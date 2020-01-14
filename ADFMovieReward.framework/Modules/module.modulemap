@@ -1,0 +1,18 @@
+framework module ADFMovieReward {
+    umbrella header "ADFMovieReward.h"
+    
+    export *
+    module * { export * }
+
+    link framework "AdSupport"
+    link framework "AVFoundation"
+    link framework "CoreGraphics"
+    link framework "CoreMedia"
+    link framework "CoreTelephony"
+    link framework "MediaPlayer"
+    link framework "SafariServices"
+    link framework "StoreKit"
+    link framework "SystemConfiguration"
+    link framework "UIKit"
+    link framework "WebKit"
+}
