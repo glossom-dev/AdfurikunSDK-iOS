@@ -7,7 +7,7 @@ Pod::Spec.new do |s|
   s.author          = "Glossom Inc."
   s.platform        = :ios, "9.0"
   s.source          = { :git => "https://github.com/glossom-dev/AdfurikunSDK-iOS", :tag => "#{s.version}" }
-  s.default_subspec = 'Core'
+  s.default_subspec = 'All'
   s.static_framework = true
   
   s.subspec 'Core' do |core|
@@ -22,6 +22,11 @@ Pod::Spec.new do |s|
     adcolony.source_files = '**/adnetworks/AdColony/*.{h,m,txt}'
   end
 
+  s.subspec 'AdMob' do |admob|
+    admob.dependency 'AdfurikunSDK-iOS/Core'
+    admob.source_files = '**/adnetworks/AdMob/*.{h,m,txt}'
+  end
+
   s.subspec 'AfiO' do |afio|
     afio.dependency 'AdfurikunSDK-iOS/Core'
     afio.dependency 'AMoAd', '5.2.8'
@@ -32,6 +37,11 @@ Pod::Spec.new do |s|
     applovin.dependency 'AdfurikunSDK-iOS/Core'
     applovin.dependency 'AppLovinSDK', '6.10.1'
     applovin.source_files = '**/adnetworks/AppLovin/*.{h,m,txt}'
+  end
+
+  s.subspec 'FAN' do |fan|
+    fan.dependency 'AdfurikunSDK-iOS/Core'
+    fan.source_files = '**/adnetworks/FAN/*.{h,m,txt}'
   end
 
   s.subspec 'Maio' do |maio|
@@ -73,8 +83,10 @@ Pod::Spec.new do |s|
   s.subspec 'All' do |all|
     all.dependency 'AdfurikunSDK-iOS/Core'
     all.dependency 'AdfurikunSDK-iOS/AdColony'
+    all.dependency 'AdfurikunSDK-iOS/AdMob'
     all.dependency 'AdfurikunSDK-iOS/AfiO'
     all.dependency 'AdfurikunSDK-iOS/AppLovin'
+    all.dependency 'AdfurikunSDK-iOS/FAN'
     all.dependency 'AdfurikunSDK-iOS/Maio'
     all.dependency 'AdfurikunSDK-iOS/NendAd'
     all.dependency 'AdfurikunSDK-iOS/Pangle'    
