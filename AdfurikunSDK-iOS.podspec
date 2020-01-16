@@ -24,6 +24,7 @@ Pod::Spec.new do |s|
 
   s.subspec 'AdMob' do |admob|
     admob.dependency 'AdfurikunSDK-iOS/Core'
+    admob.dependency 'Google-Mobile-Ads-SDK', '7.52.0'
     admob.source_files = '**/adnetworks/AdMob/*.{h,m,txt}'
   end
 
@@ -41,6 +42,7 @@ Pod::Spec.new do |s|
 
   s.subspec 'FAN' do |fan|
     fan.dependency 'AdfurikunSDK-iOS/Core'
+    fan.dependency 'FBAudienceNetwork', '4.99.3'
     fan.source_files = '**/adnetworks/FAN/*.{h,m,txt}'
   end
 
