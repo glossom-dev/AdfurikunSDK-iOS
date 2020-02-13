@@ -44,6 +44,19 @@
     if (type) {
         self.banner_type = type.intValue;
     }
+
+    NSNumber *pixelRateNumber = data[@"pixelRate"];
+    if (pixelRateNumber && ![[NSNull null] isEqual:pixelRateNumber]) {
+        self.viewabilityPixelRate = pixelRateNumber.intValue;
+    }
+    NSNumber *displayTimeNumber = data[@"displayTime"];
+    if (displayTimeNumber && ![[NSNull null] isEqual:displayTimeNumber]) {
+        self.viewabilityDisplayTime = displayTimeNumber.intValue;
+    }
+    NSNumber *timerIntervalNumber = data[@"timerInterval"];
+    if (timerIntervalNumber && ![[NSNull null] isEqual:timerIntervalNumber]) {
+        self.viewabilityTimerInterval = timerIntervalNumber.intValue;
+    }
 }
 
 - (void)initAdnetworkIfNeeded {
@@ -89,6 +102,7 @@
 }
 
 - (void)sendOnNativeMovieAdLoadFinish {
+    NSLog(@"FAN sendOnNativeMovieAdLoadFinish");
     if (self.delegate) {
         if ([self.delegate respondsToSelector: @selector(onNativeMovieAdLoadFinish:)]) {
             [self.delegate onNativeMovieAdLoadFinish: self.adInfo];
@@ -129,11 +143,13 @@
 }
 
 - (void)sendOnADFMediaViewPlayStart {
+    [self startViewabilityCheck];
+
     if (self.adInfo.mediaView.adapterInnerDelegate) {
-        if ([self.adInfo.mediaView.adapterInnerDelegate respondsToSelector:@selector(onADFMediaViewPlayStart)]) {
-            [self.adInfo.mediaView.adapterInnerDelegate onADFMediaViewPlayStart];
+        if ([self.adInfo.mediaView.adapterInnerDelegate respondsToSelector:@selector(onADFMediaViewRendering)]) {
+            [self.adInfo.mediaView.adapterInnerDelegate onADFMediaViewRendering];
         } else {
-            NSLog(@"MovieNative6016: %s onADFMediaViewPlayStart selector is not responding", __FUNCTION__);
+            NSLog(@"MovieNative6016: %s onADFMediaViewRendering selector is not responding", __FUNCTION__);
         }
     } else {
         NSLog(@"MovieNative6016: %s adInfo.mediaView.adapterInnerDelegate is not setting", __FUNCTION__);

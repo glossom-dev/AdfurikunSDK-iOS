@@ -20,7 +20,7 @@
 + (void)initializeWithAppID:(NSString *)appID option:(NSDictionary*)option;
 + (void)initializeWithAppID:(NSString *)appID viewController:(UIViewController*)viewController __deprecated_msg("Please use 'initializeWithAppID:' instead");
 + (void)initializeWithAppID:(NSString *)appID viewController:(UIViewController*)viewController option:(NSDictionary*)option;
-+ (instancetype)getInstance:(NSString *)appID delegate:(id<ADFmyMovieRewardDelegate>)delegate __deprecated_msg("Please use 'initializeWithAppID:option:' instead");
++ (instancetype)getInstance:(NSString *)appID delegate:(id<ADFmyMovieRewardDelegate>)delegate;
 + (void)disposeAll;
 
 -(BOOL)isPrepared;

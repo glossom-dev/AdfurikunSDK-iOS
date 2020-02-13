@@ -87,7 +87,7 @@
 }
 
 - (void)fiveAd:(id<FADAdInterface>)ad didFailedToReceiveAdWithError:(FADErrorCode)errorCode {
-    NSLog(@"%s, error code : %d", __func__, errorCode);
+    NSLog(@"%s, error code : %ld", __func__, (long)errorCode);
     if (self.delegate) {
         if ([self.delegate respondsToSelector:@selector(onNativeMovieAdLoadError:)]) {
             [self setErrorWithMessage:nil code:errorCode];

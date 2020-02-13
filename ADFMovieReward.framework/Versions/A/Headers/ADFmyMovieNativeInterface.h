@@ -7,6 +7,7 @@
 //
 
 #import <Foundation/Foundation.h>
+#import <UIKit/UIKit.h>
 #import "ADFMovieError.h"
 
 @class UIViewController;
@@ -22,6 +23,9 @@
 @property (nonatomic, strong) NSError *lastError;
 @property (nonatomic, strong) NSNumber *hasGdprConsent;
 
+@property (nonatomic) int viewabilityPixelRate;
+@property (nonatomic) int viewabilityDisplayTime;
+@property (nonatomic) int viewabilityTimerInterval;
 
 - (BOOL)isClassReference;
 - (void)setData:(NSDictionary *)data;
@@ -30,6 +34,7 @@
 - (BOOL)isPrepared;
 - (void)startAd;
 - (void)cancel;
+- (void)startViewabilityCheck;
 
 - (void)onImpression;
 - (void)onMovieStart;
@@ -38,6 +43,8 @@
 - (void)onRendering;
 - (void)onPlayError;
 - (void)onReloaded;
+
+- (void)dispose;
 
 /** Errorを設定する */
 -(void)setErrorWithMessage:(NSString *)description code:(NSInteger)code;
@@ -49,6 +56,8 @@
 
 //課題：ADNW SDKのバージョン情報をSDKから取得できるようにする
 + (NSString *)getSDKVersion;
+
+- (void)setCustomMediaview:(UIView *)view;
 
 @end
 

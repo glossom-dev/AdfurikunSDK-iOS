@@ -267,12 +267,26 @@
 
 //Vungle delegate
 /** 広告準備完了 */
-- (void)vungleAdPlayabilityUpdate:(BOOL)isAdPlayable placementID:(NSString *)placementID {
+- (void)vungleAdPlayabilityUpdate:(BOOL)isAdPlayable placementID:(NSString *)placementID error:(NSError *)error {
     NSLog(@"%s isAdPlayable: %@ placementID: %@", __PRETTY_FUNCTION__, (isAdPlayable ? @"YES" : @"NO"), placementID);
     NSLog(@"%@", [[VungleSDK sharedSDK] debugInfo]);
 
     id delegate = [self getDelegateWithZone:placementID];
     MovieReward6006 *movieReward = (MovieReward6006 *)[self getMovieRewardWithZone:placementID];
+
+    if (error) {
+        NSLog(@"%s called. Error : %@", __FUNCTION__, error);
+        if (delegate) {
+            if ([delegate respondsToSelector:@selector(AdsFetchError:)]) {
+                [delegate AdsFetchError:movieReward];
+            } else {
+                NSLog(@"%s AdsFetchError selector is not responding", __FUNCTION__);
+            }
+        } else {
+            NSLog(@"%s Delegate is not setting", __FUNCTION__);
+        }
+        return;
+    }
 
     if(isAdPlayable){
         // 広告準備完了

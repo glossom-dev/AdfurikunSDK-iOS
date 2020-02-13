@@ -114,7 +114,7 @@ typedef NS_ENUM(NSInteger, GlossomAdPlayError) {
  *  @param zoneId
  *  @param error Error type
  */
-- (void)onGlossomAdsVideoPlayError:(nonnull NSString *)zoneId error:(NSError *)error;
+- (void)onGlossomAdsVideoPlayError:(nonnull NSString *)zoneId error:(nullable NSError *)error;
 
 @end
 

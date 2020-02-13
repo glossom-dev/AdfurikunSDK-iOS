@@ -58,7 +58,7 @@
     if (self.zoneIdentifier && ![self.zoneIdentifier isEqual: [NSNull null]] && [self.zoneIdentifier length] != 0) {
         [[ALSdk sharedWithKey:self.appLovinSdkKey].adService loadNextAdForZoneIdentifier:self.zoneIdentifier andNotify:self];
     } else {
-        [[ALSdk sharedWithKey:self.appLovinSdkKey].adService loadNextAd:[ALAdSize sizeInterstitial] andNotify:self];
+        [[ALSdk sharedWithKey:self.appLovinSdkKey].adService loadNextAd:ALAdSize.interstitial andNotify:self];
     }
 }
 
@@ -80,7 +80,7 @@
 -(void)showAd
 {
     if(self.interstitialAd && self.isAdReady){
-        [self.interstitialAd showOver:[UIApplication sharedApplication].keyWindow andRender:self.ad];
+        [self.interstitialAd showAd:self.ad];
     }
     else{
         // No interstitial ad is currently available.  Perform failover logic...
@@ -111,9 +111,7 @@
 /**
  *  広告の読み込みを中止
  */
--(void)cancel
-{
-    [[ALInterstitialAd shared] dismiss];
+-(void)cancel {
 }
 
 -(void)setHasUserConsent:(BOOL)hasUserConsent {

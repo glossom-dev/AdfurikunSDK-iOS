@@ -106,14 +106,6 @@
     return YES;
 }
 
-/**
- *  広告の読み込みを中止
- */
--(void)cancel
-{
-    [[ALIncentivizedInterstitialAd shared] dismiss];
-}
-
 -(void)setHasUserConsent:(BOOL)hasUserConsent {
     [super setHasUserConsent:hasUserConsent];
     [ALPrivacySettings setHasUserConsent:hasUserConsent];

@@ -119,5 +119,7 @@ typedef NS_ENUM(NSInteger, ADFMovieNativeAdType) {
 // get native ad components
 - (NSDictionary*)getCustomNativeAdComponents;
 
+- (void)setCustomMediaView:(UIView *)view;
+
 @end
 NS_ASSUME_NONNULL_END

@@ -60,7 +60,7 @@ typedef NS_OPTIONS(NSUInteger, ADFALAdLoadStatus) {
 - (void)startAd {
     self.loadStatus = ADFALAdLoadStatus_None;
     ALSdk *sdk = [ALSdk sharedWithKey:self.appLovinSdkKey];
-    [sdk.nativeAdService loadNativeAdGroupOfCount:1 andNotify:self];
+    [sdk.nativeAdService loadNextAdAndNotify:self];
 }
 
 - (void)cancel {
@@ -164,7 +164,7 @@ typedef NS_OPTIONS(NSUInteger, ADFALAdLoadStatus) {
 
 - (void)trackImpression {
     if (!self.hasTrackedImpression) {
-        [[ALSdk sharedWithKey:self.appLovinSdkKey].postbackService dispatchPostbackAsync:self.ad.impressionTrackingURL andNotify:self];
+        [self.ad trackImpression];
     }
     [super trackImpression];
 }

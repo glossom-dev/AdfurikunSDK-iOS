@@ -36,7 +36,7 @@
     if (!self.didInit) {
         self.interstitialVideo = [[NADInterstitialVideo alloc] initWithSpotId:self.nendAdspotId apiKey:self.nendKey];
         self.interstitialVideo.mediationName = @"adfurikun";
-        self.interstitialVideo.isOutputLog = YES;
+        [NADLogger setLogLevel:NADLogLevelError];
         self.interstitialVideo.delegate = self;
         self.didInit = YES;
         //音出力設定

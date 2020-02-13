@@ -51,7 +51,8 @@
         self.rewardedVideoAd = nil;
     }
     if (self.didInitAdnetwork && self.tiktokSlotID) {
-        self.rewardedVideoAd = [[BURewardedVideoAd alloc] initWithSlotID:self.tiktokSlotID rewardedVideoModel:nil];
+        BURewardedVideoModel *model = [[BURewardedVideoModel alloc] init];
+        self.rewardedVideoAd = [[BURewardedVideoAd alloc] initWithSlotID:self.tiktokSlotID rewardedVideoModel:model];
         self.rewardedVideoAd.delegate = self;
         [self.rewardedVideoAd loadAdData];
     }

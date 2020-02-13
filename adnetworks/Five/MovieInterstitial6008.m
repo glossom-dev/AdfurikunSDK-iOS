@@ -154,7 +154,7 @@
 }
 
 - (void)fiveAd:(id<FADAdInterface>)ad didFailedToReceiveAdWithError:(FADErrorCode)errorCode {
-    NSLog(@"Five SDK %s Errorcode:%ld, slotId : %@", __func__, errorCode, self.fiveSlotId);
+    NSLog(@"Five SDK %s Errorcode:%ld, slotId : %@", __func__, (long)errorCode, self.fiveSlotId);
     if (self.delegate) {
         if ([self.delegate respondsToSelector:@selector(AdsFetchError:)]) {
             [self setErrorWithMessage:nil code:errorCode];

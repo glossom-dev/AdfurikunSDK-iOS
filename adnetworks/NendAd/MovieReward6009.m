@@ -36,7 +36,7 @@
     if (!self.didInit) {
         self.rewardedVideo = [[NADRewardedVideo alloc] initWithSpotId:self.nendAdspotId apiKey:self.nendKey];
         self.rewardedVideo.mediationName = @"adfurikun";
-        self.rewardedVideo.isOutputLog = YES;
+        [NADLogger setLogLevel:NADLogLevelError];
         self.rewardedVideo.delegate = self;
         self.didInit = YES;
     }

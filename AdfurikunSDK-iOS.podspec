@@ -1,6 +1,6 @@
 Pod::Spec.new do |s|
   s.name            = "AdfurikunSDK-iOS"
-  s.version         = "3.2.2"
+  s.version         = "3.3.0"
   s.summary         = "An iOS SDK for ADFURIKUN Movie Reward Ads"
   s.homepage        = "https://adfurikun.jp/adfurikun/"
   s.license         = { :type => 'Copyright', :text => 'Copyright Glossom Inc. All rights reserved.' }
@@ -36,13 +36,13 @@ Pod::Spec.new do |s|
 
   s.subspec 'AppLovin' do |applovin|
     applovin.dependency 'AdfurikunSDK-iOS/Core'
-    applovin.dependency 'AppLovinSDK', '6.10.1'
+    applovin.dependency 'AppLovinSDK', '6.11.1'
     applovin.source_files = '**/adnetworks/AppLovin/*.{h,m,txt}'
   end
 
   s.subspec 'FAN' do |fan|
     fan.dependency 'AdfurikunSDK-iOS/Core'
-    fan.dependency 'FBAudienceNetwork', '4.99.3'
+    fan.dependency 'FBAudienceNetwork', '5.5.1'
     fan.source_files = '**/adnetworks/FAN/*.{h,m,txt}'
   end
 

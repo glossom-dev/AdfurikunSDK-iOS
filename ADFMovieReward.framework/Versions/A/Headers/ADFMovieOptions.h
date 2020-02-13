@@ -39,6 +39,11 @@ typedef NS_ENUM(NSInteger, ADFMovieOptions_Sound) {
 @interface ADFMovieOptions : NSObject
 
 /**
+*  SDKのバージョンを返却します。
+*/
++ (NSString * _Nonnull)version;
+
+/**
  *  アプリユーザの性別を指定します。
  *
  *  @param gender アプリユーザの性別
@@ -96,5 +101,8 @@ typedef NS_ENUM(NSInteger, ADFMovieOptions_Sound) {
 
 + (void)enableStartupCache;
 + (BOOL)isEnableStartupCache;
+
++ (void)disableAdnetworkInfoCacheForDebug;
++ (BOOL)isDisableAdnetworkInfoCacheForDebug;
 
 @end
