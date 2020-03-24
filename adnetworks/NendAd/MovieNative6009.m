@@ -46,7 +46,7 @@
     if (clickAction && ![clickAction isEqual:[NSNull null]]) {
         self.clickAction = clickAction.integerValue;
     } else {
-        self.clickAction = NADNativeVideoClickActionFullScreen;
+        self.clickAction = NADNativeVideoClickActionLP;
     }
 }
 
@@ -76,10 +76,9 @@
                 videoAd.mutedOnFullScreen = true;
                 videoAd.delegate = weakSelf;
 
-                weakSelf.nativeVideoView = [[NADNativeVideoView alloc] initWithFrame:CGRectZero];
+                weakSelf.nativeVideoView = [[NADNativeVideoView alloc] initWithFrame:CGRectZero rootViewController:[self topMostViewController]];
                 weakSelf.nativeVideoView.delegate = weakSelf;
                 weakSelf.nativeVideoView.videoAd = videoAd;
-                weakSelf.nativeVideoView.rootViewController = [self topMostViewController];
                 [info setupMediaView:weakSelf.nativeVideoView];
 
                 weakSelf.adInfo = info;

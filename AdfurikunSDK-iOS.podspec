@@ -1,6 +1,6 @@
 Pod::Spec.new do |s|
   s.name            = "AdfurikunSDK-iOS"
-  s.version         = "3.3.1"
+  s.version         = "3.3.2"
   s.summary         = "An iOS SDK for ADFURIKUN Movie Reward Ads"
   s.homepage        = "https://adfurikun.jp/adfurikun/"
   s.license         = { :type => 'Copyright', :text => 'Copyright Glossom Inc. All rights reserved.' }
@@ -54,7 +54,7 @@ Pod::Spec.new do |s|
 
   s.subspec 'NendAd' do |nendad|
     nendad.dependency 'AdfurikunSDK-iOS/Core'
-    nendad.dependency 'NendSDK_iOS', '5.3.0'
+    nendad.dependency 'NendSDK_iOS', '5.4.1'
     nendad.source_files = '**/adnetworks/NendAd/*.{h,m,txt}'
   end
 
@@ -72,7 +72,7 @@ Pod::Spec.new do |s|
 
   s.subspec 'UnityAds' do |unityads|
     unityads.dependency 'AdfurikunSDK-iOS/Core'
-    unityads.dependency 'UnityAds', '3.4.0'
+    unityads.dependency 'UnityAds', '3.4.2'
     unityads.source_files = '**/adnetworks/UnityAds/*.{h,m,txt}'
   end
 
