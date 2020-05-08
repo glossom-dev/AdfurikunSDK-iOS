@@ -42,6 +42,8 @@
  *  広告の読み込みを開始する
  */
 -(void)startAd {
+    [super startAd];
+    
     self.adView = [[FBAdView alloc] initWithPlacementID:self.placement_id
                                                  adSize:kFBAdSizeHeight50Banner
                                      rootViewController:[self topMostViewController]];
@@ -67,7 +69,11 @@
 #pragma mark - FBAdViewDelegate
 
 - (void)adViewDidLoad:(FBAdView *)adView {
-    NativeAdInfo6016 *info = [[NativeAdInfo6016 alloc] initWithVideoUrl:nil title:@"" description:@"" adnetworkKey:@"6016"];
+    NativeAdInfo6016 *info = [[NativeAdInfo6016 alloc] initWithVideoUrl:nil
+                                                                  title:@""
+                                                            description:@""
+                                                           adnetworkKey:@"6016"];
+    info.mediaType = ADFNativeAdType_Image;
     info.adapter = self;
     [info setupMediaView:adView];
     self.adInfo = info;

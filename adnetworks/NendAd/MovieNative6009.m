@@ -17,9 +17,6 @@
 @property (nonatomic) BOOL didInit;
 @property (nonatomic) NADNativeVideoClickAction clickAction;
 
-@property (nonatomic, strong) NADNativeVideoView *nativeVideoView;
-@property (nonatomic, strong) NADNativeVideoLoader *videoAdLoader;
-
 @end
 
 @implementation MovieNative6009
@@ -62,6 +59,8 @@
 }
 
 - (void)startAd {
+    [super startAd];
+    
     MovieNative6009 __weak *weakSelf = self;
     [self.videoAdLoader loadAdWithCompletionHandler:^(NADNativeVideo * _Nullable videoAd, NSError * _Nullable error) {
         if (weakSelf) {
@@ -71,6 +70,8 @@
                                                                                         title:videoAd.title
                                                                                   description:videoAd.explanation
                                                                                  adnetworkKey:@"6009"];
+                info.mediaType = ADFNativeAdType_Movie;
+                
                 info.adapter = weakSelf;
 
                 videoAd.mutedOnFullScreen = true;
@@ -234,6 +235,24 @@
 
 - (void)playMediaView {
     NSLog(@"%s", __func__);
+}
+
+- (void)registerInteractionViews:(NSArray<__kindof UIView *> *)views {
+    MovieNative6009 *native = (MovieNative6009 *)self.adapter;
+    if (native && native.nativeVideoView && native.nativeVideoView.videoAd) {
+        [native.nativeVideoView.videoAd registerInteractionViews:views];
+    }
+}
+
+- (void)unregisterInteractionViews {
+    MovieNative6009 *native = (MovieNative6009 *)self.adapter;
+    if (native && native.nativeVideoView && native.nativeVideoView.videoAd) {
+        [native.nativeVideoView.videoAd unregisterInteractionViews];
+    }
+}
+
+- (void)dealloc {
+    [self unregisterInteractionViews];
 }
 
 @end

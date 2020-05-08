@@ -59,6 +59,8 @@
  *  広告の読み込みを開始する
  */
 -(void)startAd {
+    [super startAd];
+    
     self.isAdLoaded = false;
 
     if (self.bannerView) {
@@ -114,6 +116,8 @@
                                                                   title:@""
                                                             description:@""
                                                            adnetworkKey:@"6001"];
+    info.mediaType = ADFNativeAdType_Image;
+
     info.adapter = self;
     [info setupMediaView:bannerView];
     self.adInfo = info;

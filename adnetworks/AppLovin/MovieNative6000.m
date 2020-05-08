@@ -49,7 +49,7 @@ typedef NS_OPTIONS(NSUInteger, ADFALAdLoadStatus) {
     NSString *bundleId = [[NSBundle mainBundle] bundleIdentifier];
     if(submittedPackageName != nil &&
        ![[submittedPackageName lowercaseString] isEqualToString:[bundleId lowercaseString]]) {
-        NSLog(@"[ADF][Applovin]アプリのバンドルIDが、申請されたものと異なります。");
+        NSLog(@"[ADF] [SEVERE] [Applovin]アプリのバンドルIDが、申請されたもの（%@）と異なります。", submittedPackageName);
     }
 }
 
@@ -58,6 +58,8 @@ typedef NS_OPTIONS(NSUInteger, ADFALAdLoadStatus) {
 }
 
 - (void)startAd {
+    [super startAd];
+    
     self.loadStatus = ADFALAdLoadStatus_None;
     ALSdk *sdk = [ALSdk sharedWithKey:self.appLovinSdkKey];
     [sdk.nativeAdService loadNextAdAndNotify:self];
@@ -90,6 +92,7 @@ typedef NS_OPTIONS(NSUInteger, ADFALAdLoadStatus) {
                                                                                     title:ad.title
                                                                               description:ad.descriptionText
                                                                              adnetworkKey:@"6000"];
+            info.mediaType = ad.videoURL != nil ? ADFNativeAdType_Movie : ADFNativeAdType_Image;
             info.appLovinSdkKey = self.appLovinSdkKey;
             info.adapter = self;
             info.ad = ad;
@@ -159,6 +162,14 @@ typedef NS_OPTIONS(NSUInteger, ADFALAdLoadStatus) {
 
 @end
 
+@interface ADFMediaView ()
+- (void)registerInteractionViews:(NSArray<__kindof UIView *> *)views;
+- (void)unregisterInteractionViews;
+@end
+
+@interface MovieNativeAdInfo6000 ()
+@property (nonatomic) NSMutableArray<__kindof UIView *> *interactionViews;
+@end
 
 @implementation MovieNativeAdInfo6000
 
@@ -187,6 +198,28 @@ typedef NS_OPTIONS(NSUInteger, ADFALAdLoadStatus) {
 - (void)launchClickTarget {
     [super launchClickTarget];
     [self.ad launchClickTarget];
+}
+
+- (void)registerInteractionViews:(NSArray<__kindof UIView *> *)views {
+    if (self.adapter) {
+        ADFMediaView *mediaView = self.adapter.adInfo.mediaView;
+        if ([mediaView respondsToSelector:@selector(registerInteractionViews:)]) {
+            [mediaView registerInteractionViews:views];
+        }
+    }
+}
+
+- (void)unregisterInteractionViews {
+    if (self.adapter) {
+        ADFMediaView *mediaView = self.adapter.adInfo.mediaView;
+        if ([mediaView respondsToSelector:@selector(unregisterInteractionViews)]) {
+            [mediaView unregisterInteractionViews];
+        }
+    }
+}
+
+- (void)dealloc {
+    [self unregisterInteractionViews];
 }
 
 #pragma mark - ALPostbackDelegate

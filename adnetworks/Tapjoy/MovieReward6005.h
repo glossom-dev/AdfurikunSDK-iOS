@@ -13,6 +13,7 @@
 #import <Tapjoy/TJPlacement.h>
 
 @interface MovieReward6005 : ADFmyMovieRewardInterface
+@property (nonatomic, strong)TJPlacement* p;
 
 @end
 

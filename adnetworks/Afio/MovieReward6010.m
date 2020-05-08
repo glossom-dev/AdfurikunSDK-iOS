@@ -58,13 +58,13 @@
  *  広告の表示を行う
  */
 -(void)showAd {
+    [super showAd];
+    
     if ([self isPrepared]) {
         [self.amoadInterstitialVideo show];
         self.didLoad = NO;
     } else {
-        if ([self.delegate respondsToSelector:@selector(AdsPlayFailed:)]) {
-            [self.delegate AdsPlayFailed:self];
-        }
+        [self setCallbackStatus:MovieRewardCallbackPlayFail];
     }
 }
 -(void)showAdWithPresentingViewController:(UIViewController *)viewController {
@@ -96,25 +96,9 @@
     NSLog(@"%s", __FUNCTION__);
     if (result == AMoAdResultSuccess) {
         NSLog(@"%s %@", __FUNCTION__, @"AMoAdResultSuccess");
-        if (self.delegate) {
-            if ([self.delegate respondsToSelector:@selector(AdsFetchCompleted:)]) {
-                [self.delegate AdsFetchCompleted:self];
-            } else {
-                NSLog(@"%s AdsFetchCompleted selector is not responding", __FUNCTION__);
-            }
-        } else {
-            NSLog(@"%s Delegate is not setting", __FUNCTION__);
-        }
+        [self setCallbackStatus:MovieRewardCallbackFetchComplete];
     } else {
-        if (self.delegate) {
-            if ([self.delegate respondsToSelector:@selector(AdsFetchError:)]) {
-                [self.delegate AdsFetchError:self];
-            } else {
-                NSLog(@"%s AdsFetchError selector is not responding", __FUNCTION__);
-            }
-        } else {
-            NSLog(@"%s Delegate is not setting", __FUNCTION__);
-        }
+        [self setCallbackStatus:MovieRewardCallbackFetchFail];
     }
     
 }
@@ -122,43 +106,19 @@
 - (void)amoadInterstitialVideoDidStart:(AMoAdInterstitialVideo *)amoadInterstitialVideo {
     // 動画の再生を開始した
     NSLog(@"%s", __FUNCTION__);
-    if (self.delegate) {
-        if ([self.delegate respondsToSelector:@selector(AdsDidShow:)]) {
-            [self.delegate AdsDidShow:self];
-        } else {
-            NSLog(@"%s AdsDidShow selector is not responding", __FUNCTION__);
-        }
-    } else {
-        NSLog(@"%s Delegate is not setting", __FUNCTION__);
-    }
+    [self setCallbackStatus:MovieRewardCallbackPlayStart];
 }
 
 - (void)amoadInterstitialVideoDidComplete:(AMoAdInterstitialVideo *)amoadInterstitialVideo {
     // 動画を最後まで再生完了した
     NSLog(@"%s", __FUNCTION__);
-    if (self.delegate) {
-        if ([self.delegate respondsToSelector:@selector(AdsDidCompleteShow:)]) {
-            [self.delegate AdsDidCompleteShow:self];
-        } else {
-            NSLog(@"%s AdsDidCompleteShow selector is not responding", __FUNCTION__);
-        }
-    } else {
-        NSLog(@"%s Delegate is not setting", __FUNCTION__);
-    }
+    [self setCallbackStatus:MovieRewardCallbackPlayComplete];
 }
 
 - (void)amoadInterstitialVideoDidFailToPlay:(AMoAdInterstitialVideo *)amoadInterstitialVideo {
     // 動画の再生に失敗した
     NSLog(@"%s", __FUNCTION__);
-    if (self.delegate) {
-        if ([self.delegate respondsToSelector:@selector(AdsPlayFailed:)]) {
-            [self.delegate AdsPlayFailed:self];
-        } else {
-            NSLog(@"%s AdsPlayFailed selector is not responding", __FUNCTION__);
-        }
-    } else {
-        NSLog(@"%s Delegate is not setting", __FUNCTION__);
-    }
+    [self setCallbackStatus:MovieRewardCallbackPlayFail];
 }
 
 - (void)amoadInterstitialVideoDidShow:(AMoAdInterstitialVideo *)amoadInterstitialVideo {
@@ -169,15 +129,7 @@
 - (void)amoadInterstitialVideoWillDismiss:(AMoAdInterstitialVideo *)amoadInterstitialVideo {
     // 広告を閉じた
     NSLog(@"%s", __FUNCTION__);
-    if (self.delegate) {
-        if ([self.delegate respondsToSelector:@selector(AdsDidHide:)]) {
-            [self.delegate AdsDidHide:self];
-        } else {
-            NSLog(@"%s AdsDidHide selector is not responding", __FUNCTION__);
-        }
-    } else {
-        NSLog(@"%s Delegate is not setting", __FUNCTION__);
-    }
+    [self setCallbackStatus:MovieRewardCallbackClose];
 }
 
 - (void)amoadInterstitialVideoDidClickAd:(AMoAdInterstitialVideo *)amoadInterstitialVideo {

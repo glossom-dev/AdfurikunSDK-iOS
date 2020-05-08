@@ -10,4 +10,12 @@
 
 @implementation MovieInterstitial6002
 
+-(id)init {
+    self = [super init];
+    if (self) {
+        [self setCancellable];
+    }
+    return self;
+}
+
 @end

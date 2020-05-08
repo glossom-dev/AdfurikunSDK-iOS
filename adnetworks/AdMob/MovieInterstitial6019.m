@@ -18,6 +18,14 @@
 
 @implementation MovieInterstitial6019
 
+-(id)init {
+    self = [super init];
+    if (self) {
+        [self setCancellable];
+    }
+    return self;
+}
+
 - (void)setData:(NSDictionary *)data {
     NSString* admobId = [data objectForKey:@"ad_unit_id"];
     if (admobId != nil && ![admobId isEqual:[NSNull null]]) {
@@ -43,10 +51,12 @@
 }
 
 - (void)startAd {
-    self.interstitial = [[GADInterstitial alloc] initWithAdUnitID:self.unitID];
-    self.interstitial.delegate = self;
-    GADRequest *request = [GADRequest request];
-    [self.interstitial loadRequest:request];
+    if (!self.interstitial || !self.interstitial.isReady) {
+        self.interstitial = [[GADInterstitial alloc] initWithAdUnitID:self.unitID];
+        self.interstitial.delegate = self;
+        GADRequest *request = [GADRequest request];
+        [self.interstitial loadRequest:request];
+    }
 }
 
 - (void)showAd {
@@ -54,6 +64,8 @@
 }
 
 - (void)showAdWithPresentingViewController:(UIViewController *)viewController {
+    [super showAdWithPresentingViewController:viewController];
+
     if (self.interstitial.isReady) {
         [self.interstitial presentFromRootViewController:viewController];
     }
@@ -74,59 +86,28 @@
 
 - (void)interstitialDidReceiveAd:(GADInterstitial *)ad {
     NSLog(@"%s", __FUNCTION__);
+    [self setCallbackStatus:MovieRewardCallbackFetchComplete];
 }
 
 - (void)interstitial:(GADInterstitial *)ad didFailToReceiveAdWithError:(GADRequestError *)error {
     NSLog(@"%s error: %@", __FUNCTION__, error);
-    if (self.delegate) {
-        if ([self.delegate respondsToSelector:@selector(AdsFetchError:)]) {
-            [self setErrorWithMessage:error.localizedDescription code:error.code];
-            [self.delegate AdsFetchError:self];
-        } else {
-            NSLog(@"%s AdsFetchError selector is not responding", __FUNCTION__);
-        }
-    } else {
-        NSLog(@"%s Delegate is not setting", __FUNCTION__);
-    }
+    [self setErrorWithMessage:error.localizedDescription code:error.code];
+    [self setCallbackStatus:MovieRewardCallbackFetchFail];
 }
 
 - (void)interstitialWillPresentScreen:(GADInterstitial *)ad {
     NSLog(@"%s", __FUNCTION__);
-    if (self.delegate) {
-        if ([self.delegate respondsToSelector:@selector(AdsDidShow:)]) {
-            [self.delegate AdsDidShow:self];
-        } else {
-            NSLog(@"%s AdsDidShow selector is not responding", __FUNCTION__);
-        }
-    } else {
-        NSLog(@"%s Delegate is not setting", __FUNCTION__);
-    }
+    [self setCallbackStatus:MovieRewardCallbackPlayStart];
 }
 
 - (void)interstitialWillDismissScreen:(GADInterstitial *)ad {
     NSLog(@"%s", __FUNCTION__);
-    if (self.delegate) {
-        if ([self.delegate respondsToSelector:@selector(AdsDidCompleteShow:)]) {
-            [self.delegate AdsDidCompleteShow:self];
-        } else {
-            NSLog(@"%s AdsDidCompleteShow selector is not responding", __FUNCTION__);
-        }
-    } else {
-        NSLog(@"%s Delegate is not setting", __FUNCTION__);
-    }
+    [self setCallbackStatus:MovieRewardCallbackPlayComplete];
 }
 
 - (void)interstitialDidDismissScreen:(GADInterstitial *)ad {
     NSLog(@"%s", __FUNCTION__);
-    if (self.delegate) {
-        if ([self.delegate respondsToSelector:@selector(AdsDidHide:)]) {
-            [self.delegate AdsDidHide:self];
-        } else {
-            NSLog(@"%s AdsDidHide selector is not responding", __FUNCTION__);
-        }
-    } else {
-        NSLog(@"%s Delegate is not setting", __FUNCTION__);
-    }
+    [self setCallbackStatus:MovieRewardCallbackClose];
 }
 
 - (void)interstitialWillLeaveApplication:(GADInterstitial *)ad {

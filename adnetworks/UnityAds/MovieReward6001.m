@@ -13,6 +13,7 @@
 @property (nonatomic, strong)NSString *gameId;
 @property (nonatomic, strong)NSString *placement_id;
 @property (nonatomic, assign)BOOL isCompleted;
+@property (nonatomic) BOOL isCalledFetchCompleted;
 @property (nonatomic) BOOL test_flg;
 
 @property (strong) UMONPlacementContent *rewardedVideo;
@@ -34,11 +35,7 @@
     if (data_placement_id && ![data_placement_id isEqual:[NSNull null]]) {
         self.placement_id = [NSString stringWithFormat:@"%@",[data objectForKey:@"placement_id"]];
     }
-    if (ADFMovieOptions.getTestMode) {
-        self.test_flg = YES;
-    } else {
-        self.test_flg = [[data objectForKey:@"test_flg"] boolValue];
-    }
+    self.test_flg = [[data objectForKey:@"test_flg"] boolValue];
     _isCompleted = NO;
 }
 
@@ -61,7 +58,13 @@
 
 -(BOOL)isPrepared{
     if (self.delegate != nil) {
-        return [UnityAds isReady:self.placement_id];
+        BOOL isReady = [UnityAds isReady:self.placement_id];
+        if (self.isCalledFetchCompleted == false && isReady) {
+            self.isCalledFetchCompleted = true;
+            MovieDelegate6001 *delegate = [MovieDelegate6001 sharedInstance];
+            [delegate setCallbackStatus:MovieRewardCallbackFetchComplete zone:self.placement_id];
+        }
+        return isReady;
     }
     return NO;
 }
@@ -74,13 +77,15 @@
 }
 
 -(void)showAdWithPresentingViewController:(UIViewController *)viewController {
+    [super showAdWithPresentingViewController:viewController];
+
     if (viewController != nil && self.isPrepared) {
         [UnityAds show:viewController placementId:self.placement_id];
     } else {
         NSLog(@"Error encountered playing ad : could not fetch topmost viewcontroller");
-        if ([self.delegate respondsToSelector:@selector(AdsPlayFailed:)]) {
-            [self.delegate AdsPlayFailed:self];
-        }
+        [self setErrorWithMessage:@"Error encountered playing ad : could not fetch topmost viewcontroller" code:0];
+        MovieDelegate6001 *delegate = [MovieDelegate6001 sharedInstance];
+        [delegate setCallbackStatus:MovieRewardCallbackPlayFail zone:self.placement_id];
     }
 }
 
@@ -140,61 +145,39 @@
 - (void)unityAdsReady:(nonnull NSString *)placementId {
     MovieReward6001 *movieReward = (MovieReward6001 *)[self getMovieRewardWithZone:placementId];
     if ([placementId isEqualToString:movieReward.placement_id]) {
-        NSLog(@"didLoadAd");
         NSLog(@"%s %@", __func__, placementId);
-        id delegate = [self getDelegateWithZone:placementId];
-        if (delegate) {
-            if ([delegate respondsToSelector:@selector(AdsFetchCompleted:)]) {
-                [delegate AdsFetchCompleted:movieReward];
-            } else {
-                NSLog(@"%s AdsFetchCompleted selector is not responding", __FUNCTION__);
-            }
-        } else {
-            NSLog(@"%s Delegate is not setting", __FUNCTION__);
-        }
+        movieReward.isCalledFetchCompleted = true;
+        [self setCallbackStatus:MovieRewardCallbackFetchComplete zone:placementId];
     }
 }
 
 - (void)unityAdsDidError:(UnityAdsError)error withMessage:(nonnull NSString *)message {
+    NSLog(@"%s %@", __func__, message);
 }
 
 - (void)unityAdsDidStart:(NSString *)placementId {
     NSLog(@"《 UnityAds Callback 》unityAdsDidStart");
-    id delegate = [self getDelegateWithZone:placementId];
-    MovieReward6001 *movieReward = (MovieReward6001 *)[self getMovieRewardWithZone:placementId];
-    
-    if (delegate) {
-        if ([delegate respondsToSelector:@selector(AdsDidShow:)]) {
-            [delegate AdsDidShow:movieReward];
-        }
-    }
+    [self setCallbackStatus:MovieRewardCallbackPlayStart zone:placementId];
 }
 
 - (void)unityAdsDidFinish:(NSString *)placementId withFinishState:(UnityAdsFinishState)state {
-    id delegate = [self getDelegateWithZone:placementId];
-    MovieReward6001 *movieReward = (MovieReward6001 *)[self getMovieRewardWithZone:placementId];
-    
     switch (state) {
         case kUnityAdsFinishStateCompleted:
             NSLog(@"%s kUnityAdsFinishStateCompleted %@", __func__, placementId);
-            if ([delegate respondsToSelector:@selector(AdsDidCompleteShow:)]) {
-                [delegate AdsDidCompleteShow:movieReward];
-            }
+            [self setCallbackStatus:MovieRewardCallbackPlayComplete zone:placementId];
             break;
         case kUnityAdsFinishStateSkipped:
             NSLog(@"%s kUnityAdsFinishStateSkipped %@", __func__, placementId);
             break;
         default:
             NSLog(@"%s other %@", __func__, placementId);
-            if ([delegate respondsToSelector:@selector(AdsPlayFailed:)]) {
-                [delegate AdsPlayFailed:movieReward];
-            }
+            MovieReward6001 *movieReward = (MovieReward6001 *)[self getMovieRewardWithZone:placementId];
+            [movieReward setErrorWithMessage:@"unityAdsDidFinish with kUnityAdsFinishStateError" code:0];
+            [self setCallbackStatus:MovieRewardCallbackPlayFail zone:placementId];
             break;
     }
-    
-    if ([delegate respondsToSelector:@selector(AdsDidHide:)]) {
-        [delegate AdsDidHide:movieReward];
-    }
+
+    [self setCallbackStatus:MovieRewardCallbackClose zone:placementId];
 }
 
 -(void) unityServicesDidError: (UnityServicesError) error withMessage: (NSString *) message {

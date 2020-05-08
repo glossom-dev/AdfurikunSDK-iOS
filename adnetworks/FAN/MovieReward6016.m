@@ -75,99 +75,45 @@
         [self showAdWithPresentingViewController: topMostViewController];
     } else {
         NSLog(@"Error encountered playing ad : could not fetch topmost viewcontroller");
-        if (self.delegate) {
-            if ([self.delegate respondsToSelector:@selector(AdsPlayFailed:)]) {
-                [self.delegate AdsPlayFailed:self];
-            } else {
-                NSLog(@"%s AdsPlayFailed selector is not responding", __FUNCTION__);
-            }
-        } else {
-            NSLog(@"%s Delegate is not setting", __FUNCTION__);
-        }
+        [self setCallbackStatus:MovieRewardCallbackPlayFail];
     }
 }
 
 -(void)showAdWithPresentingViewController:(UIViewController *)viewController {
+    [super showAdWithPresentingViewController:viewController];
+
     if ([self isPrepared]) {
         if (viewController) {
             [self.rewardedVideoAd showAdFromRootViewController:viewController animated:self.isAnimated];
         } else {
             NSLog(@"Error encountered playing ad : viewController cannot be nil");
-            if (self.delegate) {
-                if ([self.delegate respondsToSelector:@selector(AdsPlayFailed:)]) {
-                    [self.delegate AdsPlayFailed:self];
-                } else {
-                    NSLog(@"%s AdsPlayFailed selector is not responding", __FUNCTION__);
-                }
-            } else {
-                NSLog(@"%s Delegate is not setting", __FUNCTION__);
-            }
+            [self setCallbackStatus:MovieRewardCallbackPlayFail];
         }
     }
 }
 
 #pragma mark - FBRewardedVideoAd delegates
 - (void)rewardedVideoAdDidLoad:(FBRewardedVideoAd *)rewardedVideoAd {
-    if (self.delegate) {
-        if ([self.delegate respondsToSelector:@selector(AdsFetchCompleted:)]) {
-            [self.delegate AdsFetchCompleted:self];
-        } else {
-            NSLog(@"adsFetchCompleted is not responding");
-        }
-    } else {
-        NSLog(@"adsFetchCompleted is not set");
-    }
+    [self setCallbackStatus:MovieRewardCallbackFetchComplete];
 }
 
 - (void)rewardedVideoAd:(FBRewardedVideoAd *)rewardedVideoAd didFailWithError:(NSError *)error {
     NSLog(@"MovieReward6016: reward video loading failed \n%@", error);
-    if (self.delegate) {
-        if ([self.delegate respondsToSelector:@selector(AdsFetchError:)]) {
-            [self.delegate AdsFetchError:self];
-        } else {
-            NSLog(@"adsFetchError is not responding");
-        }
-    } else {
-        NSLog(@"AdsFetchError is not set");
-    }
+    [self setErrorWithMessage:error.localizedDescription code:error.code];
+    [self setCallbackStatus:MovieRewardCallbackFetchFail];
 }
 
 - (void)rewardedVideoAdVideoComplete:(FBRewardedVideoAd *)rewardedVideoAd {
-    if (self.delegate) {
-        if ([self.delegate respondsToSelector:@selector(AdsDidCompleteShow:)]) {
-            [self.delegate AdsDidCompleteShow:self];
-        } else {
-            NSLog(@"adsDidCompleteShow is not responding");
-        }
-    } else {
-        NSLog(@"adsDidCompleteShow is not set");
-    }
+    [self setCallbackStatus:MovieRewardCallbackPlayComplete];
 }
 
 - (void)rewardedVideoAdDidClose:(FBRewardedVideoAd *)rewardedVideoAd {
     self.rewardedVideoAd = nil;
-    if (self.delegate) {
-        if ([self.delegate respondsToSelector:@selector(AdsDidHide:)]) {
-            [self.delegate AdsDidHide:self];
-        } else {
-            NSLog(@"adsDidHide is not responding");
-        }
-    } else {
-        NSLog(@"adsDidHide is not set");
-    }
-
+    [self setCallbackStatus:MovieRewardCallbackClose];
 }
 
 - (void)rewardedVideoAdWillLogImpression:(FBRewardedVideoAd *)rewardedVideoAd {
-    if (self.delegate) {
-        if ([self.delegate respondsToSelector:@selector(AdsDidShow:)]) {
-            [self.delegate AdsDidShow:self];
-        } else {
-            NSLog(@"adsDidShow is not responding");
-        }
-    } else {
-        NSLog(@"adsDidShow is not set");
-    }
+    [self setCallbackStatus:MovieRewardCallbackPlayStart];
 }
 
 @end

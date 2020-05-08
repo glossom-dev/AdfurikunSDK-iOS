@@ -21,6 +21,18 @@
 
 @implementation MovieInterstitial6017
 
++ (NSString *)getSDKVersion {
+    return BUAdSDKManager.SDKVersion;
+}
+
+-(id)init {
+    self = [super init];
+    if (self) {
+        [self setCancellable];
+    }
+    return self;
+}
+
 - (void)setData:(NSDictionary *)data {
     NSString *data_appID = [data objectForKey:@"appid"];
     if (data_appID && ![data_appID isEqual:[NSNull null]]) {
@@ -39,7 +51,6 @@
 - (void)initAdnetworkIfNeeded {
     if (!self.didInitAdnetwork && self.tiktokAppID) {
         [BUAdSDKManager setAppID:self.tiktokAppID];
-        [self setTargeting];
         self.didInitAdnetwork = YES;
     }
 }
@@ -61,6 +72,8 @@
 }
 
 - (void)showAdWithPresentingViewController:(UIViewController *)viewController {
+    [super showAdWithPresentingViewController:viewController];
+
     [self.fullscreenVideoAd showAdFromRootViewController:viewController];
     self.isAdLoaded = NO;
 }
@@ -77,23 +90,6 @@
     }
 }
 
-- (void)setTargeting {
-    // 年齢
-    int age = [ADFMovieOptions getUserAge];
-    if (age > 0) {
-        [BUAdSDKManager setUserAge:age];
-    }
-    // 性別
-    ADFMovieOptions_Gender gender = [ADFMovieOptions getUserGender];
-    if (ADFMovieOptions_Gender_Male == gender) {
-        [BUAdSDKManager setUserGender:BUUserGenderMan];
-    } else if (ADFMovieOptions_Gender_Female == gender) {
-        [BUAdSDKManager setUserGender:BUUserGenderWoman];
-    } else {
-        [BUAdSDKManager setUserGender:BUUserGenderUnknown];
-    }
-}
-
 #pragma BUFullscreenVideoAdDelegate
 
 - (void)fullscreenVideoMaterialMetaAdDidLoad:(BUFullscreenVideoAd *)fullscreenVideoAd {
@@ -102,27 +98,13 @@
 
 - (void)fullscreenVideoAd:(BUFullscreenVideoAd *)fullscreenVideoAd didFailWithError:(NSError *_Nullable)error {
     NSLog(@"didFailToLoadAdWithError : %@", error);
-    if (self.delegate) {
-        if ([self.delegate respondsToSelector:@selector(AdsFetchError:)]) {
-            [self setErrorWithMessage:error.localizedDescription code:error.code];
-            [self.delegate AdsFetchError:self];
-        } else {
-            NSLog(@"%s AdsFetchError selector is not responding", __FUNCTION__);
-        }
-    }
+    [self setErrorWithMessage:error.localizedDescription code:error.code];
+    [self setCallbackStatus:MovieRewardCallbackFetchFail];
 }
 
 - (void)fullscreenVideoAdVideoDataDidLoad:(BUFullscreenVideoAd *)fullscreenVideoAd {
     self.isAdLoaded = YES;
-    if (self.delegate) {
-        if ([self.delegate respondsToSelector:@selector(AdsFetchCompleted:)]) {
-            [self.delegate AdsFetchCompleted:self];
-        } else {
-            NSLog(@"adsFetchCompleted is not responding");
-        }
-    } else {
-        NSLog(@"adsFetchCompleted is not set");
-    }
+    [self setCallbackStatus:MovieRewardCallbackFetchComplete];
 }
 
 - (void)fullscreenVideoAdWillVisible:(BUFullscreenVideoAd *)fullscreenVideoAd {
@@ -130,15 +112,7 @@
 }
 
 - (void)fullscreenVideoAdDidVisible:(BUFullscreenVideoAd *)fullscreenVideoAd {
-    if (self.delegate) {
-        if ([self.delegate respondsToSelector:@selector(AdsDidShow:)]) {
-            [self.delegate AdsDidShow:self];
-        } else {
-            NSLog(@"adsDidShow is not responding");
-        }
-    } else {
-        NSLog(@"adsDidShow is not set");
-    }
+    [self setCallbackStatus:MovieRewardCallbackPlayStart];
 }
 
 - (void)fullscreenVideoAdDidClick:(BUFullscreenVideoAd *)fullscreenVideoAd {
@@ -150,27 +124,11 @@
 }
 
 - (void)fullscreenVideoAdDidClose:(BUFullscreenVideoAd *)fullscreenVideoAd {
-    if (self.delegate) {
-        if ([self.delegate respondsToSelector:@selector(AdsDidHide:)]) {
-            [self.delegate AdsDidHide:self];
-        } else {
-            NSLog(@"adsDidHide is not responding");
-        }
-    } else {
-        NSLog(@"adsDidHide is not set");
-    }
+    [self setCallbackStatus:MovieRewardCallbackClose];
 }
 
 - (void)fullscreenVideoAdDidPlayFinish:(BUFullscreenVideoAd *)fullscreenVideoAd didFailWithError:(NSError *_Nullable)error {
-    if (self.delegate) {
-        if ([self.delegate respondsToSelector:@selector(AdsDidCompleteShow:)]) {
-            [self.delegate AdsDidCompleteShow:self];
-        } else {
-            NSLog(@"adsDidCompleteShow is not responding");
-        }
-    } else {
-        NSLog(@"adsDidCompleteShow is not set");
-    }
+    [self setCallbackStatus:MovieRewardCallbackPlayComplete];
 }
 
 - (void)fullscreenVideoAdDidClickSkip:(BUFullscreenVideoAd *)fullscreenVideoAd {

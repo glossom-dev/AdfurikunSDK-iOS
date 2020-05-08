@@ -54,8 +54,10 @@
 }
 
 - (void)setDelegate:(NSObject<ADFMovieRewardDelegate> *)delegate {
-    [[MovieDelegate6004 sharedInstance] setDelegate:delegate inZone:self.maioZoneId];
-    [super setDelegate:delegate];
+    dispatch_async(dispatch_get_main_queue(), ^{
+        [[MovieDelegate6004 sharedInstance] setDelegate:delegate inZone:self.maioZoneId];
+        [super setDelegate:delegate];
+    });
 }
 
 -(BOOL)isPrepared {
@@ -84,6 +86,8 @@
 }
 
 -(void)showAd {
+    [super showAd];
+
     if (self.maioZoneId) {
         if ([Maio canShowAtZoneId:self.maioZoneId]) {
             @try {
@@ -130,14 +134,6 @@
 }
 @end
 
-
-@interface MovieDelegate6004()
-// zoneIDごとにADFmyMovieRewardInterfaceインスタンスを管理
-@property (nonatomic) NSDictionary<NSString *, ADFmyMovieRewardInterface *> *rewardMap;
-// zoneIDごとにdelegateを管理
-@property (nonatomic) NSDictionary<NSString *, id<ADFMovieRewardDelegate>> *delegateMap;
-@end
-
 @implementation MovieDelegate6004
 
 + (instancetype)sharedInstance {
@@ -152,46 +148,9 @@
 - (instancetype)init {
     self = [super init];
     if (self) {
-        _rewardMap = [NSDictionary new];
-        _delegateMap = [NSDictionary new];
         _closeFlg = NO;
     }
     return self;
-}
-
-- (void)setMovieReward:(ADFmyMovieRewardInterface *)movieReward inZone:(NSString *)zoneId {
-    NSMutableDictionary *d = [_rewardMap mutableCopy];
-    if (!zoneId) {
-        zoneId = @"default";
-    }
-    [d setValue:movieReward forKey:zoneId];
-    _rewardMap = d;
-}
-
-- (ADFmyMovieRewardInterface *)getMovieRewardWithZone:(NSString *)zoneId {
-    if (!zoneId || zoneId.length == 0 || !_rewardMap[zoneId]) {
-        zoneId = @"default";
-    }
-    return _rewardMap[zoneId];
-}
-
-- (void)setDelegate:(id<ADFMovieRewardDelegate>)delegate inZone:(NSString *)zoneId {
-    if ([_delegateMap isEqual:[NSNull null]]) {
-        return;
-    }
-    NSMutableDictionary *d = [_delegateMap mutableCopy];
-    if (!zoneId) {
-        zoneId = @"default";
-    }
-    [d setValue:delegate forKey:zoneId];
-    _delegateMap = d;
-}
-
-- (id<ADFMovieRewardDelegate>)getDelegateWithZone:(NSString *)zoneId {
-    if (!zoneId || zoneId.length == 0 || !_delegateMap[zoneId]) {
-        zoneId = @"default";
-    }
-    return _delegateMap[zoneId];
 }
 
 #pragma mark - MaioDelegate
@@ -211,18 +170,8 @@
  */
 - (void)maioDidChangeCanShow:(NSString *)zoneId newValue:(BOOL)newValue {
     NSLog(@"%s", __func__);
-    id delegate = [self getDelegateWithZone:zoneId];
-    ADFmyMovieRewardInterface *movieReward = [self getMovieRewardWithZone:zoneId];
-    if (delegate && movieReward) {
-        if (newValue) {
-            if ([delegate respondsToSelector:@selector(AdsFetchCompleted:)]) {
-                [delegate AdsFetchCompleted:movieReward];
-            } else {
-                NSLog(@"%s AdsFetchCompleted selector is not responding", __FUNCTION__);
-            }
-        }
-    } else {
-        NSLog(@"%s Delegate && movieReward is not setting", __FUNCTION__);
+    if (newValue) {
+        [self setCallbackStatus:MovieRewardCallbackFetchComplete zone:zoneId];
     }
 }
 
@@ -236,17 +185,7 @@
     NSLog(@"%s", __func__);
     self.closeFlg = NO;
     // WillShow はないので、DidShow で
-    id delegate = [self getDelegateWithZone:zoneId];
-    ADFmyMovieRewardInterface *movieReward = [self getMovieRewardWithZone:zoneId];
-    if (delegate && movieReward) {
-        if ([delegate respondsToSelector:@selector(AdsDidShow:)]) {
-            [delegate AdsDidShow:movieReward];
-        } else {
-            NSLog(@"%s AdsDidShow selector is not responding", __FUNCTION__);
-        }
-    } else {
-        NSLog(@"%s Delegate && movieReward is not setting", __FUNCTION__);
-    }
+    [self setCallbackStatus:MovieRewardCallbackPlayStart zone:zoneId];
 }
 
 /**
@@ -260,17 +199,8 @@
  */
 - (void)maioDidFinishAd:(NSString *)zoneId playtime:(NSInteger)playtime skipped:(BOOL)skipped rewardParam:(NSString *)rewardParam {
     NSLog(@"%s", __func__);
-    
-    id delegate = [self getDelegateWithZone:zoneId];
-    ADFmyMovieRewardInterface *movieReward = [self getMovieRewardWithZone:zoneId];
-    if (!skipped && delegate && movieReward) {
-        if ([delegate respondsToSelector:@selector(AdsDidCompleteShow:)]) {
-            [delegate AdsDidCompleteShow:movieReward];
-        } else {
-            NSLog(@"%s AdsDidCompleteShow selector is not responding", __FUNCTION__);
-        }
-    } else {
-        NSLog(@"%s Delegate && movieReward is not setting", __FUNCTION__);
+    if (!skipped) {
+        [self setCallbackStatus:MovieRewardCallbackPlayComplete zone:zoneId];
     }
 }
 
@@ -294,18 +224,7 @@
     }
     self.closeFlg = YES;
     NSLog(@"%s", __func__);
-    
-    id delegate = [self getDelegateWithZone:zoneId];
-    ADFmyMovieRewardInterface *movieReward = [self getMovieRewardWithZone:zoneId];
-    if (delegate && movieReward) {
-        if ([delegate respondsToSelector:@selector(AdsDidHide:)]) {
-            [delegate AdsDidHide:movieReward];
-        } else {
-            NSLog(@"%s AdsDidHide selector is not responding", __FUNCTION__);
-        }
-    } else {
-        NSLog(@"%s Delegate && movieReward is not setting", __FUNCTION__);
-    }
+    [self setCallbackStatus:MovieRewardCallbackClose zone:zoneId];
 }
 
 /**
@@ -342,32 +261,15 @@
             faileMessage =  @"AdStockOut";
             break;
     }
-    
-    id delegate = [self getDelegateWithZone:zoneId];
-    ADFmyMovieRewardInterface *movieReward = [self getMovieRewardWithZone:zoneId];
-    
-    if (delegate && faileMessage) {
-        if ([delegate respondsToSelector:@selector(AdsFetchError:)]) {
-            [movieReward setErrorWithMessage:faileMessage code:0];
-            [delegate AdsFetchError:movieReward];
-        } else {
-            NSLog(@"%s AdsFetchError selector is not responding", __FUNCTION__);
-        }
-    } else {
-        NSLog(@"%s Delegate and faileMessage is not setting", __FUNCTION__);
+    if (faileMessage) {
+        ADFmyMovieRewardInterface *movieReward = [self getMovieRewardWithZone:zoneId];
+        [movieReward setErrorWithMessage:faileMessage code:0];
+        [self setCallbackStatus:MovieRewardCallbackFetchFail zone:zoneId];
     }
-    
+
     if (reason == MaioFailReasonVideoPlayback) {
         faileMessage = @"VideoPlayback";
-        if (delegate) {
-            if ([delegate respondsToSelector:@selector(AdsPlayFailed:)]) {
-                [delegate AdsPlayFailed:movieReward];
-            } else {
-                NSLog(@"%s AdsPlayFailed selector is not responding", __FUNCTION__);
-            }
-        } else {
-            NSLog(@"%s Delegate is not setting", __FUNCTION__);
-        }
+        [self setCallbackStatus:MovieRewardCallbackPlayFail zone:zoneId];
     }
     
     NSLog(@"Maio SDK Error:%@", faileMessage);

@@ -19,6 +19,14 @@
 
 @implementation MovieInterstitial6016
 
+-(id)init {
+    self = [super init];
+    if (self) {
+        [self setCancellable];
+    }
+    return self;
+}
+
 - (void)setData:(NSDictionary *)data {
     NSString *placementId = [NSString stringWithFormat:@"%@", [data objectForKey:@"placement_id"]];
     if (placementId && ![placementId isEqual:[NSNull null]]) {
@@ -72,96 +80,42 @@
         [self showAdWithPresentingViewController: topMostViewController];
     } else {
         NSLog(@"Error encountered playing ad : could not fetch topmost viewcontroller");
-        if (self.delegate) {
-            if ([self.delegate respondsToSelector:@selector(AdsPlayFailed:)]) {
-                [self.delegate AdsPlayFailed:self];
-            } else {
-                NSLog(@"%s AdsPlayFailed selector is not responding", __FUNCTION__);
-            }
-        } else {
-            NSLog(@"%s Delegate is not setting", __FUNCTION__);
-        }
+        [self setCallbackStatus:MovieRewardCallbackPlayFail];
     }
 }
 
 -(void)showAdWithPresentingViewController:(UIViewController *)viewController {
+    [super showAdWithPresentingViewController:viewController];
+
     if ([self isPrepared]) {
         if (viewController) {
             [self.interstitialVideoAd showAdFromRootViewController:viewController];
         } else {
             NSLog(@"Error encountered playing ad : viewController cannot be nil");
-            if (self.delegate) {
-                if ([self.delegate respondsToSelector:@selector(AdsPlayFailed:)]) {
-                    [self.delegate AdsPlayFailed:self];
-                } else {
-                    NSLog(@"%s AdsPlayFailed selector is not responding", __FUNCTION__);
-                }
-            } else {
-                NSLog(@"%s Delegate is not setting", __FUNCTION__);
-            }
+            [self setCallbackStatus:MovieRewardCallbackPlayFail];
         }
     }
 }
 
 #pragma mark - FBInterstitialAd delegates
 - (void)interstitialAdDidLoad:(FBInterstitialAd *)interstitialAd {
-    if (self.delegate) {
-        if ([self.delegate respondsToSelector:@selector(AdsFetchCompleted:)]) {
-            [self.delegate AdsFetchCompleted:self];
-        } else {
-            NSLog(@"adsFetchCompleted is not responding");
-        }
-    } else {
-        NSLog(@"adsFetchCompleted is not set");
-    }
+    [self setCallbackStatus:MovieRewardCallbackFetchComplete];
 }
 
 - (void)interstitialAd:(FBInterstitialAd *)interstitialAd didFailWithError:(NSError *)error {
     NSLog(@"MovieInterstitial6016: interstitial video loading failed \n%@", error);
     [self setErrorWithMessage:error.localizedDescription code:error.code];
-    if (self.delegate) {
-        if ([self.delegate respondsToSelector:@selector(AdsFetchError:)]) {
-            [self.delegate AdsFetchError:self];
-        } else {
-            NSLog(@"adsFetchError is not responding");
-        }
-    } else {
-        NSLog(@"adsFetchError is not set");
-    }
+    [self setCallbackStatus:MovieRewardCallbackFetchFail];
 }
 
 - (void)interstitialAdDidClose:(FBInterstitialAd *)interstitialAd {
     self.interstitialVideoAd = nil;
-    if (self.delegate) {
-        if ([self.delegate respondsToSelector:@selector(AdsDidCompleteShow:)]) {
-            [self.delegate AdsDidCompleteShow:self];
-        } else {
-            NSLog(@"AdsDidCompleteShow is not responding");
-        }
-    } else {
-        NSLog(@"AdsDidCompleteShow is not set");
-    }
-    if (self.delegate) {
-        if ([self.delegate respondsToSelector:@selector(AdsDidHide:)]) {
-            [self.delegate AdsDidHide:self];
-        } else {
-            NSLog(@"AdsDidHide is not responding");
-        }
-    } else {
-        NSLog(@"AdsDidHide is not set");
-    }
+    [self setCallbackStatus:MovieRewardCallbackPlayComplete];
+    [self setCallbackStatus:MovieRewardCallbackClose];
 }
 
 - (void)interstitialAdWillLogImpression:(FBInterstitialAd *)interstitialAd {
-    if (self.delegate) {
-        if ([self.delegate respondsToSelector:@selector(AdsDidShow:)]) {
-            [self.delegate AdsDidShow:self];
-        } else {
-            NSLog(@"adsDidShow is not responding");
-        }
-    } else {
-        NSLog(@"adsDidShow is not set");
-    }
+    [self setCallbackStatus:MovieRewardCallbackPlayStart];
 }
 
 @end

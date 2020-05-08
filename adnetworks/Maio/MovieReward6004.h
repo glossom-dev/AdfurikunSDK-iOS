@@ -9,7 +9,7 @@
 
 #import <Foundation/Foundation.h>
 #import <ADFMovieReward/ADFmyMovieRewardInterface.h>
-//#import "ADFmyMovieRewardInterface.h"
+#import <ADFMovieReward/ADFmyMovieDelegateBase.h>
 #import <Maio/Maio.h>
 
 
@@ -21,10 +21,8 @@
 /**
  *  Maio用のDelegateクラス
  */
-@interface MovieDelegate6004 : NSObject<MaioDelegate>
+@interface MovieDelegate6004 : ADFmyMovieDelegateBase<MaioDelegate>
 @property (nonatomic) BOOL closeFlg;
 + (instancetype)sharedInstance;
-- (void)setMovieReward:(ADFmyMovieRewardInterface *)movieReward inZone:(NSString *)zoneId;
-- (void)setDelegate:(id<ADFMovieRewardDelegate>)delegate inZone:(NSString *)zoneId;
 
 @end

@@ -61,6 +61,8 @@
 }
 
 - (void)startAd {
+    [super startAd];
+    
     self.isAdLoaded = NO;
     self.impFlag = YES;
     if (self.adView) {
@@ -83,14 +85,15 @@
                                                                           title:@""
                                                                     description:@""
                                                                    adnetworkKey:@"6000"];
+            info.mediaType = ADFNativeAdType_Image;
             info.adapter = self;
             [info setupMediaView:self.adView];
             self.adInfo = info;
         } else {
-            NSLog(@"%s onNativeMovieAdLoadFinish selector is not responding", __FUNCTION__);
+            NSLog(@"Banner6000: %s onNativeMovieAdLoadFinish selector is not responding", __FUNCTION__);
         }
     } else {
-        NSLog(@"%s Delegate is not setting", __FUNCTION__);
+        NSLog(@"Banner6000: %s Delegate is not setting", __FUNCTION__);
     }
 }
 
@@ -104,10 +107,10 @@
             }
             [self.delegate onNativeMovieAdLoadError:self];
         } else {
-            NSLog(@"Banner6001: selector onNativeMovieAdLoadError is not responding");
+            NSLog(@"Banner6000: selector onNativeMovieAdLoadError is not responding");
         }
     } else {
-        NSLog(@"Banner6001: delegate is not set");
+        NSLog(@"Banner6000: delegate is not set");
     }
 }
 
@@ -127,10 +130,10 @@
         if ([self.adInfo.mediaView.adapterInnerDelegate respondsToSelector:@selector(onADFMediaViewRendering)]) {
             [self.adInfo.mediaView.adapterInnerDelegate onADFMediaViewRendering];
         } else {
-            NSLog(@"MovieNative6016: %s onADFMediaViewRendering selector is not responding", __FUNCTION__);
+            NSLog(@"Banner6000: %s onADFMediaViewRendering selector is not responding", __FUNCTION__);
         }
     } else {
-        NSLog(@"MovieNative6016: %s adInfo.mediaView.adapterInnerDelegate is not setting", __FUNCTION__);
+        NSLog(@"Banner6000: %s adInfo.mediaView.adapterInnerDelegate is not setting", __FUNCTION__);
     }
 }
 
@@ -143,10 +146,10 @@
         if ([self.adInfo.mediaView.adapterInnerDelegate respondsToSelector:@selector(onADFMediaViewClick)]) {
             [self.adInfo.mediaView.adapterInnerDelegate onADFMediaViewClick];
         } else {
-            NSLog(@"Banner6001: %s onADFMediaViewClick selector is not responding", __FUNCTION__);
+            NSLog(@"Banner6000: %s onADFMediaViewClick selector is not responding", __FUNCTION__);
         }
     } else {
-        NSLog(@"Banner6001: %s adInfo.mediaView.adapterInnerDelegate is not setting", __FUNCTION__);
+        NSLog(@"Banner6000: %s adInfo.mediaView.adapterInnerDelegate is not setting", __FUNCTION__);
     }
 }
 

@@ -100,6 +100,8 @@ static BOOL hasConfigured = NO;
  *  広告の表示を行う
  */
 -(void)showAd {
+    [super showAd];
+
     UIViewController *topMostViewController = [self topMostViewController];
     if (topMostViewController) {
         [_ad showWithPresentingViewController:topMostViewController];
@@ -107,15 +109,7 @@ static BOOL hasConfigured = NO;
 
     if (topMostViewController == nil) {
         NSLog(@"Error encountered playing ad : could not fetch topmost viewcontroller");
-        if (self.delegate) {
-            if ([self.delegate respondsToSelector:@selector(AdsPlayFailed:)]) {
-                [self.delegate AdsPlayFailed:self];
-            } else {
-                NSLog(@"%s AdsPlayFailed selector is not responding", __FUNCTION__);
-            }
-        } else {
-            NSLog(@"%s Delegate is not setting", __FUNCTION__);
-        }
+        [self setCallbackStatus:MovieRewardCallbackPlayFail];
     }
 }
 
@@ -123,6 +117,8 @@ static BOOL hasConfigured = NO;
  *  広告の表示を行う
  */
 -(void)showAdWithPresentingViewController:(UIViewController *)viewController {
+    [super showAdWithPresentingViewController:viewController];
+
     // 表示を呼び出す
     if ([self isPrepared]) {
         [_ad showWithPresentingViewController:viewController];
@@ -161,63 +157,24 @@ static BOOL hasConfigured = NO;
     NSLog(@"onAdColonyAdAvailabilityChange");
     
     self.ad = interstitial;
-    if (self.delegate) {
-        if ([self.delegate respondsToSelector:@selector(AdsFetchCompleted:)]) {
-            [self.delegate AdsFetchCompleted:self];
-        } else {
-            NSLog(@"%s AdsFetchCompleted selector is not responding", __FUNCTION__);
-        }
-    } else {
-        NSLog(@"%s Delegate is not setting", __FUNCTION__);
-    }
+    [self setCallbackStatus:MovieRewardCallbackFetchComplete];
 }
 
 - (void)adColonyInterstitialDidFailToLoad:(AdColonyAdRequestError * _Nonnull)error {
     NSLog(@"Request failed with error: %@ and suggestion: %@", [error localizedDescription], [error localizedRecoverySuggestion]);
-    
-    if (self.delegate) {
-        if ([self.delegate respondsToSelector:@selector(AdsFetchError:)]) {
-            [self setErrorWithMessage:error.localizedDescription code:error.code];
-            [self.delegate AdsFetchError:self];
-        } else {
-            NSLog(@"%s AdsFetchError selector is not responding", __FUNCTION__);
-        }
-    } else {
-        NSLog(@"%s Delegate is not setting", __FUNCTION__);
-    }
+    [self setErrorWithMessage:error.localizedDescription code:error.code];
+    [self setCallbackStatus:MovieRewardCallbackFetchFail];
 }
 
 - (void)adColonyInterstitialWillOpen:(AdColonyInterstitial *)interstitial {
     NSLog(@"onAdColonyAdStarted");
-    
-    if (self.delegate) {
-        if ([self.delegate respondsToSelector:@selector(AdsDidShow:)]) {
-            [self.delegate AdsDidShow:self];
-        } else {
-            NSLog(@"%s AdsDidShow selector is not responding", __FUNCTION__);
-        }
-    } else {
-        NSLog(@"%s Delegate is not setting", __FUNCTION__);
-    }
+    [self setCallbackStatus:MovieRewardCallbackPlayStart];
 }
 
 - (void)adColonyInterstitialDidClose:(AdColonyInterstitial *)interstitial {
     NSLog(@"onAdColonyAdFinished");
-    
-    if (self.delegate) {
-        if ([self.delegate respondsToSelector:@selector(AdsDidCompleteShow:)]) {
-            [self.delegate AdsDidCompleteShow:self];
-        } else {
-            NSLog(@"%s AdsDidCompleteShow selector is not responding", __FUNCTION__);
-        }
-        if ([self.delegate respondsToSelector:@selector(AdsDidHide:)]) {
-            [self.delegate AdsDidHide:self];
-        } else {
-            NSLog(@"%s AdsDidHide selector is not responding", __FUNCTION__);
-        }
-    } else {
-        NSLog(@"%s Delegate is not setting", __FUNCTION__);
-    }
+    [self setCallbackStatus:MovieRewardCallbackPlayComplete];
+    [self setCallbackStatus:MovieRewardCallbackClose];
 }
 
 - (void)adColonyInterstitialDidReceiveClick:(AdColonyInterstitial *)interstitial {

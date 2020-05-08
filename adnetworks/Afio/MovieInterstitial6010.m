@@ -10,7 +10,17 @@
 
 @implementation MovieInterstitial6010
 
+-(id)init {
+    self = [super init];
+    if (self) {
+        [self setCancellable];
+    }
+    return self;
+}
+
 -(void)setCancellable {
+    [super setCancellable];
+    
     if (self.amoadInterstitialVideo) {
         [self.amoadInterstitialVideo setCancellable:YES];
     }

@@ -1,6 +1,6 @@
 Pod::Spec.new do |s|
   s.name            = "AdfurikunSDK-iOS"
-  s.version         = "3.3.2"
+  s.version         = "3.4.0"
   s.summary         = "An iOS SDK for ADFURIKUN Movie Reward Ads"
   s.homepage        = "https://adfurikun.jp/adfurikun/"
   s.license         = { :type => 'Copyright', :text => 'Copyright Glossom Inc. All rights reserved.' }
@@ -18,7 +18,7 @@ Pod::Spec.new do |s|
 
   s.subspec 'AdColony' do |adcolony|
     adcolony.dependency 'AdfurikunSDK-iOS/Core'
-    adcolony.dependency 'AdColony', '4.1.1'
+    adcolony.dependency 'AdColony', '4.1.4'
     adcolony.source_files = '**/adnetworks/AdColony/*.{h,m,txt}'
   end
 
@@ -36,13 +36,13 @@ Pod::Spec.new do |s|
 
   s.subspec 'AppLovin' do |applovin|
     applovin.dependency 'AdfurikunSDK-iOS/Core'
-    applovin.dependency 'AppLovinSDK', '6.11.1'
+    applovin.dependency 'AppLovinSDK', '6.12.3'
     applovin.source_files = '**/adnetworks/AppLovin/*.{h,m,txt}'
   end
 
   s.subspec 'FAN' do |fan|
     fan.dependency 'AdfurikunSDK-iOS/Core'
-    fan.dependency 'FBAudienceNetwork', '5.5.1'
+    fan.dependency 'FBAudienceNetwork', '5.6.1'
     fan.source_files = '**/adnetworks/FAN/*.{h,m,txt}'
   end
 
@@ -60,13 +60,13 @@ Pod::Spec.new do |s|
 
   s.subspec 'Pangle' do |pangle|
     pangle.dependency 'AdfurikunSDK-iOS/Core'
-    pangle.dependency 'Bytedance-UnionAD', '2.5.1.5'
+    pangle.dependency 'Bytedance-UnionAD', '2.9.0.7'
     pangle.source_files = '**/adnetworks/Pangle/*.{h,m,txt}'
   end
 
   s.subspec 'Tapjoy' do |tapjoy|
     tapjoy.dependency 'AdfurikunSDK-iOS/Core'
-    tapjoy.dependency 'TapjoySDK', '12.3.4'
+    tapjoy.dependency 'TapjoySDK', '12.4.2'
     tapjoy.source_files = '**/adnetworks/Tapjoy/*.{h,m,txt}'
   end
 
@@ -78,7 +78,7 @@ Pod::Spec.new do |s|
 
   s.subspec 'Vungle' do |vungle|
     vungle.dependency 'AdfurikunSDK-iOS/Core'
-    vungle.dependency 'VungleSDK-iOS', '6.4.6'
+    vungle.dependency 'VungleSDK-iOS', '6.5.3'
     vungle.source_files = '**/adnetworks/Vungle/*.{h,m,txt}'
   end
 

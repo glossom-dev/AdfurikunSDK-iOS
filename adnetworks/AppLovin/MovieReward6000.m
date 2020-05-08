@@ -73,13 +73,15 @@
             ])
     {
         //表示を消したい場合は、こちらをコメントアウトして下さい。
-        NSLog(@"[ADF][Applovin]アプリのバンドルIDが、申請されたものと異なります。");
+        NSLog(@"[ADF] [SEVERE] [Applovin]アプリのバンドルIDが、申請されたもの（%@）と異なります。", self.submittedPackageName);
     }
     return self.incentivizedInterstitial && self.incentivizedInterstitial.isReadyForDisplay;
 }
 
 -(void)showAd
 {
+    [super showAd];
+
     if (self.incentivizedInterstitial && self.incentivizedInterstitial.isReadyForDisplay) {
         [self.incentivizedInterstitial show];
     } else{
@@ -120,15 +122,7 @@
 -(void) adService: (ALAdService *) adService didLoadAd: (ALAd *) ad
 {
     NSLog(@"didLoadAd");
-    if ( self.delegate ) {
-        if ([self.delegate respondsToSelector:@selector(AdsFetchCompleted:)]) {
-            [self.delegate AdsFetchCompleted:self];
-        } else {
-            NSLog(@"%s AdsFetchCompleted selector is not responding", __FUNCTION__);
-        }
-    } else {
-        NSLog(@"%s Delegate is not setting", __FUNCTION__);
-    }
+    [self setCallbackStatus:MovieRewardCallbackFetchComplete];
 }
 
 /**
@@ -137,14 +131,8 @@
 -(void) adService: (ALAdService *) adService didFailToLoadAdWithError: (int) code
 {
     NSLog(@"didFailToLoadAdWithError : %d", code);
-    if (self.delegate) {
-        if ([self.delegate respondsToSelector:@selector(AdsFetchError:)]) {
-            [self setErrorWithMessage:nil code:code];
-            [self.delegate AdsFetchError:self];
-        } else {
-            NSLog(@"%s AdsFetchError selector is not responding", __FUNCTION__);
-        }
-    }
+    [self setErrorWithMessage:nil code:code];
+    [self setCallbackStatus:MovieRewardCallbackFetchFail];
 }
 
 /**
@@ -161,16 +149,7 @@
 -(void) ad: (ALAd *) ad wasHiddenIn: (UIView *) view
 {
     NSLog(@"wasHiddenIn");
-    //[ALIncentivizedInterstitialAd preloadAndNotify:nil];
-    if ( self.delegate ) {
-        if ([self.delegate respondsToSelector:@selector(AdsDidHide:)]) {
-            [self.delegate AdsDidHide:self];
-        } else {
-            NSLog(@"%s AdsDidHide selector is not responding", __FUNCTION__);
-        }
-    } else {
-        NSLog(@"%s Delegate is not setting", __FUNCTION__);
-    }
+    [self setCallbackStatus:MovieRewardCallbackClose];
 }
 
 /**
@@ -188,16 +167,7 @@
 {
     NSLog(@"videoPlaybackBeganInAd");
     // 広告の読み
-    
-    if ( self.delegate ) {
-        if ([self.delegate respondsToSelector:@selector(AdsDidShow:)]) {
-            [self.delegate AdsDidShow:self];
-        } else {
-            NSLog(@"%s AdsDidShow selector is not responding", __FUNCTION__);
-        }
-    } else {
-        NSLog(@"%s Delegate is not setting", __FUNCTION__);
-    }
+    [self setCallbackStatus:MovieRewardCallbackPlayStart];
 }
 
 /**
@@ -208,26 +178,9 @@
 {
     NSLog(@"videoPlaybackBeganInAd");
     if ( wasFullyWatched ) {
-        // 全てみた場合のみ。
-        if ( self.delegate ) {
-            if ([self.delegate respondsToSelector:@selector(AdsDidCompleteShow:)]) {
-                [self.delegate AdsDidCompleteShow:self];
-            } else {
-                NSLog(@"%s AdsDidCompleteShow selector is not responding", __FUNCTION__);
-            }
-        } else {
-            NSLog(@"%s Delegate is not setting", __FUNCTION__);
-        }
-    }else{
-        if ( self.delegate ) {
-            if ([self.delegate respondsToSelector:@selector(AdsPlayFailed:)]) {
-                [self.delegate AdsPlayFailed:self];
-            } else {
-                NSLog(@"%s AdsPlayFailed selector is not responding", __FUNCTION__);
-            }
-        } else {
-            NSLog(@"%s Delegate is not setting", __FUNCTION__);
-        }
+        [self setCallbackStatus:MovieRewardCallbackPlayComplete];
+    } else {
+        [self setCallbackStatus:MovieRewardCallbackPlayFail];
     }
 }
 

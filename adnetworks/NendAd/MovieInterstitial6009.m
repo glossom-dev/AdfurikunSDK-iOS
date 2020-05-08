@@ -21,6 +21,15 @@
 @implementation MovieInterstitial6009
 
 #pragma mark - ADFmyMovieRewardInterface
+
+-(id)init {
+    self = [super init];
+    if (self) {
+        [self setCancellable];
+    }
+    return self;
+}
+
 /**< 設定データの送信 */
 -(void)setData:(NSDictionary *)data {
     self.nendKey = [NSString stringWithFormat:@"%@", [data objectForKey:@"api_key"]];
@@ -62,6 +71,8 @@
 
 /**< 広告の表示 */
 -(void)showAd {
+    [super showAd];
+
     if (self.isPrepared) {
         UIViewController *topMostViewController = [self topMostViewController];
         if (topMostViewController) {
@@ -69,21 +80,15 @@
         }
         if (topMostViewController == nil) {
             NSLog(@"Error encountered playing ad : could not fetch topmost viewcontroller");
-            if (self.delegate) {
-                if ([self.delegate respondsToSelector:@selector(AdsPlayFailed:)]) {
-                    [self.delegate AdsPlayFailed:self];
-                } else {
-                    NSLog(@"%s AdsPlayFailed selector is not responding", __FUNCTION__);
-                }
-            } else {
-                NSLog(@"%s Delegate is not setting", __FUNCTION__);
-            }
+            [self setCallbackStatus:MovieRewardCallbackPlayFail];
         }
     }
 }
 
 -(void)showAdWithPresentingViewController:(UIViewController *)viewController
 {
+    [super showAdWithPresentingViewController:viewController];
+
     if (self.interstitialVideo.isReady) {
         [self.interstitialVideo showAdFromViewController:viewController];
     }
@@ -143,37 +148,20 @@
 - (void)nadInterstitialVideoAdDidReceiveAd:(NADInterstitialVideo *)nadInterstitialVideoAd
 {
     NSLog(@"%s", __FUNCTION__);
+    [self setCallbackStatus:MovieRewardCallbackFetchComplete];
 }
 
 - (void)nadInterstitialVideoAd:(NADInterstitialVideo *)nadInterstitialVideoAd didFailToLoadWithError:(NSError *)error
 {
     NSLog(@"%s error: %@", __FUNCTION__, error);
-    
-    if (self.delegate) {
-        if ([self.delegate respondsToSelector:@selector(AdsFetchError:)]) {
-            [self setErrorWithMessage:error.localizedDescription code:error.code];
-            [self.delegate AdsFetchError:self];
-        } else {
-            NSLog(@"%s AdsFetchError selector is not responding", __FUNCTION__);
-        }
-    } else {
-        NSLog(@"%s Delegate is not setting", __FUNCTION__);
-    }
+    [self setErrorWithMessage:error.localizedDescription code:error.code];
+    [self setCallbackStatus:MovieRewardCallbackFetchFail];
 }
 
 - (void)nadInterstitialVideoAdDidFailedToPlay:(NADInterstitialVideo *)nadInterstitialVideoAd
 {
     NSLog(@"%s", __FUNCTION__);
-    
-    if (self.delegate) {
-        if ([self.delegate respondsToSelector:@selector(AdsPlayFailed:)]) {
-            [self.delegate AdsPlayFailed:self];
-        } else {
-            NSLog(@"%s AdsPlayFailed selector is not responding", __FUNCTION__);
-        }
-    } else {
-        NSLog(@"%s Delegate is not setting", __FUNCTION__);
-    }
+    [self setCallbackStatus:MovieRewardCallbackPlayFail];
 }
 
 - (void)nadInterstitialVideoAdDidOpen:(NADInterstitialVideo *)nadInterstitialVideoAd
@@ -184,31 +172,13 @@
 - (void)nadInterstitialVideoAdDidClose:(NADInterstitialVideo *)nadInterstitialVideoAd
 {
     NSLog(@"%s", __FUNCTION__);
-    
-    if (self.delegate) {
-        if ([self.delegate respondsToSelector:@selector(AdsDidHide:)]) {
-            [self.delegate AdsDidHide:self];
-        } else {
-            NSLog(@"%s AdsDidHide selector is not responding", __FUNCTION__);
-        }
-    } else {
-        NSLog(@"%s Delegate is not setting", __FUNCTION__);
-    }
+    [self setCallbackStatus:MovieRewardCallbackClose];
 }
 
 - (void)nadInterstitialVideoAdDidStartPlaying:(NADInterstitialVideo *)nadInterstitialVideoAd
 {
     NSLog(@"%s", __FUNCTION__);
-    
-    if (self.delegate) {
-        if ([self.delegate respondsToSelector:@selector(AdsDidShow:)]) {
-            [self.delegate AdsDidShow:self];
-        } else {
-            NSLog(@"%s AdsDidShow selector is not responding", __FUNCTION__);
-        }
-    } else {
-        NSLog(@"%s Delegate is not setting", __FUNCTION__);
-    }
+    [self setCallbackStatus:MovieRewardCallbackPlayStart];
 }
 
 - (void)nadInterstitialVideoAdDidStopPlaying:(NADInterstitialVideo *)nadInterstitialVideoAd
@@ -219,16 +189,7 @@
 - (void)nadInterstitialVideoAdDidCompletePlaying:(NADInterstitialVideo *)nadInterstitialVideoAd
 {
     NSLog(@"%s", __FUNCTION__);
-    
-    if (self.delegate) {
-        if ([self.delegate respondsToSelector:@selector(AdsDidCompleteShow:)]) {
-            [self.delegate AdsDidCompleteShow:self];
-        } else {
-            NSLog(@"%s AdsDidCompleteShow selector is not responding", __FUNCTION__);
-        }
-    } else {
-        NSLog(@"%s Delegate is not setting", __FUNCTION__);
-    }
+    [self setCallbackStatus:MovieRewardCallbackPlayComplete];
 }
 
 - (void)nadInterstitialVideoAdDidClickAd:(NADInterstitialVideo *)nadInterstitialVideoAd

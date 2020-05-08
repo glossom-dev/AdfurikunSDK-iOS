@@ -16,7 +16,6 @@
 @property (nonatomic, assign)BOOL test_flg;
 @property (nonatomic, strong)NSString* placement_id;
 @property (nonatomic, strong)NSString* sdkKey;
-@property (nonatomic, strong)TJPlacement* p;
 @property (nonatomic) BOOL isNeedStartAd;
 @property (nonatomic) BOOL isConnectionFail;
 
@@ -120,11 +119,14 @@
  *  広告の表示を行う
  */
 -(void)showAd {
-    NSLog(@"%@ showAd", ADAPTER_CLASS_NAME);
+    [super showAd];
+
     [_p showContentWithViewController:nil];
 }
 
 -(void)showAdWithPresentingViewController:(UIViewController *)viewController {
+    [super showAdWithPresentingViewController:viewController];
+
     NSLog(@"%@ showAdWithPresentingViewController", ADAPTER_CLASS_NAME);
     //引数に nil を渡すと弊社SDK側で再前面、全画面の View を推定して表示します。
     //多くの場合にはこれで正常に動作するのですが、View階層が複雑な場合は指定していただく必要があるケースも出ています。
@@ -204,20 +206,11 @@
 
 - (void)performAdsFetchError:(TJPlacement *)placement error:(NSError *)error {
     NSLog(@"Tapjoy load error\n %@", error);
-    id delegate = [self getDelegateWithZone:placement.placementName];
     ADFmyMovieRewardInterface *movieReward = [self getMovieRewardWithZone:placement.placementName];
-    if (delegate && movieReward) {
-        if ([delegate respondsToSelector:@selector(AdsFetchError:)]) {
-            if (error) {
-                [movieReward setErrorWithMessage:error.localizedDescription code:error.code];
-            }
-            [delegate AdsFetchError:movieReward];
-        } else {
-            NSLog(@"%s AdsFetchError selector is not responding", __FUNCTION__);
-        }
-    } else {
-        NSLog(@"%s Delegate && movieReward is not setting", __FUNCTION__);
+    if (error) {
+        [movieReward setErrorWithMessage:error.localizedDescription code:error.code];
     }
+    [self setCallbackStatus:MovieRewardCallbackFetchFail zone:placement.placementName];
 }
 
 #pragma mark - TJPlacementDelegate
@@ -241,51 +234,19 @@
 - (void)contentIsReady:(TJPlacement*)placement {
     NSLog(@"%@ contentIsReady", ADAPTER_CLASS_NAME);
     // 広告準備完了
-    id delegate = [self getDelegateWithZone:placement.placementName];
-    ADFmyMovieRewardInterface *movieReward = [self getMovieRewardWithZone:placement.placementName];
-    if (delegate && movieReward) {
-        if ([delegate respondsToSelector:@selector(AdsFetchCompleted:)]) {
-            [delegate AdsFetchCompleted:movieReward];
-        } else {
-            NSLog(@"%s AdsFetchCompleted selector is not responding", __FUNCTION__);
-        }
-    } else {
-        NSLog(@"%s Delegate && movieReward is not setting", __FUNCTION__);
-    }
+    [self setCallbackStatus:MovieRewardCallbackFetchComplete zone:placement.placementName];
 }
 
 // コンテンツが表示される際に呼ばれます。
 - (void)contentDidAppear:(TJPlacement*)placement {
     NSLog(@"%@ contentDidAppear", ADAPTER_CLASS_NAME);
-    
-    id delegate = [self getDelegateWithZone:placement.placementName];
-    ADFmyMovieRewardInterface *movieReward = [self getMovieRewardWithZone:placement.placementName];
-    if(delegate && movieReward){
-        if([delegate respondsToSelector:@selector(AdsDidShow:)]){
-            [delegate AdsDidShow:movieReward];
-        } else {
-            NSLog(@"%s AdsDidShow selector is not responding", __FUNCTION__);
-        }
-    } else {
-        NSLog(@"%s Delegate && movieReward is not setting", __FUNCTION__);
-    }
+    [self setCallbackStatus:MovieRewardCallbackPlayStart zone:placement.placementName];
 }
 
 // コンテンツが退去される際に呼ばれます。
 - (void)contentDidDisappear:(TJPlacement*)placement {
     NSLog(@"%@ contentDidDisappear", ADAPTER_CLASS_NAME);
-    
-    id delegate = [self getDelegateWithZone:placement.placementName];
-    ADFmyMovieRewardInterface *movieReward = [self getMovieRewardWithZone:placement.placementName];
-    if (delegate && movieReward) {
-        if ([delegate respondsToSelector:@selector(AdsDidHide:)]) {
-            [delegate AdsDidHide:movieReward];
-        } else {
-            NSLog(@"%s AdsDidHide selector is not responding", __FUNCTION__);
-        }
-    } else {
-        NSLog(@"%s Delegate && movieReward is not setting", __FUNCTION__);
-    }
+    [self setCallbackStatus:MovieRewardCallbackClose zone:placement.placementName];
 }
 
 - (void)didClick:(TJPlacement *)placement {
@@ -301,35 +262,14 @@
 /** 動画を最後まで視聴した際に呼ばれます。 */
 - (void)videoDidComplete:(TJPlacement *)placement {
     NSLog(@"%@ videoDidComplete", ADAPTER_CLASS_NAME);
-    
-    id delegate = [self getDelegateWithZone:placement.placementName];
-    ADFmyMovieRewardInterface *movieReward = [self getMovieRewardWithZone:placement.placementName];
-    if (delegate && movieReward) {
-        if ([delegate respondsToSelector:@selector(AdsDidCompleteShow:)]) {
-            [delegate AdsDidCompleteShow:movieReward];
-        } else {
-            NSLog(@"%s AdsDidCompleteShow selector is not responding", __FUNCTION__);
-        }
-    } else {
-        NSLog(@"%s Delegate && movieReward is not setting", __FUNCTION__);
-    }
+    [self setCallbackStatus:MovieRewardCallbackPlayComplete zone:placement.placementName];
 }
 
 - (void)videoDidFail:(TJPlacement *)placement error:(NSString *)errorMsg {
     NSLog(@"TJCVideoAdDelegate::videoAdError %@", errorMsg);
-    
-    id delegate = [self getDelegateWithZone:placement.placementName];
     ADFmyMovieRewardInterface *movieReward = [self getMovieRewardWithZone:placement.placementName];
-    if (delegate && movieReward) {
-        if ([delegate respondsToSelector:@selector(AdsPlayFailed:)]) {
-            [movieReward setErrorWithMessage:errorMsg code:0];
-            [delegate AdsPlayFailed:movieReward];
-        } else {
-            NSLog(@"%s AdsPlayFailed selector is not responding", __FUNCTION__);
-        }
-    } else {
-        NSLog(@"%s Delegate && movieReward is not setting", __FUNCTION__);
-    }
+    [movieReward setErrorWithMessage:errorMsg code:0];
+    [self setCallbackStatus:MovieRewardCallbackPlayFail zone:placement.placementName];
 }
 
 @end

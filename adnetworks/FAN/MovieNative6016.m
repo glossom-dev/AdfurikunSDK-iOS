@@ -71,6 +71,8 @@
 }
 
 - (void)startAd {
+    [super startAd];
+    
     if (_banner_type == kFANNativeAdPlacementTypeNative) {
         FBNativeAd *nativeAd = [[FBNativeAd alloc] initWithPlacementID: self.placement_id];
         nativeAd.delegate = self;
@@ -169,6 +171,11 @@
                                                                                 title:nativeAd.advertiserName
                                                                           description:nativeAd.bodyText
                                                                          adnetworkKey:@"6016"];
+        if (nativeAd.adFormatType == FBAdFormatTypeImage) {
+            info.mediaType = ADFNativeAdType_Image;
+        } else if (nativeAd.adFormatType == FBAdFormatTypeVideo) {
+            info.mediaType = ADFNativeAdType_Movie;
+        }
 
         FBNativeAdViewAttributes *attributes = [[FBNativeAdViewAttributes alloc] init];
         attributes.backgroundColor = [UIColor colorWithRed:0.9 green:0.9 blue:0.9 alpha:1];
@@ -207,11 +214,14 @@
 
         info.fbAdChoicesView = [[FBAdChoicesView alloc] init];
         info.fbAdChoicesView.nativeAd = nativeAd;
+        
+        info.fbAdSponsoredLabel = [[UILabel alloc] init];
+        info.fbAdSponsoredLabel.text = nativeAd.sponsoredTranslation;
 
         info.fbMediaView = [[FBMediaView alloc] init];
         info.fbMediaView.delegate = self;
 
-        info.fbAdIconView = [[FBAdIconView alloc] init];
+        info.fbAdIconView = [[FBMediaView alloc] init];
         //-------------------------------------------------
 
         info.adapter = self;
@@ -252,6 +262,12 @@
                                                                             title:nativeBannerAd.advertiserName
                                                                       description:nativeBannerAd.bodyText
                                                                      adnetworkKey:@"6016"];
+        if (nativeBannerAd.adFormatType == FBAdFormatTypeImage) {
+            info.mediaType = ADFNativeAdType_Image;
+        } else if (nativeBannerAd.adFormatType == FBAdFormatTypeVideo) {
+            info.mediaType = ADFNativeAdType_Movie;
+        }
+
         FBNativeAdViewAttributes *attributes = [[FBNativeAdViewAttributes alloc] init];
         attributes.backgroundColor = [UIColor colorWithRed:0.9 green:0.9 blue:0.9 alpha:1];
         attributes.buttonColor = [UIColor colorWithRed:66/255.0 green:108/255.0 blue:173/255.0 alpha:1];
@@ -267,7 +283,7 @@
         info.isCustomComponentSupported = YES;
         info.nativeBannerAd = nativeBannerAd;
 
-        info.fbAdIconView = [[FBAdIconView alloc] init];
+        info.fbAdIconView = [[FBMediaView alloc] init];
 
         info.fbAdChoicesView = [[FBAdChoicesView alloc] init];
         info.fbAdChoicesView.nativeAd = nativeBannerAd;
@@ -346,6 +362,14 @@
     NSLog(@"%s", __func__);
 }
 
+- (void)registerInteractionViews:(NSArray<__kindof UIView *> *)views {
+    if (self.adapter) {
+        [self registerViewForInteraction:[self.adapter topMostViewController].view
+                          viewController:[self.adapter topMostViewController]
+                          clickableViews:views];
+    }
+}
+
 - (void)registerViewForInteraction:(UIView *)view viewController:(UIViewController *)viewController clickableViews:(NSArray<UIView *> *)clickableViews {
     if (self.nativeAd) {
         [self.nativeAd registerViewForInteraction:view
@@ -371,6 +395,7 @@
                  @"adChoicesView": self.fbAdChoicesView,
                  @"adCallToActionButton": self.fbCallToActionButton,
                  @"adSocialContextLabel": self.fbSocialContextLabel,
+                 @"adSponsoredLabel": self.fbAdSponsoredLabel,
                  @"adBodyLabel": self.fbAdBodyLabel };
     } else if (self.nativeBannerAd) {
         return @{

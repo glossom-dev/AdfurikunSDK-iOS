@@ -116,16 +116,8 @@
     NSError *error = nil;
     if (![sdk loadPlacementWithID:self.placementID error:&error]) {
         NSLog(@"Unable to load vungle placement with reference ID :%@, Error %@", self.placementID, error);
-        if (self.delegate) {
-            if ([self.delegate respondsToSelector:@selector(AdsFetchError:)]) {
-                [self setErrorWithMessage:error.localizedDescription code:error.code];
-                [self.delegate AdsFetchError:self];
-            } else {
-                NSLog(@"%s AdsFetchError selector is not responding", __FUNCTION__);
-            }
-        } else {
-            NSLog(@"%s Delegate is not setting", __FUNCTION__);
-        }
+        [self setErrorWithMessage:error.localizedDescription code:error.code];
+        [self setCallbackStatus:MovieRewardCallbackFetchFail];
     }
 }
 
@@ -142,6 +134,8 @@
  */
 -(void)showAd
 {
+    [super showAd];
+
     VungleSDK* sdk = [VungleSDK sharedSDK];
     NSError* error;
 
@@ -153,23 +147,14 @@
 
     if (topMostViewController == nil || error) {
         NSLog(@"Error encountered playing ad : %@", error);
-        if (self.delegate) {
-            if ([self.delegate respondsToSelector:@selector(AdsPlayFailed:)]) {
-                if (error) {
-                    [self setErrorWithMessage:error.localizedDescription code:error.code];
-                }
-                [self.delegate AdsPlayFailed:self];
-            } else {
-                NSLog(@"%s AdsPlayFailed selector is not responding", __FUNCTION__);
-            }
-        } else {
-            NSLog(@"%s Delegate is not setting", __FUNCTION__);
-        }
+        [self setCallbackStatus:MovieRewardCallbackPlayFail];
     }
 }
 
 -(void)showAdWithPresentingViewController:(UIViewController *)viewController
 {
+    [super showAdWithPresentingViewController:viewController];
+
     VungleSDK* sdk = [VungleSDK sharedSDK];
     NSError* error;
     
@@ -177,16 +162,8 @@
     
     if (error) {
         NSLog(@"Error encountered playing ad : %@", error);
-        if (self.delegate) {
-            if ([self.delegate respondsToSelector:@selector(AdsPlayFailed:)]) {
-                [self setErrorWithMessage:error.localizedDescription code:error.code];
-                [self.delegate AdsPlayFailed:self];
-            } else {
-                NSLog(@"%s AdsPlayFailed selector is not responding", __FUNCTION__);
-            }
-        } else {
-            NSLog(@"%s Delegate is not setting", __FUNCTION__);
-        }
+        [self setErrorWithMessage:error.localizedDescription code:error.code];
+        [self setCallbackStatus:MovieRewardCallbackPlayFail];
     }
 }
 
@@ -267,92 +244,39 @@
 
 //Vungle delegate
 /** 広告準備完了 */
-- (void)vungleAdPlayabilityUpdate:(BOOL)isAdPlayable placementID:(NSString *)placementID error:(NSError *)error {
+- (void)vungleAdPlayabilityUpdate:(BOOL)isAdPlayable placementID:(nullable NSString *)placementID error:(nullable NSError *)error {
     NSLog(@"%s isAdPlayable: %@ placementID: %@", __PRETTY_FUNCTION__, (isAdPlayable ? @"YES" : @"NO"), placementID);
     NSLog(@"%@", [[VungleSDK sharedSDK] debugInfo]);
 
-    id delegate = [self getDelegateWithZone:placementID];
-    MovieReward6006 *movieReward = (MovieReward6006 *)[self getMovieRewardWithZone:placementID];
-
-    if (error) {
-        NSLog(@"%s called. Error : %@", __FUNCTION__, error);
-        if (delegate) {
-            if ([delegate respondsToSelector:@selector(AdsFetchError:)]) {
-                [delegate AdsFetchError:movieReward];
-            } else {
-                NSLog(@"%s AdsFetchError selector is not responding", __FUNCTION__);
-            }
-        } else {
-            NSLog(@"%s Delegate is not setting", __FUNCTION__);
-        }
-        return;
-    }
-
     if(isAdPlayable){
         // 広告準備完了
-        if (delegate) {
-            if ([delegate respondsToSelector:@selector(AdsFetchCompleted:)]) {
-                [delegate AdsFetchCompleted:movieReward];
-            } else {
-                NSLog(@"%s AdsFetchCompleted selector is not responding", __FUNCTION__);
-            }
-        } else {
-            NSLog(@"%s Delegate is not setting", __FUNCTION__);
-        }
+        [self setCallbackStatus:MovieRewardCallbackFetchComplete zone:placementID];
     }
 }
 
 /** 動画再生開始 */
 - (void)vungleWillShowAdForPlacementID:(NSString *)placementID {
     NSLog(@"%s placementID: %@", __PRETTY_FUNCTION__, placementID);
-    id delegate = [self getDelegateWithZone:placementID];
-    MovieReward6006 *movieReward = (MovieReward6006 *)[self getMovieRewardWithZone:placementID];
-
-    if (delegate) {
-        if ([delegate respondsToSelector:@selector(AdsDidShow:)]) {
-            [delegate AdsDidShow:movieReward];
-        } else {
-            NSLog(@"%s AdsDidShow selector is not responding", __FUNCTION__);
-        }
-    } else {
-        NSLog(@"%s Delegate is not setting", __FUNCTION__);
-    }
+    [self setCallbackStatus:MovieRewardCallbackPlayStart zone:placementID];
 }
 
 /** 動画再生終了&エンドカード終了 */
 - (void)vungleWillCloseAdWithViewInfo:(VungleViewInfo *)info placementID:(NSString *)placementID {
     NSLog(@"%s placementID: %@", __PRETTY_FUNCTION__, placementID);
-    id delegate = [self getDelegateWithZone:placementID];
     MovieReward6006 *movieReward = (MovieReward6006 *)[self getMovieRewardWithZone:placementID];
-    if (delegate) {
-        if (info.completedView) {
-            BOOL isCompleted = [info.completedView boolValue];
-            if (isCompleted) {
-                if ([delegate respondsToSelector:@selector(AdsDidCompleteShow:)]) {
-                    [delegate AdsDidCompleteShow:movieReward];
-                } else {
-                    NSLog(@"%s AdsDidCompleteShow selector is not responding", __FUNCTION__);
-                }
-            } else {
-                //リワード広告だったら再生エラー
-                //リワード広告以外（インタースティシャル）だったらスキップ
-                if ([movieReward isMemberOfClass:[MovieReward6006 class]]) {
-                    if ([delegate respondsToSelector:@selector(AdsPlayFailed:)]) {
-                        [delegate AdsPlayFailed:movieReward];
-                    } else {
-                        NSLog(@"%s AdsPlayFailed selector is not responding", __FUNCTION__);
-                    }
-                }
+    if (info.completedView) {
+        BOOL isCompleted = [info.completedView boolValue];
+        if (isCompleted) {
+            [self setCallbackStatus:MovieRewardCallbackPlayComplete zone:placementID];
+        } else {
+            //リワード広告だったら再生エラー
+            //リワード広告以外（インタースティシャル）だったらスキップ
+            if ([movieReward isMemberOfClass:[MovieReward6006 class]]) {
+                [self setCallbackStatus:MovieRewardCallbackPlayFail zone:placementID];
             }
         }
-        if ([delegate respondsToSelector:@selector(AdsDidHide:)]) {
-            [delegate AdsDidHide:movieReward];
-        } else {
-            NSLog(@"%s AdsDidHide selector is not responding", __FUNCTION__);
-        }
-    } else {
-        NSLog(@"%s Delegate is not setting", __FUNCTION__);
     }
+    [self setCallbackStatus:MovieRewardCallbackClose zone:placementID];
 }
 
 @end

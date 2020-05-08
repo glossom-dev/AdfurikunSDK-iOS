@@ -19,6 +19,14 @@
 
 @implementation MovieReward6019
 
+-(id)init {
+    self = [super init];
+    if (self) {
+        [self setCancellable];
+    }
+    return self;
+}
+
 - (void)setData:(NSDictionary *)data {
     NSString* admobId = [data objectForKey:@"ad_unit_id"];
     if (admobId != nil && ![admobId isEqual:[NSNull null]]) {
@@ -41,15 +49,17 @@
 }
 
 - (void)startAd {
-    self.rewardedAd = [[GADRewardedAd alloc] initWithAdUnitID:self.unitID];
-    GADRequest *request = [GADRequest request];
-    [self.rewardedAd loadRequest:request completionHandler:^(GADRequestError * _Nullable error) {
-        if (error) {
-            [self adRequestFailure:error];
-        } else {
-            [self adRequestSccess];
-        }
-    }];
+    if (!self.rewardedAd || !self.rewardedAd.isReady) {
+        self.rewardedAd = [[GADRewardedAd alloc] initWithAdUnitID:self.unitID];
+        GADRequest *request = [GADRequest request];
+        [self.rewardedAd loadRequest:request completionHandler:^(GADRequestError * _Nullable error) {
+            if (error) {
+                [self adRequestFailure:error];
+            } else {
+                [self adRequestSccess];
+            }
+        }];
+    }
 }
 
 - (BOOL)isPrepared {
@@ -61,6 +71,8 @@
 }
 
 - (void)showAdWithPresentingViewController:(UIViewController *)viewController {
+    [super showAdWithPresentingViewController:viewController];
+
     if (self.rewardedAd.isReady) {
         [self.rewardedAd presentFromRootViewController:[self topMostViewController] delegate:self];
     }
@@ -79,20 +91,13 @@
 
 - (void)adRequestSccess {
     NSLog(@"%s", __FUNCTION__);
+    [self setCallbackStatus:MovieRewardCallbackFetchComplete];
 }
 
 - (void)adRequestFailure:(NSError *)error {
     NSLog(@"%s error: %@", __FUNCTION__, error);
-    if (self.delegate) {
-        if ([self.delegate respondsToSelector:@selector(AdsFetchError:)]) {
-            [self setErrorWithMessage:error.localizedDescription code:error.code];
-            [self.delegate AdsFetchError:self];
-        } else {
-            NSLog(@"%s AdsFetchError selector is not responding", __FUNCTION__);
-        }
-    } else {
-        NSLog(@"%s Delegate is not setting", __FUNCTION__);
-    }
+    [self setErrorWithMessage:error.localizedDescription code:error.code];
+    [self setCallbackStatus:MovieRewardCallbackFetchFail];
 }
 
 #pragma mark - GADRewardedAdDelegate
@@ -100,62 +105,27 @@
 - (void)rewardedAd:(GADRewardedAd *)rewardedAd userDidEarnReward:(GADAdReward *)reward {
     NSLog(@"%s", __FUNCTION__);
     self.isAdsCompleteShow = YES;
-    if (self.delegate) {
-        if ([self.delegate respondsToSelector:@selector(AdsDidCompleteShow:)]) {
-            [self.delegate AdsDidCompleteShow:self];
-        } else {
-            NSLog(@"%s AdsDidCompleteShow selector is not responding", __FUNCTION__);
-        }
-    } else {
-        NSLog(@"%s Delegate is not setting", __FUNCTION__);
-    }
+    [self setCallbackStatus:MovieRewardCallbackPlayComplete];
 }
 
 - (void)rewardedAdDidPresent:(GADRewardedAd *)rewardedAd {
     NSLog(@"%s", __FUNCTION__);
     self.isAdsCompleteShow = NO;
-    if (self.delegate) {
-        if ([self.delegate respondsToSelector:@selector(AdsDidShow:)]) {
-            [self.delegate AdsDidShow:self];
-        } else {
-            NSLog(@"%s AdsDidShow selector is not responding", __FUNCTION__);
-        }
-    } else {
-        NSLog(@"%s Delegate is not setting", __FUNCTION__);
-    }
+    [self setCallbackStatus:MovieRewardCallbackPlayStart];
 }
 
 - (void)rewardedAd:(GADRewardedAd *)rewardedAd didFailToPresentWithError:(NSError *)error {
     NSLog(@"%s", __FUNCTION__);
-    if (self.delegate) {
-        if ([self.delegate respondsToSelector:@selector(AdsPlayFailed:)]) {
-            [self.delegate AdsPlayFailed:self];
-        } else {
-            NSLog(@"%s AdsPlayFailed selector is not responding", __FUNCTION__);
-        }
-    } else {
-        NSLog(@"%s Delegate is not setting", __FUNCTION__);
-    }
+    [self setErrorWithMessage:error.localizedDescription code:error.code];
+    [self setCallbackStatus:MovieRewardCallbackPlayFail];
 }
 
 - (void)rewardedAdDidDismiss:(GADRewardedAd *)rewardedAd {
     NSLog(@"%s", __FUNCTION__);
-    if (self.delegate) {
-        if (!self.isAdsCompleteShow) {
-            if ([self.delegate respondsToSelector:@selector(AdsPlayFailed:)]) {
-                [self.delegate AdsPlayFailed:self];
-            } else {
-                NSLog(@"%s Skip AdMob RewardAd", __FUNCTION__);
-            }
-        }
-        if ([self.delegate respondsToSelector:@selector(AdsDidHide:)]) {
-            [self.delegate AdsDidHide:self];
-        } else {
-            NSLog(@"%s AdsDidHide selector is not responding", __FUNCTION__);
-        }
-    } else {
-        NSLog(@"%s Delegate is not setting", __FUNCTION__);
+    if (!self.isAdsCompleteShow) {
+        [self setCallbackStatus:MovieRewardCallbackPlayFail];
     }
+    [self setCallbackStatus:MovieRewardCallbackClose];
 }
 
 @end

@@ -11,7 +11,8 @@
 #import <ADFMovieReward/ADFMovieNativeAdInfo.h>
 
 @interface MovieNative6009 : ADFmyMovieNativeInterface
-
+@property (nonatomic, strong) NADNativeVideoView *nativeVideoView;
+@property (nonatomic, strong) NADNativeVideoLoader *videoAdLoader;
 @end
 
 @interface MovieNativeAdInfo6009 : ADFMovieNativeAdInfo
