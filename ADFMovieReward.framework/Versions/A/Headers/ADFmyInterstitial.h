@@ -1,0 +1,17 @@
+//
+//  ADFmyInterstitial.h
+//  ADFMovieReward
+//
+//  Created by Sungil Kim on 2019/07/02.
+//  Copyright © 2019 A .D F. U. L. L. Y Co., Ltd. All rights reserved.
+//
+
+#import <ADFMovieReward/ADFMovieReward.h>
+
+NS_ASSUME_NONNULL_BEGIN
+
+@interface ADFmyInterstitial : ADFmyMovieInterstitial
+
+@end
+
+NS_ASSUME_NONNULL_END
