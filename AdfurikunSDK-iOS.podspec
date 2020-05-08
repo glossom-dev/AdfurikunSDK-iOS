@@ -9,6 +9,7 @@ Pod::Spec.new do |s|
   s.source          = { :git => "https://github.com/glossom-dev/AdfurikunSDK-iOS", :tag => "#{s.version}" }
   s.default_subspec = 'All'
   s.static_framework = true
+  s.xcconfig = { "VALID_ARCHS": "armv7 armv7s x86_64 arm64" }
   
   s.subspec 'Core' do |core|
     core.vendored_frameworks = '**/ADFMovieReward.framework'
@@ -91,7 +92,7 @@ Pod::Spec.new do |s|
     all.dependency 'AdfurikunSDK-iOS/FAN'
     all.dependency 'AdfurikunSDK-iOS/Maio'
     all.dependency 'AdfurikunSDK-iOS/NendAd'
-    all.dependency 'AdfurikunSDK-iOS/Pangle'    
+    all.dependency 'AdfurikunSDK-iOS/Pangle'
     all.dependency 'AdfurikunSDK-iOS/Tapjoy'
     all.dependency 'AdfurikunSDK-iOS/UnityAds'
     all.dependency 'AdfurikunSDK-iOS/Vungle'
