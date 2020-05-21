@@ -36,6 +36,8 @@
 }
 
 -(void)setData:(NSDictionary *)data {
+    [super setData:data];
+    
     if (ADFMovieOptions.getTestMode) {
         self.testFlg = YES;
     } else {
@@ -51,13 +53,6 @@
     //広告の読み込みがmediaID単位で行われることにより
     //startAdより前にisPrepared=trueになって広告が再生されるケースがあるため
     [[MovieDelegate6004 sharedInstance] setMovieReward:self inZone:self.maioZoneId];
-}
-
-- (void)setDelegate:(NSObject<ADFMovieRewardDelegate> *)delegate {
-    dispatch_async(dispatch_get_main_queue(), ^{
-        [[MovieDelegate6004 sharedInstance] setDelegate:delegate inZone:self.maioZoneId];
-        [super setDelegate:delegate];
-    });
 }
 
 -(BOOL)isPrepared {

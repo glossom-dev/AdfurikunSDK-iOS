@@ -38,6 +38,8 @@
 }
 
 - (void)setData:(NSDictionary *)data {
+    [super setData:data];
+    
     self.placement_id = [NSString stringWithFormat:@"%@", [data objectForKey:@"placement_id"]];
     self.banner_type = kFANNativeAdPlacementTypeNative;
     NSNumber *type = [data objectForKey:@"banner_type"];

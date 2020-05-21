@@ -27,6 +27,8 @@
 }
 
 - (void)setData:(NSDictionary *)data {
+    [super setData:data];
+    
     NSString *data_appID = [data objectForKey:@"appid"];
     if (data_appID && ![data_appID isEqual:[NSNull null]]) {
         self.tiktokAppID = data_appID;

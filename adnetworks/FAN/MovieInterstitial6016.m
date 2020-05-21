@@ -28,6 +28,8 @@
 }
 
 - (void)setData:(NSDictionary *)data {
+    [super setData:data];
+    
     NSString *placementId = [NSString stringWithFormat:@"%@", [data objectForKey:@"placement_id"]];
     if (placementId && ![placementId isEqual:[NSNull null]]) {
         self.placementId = placementId;

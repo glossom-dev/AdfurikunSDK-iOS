@@ -39,6 +39,8 @@
  */
 -(void)setData:(NSDictionary *)data
 {
+    [super setData:data];
+    
     self.appLovinSdkKey = [data objectForKey:@"sdk_key"];
     NSDictionary* infoDict = [[NSBundle mainBundle] infoDictionary];
     if ( ![infoDict objectForKey:@"AppLovinSdkKey"] ) {
@@ -188,7 +190,7 @@
  * パーセント、読み込み終わりの設定を表示
  */
 -(void) videoPlaybackEndedInAd: (ALAd*) ad atPlaybackPercent:(NSNumber*) percentPlayed fullyWatched: (BOOL) wasFullyWatched {
-    NSLog(@"videoPlaybackBeganInAd");
+    NSLog(@"videoPlaybackEndedInAd, atPlaybackPercent : %@, fullyWatched : %d", percentPlayed, wasFullyWatched);
     
     if (wasFullyWatched) {
         [self setCallbackStatus:MovieRewardCallbackPlayComplete];

@@ -48,6 +48,8 @@ static BOOL hasConfigured = NO;
  *  データの設定
  */
 -(void)setData:(NSDictionary *)data {
+    [super setData:data];
+
     _adColonyAppId = [data objectForKey:@"app_id"];
     _adShowZoneId = [data objectForKey:@"zone_id"];
     

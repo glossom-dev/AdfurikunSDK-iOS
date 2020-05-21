@@ -37,6 +37,8 @@
 }
 
 - (void)setData:(NSDictionary *)data {
+    [super setData:data];
+    
     self.nendKey = [NSString stringWithFormat:@"%@", [data objectForKey:@"api_key"]];
     self.nendAdspotId = [NSString stringWithFormat:@"%@", [data objectForKey:@"adspot_id"]];
     NSNumber *clickAction = [data objectForKey:@"click_action"];

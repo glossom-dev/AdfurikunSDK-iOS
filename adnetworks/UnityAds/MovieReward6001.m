@@ -30,6 +30,8 @@
  *  データの設定
  */
 -(void)setData:(NSDictionary *)data {
+    [super setData:data];
+    
     self.gameId = [NSString stringWithFormat:@"%@",[data objectForKey:@"game_id"]];
     NSString *data_placement_id = [data objectForKey:@"placement_id"];
     if (data_placement_id && ![data_placement_id isEqual:[NSNull null]]) {
@@ -53,7 +55,6 @@
  *  広告の読み込みを開始する
  */
 -(void)startAd {
-    [[MovieDelegate6001 sharedInstance] setDelegate:self.delegate inZone:self.placement_id];
 }
 
 -(BOOL)isPrepared{

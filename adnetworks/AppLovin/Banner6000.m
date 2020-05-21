@@ -27,6 +27,8 @@
 }
 
 - (void)setData:(NSDictionary *)data {
+    [super setData:data];
+    
     NSString *data_sdkKey = [data objectForKey:@"sdk_key"];
     if (data_sdkKey && ![data_sdkKey isEqual:[NSNull null]]) {
         self.appLovinSdkKey = [NSString stringWithFormat:@"%@", data_sdkKey];

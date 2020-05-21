@@ -52,6 +52,8 @@
  *  データの設定
  */
 -(void)setData:(NSDictionary *)data {
+    [super setData:data];
+    
     self.placement_id = [data objectForKey:@"placement_id"];
     self.sdkKey = [data objectForKey:@"sdk_key"];
     if (ADFMovieOptions.getTestMode) {
@@ -97,7 +99,6 @@
     
     MovieDelegate6005 *delegate = [MovieDelegate6005 sharedInstance];
     [delegate setMovieReward:self inZone:self.placement_id];
-    [delegate setDelegate:self.delegate inZone:self.placement_id];
     
     _p = [TJPlacement limitedPlacementWithName:_placement_id mediationAgent:@"adfully" delegate:delegate];
     _p.videoDelegate = delegate;

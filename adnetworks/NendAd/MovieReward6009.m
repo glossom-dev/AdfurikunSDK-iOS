@@ -23,6 +23,8 @@
 #pragma mark - ADFmyMovieRewardInterface
 /**< 設定データの送信 */
 -(void)setData:(NSDictionary *)data {
+    [super setData:data];
+    
     self.nendKey = [NSString stringWithFormat:@"%@", [data objectForKey:@"api_key"]];
     self.nendAdspotId = [NSString stringWithFormat:@"%@", [data objectForKey:@"adspot_id"]];
 }

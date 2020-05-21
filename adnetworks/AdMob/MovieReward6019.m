@@ -28,6 +28,8 @@
 }
 
 - (void)setData:(NSDictionary *)data {
+    [super setData:data];
+    
     NSString* admobId = [data objectForKey:@"ad_unit_id"];
     if (admobId != nil && ![admobId isEqual:[NSNull null]]) {
         self.unitID = [[NSString alloc] initWithString:admobId];

@@ -11,8 +11,7 @@
 
 -(void)startAd {
     [super startAd];
-    MovieDelegate6005 *delegate = [MovieDelegate6005 sharedInstance];
-    [delegate setCancellable];
+    [self setCancellable];
 }
 
 @end

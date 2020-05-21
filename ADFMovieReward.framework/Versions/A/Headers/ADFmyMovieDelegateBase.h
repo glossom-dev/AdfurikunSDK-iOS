@@ -13,13 +13,9 @@
 @interface ADFmyMovieDelegateBase : NSObject
 
 - (void)setMovieReward:(ADFmyMovieRewardInterface *)movieReward inZone:(NSString *)zoneId;
-- (void)setDelegate:(id<ADFMovieRewardDelegate>)delegate inZone:(NSString *)zoneId;
-
 - (ADFmyMovieRewardInterface *)getMovieRewardWithZone:(NSString *)zoneId;
 - (NSDictionary<NSString *, ADFmyMovieRewardInterface *> *)getAllMovieReward;
-- (id<ADFMovieRewardDelegate>)getDelegateWithZone:(NSString *)zoneId;
 
--(void)setCancellable;
 -(void)setCallbackStatus:(MovieRewardCallbackStatus)status zone:(NSString *)zoneId;
 
 @end

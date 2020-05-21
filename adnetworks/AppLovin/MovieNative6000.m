@@ -37,6 +37,8 @@ typedef NS_OPTIONS(NSUInteger, ADFALAdLoadStatus) {
 }
 
 - (void)setData:(NSDictionary *)data {
+    [super setData:data];
+    
     self.appLovinSdkKey = [data objectForKey:@"sdk_key"];
     NSDictionary* infoDict = [[NSBundle mainBundle] infoDictionary];
     if (![infoDict objectForKey:@"AppLovinSdkKey"] ) {

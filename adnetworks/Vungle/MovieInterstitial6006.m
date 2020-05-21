@@ -11,8 +11,7 @@
 
 -(void)initAdnetworkIfNeeded {
     [super initAdnetworkIfNeeded];
-    MovieDelegate6006 *delegate = [MovieDelegate6006 sharedInstance];
-    [delegate setCancellable];
+    [self setCancellable];
 }
 
 @end

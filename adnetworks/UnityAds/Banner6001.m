@@ -20,6 +20,8 @@
 @implementation Banner6001
 
 -(void)setData:(NSDictionary *)data {
+    [super setData:data];
+    
     if (ADFMovieOptions.getTestMode) {
         self.testFlg = YES;
     } else {

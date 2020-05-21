@@ -48,6 +48,8 @@
  */
 -(void)setData:(NSDictionary *)data
 {
+    [super setData:data];
+    
     NSLog(@"data : %@",data);
     
     NSString* vungleAppID = [data objectForKey:@"application_id"];
@@ -112,7 +114,6 @@
         return;
     }
 
-    [[MovieDelegate6006 sharedInstance] setDelegate:self.delegate inZone:self.placementID];
     NSError *error = nil;
     if (![sdk loadPlacementWithID:self.placementID error:&error]) {
         NSLog(@"Unable to load vungle placement with reference ID :%@, Error %@", self.placementID, error);
@@ -122,8 +123,7 @@
 }
 
 -(BOOL)isPrepared{
-    id delegate = [[MovieDelegate6006 sharedInstance] getDelegateWithZone:self.placementID];
-    if (!delegate) {
+    if (!self.delegate) {
         return NO;
     }
     return [[VungleSDK sharedSDK] isAdCachedForPlacementID:self.placementID];

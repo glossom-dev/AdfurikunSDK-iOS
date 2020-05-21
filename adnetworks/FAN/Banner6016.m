@@ -15,6 +15,8 @@
 
 @implementation Banner6016
 -(void)setData:(NSDictionary *)data {
+    [super setData:data];
+    
     NSString *data_placement_id = [data objectForKey:@"placement_id"];
     if (data_placement_id && ![data_placement_id isEqual:[NSNull null]]) {
         self.placement_id = [NSString stringWithFormat:@"%@",data_placement_id];

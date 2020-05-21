@@ -19,6 +19,8 @@
  *  データの設定
  */
 -(void)setData:(NSDictionary *)data {
+    [super setData:data];
+    
     self.sid = [data objectForKey:@"sid"];
     self.tag = [data objectForKey:@"tag"];
     if (!self.tag || [self.tag isEqual: [NSNull null]]){
