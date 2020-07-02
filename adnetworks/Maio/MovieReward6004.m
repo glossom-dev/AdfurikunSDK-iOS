@@ -81,12 +81,16 @@
 }
 
 -(void)showAd {
+    [self showAdWithPresentingViewController:[self topMostViewController]];
+}
+
+-(void)showAdWithPresentingViewController:(UIViewController *)viewController {
     [super showAd];
 
     if (self.maioZoneId) {
         if ([Maio canShowAtZoneId:self.maioZoneId]) {
             @try {
-                [Maio showAtZoneId:self.maioZoneId];;
+                [Maio showAtZoneId:self.maioZoneId vc:viewController];
             }
             @catch (NSException *exception) {
                 NSLog(@"Maio zone id %@ has exception name[%@] description[%@]", self.maioZoneId, exception.name, exception.description);
@@ -95,17 +99,13 @@
     } else {
         if ([Maio canShow]) {
             @try {
-                [Maio show];
+                [Maio showWithViewController:viewController];
             }
             @catch (NSException *exception) {
                 NSLog(@"Maio has exception name[%@] description[%@]", exception.name, exception.description);
             }
         }
     }
-}
-
--(void)showAdWithPresentingViewController:(UIViewController *)viewController {
-    [self showAd];
 }
 
 -(BOOL)isClassReference {

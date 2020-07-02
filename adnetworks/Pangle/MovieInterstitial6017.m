@@ -28,7 +28,6 @@
 -(id)init {
     self = [super init];
     if (self) {
-        [self setCancellable];
     }
     return self;
 }

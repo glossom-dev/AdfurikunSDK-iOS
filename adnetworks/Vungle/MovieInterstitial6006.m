@@ -11,7 +11,6 @@
 
 -(void)initAdnetworkIfNeeded {
     [super initAdnetworkIfNeeded];
-    [self setCancellable];
 }
 
 @end

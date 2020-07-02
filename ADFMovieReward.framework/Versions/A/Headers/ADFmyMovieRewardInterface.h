@@ -31,14 +31,14 @@ typedef enum : NSInteger {
 @property (nonatomic, copy) NSString *appId;
 @property (nonatomic, copy) NSString *adnetworkKey;
 
+//ADNW SDKのバージョン情報をSDKから取得できるようにする
++ (NSString *)getSDKVersion;
 /**< 設定データの送信 */
 -(void)setData:(NSDictionary *)data;
 /**< Adnetwork SDKを初期化する （Optional） */
 -(void)initAdnetworkIfNeeded;
 /**< 広告データの初期化 （Optional） */
 -(void)clearStatusIfNeeded;
-/**広告がSkipできる場合呼び出す */
--(void)setCancellable;
 /**< 広告が準備できているか？ */
 -(BOOL)isPrepared;
 /**< 広告の読み込み開始 */
@@ -88,8 +88,5 @@ typedef enum : NSInteger {
 
 /** アドネットワーク接続後のイベント(特定のアドネットワーク用) */
 - (void)AdsDidConnect:(ADFmyMovieRewardInterface*)movieReward;
-
-//課題：ADNW SDKのバージョン情報をSDKから取得できるようにする
-+ (NSString *)getSDKVersion;
 
 @end

@@ -11,7 +11,6 @@
 
 -(void)startAd {
     [super startAd];
-    [self setCancellable];
 }
 
 @end

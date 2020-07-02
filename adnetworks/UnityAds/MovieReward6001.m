@@ -46,8 +46,12 @@
     [delegate setMovieReward:self inZone:self.placement_id];
     [UnityServices setDebugMode:self.test_flg];
     if (![UnityServices isInitialized]) {
-        [UnityAds addDelegate:[MovieDelegate6001 sharedInstance]];
-        [UnityAds initialize:_gameId];
+        __weak MovieReward6001 *weakSelf = self;
+        dispatch_queue_t queue = dispatch_get_main_queue();
+        dispatch_async(queue, ^{
+            [UnityAds addDelegate:[MovieDelegate6001 sharedInstance]];
+            [UnityAds initialize:weakSelf.gameId];
+        });
     }
 }
 

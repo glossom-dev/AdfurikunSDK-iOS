@@ -5,7 +5,7 @@
 //  Copyright © 2020 Glossom, Inc. All rights reserved.
 //
 
-#import "ADFmyRectangle.h"
+#import "ADFmyNativeAd.h"
 
 NS_ASSUME_NONNULL_BEGIN
 
@@ -14,12 +14,12 @@ NS_ASSUME_NONNULL_BEGIN
 - (void)onCarouselLoadFinish:(UIView *)carouselView;
 @optional
 - (void)onCarouselLoadError:(ADFMovieError *)error;
-- (void)onCarouselViewImpressionKey:(NSString *)key appID:(NSString *)appID index:(NSInteger)index;
-- (void)onCarouselViewClickKey:(NSString *)key appID:(NSString *)appID index:(NSInteger)index;
+- (void)onCarouselViewImpressionAppID:(NSString *)appID index:(NSInteger)index;
+- (void)onCarouselViewClickAppID:(NSString *)appID index:(NSInteger)index;
 @end
 
 @interface ADFmyCarousel : NSObject
-+ (instancetype)initializeWithAppIDList:(NSDictionary<NSString *, NSString *> *)appIdDic;
++ (instancetype)initializeWithAppIDList:(NSArray<NSString *> *)appIdList;
 - (void)loadAndNotify:(id<ADFmyCarouselDelegate>)delegate;
 @end
 

@@ -411,4 +411,8 @@
     return nil;
 }
 
+- (void)updateAdChoicesFrame {
+    [self.fbAdChoicesView updateFrameFromSuperview:UIRectCornerTopLeft];
+}
+
 @end
