@@ -5,7 +5,7 @@ Pod::Spec.new do |s|
   s.homepage        = "https://adfurikun.jp/adfurikun/"
   s.license         = { :type => 'Copyright', :text => 'Copyright Glossom Inc. All rights reserved.' }
   s.author          = "Glossom Inc."
-  s.platform        = :ios, "9.0"
+  s.platform        = :ios, "10.0"
   s.source          = { :git => "https://github.com/glossom-dev/AdfurikunSDK-iOS", :tag => "#{s.version}" }
   s.default_subspec = 'All'
   s.static_framework = true

@@ -7,7 +7,7 @@
 //
 
 #import "Banner6020.h"
-#import <MoPub/MoPub.h>
+#import "MoPub.h"
 
 @interface Banner6020() <MPAdViewDelegate>
 
