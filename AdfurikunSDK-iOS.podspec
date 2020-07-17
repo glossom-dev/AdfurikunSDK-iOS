@@ -20,80 +20,84 @@ Pod::Spec.new do |s|
   s.subspec 'AdColony' do |adcolony|
     adcolony.dependency 'AdfurikunSDK-iOS/Core'
     adcolony.dependency 'AdColony', '4.1.5'
-    adcolony.source_files = '**/adnetworks/AdColony/*.{h,m,txt}'
+    adcolony.source_files = '**/adnetworks/AdColony/*.{h,m}'
+    adcolony.resource = '**/adnetworks/AdColony/*.txt'
   end
 
   s.subspec 'AdMob' do |admob|
     admob.dependency 'AdfurikunSDK-iOS/Core'
     admob.dependency 'Google-Mobile-Ads-SDK', '7.58.0'
-    admob.source_files = '**/adnetworks/AdMob/*.{h,m,txt}'
-  end
-
-  s.subspec 'AfiO' do |afio|
-    afio.dependency 'AdfurikunSDK-iOS/Core'
-    afio.dependency 'AMoAd', '6.0.4'
-    afio.source_files = '**/adnetworks/Afio/*.{h,m,txt}'
+    admob.source_files = '**/adnetworks/AdMob/*.{h,m}'
+    admob.resource = '**/adnetworks/AdMob/*.txt'
   end
 
   s.subspec 'AppLovin' do |applovin|
     applovin.dependency 'AdfurikunSDK-iOS/Core'
     applovin.dependency 'AppLovinSDK', '6.12.8'
-    applovin.source_files = '**/adnetworks/AppLovin/*.{h,m,txt}'
+    applovin.source_files = '**/adnetworks/AppLovin/*.{h,m}'
+    applovin.resource = '**/adnetworks/AppLovin/*.txt'
   end
 
   s.subspec 'FAN' do |fan|
     fan.dependency 'AdfurikunSDK-iOS/Core'
     fan.dependency 'FBAudienceNetwork', '5.9.0'
-    fan.source_files = '**/adnetworks/FAN/*.{h,m,txt}'
+    fan.source_files = '**/adnetworks/FAN/*.{h,m}'
+    fan.resource = '**/adnetworks/FAN/*.txt'
   end
 
   s.subspec 'Maio' do |maio|
     maio.dependency 'AdfurikunSDK-iOS/Core'
     maio.dependency 'MaioSDK', '1.5.4'
-    maio.source_files = '**/adnetworks/Maio/*.{h,m,txt}'
+    maio.source_files = '**/adnetworks/Maio/*.{h,m}'
+    maio.resource = '**/adnetworks/Maio/*.txt'
   end
 
   s.subspec 'NendAd' do |nendad|
     nendad.dependency 'AdfurikunSDK-iOS/Core'
     nendad.dependency 'NendSDK_iOS', '5.4.1'
-    nendad.source_files = '**/adnetworks/NendAd/*.{h,m,txt}'
+    nendad.source_files = '**/adnetworks/NendAd/*.{h,m}'
+    nendad.resource = '**/adnetworks/NendAd/*.txt'
   end
 
   s.subspec 'Pangle' do |pangle|
     pangle.dependency 'AdfurikunSDK-iOS/Core'
     pangle.dependency 'Bytedance-UnionAD', '3.0.0.2'
-    pangle.source_files = '**/adnetworks/Pangle/*.{h,m,txt}'
+    pangle.source_files = '**/adnetworks/Pangle/*.{h,m}'
+    pangle.resource = '**/adnetworks/Pangle/*.txt'
   end
 
   s.subspec 'Tapjoy' do |tapjoy|
     tapjoy.dependency 'AdfurikunSDK-iOS/Core'
     tapjoy.dependency 'TapjoySDK', '12.4.2'
-    tapjoy.source_files = '**/adnetworks/Tapjoy/*.{h,m,txt}'
+    tapjoy.source_files = '**/adnetworks/Tapjoy/*.{h,m}'
+    tapjoy.resource = '**/adnetworks/Tapjoy/*.txt'
   end
 
   s.subspec 'UnityAds' do |unityads|
     unityads.dependency 'AdfurikunSDK-iOS/Core'
     unityads.dependency 'UnityAds', '3.4.6'
-    unityads.source_files = '**/adnetworks/UnityAds/*.{h,m,txt}'
+    unityads.source_files = '**/adnetworks/UnityAds/*.{h,m}'
+    unityads.resource = '**/adnetworks/UnityAds/*.txt'
   end
 
   s.subspec 'Vungle' do |vungle|
     vungle.dependency 'AdfurikunSDK-iOS/Core'
     vungle.dependency 'VungleSDK-iOS', '6.5.3'
-    vungle.source_files = '**/adnetworks/Vungle/*.{h,m,txt}'
+    vungle.source_files = '**/adnetworks/Vungle/*.{h,m}'
+    vungle.resource = '**/adnetworks/Vungle/*.txt'
   end
   
   s.subspec 'MoPub' do |mopub|
     mopub.dependency 'AdfurikunSDK-iOS/Core'
     mopub.dependency 'mopub-ios-sdk', '5.13.0'
-    mopub.source_files = '**/adnetworks/MoPub/*.{h,m,txt}'
+    mopub.source_files = '**/adnetworks/MoPub/*.{h,m}'
+    mopub.resource = '**/adnetworks/MoPub/*.txt'
   end
 
   s.subspec 'All' do |all|
     all.dependency 'AdfurikunSDK-iOS/Core'
     all.dependency 'AdfurikunSDK-iOS/AdColony'
     all.dependency 'AdfurikunSDK-iOS/AdMob'
-    all.dependency 'AdfurikunSDK-iOS/AfiO'
     all.dependency 'AdfurikunSDK-iOS/AppLovin'
     all.dependency 'AdfurikunSDK-iOS/FAN'
     all.dependency 'AdfurikunSDK-iOS/Maio'
