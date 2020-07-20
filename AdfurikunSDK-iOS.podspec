@@ -31,6 +31,13 @@ Pod::Spec.new do |s|
     admob.resource = '**/adnetworks/AdMob/*.txt'
   end
 
+ s.subspec 'AfiO' do |afio|
+     afio.dependency 'AdfurikunSDK-iOS/Core'
+     afio.dependency 'AMoAd', '6.0.4'
+     afio.source_files = '**/adnetworks/Afio/*.swift'
+     afio.resource = '**/adnetworks/Afio/*.txt'
+   end
+   
   s.subspec 'AppLovin' do |applovin|
     applovin.dependency 'AdfurikunSDK-iOS/Core'
     applovin.dependency 'AppLovinSDK', '6.12.8'
