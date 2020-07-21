@@ -105,6 +105,7 @@ Pod::Spec.new do |s|
     all.dependency 'AdfurikunSDK-iOS/Core'
     all.dependency 'AdfurikunSDK-iOS/AdColony'
     all.dependency 'AdfurikunSDK-iOS/AdMob'
+    all.dependency 'AdfurikunSDK-iOS/AfiO'
     all.dependency 'AdfurikunSDK-iOS/AppLovin'
     all.dependency 'AdfurikunSDK-iOS/FAN'
     all.dependency 'AdfurikunSDK-iOS/Maio'
