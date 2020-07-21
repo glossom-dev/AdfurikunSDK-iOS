@@ -8,7 +8,7 @@ Pod::Spec.new do |s|
   s.platform        = :ios, "10.0"
   s.source          = { :git => "https://github.com/glossom-dev/AdfurikunSDK-iOS", :tag => "#{s.version}" }
   s.default_subspec = 'All'
-  s.static_framework = true
+  s.static_framework = false
   s.xcconfig = { "VALID_ARCHS": "armv7 armv7s x86_64 arm64" }
   
   s.subspec 'Core' do |core|
