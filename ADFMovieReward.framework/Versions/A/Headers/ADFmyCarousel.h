@@ -20,7 +20,9 @@ NS_ASSUME_NONNULL_BEGIN
 
 @interface ADFmyCarousel : NSObject
 + (instancetype)initializeWithAppIDList:(NSArray<NSString *> *)appIdList;
++ (instancetype)initializeWithAppIDList:(NSArray<NSString *> *)appIdList viewStartMargin:(CGFloat)startMargin viewEndMargin:(CGFloat)endMargin;
 - (void)loadAndNotify:(id<ADFmyCarouselDelegate>)delegate;
+- (void)setTrackingId:(NSDictionary*)trackingId;
 @end
 
 NS_ASSUME_NONNULL_END

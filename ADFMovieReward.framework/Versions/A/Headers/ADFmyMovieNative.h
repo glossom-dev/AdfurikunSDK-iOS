@@ -76,6 +76,8 @@
 - (void)loadAndNotifyTo:(id<ADFmyMovieNativeDelegate>)delegate customParam:(NSDictionary *)param;
 - (void)loadAndNotifyTo:(id<ADFmyMovieNativeDelegate>)delegate customParam:(NSDictionary *)param optiton:(NSDictionary *)option;
 
+-(void)setTrackingId:(NSDictionary*)trackingId;
+
 - (void)dispose;
 
 @end

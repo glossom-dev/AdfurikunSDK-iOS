@@ -28,6 +28,10 @@ static BOOL hasConfigured = NO;
     return AdColony.getSDKVersion;
 }
 
++(NSString *)getAdapterVersion {
+    return @"4.3.1.1";
+}
+
 -(id)init {
     self = [super init];
     if (self) {

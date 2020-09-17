@@ -11,8 +11,14 @@
 
 @implementation MovieInterstitial6020
 
++(NSString *)getAdapterVersion {
+    return @"5.13.1.1";
+}
+
 - (void)setData:(NSDictionary *)data {
     NSLog(@"mopub inst: setData");
+    [super setData:data];
+
     NSString *adUnitId = [NSString stringWithFormat:@"%@", [data objectForKey:@"ad_unit_id"]];
     if (adUnitId && ![adUnitId isEqual:[NSNull null]]) {
         self.adUnitId = adUnitId;
@@ -49,14 +55,10 @@
 }
 
 -(BOOL)isClassReference {
-    if (NSFoundationVersionNumber < NSFoundationVersionNumber_iOS_9_0) {
-        return NO;
-    }
-
-    Class clazz = NSClassFromString(@"FBInterstitialAd");
+    Class clazz = NSClassFromString(@"MPInterstitialAdController");
     if (clazz) {
     } else {
-        NSLog(@"Not found Class: FBInterstitialAd");
+        NSLog(@"Not found Class: MPInterstitialAdController");
         return NO;
     }
     return YES;

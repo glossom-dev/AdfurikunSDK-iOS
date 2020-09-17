@@ -35,6 +35,7 @@
 -(void)playWithCustomParam:(NSDictionary*)param;
 -(void)playWithPresentingViewController:(UIViewController *)viewController;
 -(void)playWithPresentingViewController:(UIViewController *)viewController customParam:(NSDictionary*)param;
+-(void)setTrackingId:(NSDictionary*)trackingId;
 -(void)dispose;
 
 @end

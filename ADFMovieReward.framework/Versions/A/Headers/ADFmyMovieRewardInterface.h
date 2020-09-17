@@ -33,6 +33,8 @@ typedef enum : NSInteger {
 
 //ADNW SDKのバージョン情報をSDKから取得できるようにする
 + (NSString *)getSDKVersion;
++ (NSString *)getAdapterVersion;
+
 /**< 設定データの送信 */
 -(void)setData:(NSDictionary *)data;
 /**< Adnetwork SDKを初期化する （Optional） */
@@ -63,6 +65,8 @@ typedef enum : NSInteger {
 
 -(void)setCallbackStatus:(MovieRewardCallbackStatus)status;
 -(void)invalidViewControllerTimer;
+
+-(NSString *)debugDescriptionForCallback;
 
 @end
 

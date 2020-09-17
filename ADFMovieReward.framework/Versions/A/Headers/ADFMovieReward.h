@@ -15,6 +15,7 @@
 #import <ADFMovieReward/ADFmyMovieNative.h>
 #import <ADFMovieReward/ADFmyMovieNativeAdFlex.h>
 #import <ADFMovieReward/ADFMovieOptions.h>
+#import <ADFMovieReward/ADFEventSender.h>
 #import <ADFMovieReward/ADFLogger.h>
 #import <ADFMovieReward/ADFMediaView.h>
 #import <ADFMovieReward/ADFMovieError.h>

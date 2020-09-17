@@ -78,6 +78,8 @@
 - (void)playWithPresentingViewController:(UIViewController *)viewController;
 - (void)playWithPresentingViewController:(UIViewController *)viewController customParam:(NSDictionary*)param;
 
+-(void)setTrackingId:(NSDictionary*)trackingId;
+
 /**
  動画ネイティブ広告（FLEX）の表示を終了します
  画面遷移など任意のタイミングで広告を終了したい場合に利用してください

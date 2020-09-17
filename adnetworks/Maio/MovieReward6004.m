@@ -26,6 +26,10 @@
     return Maio.sdkVersion;
 }
 
++(NSString *)getAdapterVersion {
+    return @"1.5.5.1";
+}
+
 -(id)init {
     self = [super init];
     

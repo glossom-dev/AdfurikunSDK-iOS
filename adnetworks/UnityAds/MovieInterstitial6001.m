@@ -16,3 +16,10 @@
 
 @end
 
+@implementation MovieInterstitial6030
+
+@end
+
+@implementation MovieInterstitial6031
+
+@end

@@ -13,3 +13,11 @@
 @interface MovieReward6016 : ADFmyMovieRewardInterface<FBRewardedVideoAdDelegate>
 
 @end
+
+@interface MovieReward6040 : MovieReward6016
+
+@end
+
+@interface MovieReward6041 : MovieReward6016
+
+@end

@@ -13,3 +13,11 @@
 @interface MovieInterstitial6016 : ADFmyMovieRewardInterface<FBInterstitialAdDelegate>
 
 @end
+
+@interface MovieInterstitial6040 : MovieInterstitial6016
+
+@end
+
+@interface MovieInterstitial6041 : MovieInterstitial6016
+
+@end

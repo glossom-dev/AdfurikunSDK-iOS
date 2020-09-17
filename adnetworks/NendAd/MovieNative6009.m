@@ -13,7 +13,7 @@
 @interface MovieNative6009()<NADNativeVideoDelegate, NADNativeVideoViewDelegate>
 
 @property (nonatomic, strong) NSString *nendKey;
-@property (nonatomic, strong) NSString *nendAdspotId;
+@property (nonatomic) NSInteger nendAdspotId;
 @property (nonatomic) BOOL didInit;
 @property (nonatomic) NADNativeVideoClickAction clickAction;
 
@@ -40,7 +40,10 @@
     [super setData:data];
     
     self.nendKey = [NSString stringWithFormat:@"%@", [data objectForKey:@"api_key"]];
-    self.nendAdspotId = [NSString stringWithFormat:@"%@", [data objectForKey:@"adspot_id"]];
+    NSNumber *spotId = [data objectForKey:@"adspot_id"];
+    if (spotId) {
+        self.nendAdspotId = [spotId integerValue];
+    }
     NSNumber *clickAction = [data objectForKey:@"click_action"];
     if (clickAction && ![clickAction isEqual:[NSNull null]]) {
         self.clickAction = clickAction.integerValue;
@@ -51,7 +54,7 @@
 
 -(void)initAdnetworkIfNeeded {
     if (!self.didInit) {
-        self.videoAdLoader = [[NADNativeVideoLoader alloc] initWithSpotId:self.nendAdspotId apiKey:self.nendKey clickAction:self.clickAction];
+        self.videoAdLoader = [[NADNativeVideoLoader alloc] initWithSpotID:self.nendAdspotId apiKey:self.nendKey clickAction:self.clickAction];
         self.videoAdLoader.mediationName = @"adfurikun";
         // 動画広告のターゲティング
         [self setTargeting];

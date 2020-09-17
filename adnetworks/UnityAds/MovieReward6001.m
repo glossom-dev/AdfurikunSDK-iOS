@@ -26,6 +26,10 @@
     return UnityServices.getVersion;
 }
 
++(NSString *)getAdapterVersion {
+    return @"3.4.8.1";
+}
+
 /**
  *  データの設定
  */
@@ -59,6 +63,8 @@
  *  広告の読み込みを開始する
  */
 -(void)startAd {
+    self.isCalledFetchCompleted = false;
+    [self isPrepared];
 }
 
 -(BOOL)isPrepared{
@@ -194,5 +200,13 @@
 //        }
 //    }
 }
+
+@end
+
+@implementation MovieReward6030
+
+@end
+
+@implementation MovieReward6031
 
 @end

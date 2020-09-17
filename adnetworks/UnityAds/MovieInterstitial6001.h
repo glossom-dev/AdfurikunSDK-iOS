@@ -11,3 +11,11 @@
 @interface MovieInterstitial6001 : MovieReward6001
 
 @end
+
+@interface MovieInterstitial6030 : MovieInterstitial6001
+
+@end
+
+@interface MovieInterstitial6031 : MovieInterstitial6001
+
+@end

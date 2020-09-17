@@ -26,6 +26,10 @@
     return BUAdSDKManager.SDKVersion;
 }
 
++(NSString *)getAdapterVersion {
+    return @"3.2.5.2.1";
+}
+
 - (void)setData:(NSDictionary *)data {
     [super setData:data];
     

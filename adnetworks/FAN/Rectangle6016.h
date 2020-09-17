@@ -14,3 +14,11 @@
 @interface RectangleAdInfo6016 : MovieNativeAdInfo6016
 - (NSDictionary*)getCustomRectangleComponents;
 @end
+
+@interface Rectangle6040 : Rectangle6016
+
+@end
+
+@interface Rectangle6041 : Rectangle6016
+
+@end

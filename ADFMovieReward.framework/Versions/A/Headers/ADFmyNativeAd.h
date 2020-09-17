@@ -78,6 +78,8 @@ NS_ASSUME_NONNULL_BEGIN
 - (void)loadAndNotifyTo:(id<ADFmyNativeAdDelegate> _Nullable)delegate customParam:(NSDictionary * _Nullable)param;
 - (void)loadAndNotifyTo:(id<ADFmyNativeAdDelegate>)delegate customParam:(NSDictionary *)param optiton:(NSDictionary *)option;
 
+-(void)setTrackingId:(NSDictionary*)trackingId;
+
 - (void)dispose;
 
 @end

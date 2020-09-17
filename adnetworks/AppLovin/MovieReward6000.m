@@ -25,6 +25,10 @@
     return ALSdk.version;
 }
 
++(NSString *)getAdapterVersion {
+    return @"6.13.5.1";
+}
+
 /**
  *  データの設定
  */
