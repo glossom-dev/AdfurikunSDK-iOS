@@ -2,7 +2,7 @@
 //  ADFmyMovieReward.h
 //  ADFMovieReword
 //
-//  (3.5.0)
+//  (3.6.0)
 //  Created by tsukui on 2016/05/28.
 //  (c) 2015 ADFULLY Inc.
 //  (ご利用になられる前に、必ずマニュアルにて実装方法をご参照ください。
@@ -92,6 +92,22 @@
 -(void)playWithPresentingViewController:(UIViewController *)viewController;
 -(void)playWithPresentingViewController:(UIViewController *)viewController customParam:(NSDictionary*)param;
 
+-(void)setTrackingId:(NSDictionary*)trackingId;
+
+/**
+アプリケーションでReward処理を行った後、記録を残す
+
+@param result Rewardが正常に行われたか
+@return SDK内部で記録が正常に残されたか
+*/
+-(BOOL)rewardCompleted:(BOOL)result;
+
+/**
+アプリケーションで在庫がなく広告再生ができない状態の記録を残す
+
+@return SDK内部で記録が正常に残されたか
+*/
+-(BOOL)notReadyAlert;
 
 -(void)dispose;
 

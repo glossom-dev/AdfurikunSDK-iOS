@@ -18,6 +18,10 @@
 
 @implementation MovieInterstitial6019
 
++(NSString *)getAdapterVersion {
+    return @"7.64.0.1";
+}
+
 -(id)init {
     self = [super init];
     if (self) {

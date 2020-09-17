@@ -20,3 +20,11 @@
 + (instancetype)sharedInstance;
 
 @end
+
+@interface MovieReward6030 : MovieReward6001
+
+@end
+
+@interface MovieReward6031 : MovieReward6001
+
+@end

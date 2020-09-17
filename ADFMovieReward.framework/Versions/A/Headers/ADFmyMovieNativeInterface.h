@@ -9,6 +9,7 @@
 #import <Foundation/Foundation.h>
 #import <UIKit/UIKit.h>
 #import "ADFMovieError.h"
+#import "ADFmyMovieRewardInterface.h"
 
 @class UIViewController;
 
@@ -62,6 +63,9 @@
 - (void)setCustomMediaview:(UIView *)view;
 
 - (void)showDebugInformation;
+
+// MovieRewardInterfaceと同じ関数Formatを使う
+- (void)setCallbackStatus:(MovieRewardCallbackStatus)status;
 
 @end
 

@@ -7,6 +7,7 @@
 //
 
 #import <ADFMovieReward/ADFMovieReward.h>
+#import "MovieNative6019.h"
 
 #import <GoogleMobileAds/GoogleMobileAds.h>
 
@@ -21,9 +22,5 @@ NS_ASSUME_NONNULL_BEGIN
 
 @end
 
-
-@interface MovieNativeAdInfo6019 : ADFMovieNativeAdInfo
-
-@end
 
 NS_ASSUME_NONNULL_END

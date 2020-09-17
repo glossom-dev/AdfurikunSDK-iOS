@@ -8,8 +8,6 @@
 #import "MovieReward6020.h"
 #import <ADFMovieReward/ADFMovieOptions.h>
 
-
-
 @interface MovieReward6020()
 
 @property (nonatomic, strong) NSString *adUnitId;
@@ -19,12 +17,17 @@
 @end
 @implementation MovieReward6020
 
++(NSString *)getAdapterVersion {
+    return @"5.13.1.1";
+}
 
 /**
  *  データの設定
  */
 -(void)setData:(NSDictionary *)data {
     NSLog(@"mopub: setData");
+    [super setData:data];
+    
     NSString *adUnitId = [NSString stringWithFormat:@"%@", [data objectForKey:@"ad_unit_id"]];
     if (adUnitId && ![adUnitId isEqual:[NSNull null]]) {
         self.adUnitId = adUnitId;

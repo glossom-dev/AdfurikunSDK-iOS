@@ -25,6 +25,10 @@
     return BUAdSDKManager.SDKVersion;
 }
 
++(NSString *)getAdapterVersion {
+    return @"3.2.5.2.1";
+}
+
 -(id)init {
     self = [super init];
     if (self) {

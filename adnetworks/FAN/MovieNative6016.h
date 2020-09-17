@@ -40,3 +40,11 @@
 @property (nonatomic) UILabel *fbAdSponsoredLabel;
 
 @end
+
+@interface MovieNative6040 : MovieNative6016
+
+@end
+
+@interface MovieNative6041 : MovieNative6016
+
+@end

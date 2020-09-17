@@ -11,7 +11,7 @@
 @interface MovieInterstitial6009()<NADInterstitialVideoDelegate>
 
 @property (nonatomic, strong) NSString *nendKey;
-@property (nonatomic, strong) NSString *nendAdspotId;
+@property (nonatomic) NSInteger nendAdspotId;
 @property (nonatomic) BOOL didInit;
 
 @property (nonatomic) NADInterstitialVideo *interstitialVideo;
@@ -21,6 +21,10 @@
 @implementation MovieInterstitial6009
 
 #pragma mark - ADFmyMovieRewardInterface
+
++(NSString *)getAdapterVersion {
+    return @"7.0.0.1";
+}
 
 -(id)init {
     self = [super init];
@@ -34,7 +38,10 @@
     [super setData:data];
     
     self.nendKey = [NSString stringWithFormat:@"%@", [data objectForKey:@"api_key"]];
-    self.nendAdspotId = [NSString stringWithFormat:@"%@", [data objectForKey:@"adspot_id"]];
+    NSNumber *spotId = [data objectForKey:@"adspot_id"];
+    if (spotId) {
+        self.nendAdspotId = [spotId integerValue];
+    }
 }
 
 /**< 広告が準備できているか？ */
@@ -44,7 +51,7 @@
 
 -(void)initAdnetworkIfNeeded {
     if (!self.didInit) {
-        self.interstitialVideo = [[NADInterstitialVideo alloc] initWithSpotId:self.nendAdspotId apiKey:self.nendKey];
+        self.interstitialVideo = [[NADInterstitialVideo alloc] initWithSpotID:self.nendAdspotId apiKey:self.nendKey];
         self.interstitialVideo.mediationName = @"adfurikun";
         [NADLogger setLogLevel:NADLogLevelError];
         self.interstitialVideo.delegate = self;

@@ -11,7 +11,7 @@
 @interface MovieReward6009()<NADRewardedVideoDelegate>
 
 @property (nonatomic, strong) NSString *nendKey;
-@property (nonatomic, strong) NSString *nendAdspotId;
+@property (nonatomic) NSInteger nendAdspotId;
 @property (nonatomic) BOOL didInit;
 
 @property (nonatomic) NADRewardedVideo *rewardedVideo;
@@ -20,13 +20,20 @@
 
 @implementation MovieReward6009
 
++(NSString *)getAdapterVersion {
+    return @"7.0.0.1";
+}
+
 #pragma mark - ADFmyMovieRewardInterface
 /**< 設定データの送信 */
 -(void)setData:(NSDictionary *)data {
     [super setData:data];
     
     self.nendKey = [NSString stringWithFormat:@"%@", [data objectForKey:@"api_key"]];
-    self.nendAdspotId = [NSString stringWithFormat:@"%@", [data objectForKey:@"adspot_id"]];
+    NSNumber *spotId = [data objectForKey:@"adspot_id"];
+    if (spotId) {
+        self.nendAdspotId = [spotId integerValue];
+    }
 }
 
 /**< 広告が準備できているか？ */
@@ -36,7 +43,7 @@
 
 -(void)initAdnetworkIfNeeded {
     if (!self.didInit) {
-        self.rewardedVideo = [[NADRewardedVideo alloc] initWithSpotId:self.nendAdspotId apiKey:self.nendKey];
+        self.rewardedVideo = [[NADRewardedVideo alloc] initWithSpotID:self.nendAdspotId apiKey:self.nendKey];
         self.rewardedVideo.mediationName = @"adfurikun";
         [NADLogger setLogLevel:NADLogLevelError];
         self.rewardedVideo.delegate = self;

@@ -210,20 +210,6 @@ typedef NS_ENUM(NSInteger, GlossomBillBoardAdLayoutHorizontal) {
 @interface GlossomAds : NSObject
 
 /**
- *  Assigns your own custom identifier to the current app user.
- *
- *  @param identifier An arbitrary, application-specific identifier string for the current user.
- */
-+ (void)setUserIdentifier:(nonnull NSString *)identifier;
-
-/**
- *  Returns the device’s current custom identifier.
- *
- *  @return The custom identifier string most recently set using setCustomID.
- */
-+ (nullable NSString *)getUserIdentifier;
-
-/**
  *  Assigns user attribute as int value
  *
  *  @param value user attribute value

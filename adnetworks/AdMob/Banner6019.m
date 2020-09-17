@@ -181,13 +181,3 @@
 }
 
 @end
-
-@implementation MovieNativeAdInfo6019
-
-- (void)playMediaView {
-    if (self.adapter) {
-        [self.adapter startViewabilityCheck];
-    }
-}
-
-@end

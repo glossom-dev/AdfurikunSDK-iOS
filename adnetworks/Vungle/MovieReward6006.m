@@ -23,6 +23,10 @@
     return VungleSDKVersion;
 }
 
++(NSString *)getAdapterVersion {
+    return @"6.7.1.1";
+}
+
 - (id)init{
     self = [super init];
     if(self){
@@ -261,21 +265,9 @@
 }
 
 /** 動画再生終了&エンドカード終了 */
-- (void)vungleWillCloseAdWithViewInfo:(VungleViewInfo *)info placementID:(NSString *)placementID {
+- (void)vungleWillCloseAdForPlacementID:(NSString *)placementID {
     NSLog(@"%s placementID: %@", __PRETTY_FUNCTION__, placementID);
-    MovieReward6006 *movieReward = (MovieReward6006 *)[self getMovieRewardWithZone:placementID];
-    if (info.completedView) {
-        BOOL isCompleted = [info.completedView boolValue];
-        if (isCompleted) {
-            [self setCallbackStatus:MovieRewardCallbackPlayComplete zone:placementID];
-        } else {
-            //リワード広告だったら再生エラー
-            //リワード広告以外（インタースティシャル）だったらスキップ
-            if ([movieReward isMemberOfClass:[MovieReward6006 class]]) {
-                [self setCallbackStatus:MovieRewardCallbackPlayFail zone:placementID];
-            }
-        }
-    }
+    [self setCallbackStatus:MovieRewardCallbackPlayComplete zone:placementID];
     [self setCallbackStatus:MovieRewardCallbackClose zone:placementID];
 }
 

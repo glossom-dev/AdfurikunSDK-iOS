@@ -28,6 +28,10 @@
     return Tapjoy.getVersion;
 }
 
++(NSString *)getAdapterVersion {
+    return @"12.7.0.1";
+}
+
 - (id)init {
     NSLog(@"%@ init", ADAPTER_CLASS_NAME);
     self = [super init];

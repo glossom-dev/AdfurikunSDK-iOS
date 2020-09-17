@@ -16,3 +16,11 @@
     return [self getCustomNativeAdComponents];
 }
 @end
+
+@implementation Rectangle6040
+
+@end
+
+@implementation Rectangle6041
+
+@end

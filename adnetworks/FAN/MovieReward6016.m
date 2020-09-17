@@ -20,6 +20,10 @@
 
 @implementation MovieReward6016
 
++(NSString *)getAdapterVersion {
+    return @"5.9.0.1";
+}
+
 - (void)setData:(NSDictionary *)data {
     [super setData:data];
     
@@ -120,3 +124,10 @@
 
 @end
 
+@implementation MovieReward6040
+
+@end
+
+@implementation MovieReward6041
+
+@end
