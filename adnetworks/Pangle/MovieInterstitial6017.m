@@ -26,7 +26,7 @@
 }
 
 +(NSString *)getAdapterVersion {
-    return @"3.2.5.2.1";
+    return @"3.2.6.2.1";
 }
 
 -(id)init {
