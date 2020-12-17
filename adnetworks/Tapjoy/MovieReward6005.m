@@ -29,7 +29,7 @@
 }
 
 +(NSString *)getAdapterVersion {
-    return @"12.7.0.1";
+    return @"12.7.1.2";
 }
 
 - (id)init {
@@ -58,12 +58,23 @@
 -(void)setData:(NSDictionary *)data {
     [super setData:data];
     
-    self.placement_id = [data objectForKey:@"placement_id"];
-    self.sdkKey = [data objectForKey:@"sdk_key"];
+    NSString *placement_id = [data objectForKey:@"placement_id"];
+    if ([self isNotNull:placement_id]) {
+        self.placement_id = [NSString stringWithFormat:@"%@", placement_id];
+    }
+
+    NSString *sdkKey = [data objectForKey:@"sdk_key"];
+    if ([self isNotNull:sdkKey]) {
+        self.sdkKey = [NSString stringWithFormat:@"%@", sdkKey];
+    }
+
     if (ADFMovieOptions.getTestMode) {
         self.test_flg = YES;
     } else {
-        self.test_flg = [[data objectForKey:@"test_flg"] boolValue];
+        NSNumber *testFlg = [data objectForKey:@"test_flg"];
+        if ([self isNotNull:testFlg] && [testFlg isKindOfClass:[NSNumber class]]) {
+            self.test_flg = [testFlg boolValue];
+        }
     }
 }
 
@@ -71,18 +82,22 @@
     //NSLog(@"%@ startAd", ADAPTER_CLASS_NAME);
     static dispatch_once_t onceToken;
     dispatch_once(&onceToken, ^{
-        //Set up success and failure notifications
-        [[NSNotificationCenter defaultCenter] addObserver:self
-                                                 selector:@selector(tjcConnectSuccess:)
-                                                     name:TJC_LIMITED_CONNECT_SUCCESS
-                                                   object:nil];
-        [[NSNotificationCenter defaultCenter] addObserver:self
-                                                 selector:@selector(tjcConnectFail:)
-                                                     name:TJC_LIMITED_CONNECT_FAILED
-                                                   object:nil];
-        
-        [Tapjoy limitedConnect:self.sdkKey];
-        [Tapjoy setDebugEnabled:self.test_flg];
+        @try {
+            //Set up success and failure notifications
+            [[NSNotificationCenter defaultCenter] addObserver:self
+                                                     selector:@selector(tjcConnectSuccess:)
+                                                         name:TJC_LIMITED_CONNECT_SUCCESS
+                                                       object:nil];
+            [[NSNotificationCenter defaultCenter] addObserver:self
+                                                     selector:@selector(tjcConnectFail:)
+                                                         name:TJC_LIMITED_CONNECT_FAILED
+                                                       object:nil];
+            
+            [Tapjoy limitedConnect:self.sdkKey];
+            [Tapjoy setDebugEnabled:self.test_flg];
+        } @catch (NSException *exception) {
+            [self adnetworkExceptionHandling:exception];
+        }
     });
     NSLog(@"%@ connectSetting end", ADAPTER_CLASS_NAME);
 }
@@ -91,23 +106,29 @@
  *  広告の読み込みを開始する
  */
 -(void)startAd {
-    if (![Tapjoy isLimitedConnected]) {
-        self.isNeedStartAd = YES;
-        
-        if (self.isConnectionFail) {
-            [Tapjoy limitedConnect:self.sdkKey];
+    if (self.sdkKey && self.placement_id) {
+        @try {
+            if (![Tapjoy isLimitedConnected]) {
+                self.isNeedStartAd = YES;
+                
+                if (self.isConnectionFail) {
+                    [Tapjoy limitedConnect:self.sdkKey];
+                }
+                
+                return;
+            }
+            
+            MovieDelegate6005 *delegate = [MovieDelegate6005 sharedInstance];
+            [delegate setMovieReward:self inZone:self.placement_id];
+            
+            _p = [TJPlacement limitedPlacementWithName:_placement_id mediationAgent:@"adfully" delegate:delegate];
+            _p.videoDelegate = delegate;
+            _p.adapterVersion = @"1.0.1";
+            [_p requestContent];
+        } @catch (NSException *exception) {
+            [self adnetworkExceptionHandling:exception];
         }
-        
-        return;
     }
-    
-    MovieDelegate6005 *delegate = [MovieDelegate6005 sharedInstance];
-    [delegate setMovieReward:self inZone:self.placement_id];
-    
-    _p = [TJPlacement limitedPlacementWithName:_placement_id mediationAgent:@"adfully" delegate:delegate];
-    _p.videoDelegate = delegate;
-    _p.adapterVersion = @"1.0.1";
-    [_p requestContent];
 }
 
 -(BOOL)isPrepared {
@@ -126,7 +147,13 @@
 -(void)showAd {
     [super showAd];
 
-    [_p showContentWithViewController:nil];
+    @try {
+        [_p showContentWithViewController:nil];
+    } @catch (NSException *exception) {
+        [self adnetworkExceptionHandling:exception];
+        MovieDelegate6005 *delegate = [MovieDelegate6005 sharedInstance];
+        [delegate setCallbackStatus:MovieRewardCallbackPlayFail zone:self.placement_id];
+    }
 }
 
 -(void)showAdWithPresentingViewController:(UIViewController *)viewController {
@@ -137,7 +164,13 @@
     //多くの場合にはこれで正常に動作するのですが、View階層が複雑な場合は指定していただく必要があるケースも出ています。
     if (_p.isContentAvailable) {
         //渡したviewControllerを強制的にご利用したい場合、必ずテストしてください。
-        [_p showContentWithViewController:viewController];
+        @try {
+            [_p showContentWithViewController:viewController];
+        } @catch (NSException *exception) {
+            [self adnetworkExceptionHandling:exception];
+            MovieDelegate6005 *delegate = [MovieDelegate6005 sharedInstance];
+            [delegate setCallbackStatus:MovieRewardCallbackPlayFail zone:self.placement_id];
+        }
     }
 }
 

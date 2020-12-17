@@ -42,44 +42,51 @@
     NSLog(@"MovieNatve6020 setData");
     [super setData:data];
 
-    NSString *adUnitId = [NSString stringWithFormat:@"%@", [data objectForKey:@"ad_unit_id"]];
-    if (adUnitId && ![adUnitId isEqual:[NSNull null]]) {
-        self.adUnitId = adUnitId;
+    NSString *adUnitId = [data objectForKey:@"ad_unit_id"];
+    if ([self isNotNull:adUnitId]) {
+        self.adUnitId = [NSString stringWithFormat:@"%@", adUnitId];
     }
 
     NSNumber *pixelRateNumber = data[@"pixelRate"];
-    if (pixelRateNumber && ![[NSNull null] isEqual:pixelRateNumber]) {
+    if ([self isNotNull:pixelRateNumber] && [pixelRateNumber isKindOfClass:[NSNumber class]]) {
         self.viewabilityPixelRate = pixelRateNumber.intValue;
     }
     NSNumber *displayTimeNumber = data[@"displayTime"];
-    if (displayTimeNumber && ![[NSNull null] isEqual:displayTimeNumber]) {
+    if ([self isNotNull:displayTimeNumber] && [displayTimeNumber isKindOfClass:[NSNumber class]]) {
         self.viewabilityDisplayTime = displayTimeNumber.intValue;
     }
     NSNumber *timerIntervalNumber = data[@"timerInterval"];
-    if (timerIntervalNumber && ![[NSNull null] isEqual:timerIntervalNumber]) {
+    if ([self isNotNull:timerIntervalNumber] && [timerIntervalNumber isKindOfClass:[NSNumber class]]) {
         self.viewabilityTimerInterval = timerIntervalNumber.intValue;
     }
 }
 
 // SDKの初期化ロジックを入れる。ただし、Instance化を毎回する必要がある場合にはこちらではなくてSstartAdで行うこと
 -(void)initAdnetworkIfNeeded {
-    NSLog(@"MovieNatve6020 initAdnetworkIfNeeded");
-    MPMoPubConfiguration *sdkConfig = [[MPMoPubConfiguration alloc] initWithAdUnitIdForAppInitialization:self.adUnitId];
-
-    sdkConfig.globalMediationSettings = @[];
-    sdkConfig.loggingLevel = MPBLogLevelInfo;
-
-    [[MoPub sharedInstance] initializeSdkWithConfiguration:sdkConfig completion:^{
-        NSLog(@"MovieNatve6020 SDK initialization complete");
-        if (self.hasPendedLoad) {
-            self.hasPendedLoad = false;
-            [self startAd];
+    if (self.adUnitId) {
+        @try {
+            
+            NSLog(@"MovieNatve6020 initAdnetworkIfNeeded");
+            MPMoPubConfiguration *sdkConfig = [[MPMoPubConfiguration alloc] initWithAdUnitIdForAppInitialization:self.adUnitId];
+            
+            sdkConfig.globalMediationSettings = @[];
+            sdkConfig.loggingLevel = MPBLogLevelInfo;
+            
+            [[MoPub sharedInstance] initializeSdkWithConfiguration:sdkConfig completion:^{
+                NSLog(@"MovieNatve6020 SDK initialization complete");
+                if (self.hasPendedLoad) {
+                    self.hasPendedLoad = false;
+                    [self startAd];
+                }
+            }];
+            
+            self.settings = [[MPStaticNativeAdRendererSettings alloc] init];
+            self.settings.renderingViewClass = [MovieNativeAdView6020 class];
+            self.config = [MPStaticNativeAdRenderer rendererConfigurationWithRendererSettings:self.settings];
+        } @catch (NSException *exception) {
+            [self adnetworkExceptionHandling:exception];
         }
-    }];
-
-    self.settings = [[MPStaticNativeAdRendererSettings alloc] init];
-    self.settings.renderingViewClass = [MovieNativeAdView6020 class];
-    self.config = [MPStaticNativeAdRenderer rendererConfigurationWithRendererSettings:self.settings];
+    }
 }
 
 - (void)clearStatusIfNeeded {
@@ -102,30 +109,35 @@
     }
 
     [super startAd];
-    MPNativeAdRequest *adRequest = [MPNativeAdRequest requestWithAdUnitIdentifier:self.adUnitId
-                                                           rendererConfigurations:@[self.config]];
-    MPNativeAdRequestTargeting *targeting = [MPNativeAdRequestTargeting targeting];
-    targeting.desiredAssets = [NSSet setWithObjects:
-                               kAdTitleKey,
-                               kAdCTATextKey,
-                               kAdIconImageKey,
-                               kAdMainImageKey,
-                               kAdPrivacyIconUIImageKey,
-                               kAdSponsoredByCompanyKey,
-                               nil];
-    adRequest.targeting = targeting;
-
-    MovieNative6020 __weak *weakSelf = self;
-    [adRequest startWithCompletionHandler:^(MPNativeAdRequest *request, MPNativeAd *response, NSError *error) {
-        NSLog(@"MovieNatve6020 startWithCompletionHandler %@, %@", response, error);
-        if (weakSelf) {
-            if (error) {
-                [weakSelf sendLoadFail:error];
-            } else {
-                [weakSelf loadAdInfo:response];
+    
+    @try {
+        MPNativeAdRequest *adRequest = [MPNativeAdRequest requestWithAdUnitIdentifier:self.adUnitId
+                                                               rendererConfigurations:@[self.config]];
+        MPNativeAdRequestTargeting *targeting = [MPNativeAdRequestTargeting targeting];
+        targeting.desiredAssets = [NSSet setWithObjects:
+                                   kAdTitleKey,
+                                   kAdCTATextKey,
+                                   kAdIconImageKey,
+                                   kAdMainImageKey,
+                                   kAdPrivacyIconUIImageKey,
+                                   kAdSponsoredByCompanyKey,
+                                   nil];
+        adRequest.targeting = targeting;
+        
+        MovieNative6020 __weak *weakSelf = self;
+        [adRequest startWithCompletionHandler:^(MPNativeAdRequest *request, MPNativeAd *response, NSError *error) {
+            NSLog(@"MovieNatve6020 startWithCompletionHandler %@, %@", response, error);
+            if (weakSelf) {
+                if (error) {
+                    [weakSelf sendLoadFail:error];
+                } else {
+                    [weakSelf loadAdInfo:response];
+                }
             }
-        }
-    }];
+        }];
+    } @catch (NSException *exception) {
+        [self adnetworkExceptionHandling:exception];
+    }
 }
 
 - (void)startAdWithOption:(NSDictionary *)option {
@@ -260,6 +272,16 @@
 
 - (void)playMediaView {
     NSLog(@"%s", __func__);
+    if (self.mediaView.adapterInnerDelegate) {
+        if ([self.mediaView.adapterInnerDelegate respondsToSelector:@selector(onADFMediaViewRendering)]) {
+            [self.mediaView.adapterInnerDelegate onADFMediaViewRendering];
+        } else {
+            NSLog(@"MovieNativeAdInfo6020: %s onADFMediaViewRendering selector is not responding", __FUNCTION__);
+        }
+    } else {
+        NSLog(@"MovieNativeAdInfo6020: %s adInfo.mediaView.adapterInnerDelegate is not setting", __FUNCTION__);
+    }
+
     if (self.adapter) {
         [self.adapter startViewabilityCheck];
     }

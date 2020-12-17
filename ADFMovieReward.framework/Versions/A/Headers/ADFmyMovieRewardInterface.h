@@ -68,10 +68,9 @@ typedef enum : NSInteger {
 
 -(NSString *)debugDescriptionForCallback;
 
-@end
+-(void)adnetworkExceptionHandling:(NSException *)exception;
+-(BOOL)isNotNull:(id)obj;
 
-@protocol ADFmyMovieNativeAdFlexInterface
-- (void)finishAd;
 @end
 
 @protocol ADFMovieRewardDelegate

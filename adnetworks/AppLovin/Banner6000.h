@@ -10,7 +10,6 @@
 NS_ASSUME_NONNULL_BEGIN
 
 @interface Banner6000 : ADFmyMovieNativeInterface
-
 @end
 
 @interface NativeAdInfo6000 : ADFNativeAdInfo

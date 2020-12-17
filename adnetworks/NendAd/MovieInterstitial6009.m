@@ -13,6 +13,8 @@
 @property (nonatomic, strong) NSString *nendKey;
 @property (nonatomic) NSInteger nendAdspotId;
 @property (nonatomic) BOOL didInit;
+@property (nonatomic) BOOL didPlayComplete;
+@property (nonatomic) BOOL isNADVideoAdTypeNormal;
 
 @property (nonatomic) NADInterstitialVideo *interstitialVideo;
 
@@ -23,7 +25,7 @@
 #pragma mark - ADFmyMovieRewardInterface
 
 +(NSString *)getAdapterVersion {
-    return @"7.0.0.1";
+    return @"7.0.2.2";
 }
 
 -(id)init {
@@ -37,9 +39,12 @@
 -(void)setData:(NSDictionary *)data {
     [super setData:data];
     
-    self.nendKey = [NSString stringWithFormat:@"%@", [data objectForKey:@"api_key"]];
-    NSNumber *spotId = [data objectForKey:@"adspot_id"];
-    if (spotId) {
+    NSString *nendKey = [data objectForKey:@"api_key"];
+    if ([self isNotNull:nendKey]) {
+        self.nendKey = [NSString stringWithFormat:@"%@", nendKey];
+    }
+    NSString *spotId = [data objectForKey:@"adspot_id"];
+    if ([self isNotNull:spotId] && ([spotId isKindOfClass:[NSString class]] || [spotId isKindOfClass:[NSNumber class]])) {
         self.nendAdspotId = [spotId integerValue];
     }
 }
@@ -50,18 +55,22 @@
 }
 
 -(void)initAdnetworkIfNeeded {
-    if (!self.didInit) {
-        self.interstitialVideo = [[NADInterstitialVideo alloc] initWithSpotID:self.nendAdspotId apiKey:self.nendKey];
-        self.interstitialVideo.mediationName = @"adfurikun";
-        [NADLogger setLogLevel:NADLogLevelError];
-        self.interstitialVideo.delegate = self;
-        self.didInit = YES;
-        //音出力設定
-        ADFMovieOptions_Sound soundState = [ADFMovieOptions getSoundState];
-        if (ADFMovieOptions_Sound_On == soundState) {
-            self.interstitialVideo.isMuteStartPlaying = false;
-        } else if (ADFMovieOptions_Sound_Off == soundState) {
-            self.interstitialVideo.isMuteStartPlaying = true;
+    if (!self.didInit && self.nendAdspotId && self.nendKey) {
+        @try {
+            self.interstitialVideo = [[NADInterstitialVideo alloc] initWithSpotID:self.nendAdspotId apiKey:self.nendKey];
+            self.interstitialVideo.mediationName = @"adfurikun";
+            [NADLogger setLogLevel:NADLogLevelError];
+            self.interstitialVideo.delegate = self;
+            self.didInit = YES;
+            //音出力設定
+            ADFMovieOptions_Sound soundState = [ADFMovieOptions getSoundState];
+            if (ADFMovieOptions_Sound_On == soundState) {
+                self.interstitialVideo.isMuteStartPlaying = false;
+            } else if (ADFMovieOptions_Sound_Off == soundState) {
+                self.interstitialVideo.isMuteStartPlaying = true;
+            }
+        } @catch (NSException *exception) {
+            [self adnetworkExceptionHandling:exception];
         }
     }
 
@@ -72,7 +81,11 @@
 /**< 広告の読み込み開始 */
 -(void)startAd {
     if (self.interstitialVideo) {
-        [self.interstitialVideo loadAd];
+        @try {
+            [self.interstitialVideo loadAd];
+        } @catch (NSException *exception) {
+            [self adnetworkExceptionHandling:exception];
+        }
     }
 
 }
@@ -84,7 +97,12 @@
     if (self.isPrepared) {
         UIViewController *topMostViewController = [self topMostViewController];
         if (topMostViewController) {
-            [self.interstitialVideo showAdFromViewController:topMostViewController];
+            @try {
+                [self.interstitialVideo showAdFromViewController:topMostViewController];
+            } @catch (NSException *exception) {
+                [self adnetworkExceptionHandling:exception];
+                [self setCallbackStatus:MovieRewardCallbackPlayFail];
+            }
         }
         if (topMostViewController == nil) {
             NSLog(@"Error encountered playing ad : could not fetch topmost viewcontroller");
@@ -98,7 +116,12 @@
     [super showAdWithPresentingViewController:viewController];
 
     if (self.interstitialVideo.isReady) {
-        [self.interstitialVideo showAdFromViewController:viewController];
+        @try {
+            [self.interstitialVideo showAdFromViewController:viewController];
+        } @catch (NSException *exception) {
+            [self adnetworkExceptionHandling:exception];
+            [self setCallbackStatus:MovieRewardCallbackPlayFail];
+        }
     }
 }
 
@@ -129,21 +152,25 @@
 }
 
 - (void)setTargeting {
-    NADUserFeature *feature = [NADUserFeature new];
-    // 年齢
-    int age = [ADFMovieOptions getUserAge];
-    if (age > 0) {
-        feature.age = age;
-        self.interstitialVideo.userFeature = feature;
-    }
-    // 性別
-    ADFMovieOptions_Gender gender = [ADFMovieOptions getUserGender];
-    if (ADFMovieOptions_Gender_Male == gender) {
-        feature.gender = NADGenderMale;
-        self.interstitialVideo.userFeature = feature;
-    } else if (ADFMovieOptions_Gender_Female == gender) {
-        feature.gender = NADGenderFemale;
-        self.interstitialVideo.userFeature = feature;
+    @try {
+        NADUserFeature *feature = [NADUserFeature new];
+        // 年齢
+        int age = [ADFMovieOptions getUserAge];
+        if (age > 0) {
+            feature.age = age;
+            self.interstitialVideo.userFeature = feature;
+        }
+        // 性別
+        ADFMovieOptions_Gender gender = [ADFMovieOptions getUserGender];
+        if (ADFMovieOptions_Gender_Male == gender) {
+            feature.gender = NADGenderMale;
+            self.interstitialVideo.userFeature = feature;
+        } else if (ADFMovieOptions_Gender_Female == gender) {
+            feature.gender = NADGenderFemale;
+            self.interstitialVideo.userFeature = feature;
+        }
+    } @catch (NSException *exception) {
+        [self adnetworkExceptionHandling:exception];
     }
 }
 
@@ -156,6 +183,8 @@
 - (void)nadInterstitialVideoAdDidReceiveAd:(NADInterstitialVideo *)nadInterstitialVideoAd
 {
     NSLog(@"%s", __FUNCTION__);
+    self.isNADVideoAdTypeNormal = NO;
+    self.didPlayComplete = NO;
     [self setCallbackStatus:MovieRewardCallbackFetchComplete];
 }
 
@@ -175,29 +204,16 @@
 - (void)nadInterstitialVideoAdDidOpen:(NADInterstitialVideo *)nadInterstitialVideoAd
 {
     NSLog(@"%s", __FUNCTION__);
+    [self setCallbackStatus:MovieRewardCallbackPlayStart];
 }
 
 - (void)nadInterstitialVideoAdDidClose:(NADInterstitialVideo *)nadInterstitialVideoAd
 {
     NSLog(@"%s", __FUNCTION__);
+    if (!self.isNADVideoAdTypeNormal && !self.didPlayComplete) {
+        [self setCallbackStatus:MovieRewardCallbackPlayComplete];
+    }
     [self setCallbackStatus:MovieRewardCallbackClose];
-}
-
-- (void)nadInterstitialVideoAdDidStartPlaying:(NADInterstitialVideo *)nadInterstitialVideoAd
-{
-    NSLog(@"%s", __FUNCTION__);
-    [self setCallbackStatus:MovieRewardCallbackPlayStart];
-}
-
-- (void)nadInterstitialVideoAdDidStopPlaying:(NADInterstitialVideo *)nadInterstitialVideoAd
-{
-    NSLog(@"%s", __FUNCTION__);
-}
-
-- (void)nadInterstitialVideoAdDidCompletePlaying:(NADInterstitialVideo *)nadInterstitialVideoAd
-{
-    NSLog(@"%s", __FUNCTION__);
-    [self setCallbackStatus:MovieRewardCallbackPlayComplete];
 }
 
 - (void)nadInterstitialVideoAdDidClickAd:(NADInterstitialVideo *)nadInterstitialVideoAd
@@ -206,6 +222,26 @@
 }
 
 - (void)nadInterstitialVideoAdDidClickInformation:(NADInterstitialVideo *)nadInterstitialVideoAd
+{
+    NSLog(@"%s", __FUNCTION__);
+}
+// only adType NADVideoAdTypeNormal
+- (void)nadInterstitialVideoAdDidStartPlaying:(NADInterstitialVideo *)nadInterstitialVideoAd
+{
+    NSLog(@"%s", __FUNCTION__);
+    self.isNADVideoAdTypeNormal = YES;
+}
+// only adType NADVideoAdTypeNormal
+- (void)nadInterstitialVideoAdDidCompletePlaying:(NADInterstitialVideo *)nadInterstitialVideoAd
+{
+    NSLog(@"%s", __FUNCTION__);
+    if (!self.didPlayComplete) {
+        [self setCallbackStatus:MovieRewardCallbackPlayComplete];
+        self.didPlayComplete = YES;
+    }
+}
+//only adType NADVideoAdTypeNormal
+- (void)nadInterstitialVideoAdDidStopPlaying:(NADInterstitialVideo *)nadInterstitialVideoAd
 {
     NSLog(@"%s", __FUNCTION__);
 }

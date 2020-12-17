@@ -26,7 +26,7 @@
 }
 
 +(NSString *)getAdapterVersion {
-    return @"3.2.6.2.1";
+    return @"3.3.0.5.2";
 }
 
 -(id)init {
@@ -40,12 +40,12 @@
     [super setData:data];
     
     NSString *data_appID = [data objectForKey:@"appid"];
-    if (data_appID && ![data_appID isEqual:[NSNull null]]) {
-        self.tiktokAppID = data_appID;
+    if ([self isNotNull:data_appID]) {
+        self.tiktokAppID = [NSString stringWithFormat:@"%@", data_appID];
     }
     NSString *data_slotID = [data objectForKey:@"ad_slot_id"];
-    if (data_slotID && ![data_slotID isEqual:[NSNull null]]) {
-        self.tiktokSlotID = data_slotID;
+    if ([self isNotNull:data_slotID]) {
+        self.tiktokSlotID = [NSString stringWithFormat:@"%@", data_slotID];
     }
 }
 
@@ -55,7 +55,11 @@
 
 - (void)initAdnetworkIfNeeded {
     if (!self.didInitAdnetwork && self.tiktokAppID) {
-        [BUAdSDKManager setAppID:self.tiktokAppID];
+        @try {
+            [BUAdSDKManager setAppID:self.tiktokAppID];
+        } @catch (NSException *exception) {
+            [self adnetworkExceptionHandling:exception];
+        }
         self.didInitAdnetwork = YES;
     }
 }
@@ -66,9 +70,13 @@
         self.fullscreenVideoAd = nil;
     }
     if (self.didInitAdnetwork && self.tiktokSlotID) {
-        self.fullscreenVideoAd = [[BUFullscreenVideoAd alloc] initWithSlotID:self.tiktokSlotID];
-        self.fullscreenVideoAd.delegate = self;
-        [self.fullscreenVideoAd loadAdData];
+        @try {
+            self.fullscreenVideoAd = [[BUFullscreenVideoAd alloc] initWithSlotID:self.tiktokSlotID];
+            self.fullscreenVideoAd.delegate = self;
+            [self.fullscreenVideoAd loadAdData];
+        } @catch (NSException *exception) {
+            [self adnetworkExceptionHandling:exception];
+        }
     }
 }
 
@@ -79,7 +87,12 @@
 - (void)showAdWithPresentingViewController:(UIViewController *)viewController {
     [super showAdWithPresentingViewController:viewController];
 
-    [self.fullscreenVideoAd showAdFromRootViewController:viewController];
+    @try {
+        [self.fullscreenVideoAd showAdFromRootViewController:viewController];
+    } @catch (NSException *exception) {
+        [self adnetworkExceptionHandling:exception];
+        [self setCallbackStatus:MovieRewardCallbackPlayFail];
+    }
     self.isAdLoaded = NO;
 }
 

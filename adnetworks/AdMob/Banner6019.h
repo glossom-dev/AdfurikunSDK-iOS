@@ -15,12 +15,15 @@ NS_ASSUME_NONNULL_BEGIN
 
 @interface Banner6019 : ADFmyMovieNativeInterface<GADBannerViewDelegate>
 
-@property (nonatomic, strong, nullable) DFPBannerView *bannerView;
+@property (nonatomic, strong, nullable) GADBannerView *bannerView;
 @property (nonatomic, nullable) NSString *unitID;
 @property (nonatomic) GADAdSize adSize;
 @property (nonatomic) BOOL testFlg;
 
 @end
 
+@interface Banner6060 : Banner6019
+
+@end
 
 NS_ASSUME_NONNULL_END

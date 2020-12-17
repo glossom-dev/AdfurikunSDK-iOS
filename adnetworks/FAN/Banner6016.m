@@ -18,20 +18,20 @@
     [super setData:data];
     
     NSString *data_placement_id = [data objectForKey:@"placement_id"];
-    if (data_placement_id && ![data_placement_id isEqual:[NSNull null]]) {
+    if ([self isNotNull:data_placement_id]) {
         self.placement_id = [NSString stringWithFormat:@"%@",data_placement_id];
     }
 
     NSNumber *pixelRateNumber = data[@"pixelRate"];
-    if (pixelRateNumber && ![[NSNull null] isEqual:pixelRateNumber]) {
+    if ([self isNotNull:pixelRateNumber] && [pixelRateNumber isKindOfClass:[NSNumber class]]) {
         self.viewabilityPixelRate = pixelRateNumber.intValue;
     }
     NSNumber *displayTimeNumber = data[@"displayTime"];
-    if (displayTimeNumber && ![[NSNull null] isEqual:displayTimeNumber]) {
+    if ([self isNotNull:displayTimeNumber] && [displayTimeNumber isKindOfClass:[NSNumber class]]) {
         self.viewabilityDisplayTime = displayTimeNumber.intValue;
     }
     NSNumber *timerIntervalNumber = data[@"timerInterval"];
-    if (timerIntervalNumber && ![[NSNull null] isEqual:timerIntervalNumber]) {
+    if ([self isNotNull:timerIntervalNumber] && [timerIntervalNumber isKindOfClass:[NSNumber class]]) {
         self.viewabilityTimerInterval = timerIntervalNumber.intValue;
     }
 }
@@ -44,13 +44,19 @@
  *  広告の読み込みを開始する
  */
 -(void)startAd {
-    [super startAd];
-    
-    self.adView = [[FBAdView alloc] initWithPlacementID:self.placement_id
-                                                 adSize:kFBAdSizeHeight50Banner
-                                     rootViewController:[self topMostViewController]];
-    self.adView.delegate = self;
-    [self.adView loadAd];
+    if (self.placement_id) {
+        @try {
+            [super startAd];
+            
+            self.adView = [[FBAdView alloc] initWithPlacementID:self.placement_id
+                                                         adSize:kFBAdSizeHeight50Banner
+                                             rootViewController:[self topMostViewController]];
+            self.adView.delegate = self;
+            [self.adView loadAd];
+        } @catch (NSException *exception) {
+            [self adnetworkExceptionHandling:exception];
+        }
+    }
 }
 
 /**

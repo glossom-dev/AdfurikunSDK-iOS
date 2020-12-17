@@ -17,21 +17,24 @@
     [super setData:data];
     
     NSString* admobId = [data objectForKey:@"ad_unit_id"];
-    if (admobId != nil && ![admobId isEqual:[NSNull null]]) {
-        self.unitID = [[NSString alloc] initWithString:admobId];
+    if ([self isNotNull:admobId]) {
+        self.unitID = [[NSString alloc] initWithFormat:@"%@", admobId];
     }
-    self.testFlg = [[data objectForKey:@"test_flg"] boolValue];
-
+    NSNumber *testFlg = [data objectForKey:@"test_flg"];
+    if ([self isNotNull:testFlg] && [testFlg isKindOfClass:[NSNumber class]]) {
+        self.testFlg = [testFlg boolValue];
+    }
+    
     NSNumber *pixelRateNumber = data[@"pixelRate"];
-    if (pixelRateNumber && ![[NSNull null] isEqual:pixelRateNumber]) {
+    if ([self isNotNull:pixelRateNumber] && [pixelRateNumber isKindOfClass:[NSNumber class]]) {
         self.viewabilityPixelRate = pixelRateNumber.intValue;
     }
     NSNumber *displayTimeNumber = data[@"displayTime"];
-    if (displayTimeNumber && ![[NSNull null] isEqual:displayTimeNumber]) {
+    if ([self isNotNull:displayTimeNumber] && [displayTimeNumber isKindOfClass:[NSNumber class]]) {
         self.viewabilityDisplayTime = displayTimeNumber.intValue;
     }
     NSNumber *timerIntervalNumber = data[@"timerInterval"];
-    if (timerIntervalNumber && ![[NSNull null] isEqual:timerIntervalNumber]) {
+    if ([self isNotNull:timerIntervalNumber] && [timerIntervalNumber isKindOfClass:[NSNumber class]]) {
         self.viewabilityTimerInterval = timerIntervalNumber.intValue;
     }
 }
@@ -49,6 +52,7 @@
 }
 
 - (void)startAdWithOption:(NSDictionary *)option {
+    NSLog(@"%s called", __func__);
     [super startAd];
 
     self.isAdLoaded = false;
@@ -61,32 +65,34 @@
         [self.bannerView removeFromSuperview];
         self.bannerView = nil;
     }
-
-    self.bannerView = [[DFPBannerView alloc] initWithAdSize:self.adSize];
-    self.bannerView.adUnitID = self.unitID;
-    self.bannerView.rootViewController = [self topMostViewController];
-    self.bannerView.delegate = self;
-
-    DFPRequest *request = [DFPRequest new];
-    if (option) {
-        NSLog(@"custom event option : %@", option);
-        NSString *label = option[@"label"];
-        if (label) {
-            GADCustomEventExtras *extras = [[GADCustomEventExtras alloc] init];
-            [extras setExtras:option forLabel:label];
-            [request registerAdNetworkExtras:extras];
+    @try {
+        self.bannerView = [[GADBannerView alloc] initWithAdSize:self.adSize];
+        self.bannerView.adUnitID = self.unitID;
+        self.bannerView.rootViewController = [self topMostViewController];
+        self.bannerView.delegate = self;
+        
+        GADRequest *request = [GADRequest new];
+        if (option) {
+            NSLog(@"custom event option : %@", option);
+            NSString *label = option[@"label"];
+            if (label) {
+                GADCustomEventExtras *extras = [[GADCustomEventExtras alloc] init];
+                [extras setExtras:option forLabel:label];
+                [request registerAdNetworkExtras:extras];
+            }
+            [self.bannerView loadRequest:request];
         }
+    } @catch (NSException *exception) {
+        [self adnetworkExceptionHandling:exception];
     }
-    [self.bannerView loadRequest:request];
-
 }
 
 - (BOOL)isClassReference {
-    Class clazz = NSClassFromString(@"DFPBannerView");
+    Class clazz = NSClassFromString(@"GADBannerView");
     if (clazz) {
-        NSLog(@"Found Class: DFPBannerView");
+        NSLog(@"Found Class: GADBannerView");
     } else {
-        NSLog(@"Not found Class: DFPBannerView");
+        NSLog(@"Not found Class: GADBannerView");
         return NO;
     }
     return YES;
@@ -114,8 +120,12 @@
 #pragma mark - GADBannerViewDelegate
 
 /// Tells the delegate an ad request loaded an ad.
-- (void)adViewDidReceiveAd:(DFPBannerView *)adView {
+- (void)adViewDidReceiveAd:(GADBannerView *)adView {
     NSLog(@"%s called", __func__);
+    if (self.isAdLoaded) {
+        return;
+    }
+    
     self.isAdLoaded = true;
     MovieNativeAdInfo6019 *info = [[MovieNativeAdInfo6019 alloc] initWithVideoUrl:nil
                                                                             title:@""
@@ -140,7 +150,7 @@
 }
 
 /// Tells the delegate an ad request failed.
-- (void)adView:(DFPBannerView *)adView didFailToReceiveAdWithError:(GADRequestError *)error {
+- (void)adView:(GADBannerView *)adView didFailToReceiveAdWithError:(GADRequestError *)error {
     NSLog(@"%s error: %@", __FUNCTION__, error);
     if (self.delegate) {
         if ([self.delegate respondsToSelector:@selector(onNativeMovieAdLoadError:)]) {
@@ -158,26 +168,30 @@
 
 /// Tells the delegate that a full-screen view will be presented in response
 /// to the user clicking on an ad.
-- (void)adViewWillPresentScreen:(DFPBannerView *)adView {
+- (void)adViewWillPresentScreen:(GADBannerView *)adView {
     NSLog(@"adViewWillPresentScreen");
     [self callbackClick];
 }
 
 /// Tells the delegate that the full-screen view will be dismissed.
-- (void)adViewWillDismissScreen:(DFPBannerView *)adView {
+- (void)adViewWillDismissScreen:(GADBannerView *)adView {
     NSLog(@"adViewWillDismissScreen");
 }
 
 /// Tells the delegate that the full-screen view has been dismissed.
-- (void)adViewDidDismissScreen:(DFPBannerView *)adView {
+- (void)adViewDidDismissScreen:(GADBannerView *)adView {
     NSLog(@"adViewDidDismissScreen");
 }
 
 /// Tells the delegate that a user click will open another app (such as
 /// the App Store), backgrounding the current app.
-- (void)adViewWillLeaveApplication:(DFPBannerView *)adView {
+- (void)adViewWillLeaveApplication:(GADBannerView *)adView {
     NSLog(@"adViewWillLeaveApplication");
     [self callbackClick];
 }
+
+@end
+
+@implementation Banner6060
 
 @end

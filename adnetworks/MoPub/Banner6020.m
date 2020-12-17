@@ -41,39 +41,43 @@
     NSLog(@"Banner6020 : setData");
 
     NSString *adUnitId = [data objectForKey:@"ad_unit_id"];
-    if (adUnitId && ![adUnitId isEqual:[NSNull null]]) {
-        self.adUnitId = [NSString stringWithString:adUnitId];
+    if ([self isNotNull:adUnitId]) {
+        self.adUnitId = [NSString stringWithFormat:@"%@", adUnitId];
     }
 
     NSNumber *pixelRateNumber = data[@"pixelRate"];
-    if (pixelRateNumber && ![[NSNull null] isEqual:pixelRateNumber]) {
+    if ([self isNotNull:pixelRateNumber] && [pixelRateNumber isKindOfClass:[NSNumber class]]) {
         self.viewabilityPixelRate = pixelRateNumber.intValue;
     }
     NSNumber *displayTimeNumber = data[@"displayTime"];
-    if (displayTimeNumber && ![[NSNull null] isEqual:displayTimeNumber]) {
+    if ([self isNotNull:displayTimeNumber] && [displayTimeNumber isKindOfClass:[NSNumber class]]) {
         self.viewabilityDisplayTime = displayTimeNumber.intValue;
     }
     NSNumber *timerIntervalNumber = data[@"timerInterval"];
-    if (timerIntervalNumber && ![[NSNull null] isEqual:timerIntervalNumber]) {
+    if ([self isNotNull:timerIntervalNumber] && [timerIntervalNumber isKindOfClass:[NSNumber class]]) {
         self.viewabilityTimerInterval = timerIntervalNumber.intValue;
     }
 }
 
 -(void)initAdnetworkIfNeeded {
     NSLog(@"Banner6020 : initAdnetworkIfNeeded");
-
-    MPMoPubConfiguration *sdkConfig = [[MPMoPubConfiguration alloc] initWithAdUnitIdForAppInitialization:self.adUnitId];
-
-    sdkConfig.globalMediationSettings = @[];
-    sdkConfig.loggingLevel = MPBLogLevelInfo;
-
-    [[MoPub sharedInstance] initializeSdkWithConfiguration:sdkConfig completion:^{
-        NSLog(@"SDK initialization complete");
-        if (self.hasPendedLoad) {
-            self.hasPendedLoad = false;
-            [self startAd];
-        }
-    }];
+    
+    @try {
+        MPMoPubConfiguration *sdkConfig = [[MPMoPubConfiguration alloc] initWithAdUnitIdForAppInitialization:self.adUnitId];
+        
+        sdkConfig.globalMediationSettings = @[];
+        sdkConfig.loggingLevel = MPBLogLevelInfo;
+        
+        [[MoPub sharedInstance] initializeSdkWithConfiguration:sdkConfig completion:^{
+            NSLog(@"SDK initialization complete");
+            if (self.hasPendedLoad) {
+                self.hasPendedLoad = false;
+                [self startAd];
+            }
+        }];
+    } @catch (NSException *exception) {
+        [self adnetworkExceptionHandling:exception];
+    }
 }
 
 - (BOOL)isPrepared {
@@ -100,12 +104,16 @@
         [self.adView removeFromSuperview];
         self.adView = nil;
     }
-    self.adView = [[MPAdView alloc] initWithAdUnitId:self.adUnitId];
-    self.adView.delegate = self;
-    self.adView.frame = CGRectZero;
-    [self.adView stopAutomaticallyRefreshingContents];
-
-    [self.adView loadAdWithMaxAdSize:kMPPresetMaxAdSize50Height];
+    @try {
+        self.adView = [[MPAdView alloc] initWithAdUnitId:self.adUnitId];
+        self.adView.delegate = self;
+        self.adView.frame = CGRectZero;
+        [self.adView stopAutomaticallyRefreshingContents];
+        
+        [self.adView loadAdWithMaxAdSize:kMPPresetMaxAdSize50Height];
+    } @catch (NSException *exception) {
+        [self adnetworkExceptionHandling:exception];
+    }
 }
 
 - (void)startAdWithOption:(NSDictionary *)option {
@@ -185,6 +193,16 @@
 @implementation NativeAdInfo6020
 
 - (void)playMediaView {
+    if (self.mediaView.adapterInnerDelegate) {
+        if ([self.mediaView.adapterInnerDelegate respondsToSelector:@selector(onADFMediaViewRendering)]) {
+            [self.mediaView.adapterInnerDelegate onADFMediaViewRendering];
+        } else {
+            NSLog(@"NativeAdInfo6020: %s onADFMediaViewRendering selector is not responding", __FUNCTION__);
+        }
+    } else {
+        NSLog(@"NativeAdInfo6020: %s adInfo.mediaView.adapterInnerDelegate is not setting", __FUNCTION__);
+    }
+
     if (self.adapter) {
         [self.adapter startViewabilityCheck];
     }

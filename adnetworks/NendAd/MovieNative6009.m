@@ -39,27 +39,36 @@
 - (void)setData:(NSDictionary *)data {
     [super setData:data];
     
-    self.nendKey = [NSString stringWithFormat:@"%@", [data objectForKey:@"api_key"]];
-    NSNumber *spotId = [data objectForKey:@"adspot_id"];
-    if (spotId) {
+    NSString *nendKey = [data objectForKey:@"api_key"];
+    if ([self isNotNull:nendKey]) {
+        self.nendKey = [NSString stringWithFormat:@"%@", nendKey];
+    }
+    NSString *spotId = [data objectForKey:@"adspot_id"];
+    if ([self isNotNull:spotId] && ([spotId isKindOfClass:[NSString class]] || [spotId isKindOfClass:[NSNumber class]])) {
         self.nendAdspotId = [spotId integerValue];
     }
+    
+    self.clickAction = NADNativeVideoClickActionLP;
     NSNumber *clickAction = [data objectForKey:@"click_action"];
-    if (clickAction && ![clickAction isEqual:[NSNull null]]) {
-        self.clickAction = clickAction.integerValue;
-    } else {
-        self.clickAction = NADNativeVideoClickActionLP;
+    if ([self isNotNull:clickAction] && ([clickAction isKindOfClass:[NSNumber class]] || [clickAction isKindOfClass:[NSString class]])) {
+        if (clickAction.integerValue == NADNativeVideoClickActionFullScreen || clickAction.integerValue == NADNativeVideoClickActionLP) {
+            self.clickAction = clickAction.integerValue;
+        }
     }
 }
 
 -(void)initAdnetworkIfNeeded {
-    if (!self.didInit) {
-        self.videoAdLoader = [[NADNativeVideoLoader alloc] initWithSpotID:self.nendAdspotId apiKey:self.nendKey clickAction:self.clickAction];
-        self.videoAdLoader.mediationName = @"adfurikun";
-        // 動画広告のターゲティング
-        [self setTargeting];
-
-        self.didInit = YES;
+    if (!self.didInit && self.nendAdspotId && self.nendKey) {
+        @try {
+            self.videoAdLoader = [[NADNativeVideoLoader alloc] initWithSpotID:self.nendAdspotId apiKey:self.nendKey clickAction:self.clickAction];
+            self.videoAdLoader.mediationName = @"adfurikun";
+            // 動画広告のターゲティング
+            [self setTargeting];
+            
+            self.didInit = YES;
+        } @catch (NSException *exception) {
+            [self adnetworkExceptionHandling:exception];
+        }
     }
 }
 
@@ -67,77 +76,85 @@
     [super startAd];
     
     MovieNative6009 __weak *weakSelf = self;
-    [self.videoAdLoader loadAdWithCompletionHandler:^(NADNativeVideo * _Nullable videoAd, NSError * _Nullable error) {
-        if (weakSelf) {
-            if (videoAd) {
-                NSLog(@"nend NativeAd Load completed");
-                MovieNativeAdInfo6009 *info = [[MovieNativeAdInfo6009 alloc] initWithVideoUrl:nil
-                                                                                        title:videoAd.title
-                                                                                  description:videoAd.explanation
-                                                                                 adnetworkKey:@"6009"];
-                info.mediaType = ADFNativeAdType_Movie;
-                
-                info.adapter = weakSelf;
-
-                videoAd.mutedOnFullScreen = true;
-                videoAd.delegate = weakSelf;
-
-                weakSelf.nativeVideoView = [[NADNativeVideoView alloc] initWithFrame:CGRectZero rootViewController:[self topMostViewController]];
-                weakSelf.nativeVideoView.delegate = weakSelf;
-                weakSelf.nativeVideoView.videoAd = videoAd;
-                [info setupMediaView:weakSelf.nativeVideoView];
-
-                weakSelf.adInfo = info;
-                weakSelf.isAdLoaded = true;
-
-                if (weakSelf.delegate) {
-                    if ([weakSelf.delegate respondsToSelector:@selector(onNativeMovieAdLoadFinish:)]) {
-                        [weakSelf.delegate onNativeMovieAdLoadFinish:weakSelf.adInfo];
+    @try {
+        [self.videoAdLoader loadAdWithCompletionHandler:^(NADNativeVideo * _Nullable videoAd, NSError * _Nullable error) {
+            if (weakSelf) {
+                if (videoAd) {
+                    NSLog(@"nend NativeAd Load completed");
+                    MovieNativeAdInfo6009 *info = [[MovieNativeAdInfo6009 alloc] initWithVideoUrl:nil
+                                                                                            title:videoAd.title
+                                                                                      description:videoAd.explanation
+                                                                                     adnetworkKey:@"6009"];
+                    info.mediaType = ADFNativeAdType_Movie;
+                    
+                    info.adapter = weakSelf;
+                    
+                    videoAd.mutedOnFullScreen = true;
+                    videoAd.delegate = weakSelf;
+                    
+                    weakSelf.nativeVideoView = [[NADNativeVideoView alloc] initWithFrame:CGRectZero rootViewController:[self topMostViewController]];
+                    weakSelf.nativeVideoView.delegate = weakSelf;
+                    weakSelf.nativeVideoView.videoAd = videoAd;
+                    [info setupMediaView:weakSelf.nativeVideoView];
+                    
+                    weakSelf.adInfo = info;
+                    weakSelf.isAdLoaded = true;
+                    
+                    if (weakSelf.delegate) {
+                        if ([weakSelf.delegate respondsToSelector:@selector(onNativeMovieAdLoadFinish:)]) {
+                            [weakSelf.delegate onNativeMovieAdLoadFinish:weakSelf.adInfo];
+                        } else {
+                            NSLog(@"%s onNativeMovieAdLoadFinish selector is not responding", __FUNCTION__);
+                        }
                     } else {
-                        NSLog(@"%s onNativeMovieAdLoadFinish selector is not responding", __FUNCTION__);
+                        NSLog(@"%s Delegate is not setting", __FUNCTION__);
                     }
+                    
+                    
                 } else {
-                    NSLog(@"%s Delegate is not setting", __FUNCTION__);
-                }
-
-
-            } else {
-                weakSelf.isAdLoaded = false;
-                NSLog(@"nend NativeAd load error : %@", error.localizedDescription);
-                if (weakSelf.delegate) {
-                    if ([weakSelf.delegate respondsToSelector:@selector(onNativeMovieAdLoadError:)]) {
-                        [self setErrorWithMessage:error.localizedDescription code:error.code];
-                        [weakSelf.delegate onNativeMovieAdLoadError:weakSelf];
+                    weakSelf.isAdLoaded = false;
+                    NSLog(@"nend NativeAd load error : %@", error.localizedDescription);
+                    if (weakSelf.delegate) {
+                        if ([weakSelf.delegate respondsToSelector:@selector(onNativeMovieAdLoadError:)]) {
+                            [self setErrorWithMessage:error.localizedDescription code:error.code];
+                            [weakSelf.delegate onNativeMovieAdLoadError:weakSelf];
+                        } else {
+                            NSLog(@"%s onNativeMovieAdLoadError selector is not responding", __FUNCTION__);
+                        }
                     } else {
-                        NSLog(@"%s onNativeMovieAdLoadError selector is not responding", __FUNCTION__);
+                        NSLog(@"%s Delegate is not setting", __FUNCTION__);
                     }
-                } else {
-                    NSLog(@"%s Delegate is not setting", __FUNCTION__);
                 }
             }
-        }
-    }];
+        }];
+    } @catch (NSException *exception) {
+        [self adnetworkExceptionHandling:exception];
+    }
 }
 
 - (void)cancel {
 }
 
 - (void)setTargeting {
-    NADUserFeature *feature = [NADUserFeature new];
-    // 年齢
-    int age = [ADFMovieOptions getUserAge];
-    if (age > 0) {
-        feature.age = age;
-        self.videoAdLoader.userFeature = feature;
-    }
-    // 性別
-    ADFMovieOptions_Gender gender = [ADFMovieOptions getUserGender];
-    if (ADFMovieOptions_Gender_Male == gender) {
-        feature.gender = NADGenderMale;
-        self.videoAdLoader.userFeature = feature;
-    } else if (ADFMovieOptions_Gender_Female == gender) {
-        feature.gender = NADGenderFemale;
-        self.videoAdLoader.userFeature = feature;
+    @try {
+        NADUserFeature *feature = [NADUserFeature new];
+        // 年齢
+        int age = [ADFMovieOptions getUserAge];
+        if (age > 0) {
+            feature.age = age;
+            self.videoAdLoader.userFeature = feature;
+        }
+        // 性別
+        ADFMovieOptions_Gender gender = [ADFMovieOptions getUserGender];
+        if (ADFMovieOptions_Gender_Male == gender) {
+            feature.gender = NADGenderMale;
+            self.videoAdLoader.userFeature = feature;
+        } else if (ADFMovieOptions_Gender_Female == gender) {
+            feature.gender = NADGenderFemale;
+            self.videoAdLoader.userFeature = feature;
+        }
+    } @catch (NSException *exception) {
+        [self adnetworkExceptionHandling:exception];
     }
 }
 

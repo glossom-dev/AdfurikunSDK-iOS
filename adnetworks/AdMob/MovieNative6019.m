@@ -27,36 +27,43 @@
     [super setData:data];
     
     NSString* admobId = [data objectForKey:@"ad_unit_id"];
-    if (admobId != nil && ![admobId isEqual:[NSNull null]]) {
-        self.unitID = [[NSString alloc] initWithString:admobId];
+    if ([self isNotNull:admobId]) {
+        self.unitID = [[NSString alloc] initWithFormat:@"%@", admobId];
     }
-    self.testFlg = [[data objectForKey:@"test_flg"] boolValue];
+    NSNumber *testFlg = [data objectForKey:@"test_flg"];
+    if ([self isNotNull:testFlg] && [testFlg isKindOfClass:[NSNumber class]]) {
+        self.testFlg = [testFlg boolValue];
+    }
 
     NSNumber *pixelRateNumber = data[@"pixelRate"];
-    if (pixelRateNumber && ![[NSNull null] isEqual:pixelRateNumber]) {
+    if ([self isNotNull:pixelRateNumber] && [pixelRateNumber isKindOfClass:[NSNumber class]]) {
         self.viewabilityPixelRate = pixelRateNumber.intValue;
     }
     NSNumber *displayTimeNumber = data[@"displayTime"];
-    if (displayTimeNumber && ![[NSNull null] isEqual:displayTimeNumber]) {
+    if ([self isNotNull:displayTimeNumber] && [displayTimeNumber isKindOfClass:[NSNumber class]]) {
         self.viewabilityDisplayTime = displayTimeNumber.intValue;
     }
     NSNumber *timerIntervalNumber = data[@"timerInterval"];
-    if (timerIntervalNumber && ![[NSNull null] isEqual:timerIntervalNumber]) {
+    if ([self isNotNull:timerIntervalNumber] && [timerIntervalNumber isKindOfClass:[NSNumber class]]) {
         self.viewabilityTimerInterval = timerIntervalNumber.intValue;
     }
 }
 
 - (void)initAdnetworkIfNeeded {
-    if (self.testFlg) {
-        // GADMobileAds.sharedInstance.requestConfiguration.testDeviceIdentifiers = @[@"コンソールに出力されたデバイスIDを入力してください。"];
-        //詳細　https://developers.google.com/admob/ios/test-ads?hl=ja
-    }
-    if (self.adLoader == nil && self.unitID != nil) {
-        self.adLoader = [[GADAdLoader alloc] initWithAdUnitID:self.unitID
-                                           rootViewController:nil
-                                                      adTypes:@[kGADAdLoaderAdTypeUnifiedNative]
-                                                      options:nil];
-        self.adLoader.delegate = self;
+    @try {
+        if (self.testFlg) {
+            // GADMobileAds.sharedInstance.requestConfiguration.testDeviceIdentifiers = @[@"コンソールに出力されたデバイスIDを入力してください。"];
+            //詳細　https://developers.google.com/admob/ios/test-ads?hl=ja
+        }
+        if (self.adLoader == nil && self.unitID != nil) {
+            self.adLoader = [[GADAdLoader alloc] initWithAdUnitID:self.unitID
+                                               rootViewController:nil
+                                                          adTypes:@[kGADAdLoaderAdTypeUnifiedNative]
+                                                          options:nil];
+            self.adLoader.delegate = self;
+        }
+    } @catch (NSException *exception) {
+        [self adnetworkExceptionHandling:exception];
     }
 }
 
@@ -72,7 +79,11 @@
     [super startAd];
 
     self.isAdLoaded = false;
-    [self.adLoader loadRequest:[GADRequest request]];
+    @try {
+        [self.adLoader loadRequest:[GADRequest request]];
+    } @catch (NSException *exception) {
+        [self adnetworkExceptionHandling:exception];
+    }
 }
 
 - (BOOL)isClassReference {
@@ -408,7 +419,7 @@
         if (nativeAd.headline) {
             result[@"adTitle"] = nativeAd.headline;
         }
-        if (nativeAd.headline) {
+        if (nativeAd.icon && nativeAd.icon.image) {
             result[@"adIcon"] = nativeAd.icon.image;
         }
         if (nativeAd.callToAction) {
@@ -425,5 +436,27 @@
     }
     return nil;
 }
+
+- (GADUnifiedNativeAdView *)createGADUnifiedNativeAdView:(NSDictionary *)parts {
+    GADUnifiedNativeAdView *view = [GADUnifiedNativeAdView new];
+    view.nativeAd = self.nativeAdView.nativeAd;
+    view.bodyView = parts[@"body"];
+    view.advertiserView = parts[@"advertiser"];
+    view.callToActionView = parts[@"callToAction"];
+    view.mediaView = parts[@"media"];
+    [view.nativeAd registerAdView:view
+              clickableAssetViews:@{
+                  GADUnifiedNativeCallToActionAsset: view.callToActionView,
+                          GADUnifiedNativeBodyAsset: view.bodyView,
+                     GADUnifiedNativeMediaViewAsset: view.mediaView,
+                    GADUnifiedNativeAdvertiserAsset: view.advertiserView
+              }
+           nonclickableAssetViews:@{}];
+    return view;
+}
+
+@end
+
+@implementation MovieNative6060
 
 @end

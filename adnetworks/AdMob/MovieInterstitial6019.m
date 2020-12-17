@@ -19,7 +19,7 @@
 @implementation MovieInterstitial6019
 
 +(NSString *)getAdapterVersion {
-    return @"7.64.0.1";
+    return @"7.68.0.2";
 }
 
 -(id)init {
@@ -33,10 +33,13 @@
     [super setData:data];
     
     NSString* admobId = [data objectForKey:@"ad_unit_id"];
-    if (admobId != nil && ![admobId isEqual:[NSNull null]]) {
-        self.unitID = [[NSString alloc] initWithString:admobId];
+    if ([self isNotNull:admobId]) {
+        self.unitID = [[NSString alloc] initWithFormat:@"%@", admobId];
     }
-    self.testFlg = [[data objectForKey:@"test_flg"] boolValue];
+    NSNumber *testFlg = [data objectForKey:@"test_flg"];
+    if ([self isNotNull:testFlg] && [testFlg isKindOfClass:[NSNumber class]]) {
+        self.testFlg = [testFlg boolValue];
+    }
 }
 
 - (void)initAdnetworkIfNeeded {
@@ -56,11 +59,19 @@
 }
 
 - (void)startAd {
+    if (self.unitID == nil) {
+        return;
+    }
+    
     if (!self.interstitial || !self.interstitial.isReady) {
-        self.interstitial = [[GADInterstitial alloc] initWithAdUnitID:self.unitID];
-        self.interstitial.delegate = self;
-        GADRequest *request = [GADRequest request];
-        [self.interstitial loadRequest:request];
+        @try {
+            self.interstitial = [[GADInterstitial alloc] initWithAdUnitID:self.unitID];
+            self.interstitial.delegate = self;
+            GADRequest *request = [GADRequest request];
+            [self.interstitial loadRequest:request];
+        } @catch (NSException *exception) {
+            [self adnetworkExceptionHandling:exception];
+        }
     }
 }
 
@@ -72,7 +83,12 @@
     [super showAdWithPresentingViewController:viewController];
 
     if (self.interstitial.isReady) {
-        [self.interstitial presentFromRootViewController:viewController];
+        @try {
+            [self.interstitial presentFromRootViewController:viewController];
+        } @catch (NSException *exception) {
+            [self adnetworkExceptionHandling:exception];
+            [self setCallbackStatus:MovieRewardCallbackPlayFail];
+        }
     }
 }
 
@@ -118,5 +134,9 @@
 - (void)interstitialWillLeaveApplication:(GADInterstitial *)ad {
     NSLog(@"%s", __FUNCTION__);
 }
+
+@end
+
+@implementation MovieInterstitial6060
 
 @end

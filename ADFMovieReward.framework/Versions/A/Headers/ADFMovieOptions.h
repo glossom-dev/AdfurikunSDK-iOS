@@ -89,7 +89,7 @@ typedef NS_ENUM(NSInteger, ADFMovieOptions_Sound) {
  */
 + (void)setHasUserConsent:(BOOL)hasUserConsent;
 
-+ (NSNumber *)getHasUserConsentNumber;
++ (NSNumber * _Nonnull)getHasUserConsentNumber;
 
 /**
  *  広告をClickした時にアプリ内で遷移するか、外部ブラウザで遷移するかを選択する

@@ -20,7 +20,7 @@
 @implementation MovieReward6019
 
 +(NSString *)getAdapterVersion {
-    return @"7.64.0.1";
+    return @"7.68.0.2";
 }
 
 -(id)init {
@@ -34,10 +34,14 @@
     [super setData:data];
     
     NSString* admobId = [data objectForKey:@"ad_unit_id"];
-    if (admobId != nil && ![admobId isEqual:[NSNull null]]) {
-        self.unitID = [[NSString alloc] initWithString:admobId];
+    if ([self isNotNull:admobId]) {
+        self.unitID = [[NSString alloc] initWithFormat:@"%@", admobId];
     }
-    self.testFlg = [[data objectForKey:@"test_flg"] boolValue];
+    NSNumber *testFlg = [data objectForKey:@"test_flg"];
+    if ([self isNotNull:testFlg] && [testFlg isKindOfClass:[NSNumber class]]) {
+        self.testFlg = [testFlg boolValue];
+    }
+
     self.isAdsCompleteShow = NO;
 }
 
@@ -54,16 +58,24 @@
 }
 
 - (void)startAd {
-    if (!self.rewardedAd || !self.rewardedAd.isReady) {
-        self.rewardedAd = [[GADRewardedAd alloc] initWithAdUnitID:self.unitID];
-        GADRequest *request = [GADRequest request];
-        [self.rewardedAd loadRequest:request completionHandler:^(GADRequestError * _Nullable error) {
-            if (error) {
-                [self adRequestFailure:error];
-            } else {
-                [self adRequestSccess];
-            }
-        }];
+    if (self.unitID == nil) {
+        return;
+    }
+    
+    @try {
+        if (!self.rewardedAd || !self.rewardedAd.isReady) {
+            self.rewardedAd = [[GADRewardedAd alloc] initWithAdUnitID:self.unitID];
+            GADRequest *request = [GADRequest request];
+            [self.rewardedAd loadRequest:request completionHandler:^(GADRequestError * _Nullable error) {
+                if (error) {
+                    [self adRequestFailure:error];
+                } else {
+                    [self adRequestSccess];
+                }
+            }];
+        }
+    } @catch (NSException *exception) {
+        [self adnetworkExceptionHandling:exception];
     }
 }
 
@@ -79,7 +91,12 @@
     [super showAdWithPresentingViewController:viewController];
 
     if (self.rewardedAd.isReady) {
-        [self.rewardedAd presentFromRootViewController:[self topMostViewController] delegate:self];
+        @try {
+            [self.rewardedAd presentFromRootViewController:[self topMostViewController] delegate:self];
+        } @catch (NSException *exception) {
+            [self adnetworkExceptionHandling:exception];
+            [self setCallbackStatus:MovieRewardCallbackPlayFail];
+        }
     }
 }
 
@@ -132,5 +149,9 @@
     }
     [self setCallbackStatus:MovieRewardCallbackClose];
 }
+
+@end
+
+@implementation MovieReward6060
 
 @end

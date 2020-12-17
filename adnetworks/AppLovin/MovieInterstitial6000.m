@@ -27,7 +27,7 @@
 }
 
 +(NSString *)getAdapterVersion {
-    return @"6.13.5.1";
+    return @"6.14.8.2";
 }
 
 -(id)init {
@@ -44,23 +44,40 @@
 {
     [super setData:data];
     
-    self.appLovinSdkKey = [data objectForKey:@"sdk_key"];
+    NSString *appLovinSdkKey = [data objectForKey:@"sdk_key"];
+    if ([self isNotNull:appLovinSdkKey]) {
+        self.appLovinSdkKey = [NSString stringWithFormat:@"%@", appLovinSdkKey];
+    }
+    
     NSDictionary* infoDict = [[NSBundle mainBundle] infoDictionary];
     if ( ![infoDict objectForKey:@"AppLovinSdkKey"] ) {
         [infoDict setValue:self.appLovinSdkKey forKey:@"AppLovinSdkKey"];
     }
     //申請されたパッケージ名を受け取り
-    self.submittedPackageName = [data objectForKey:@"package_name"];
-    self.zoneIdentifier = [data objectForKey:@"zone_id"];
+    NSString *submittedPackageName = [data objectForKey:@"package_name"];
+    if ([self isNotNull:submittedPackageName]) {
+        self.submittedPackageName = [NSString stringWithFormat:@"%@", submittedPackageName];
+    }
+    
+    NSString *zoneIdentifier = [data objectForKey:@"zone_id"];
+    if ([self isNotNull:zoneIdentifier]) {
+        self.zoneIdentifier = [NSString stringWithFormat:@"%@", zoneIdentifier];
+    }
 }
 
 -(void)initAdnetworkIfNeeded {
-    [MovieConfigure6000 configure];
-    if (!self.interstitialAd) {
-        self.interstitialAd = [[ALInterstitialAd alloc] initWithSdk: [ALSdk sharedWithKey:self.appLovinSdkKey]];
-        self.interstitialAd.adDisplayDelegate = self;
-        self.interstitialAd.adLoadDelegate = self;
-        self.interstitialAd.adVideoPlaybackDelegate = self;
+    if (self.appLovinSdkKey) {
+        [MovieConfigure6000 configure];
+        if (!self.interstitialAd) {
+            @try {
+                self.interstitialAd = [[ALInterstitialAd alloc] initWithSdk: [ALSdk sharedWithKey:self.appLovinSdkKey]];
+                self.interstitialAd.adDisplayDelegate = self;
+                self.interstitialAd.adLoadDelegate = self;
+                self.interstitialAd.adVideoPlaybackDelegate = self;
+            } @catch (NSException *exception) {
+                [self adnetworkExceptionHandling:exception];
+            }
+        }
     }
 }
 
@@ -68,11 +85,16 @@
  *  広告の読み込みを開始する
  */
 -(void)startAd {
-    if (self.zoneIdentifier && ![self.zoneIdentifier isEqual: [NSNull null]] && [self.zoneIdentifier length] != 0) {
-        [[ALSdk sharedWithKey:self.appLovinSdkKey].adService loadNextAdForZoneIdentifier:self.zoneIdentifier andNotify:self];
-    } else {
-        [[ALSdk sharedWithKey:self.appLovinSdkKey].adService loadNextAd:ALAdSize.interstitial andNotify:self];
+    @try {
+        if ([self isNotNull:_appLovinSdkKey] && [self isNotNull:self.zoneIdentifier] && [self.zoneIdentifier length] != 0) {
+            [[ALSdk sharedWithKey:self.appLovinSdkKey].adService loadNextAdForZoneIdentifier:self.zoneIdentifier andNotify:self];
+        } else {
+            [[ALSdk sharedWithKey:self.appLovinSdkKey].adService loadNextAd:ALAdSize.interstitial andNotify:self];
+        }
+    } @catch (NSException *exception) {
+        [self adnetworkExceptionHandling:exception];
     }
+    
 }
 
 -(BOOL)isPrepared{
@@ -93,14 +115,20 @@
 -(void)showAd
 {
     [super showAd];
-
-    if(self.interstitialAd && self.isAdReady){
-        [self.interstitialAd showAd:self.ad];
+    
+    if(self.interstitialAd && self.ad && self.isAdReady){
+        @try {
+            [self.interstitialAd showAd:self.ad];
+        } @catch (NSException *exception) {
+            [self adnetworkExceptionHandling:exception];
+            [self setCallbackStatus:MovieRewardCallbackPlayFail];
+        }
     }
     else{
         // No interstitial ad is currently available.  Perform failover logic...
         NSLog(@"no ads could be shown!");
         self.isAdReady = NO;
+        [self setCallbackStatus:MovieRewardCallbackPlayFail];
     }
 }
 

@@ -25,35 +25,43 @@
     if (ADFMovieOptions.getTestMode) {
         self.testFlg = YES;
     } else {
-        self.testFlg = [[data objectForKey:@"test_flg"] boolValue];
+        NSNumber *testFlg = [data objectForKey:@"test_flg"];
+        if ([self isNotNull:testFlg] && [testFlg isKindOfClass:[NSNumber class]]) {
+            self.testFlg = [testFlg boolValue];
+        }
     }
     [UnityServices setDebugMode:self.testFlg];
+
     NSString *dataGameId = [data objectForKey:@"game_id"];
-    if (dataGameId && ![dataGameId isEqual:[NSNull null]]) {
+    if ([self isNotNull:dataGameId]) {
         self.gameId = [NSString stringWithFormat:@"%@", dataGameId];
     }
     NSString *dataPlacementId = [data objectForKey:@"placement_id"];
-    if (dataPlacementId && ![dataPlacementId isEqual:[NSNull null]]) {
+    if ([self isNotNull:dataPlacementId]) {
         self.placementId = [NSString stringWithFormat:@"%@",dataPlacementId];
     }
 
     NSNumber *pixelRateNumber = data[@"pixelRate"];
-    if (pixelRateNumber && ![[NSNull null] isEqual:pixelRateNumber]) {
+    if ([self isNotNull:pixelRateNumber] && [pixelRateNumber isKindOfClass:[NSNumber class]]) {
         self.viewabilityPixelRate = pixelRateNumber.intValue;
     }
     NSNumber *displayTimeNumber = data[@"displayTime"];
-    if (displayTimeNumber && ![[NSNull null] isEqual:displayTimeNumber]) {
+    if ([self isNotNull:displayTimeNumber] && [displayTimeNumber isKindOfClass:[NSNumber class]]) {
         self.viewabilityDisplayTime = displayTimeNumber.intValue;
     }
     NSNumber *timerIntervalNumber = data[@"timerInterval"];
-    if (timerIntervalNumber && ![[NSNull null] isEqual:timerIntervalNumber]) {
+    if ([self isNotNull:timerIntervalNumber] && [timerIntervalNumber isKindOfClass:[NSNumber class]]) {
         self.viewabilityTimerInterval = timerIntervalNumber.intValue;
     }
 }
 
 -(void)initAdnetworkIfNeeded {
     if (![UnityServices isInitialized] && self.gameId) {
-        [UnityAds initialize:self.gameId testMode:self.testFlg];
+        @try {
+            [UnityAds initialize:self.gameId testMode:self.testFlg];
+        } @catch (NSException *exception) {
+            [self adnetworkExceptionHandling:exception];
+        }
     }
 }
 
@@ -61,22 +69,26 @@
  *  広告の読み込みを開始する
  */
 -(void)startAd {
-    [super startAd];
-    
-    self.isAdLoaded = false;
-
-    if (self.bannerView) {
-        self.bannerView = nil;
-    }
-    if (self.placementId) {
-        self.bannerView = [[UADSBannerView alloc] initWithPlacementId:self.placementId size:CGSizeMake(320.0, 50.0)];
-    }
-
-    BOOL isReady = [UnityAds isReady:self.placementId];
-    NSLog(@"%s unityAds placement id : %@, is ready : %@", __func__, self.placementId, (isReady ? @"true" : @"false"));
-    if (isReady && self.bannerView) {
-        self.bannerView.delegate = self;
-        [self.bannerView load];
+    @try {
+        [super startAd];
+        
+        self.isAdLoaded = false;
+        
+        if (self.bannerView) {
+            self.bannerView = nil;
+        }
+        if (self.placementId) {
+            self.bannerView = [[UADSBannerView alloc] initWithPlacementId:self.placementId size:CGSizeMake(320.0, 50.0)];
+        }
+        
+        BOOL isReady = [UnityAds isReady:self.placementId];
+        NSLog(@"%s unityAds placement id : %@, is ready : %@", __func__, self.placementId, (isReady ? @"true" : @"false"));
+        if (isReady && self.bannerView) {
+            self.bannerView.delegate = self;
+            [self.bannerView load];
+        }
+    } @catch (NSException *exception) {
+        [self adnetworkExceptionHandling:exception];
     }
 }
 

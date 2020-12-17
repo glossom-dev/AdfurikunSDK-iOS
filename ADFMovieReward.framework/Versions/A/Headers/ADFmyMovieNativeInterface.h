@@ -67,6 +67,9 @@
 // MovieRewardInterfaceと同じ関数Formatを使う
 - (void)setCallbackStatus:(MovieRewardCallbackStatus)status;
 
+- (void)adnetworkExceptionHandling:(NSException *)exception;
+- (BOOL)isNotNull:(id)obj;
+
 @end
 
 

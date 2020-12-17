@@ -27,7 +27,7 @@
 }
 
 +(NSString *)getAdapterVersion {
-    return @"1.5.5.1";
+    return @"1.5.5.2";
 }
 
 -(id)init {
@@ -45,15 +45,22 @@
     if (ADFMovieOptions.getTestMode) {
         self.testFlg = YES;
     } else {
-        self.testFlg = [[data objectForKey:@"test_flg"] boolValue];
-    }
-    self.maioMediaId = [NSString stringWithFormat:@"%@", [data objectForKey:@"media_id"]];
-    if ([data objectForKey:@"spot_id"]) {
-        NSString *spotId = [NSString stringWithFormat:@"%@", [data objectForKey:@"spot_id"]];
-        if ([spotId length] > 0) {
-            self.maioZoneId = spotId;
+        NSNumber *testFlg = [data objectForKey:@"test_flg"];
+        if ([self isNotNull:testFlg] && [testFlg isKindOfClass:[NSNumber class]]) {
+            self.testFlg = [testFlg boolValue];
         }
     }
+    
+    NSString *maioMediaId = [data objectForKey:@"media_id"];
+    if ([self isNotNull:maioMediaId]) {
+        self.maioMediaId = [NSString stringWithFormat:@"%@", maioMediaId];
+    }
+
+    NSString *maioZoneId = [data objectForKey:@"spot_id"];
+    if ([self isNotNull:maioZoneId]) {
+        self.maioZoneId = [NSString stringWithFormat:@"%@", maioZoneId];
+    }
+
     //広告の読み込みがmediaID単位で行われることにより
     //startAdより前にisPrepared=trueになって広告が再生されるケースがあるため
     [[MovieDelegate6004 sharedInstance] setMovieReward:self inZone:self.maioZoneId];
@@ -72,15 +79,23 @@
 }
 
 -(void)startAd {
+    if (self.maioMediaId == nil) {
+        return;
+    }
+    
     // 動画の読み込みを開始します。
     static dispatch_once_t adfMaioOnceToken;
     dispatch_once(&adfMaioOnceToken, ^{
-        // テストモードに変更（リリース前必ず本番モードに戻してください）
-        // [Maio setAdTestMode:YES];
-        if(self.testFlg) {
-            [Maio setAdTestMode:self.testFlg];
+        @try {
+            // テストモードに変更（リリース前必ず本番モードに戻してください）
+            // [Maio setAdTestMode:YES];
+            if(self.testFlg) {
+                [Maio setAdTestMode:self.testFlg];
+            }
+            [Maio startWithMediaId:self.maioMediaId delegate:[MovieDelegate6004 sharedInstance]];
+        } @catch (NSException *exception) {
+            [self adnetworkExceptionHandling:exception];
         }
-        [Maio startWithMediaId:self.maioMediaId delegate:[MovieDelegate6004 sharedInstance]];
     });
 }
 

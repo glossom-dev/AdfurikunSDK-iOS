@@ -40,49 +40,65 @@
 - (void)setData:(NSDictionary *)data {
     [super setData:data];
     
-    self.placement_id = [NSString stringWithFormat:@"%@", [data objectForKey:@"placement_id"]];
+    NSString *placementId = [data objectForKey:@"placement_id"];
+    if ([self isNotNull:placementId]) {
+        self.placement_id = [NSString stringWithFormat:@"%@", placementId];
+    }
+
     self.banner_type = kFANNativeAdPlacementTypeNative;
     NSNumber *type = [data objectForKey:@"banner_type"];
-    if (type) {
-        self.banner_type = type.intValue;
+    if ([self isNotNull:type] && ([type isKindOfClass:[NSNumber class]] || [type isKindOfClass:[NSString class]])) {
+        if (type.intValue == kFANNativeAdPlacementTypeNative || type.intValue == kFANNativeAdPlacementTypeNativeBanner) {
+            self.banner_type = type.intValue;
+        }
     }
 
     NSNumber *pixelRateNumber = data[@"pixelRate"];
-    if (pixelRateNumber && ![[NSNull null] isEqual:pixelRateNumber]) {
+    if ([self isNotNull:pixelRateNumber] && [pixelRateNumber isKindOfClass:[NSNumber class]]) {
         self.viewabilityPixelRate = pixelRateNumber.intValue;
     }
     NSNumber *displayTimeNumber = data[@"displayTime"];
-    if (displayTimeNumber && ![[NSNull null] isEqual:displayTimeNumber]) {
+    if ([self isNotNull:displayTimeNumber] && [displayTimeNumber isKindOfClass:[NSNumber class]]) {
         self.viewabilityDisplayTime = displayTimeNumber.intValue;
     }
     NSNumber *timerIntervalNumber = data[@"timerInterval"];
-    if (timerIntervalNumber && ![[NSNull null] isEqual:timerIntervalNumber]) {
+    if ([self isNotNull:timerIntervalNumber] && [timerIntervalNumber isKindOfClass:[NSNumber class]]) {
         self.viewabilityTimerInterval = timerIntervalNumber.intValue;
     }
 }
 
 - (void)initAdnetworkIfNeeded {
-    static dispatch_once_t adfAdColonyOnceToken;
-    dispatch_once(&adfAdColonyOnceToken, ^{
-        if (self.test_flg) {
-            [FBAdSettings addTestDevice:[FBAdSettings testDeviceHash]];
-        } else {
-            [FBAdSettings clearTestDevices];
+    static dispatch_once_t adfFANOnceToken;
+    dispatch_once(&adfFANOnceToken, ^{
+        @try {
+            if (self.test_flg) {
+                [FBAdSettings addTestDevice:[FBAdSettings testDeviceHash]];
+            } else {
+                [FBAdSettings clearTestDevices];
+            }
+        } @catch (NSException *exception) {
+            [self adnetworkExceptionHandling:exception];
         }
     });
 }
 
 - (void)startAd {
-    [super startAd];
-    
-    if (_banner_type == kFANNativeAdPlacementTypeNative) {
-        FBNativeAd *nativeAd = [[FBNativeAd alloc] initWithPlacementID: self.placement_id];
-        nativeAd.delegate = self;
-        [nativeAd loadAd];
-    } else if (_banner_type == kFANNativeAdPlacementTypeNativeBanner) {
-        FBNativeBannerAd *nativeBannerAd = [[FBNativeBannerAd alloc] initWithPlacementID:self.placement_id];
-        nativeBannerAd.delegate = self;
-        [nativeBannerAd loadAd];
+    if (self.placement_id) {
+        [super startAd];
+        
+        @try {
+            if (_banner_type == kFANNativeAdPlacementTypeNative) {
+                FBNativeAd *nativeAd = [[FBNativeAd alloc] initWithPlacementID: self.placement_id];
+                nativeAd.delegate = self;
+                [nativeAd loadAd];
+            } else if (_banner_type == kFANNativeAdPlacementTypeNativeBanner) {
+                FBNativeBannerAd *nativeBannerAd = [[FBNativeBannerAd alloc] initWithPlacementID:self.placement_id];
+                nativeBannerAd.delegate = self;
+                [nativeBannerAd loadAd];
+            }
+        } @catch (NSException *exception) {
+            [self adnetworkExceptionHandling:exception];
+        }
     }
 }
 
@@ -147,16 +163,29 @@
 }
 
 - (void)sendOnADFMediaViewPlayStart {
-    [self startViewabilityCheck];
-
-    if (self.adInfo.mediaView.adapterInnerDelegate) {
-        if ([self.adInfo.mediaView.adapterInnerDelegate respondsToSelector:@selector(onADFMediaViewRendering)]) {
-            [self.adInfo.mediaView.adapterInnerDelegate onADFMediaViewRendering];
+    if (self.adInfo.mediaType == ADFNativeAdType_Movie) {
+        if (self.adInfo.mediaView.adapterInnerDelegate) {
+            if ([self.adInfo.mediaView.adapterInnerDelegate respondsToSelector:@selector(onADFMediaViewPlayStart)]) {
+                [self.adInfo.mediaView.adapterInnerDelegate onADFMediaViewPlayStart];
+            } else {
+                NSLog(@"MovieNative6016: %s onADFMediaViewPlayStart selector is not responding", __FUNCTION__);
+            }
         } else {
-            NSLog(@"MovieNative6016: %s onADFMediaViewRendering selector is not responding", __FUNCTION__);
+            NSLog(@"MovieNative6016: %s adInfo.mediaView.adapterInnerDelegate is not setting", __FUNCTION__);
         }
+        
     } else {
-        NSLog(@"MovieNative6016: %s adInfo.mediaView.adapterInnerDelegate is not setting", __FUNCTION__);
+        [self startViewabilityCheck];
+        
+        if (self.adInfo.mediaView.adapterInnerDelegate) {
+            if ([self.adInfo.mediaView.adapterInnerDelegate respondsToSelector:@selector(onADFMediaViewRendering)]) {
+                [self.adInfo.mediaView.adapterInnerDelegate onADFMediaViewRendering];
+            } else {
+                NSLog(@"MovieNative6016: %s onADFMediaViewRendering selector is not responding", __FUNCTION__);
+            }
+        } else {
+            NSLog(@"MovieNative6016: %s adInfo.mediaView.adapterInnerDelegate is not setting", __FUNCTION__);
+        }
     }
 }
 

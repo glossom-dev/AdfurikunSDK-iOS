@@ -27,19 +27,19 @@
 }
 
 +(NSString *)getAdapterVersion {
-    return @"3.2.6.2.1";
+    return @"3.3.0.5.2";
 }
 
 - (void)setData:(NSDictionary *)data {
     [super setData:data];
     
     NSString *data_appID = [data objectForKey:@"appid"];
-    if (data_appID && ![data_appID isEqual:[NSNull null]]) {
-        self.tiktokAppID = data_appID;
+    if ([self isNotNull:data_appID]) {
+        self.tiktokAppID = [NSString stringWithFormat:@"%@", data_appID];
     }
     NSString *data_slotID = [data objectForKey:@"ad_slot_id"];
-    if (data_slotID && ![data_slotID isEqual:[NSNull null]]) {
-        self.tiktokSlotID = data_slotID;
+    if ([self isNotNull:data_slotID]) {
+        self.tiktokSlotID = [NSString stringWithFormat:@"%@", data_slotID];
     }
 }
 
@@ -49,7 +49,11 @@
 
 - (void)initAdnetworkIfNeeded {
     if (!self.didInitAdnetwork && self.tiktokAppID) {
-        [BUAdSDKManager setAppID:self.tiktokAppID];
+        @try {
+            [BUAdSDKManager setAppID:self.tiktokAppID];
+        } @catch (NSException *exception) {
+            [self adnetworkExceptionHandling:exception];
+        }
         self.didInitAdnetwork = YES;
     }
 }
@@ -60,10 +64,14 @@
         self.rewardedVideoAd = nil;
     }
     if (self.didInitAdnetwork && self.tiktokSlotID) {
-        BURewardedVideoModel *model = [[BURewardedVideoModel alloc] init];
-        self.rewardedVideoAd = [[BURewardedVideoAd alloc] initWithSlotID:self.tiktokSlotID rewardedVideoModel:model];
-        self.rewardedVideoAd.delegate = self;
-        [self.rewardedVideoAd loadAdData];
+        @try {
+            BURewardedVideoModel *model = [[BURewardedVideoModel alloc] init];
+            self.rewardedVideoAd = [[BURewardedVideoAd alloc] initWithSlotID:self.tiktokSlotID rewardedVideoModel:model];
+            self.rewardedVideoAd.delegate = self;
+            [self.rewardedVideoAd loadAdData];
+        } @catch (NSException *exception) {
+            [self adnetworkExceptionHandling:exception];
+        }
     }
 }
 
@@ -72,10 +80,17 @@
 }
 
 - (void)showAdWithPresentingViewController:(UIViewController *)viewController {
-    [super showAdWithPresentingViewController:viewController];
-
-    [self.rewardedVideoAd showAdFromRootViewController:viewController];
-    self.isAdLoaded = NO;
+    if (self.rewardedVideoAd) {
+        [super showAdWithPresentingViewController:viewController];
+        
+        @try {
+            [self.rewardedVideoAd showAdFromRootViewController:viewController];
+        } @catch (NSException *exception) {
+            [self adnetworkExceptionHandling:exception];
+            [self setCallbackStatus:MovieRewardCallbackPlayFail];
+        }
+        self.isAdLoaded = NO;
+    }
 }
 
 - (BOOL)isClassReference {

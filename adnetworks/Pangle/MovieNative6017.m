@@ -48,24 +48,24 @@
     [super setData:data];
     
     NSString *appID = [data objectForKey:@"appid"];
-    if (appID && ![appID isEqual:[NSNull null]]) {
-        self.pangleAppID = [NSString stringWithString:appID];
+    if ([self isNotNull:appID]) {
+        self.pangleAppID = [NSString stringWithFormat:@"%@", appID];
     }
     NSString *slotID = [data objectForKey:@"ad_slot_id"];
-    if (slotID && ![slotID isEqual:[NSNull null]]) {
-        self.pangleSlotID = [NSString stringWithString:slotID];
+    if ([self isNotNull:slotID]) {
+        self.pangleSlotID = [NSString stringWithFormat:@"%@", slotID];
     }
 
     NSNumber *pixelRateNumber = data[@"pixelRate"];
-    if (pixelRateNumber && ![[NSNull null] isEqual:pixelRateNumber]) {
+    if ([self isNotNull:pixelRateNumber] && [pixelRateNumber isKindOfClass:[NSNumber class]]) {
         self.viewabilityPixelRate = pixelRateNumber.intValue;
     }
     NSNumber *displayTimeNumber = data[@"displayTime"];
-    if (displayTimeNumber && ![[NSNull null] isEqual:displayTimeNumber]) {
+    if ([self isNotNull:displayTimeNumber] && [displayTimeNumber isKindOfClass:[NSNumber class]]) {
         self.viewabilityDisplayTime = displayTimeNumber.intValue;
     }
     NSNumber *timerIntervalNumber = data[@"timerInterval"];
-    if (timerIntervalNumber && ![[NSNull null] isEqual:timerIntervalNumber]) {
+    if ([self isNotNull:timerIntervalNumber] && [timerIntervalNumber isKindOfClass:[NSNumber class]]) {
         self.viewabilityTimerInterval = timerIntervalNumber.intValue;
     }
 }
@@ -75,7 +75,11 @@
     NSLog(@"MovieNatve6017 initAdnetworkIfNeeded");
     if (!self.didInitAdnetwork && self.pangleAppID) {
         NSLog(@"%s", __FUNCTION__);
-        [BUAdSDKManager setAppID:self.pangleAppID];
+        @try {
+            [BUAdSDKManager setAppID:self.pangleAppID];
+        } @catch (NSException *exception) {
+            [self adnetworkExceptionHandling:exception];
+        }
         self.didInitAdnetwork = true;
     }
 }
@@ -97,24 +101,28 @@
     if (self.nativeAd) {
         self.nativeAd = nil;
     }
-
+    
     [super startAd];
     
-    self.nativeAd = [BUNativeAd new];
-    BUAdSlot *slot = [[BUAdSlot alloc] init];
-    BUSize *imgSize = [BUSize sizeBy:BUProposalSize_Feed690_388];
-    //BUSize *imgSize = [BUSize sizeBy:BUProposalSize_Banner600_90];
-    slot.ID = self.pangleSlotID;
-    slot.AdType = BUAdSlotAdTypeFeed;
-    slot.position = BUAdSlotPositionFeed;
-    slot.imgSize = imgSize;
-    slot.isSupportDeepLink = YES;
-    self.nativeAd.adslot = slot;
-
-    self.nativeAd.rootViewController = [self topMostViewController];
-    self.nativeAd.delegate = self;
-
-    [self.nativeAd loadAdData];
+    @try {
+        self.nativeAd = [BUNativeAd new];
+        BUAdSlot *slot = [[BUAdSlot alloc] init];
+        BUSize *imgSize = [BUSize sizeBy:BUProposalSize_Feed690_388];
+        //BUSize *imgSize = [BUSize sizeBy:BUProposalSize_Banner600_90];
+        slot.ID = self.pangleSlotID;
+        slot.AdType = BUAdSlotAdTypeFeed;
+        slot.position = BUAdSlotPositionFeed;
+        slot.imgSize = imgSize;
+        slot.isSupportDeepLink = YES;
+        self.nativeAd.adslot = slot;
+        
+        self.nativeAd.rootViewController = [self topMostViewController];
+        self.nativeAd.delegate = self;
+        
+        [self.nativeAd loadAdData];
+    } @catch (NSException *exception) {
+        [self adnetworkExceptionHandling:exception];
+    }
 }
 
 - (void)startAdWithOption:(NSDictionary *)option {

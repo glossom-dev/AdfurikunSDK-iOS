@@ -22,3 +22,7 @@
 }
 
 @end
+
+@implementation Rectangle6060
+
+@end

@@ -8,7 +8,8 @@
 #import <Foundation/Foundation.h>
 #import <AdColony/AdColony.h>
 #import <ADFMovieReward/ADFmyMovieRewardInterface.h>
-//#import "ADFmyMovieRewardInterface.h"
+
+static BOOL hasConfigured = NO;
 
 @interface MovieReward6002 : ADFmyMovieRewardInterface
 

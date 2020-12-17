@@ -11,7 +11,6 @@
 @property (nonatomic, strong)ALAdView *adView;
 @property (nonatomic, strong)NSString *zoneIdentifier;
 @property (nonatomic, strong)NSString* appLovinSdkKey;
-@property (nonatomic)BOOL impFlag;
 @end
 
 @implementation Banner6000
@@ -30,33 +29,38 @@
     [super setData:data];
     
     NSString *data_sdkKey = [data objectForKey:@"sdk_key"];
-    if (data_sdkKey && ![data_sdkKey isEqual:[NSNull null]]) {
+    if ([self isNotNull:data_sdkKey]) {
         self.appLovinSdkKey = [NSString stringWithFormat:@"%@", data_sdkKey];
     }
     NSString *data_zoneID = [data objectForKey:@"zone_id"];
-    if (data_zoneID && ![data_zoneID isEqual:[NSNull null]]) {
+    if ([self isNotNull:data_zoneID]) {
         self.zoneIdentifier = [NSString stringWithFormat:@"%@", data_zoneID];
     }
 
     NSNumber *pixelRateNumber = data[@"pixelRate"];
-    if (pixelRateNumber && ![[NSNull null] isEqual:pixelRateNumber]) {
+    if ([self isNotNull:pixelRateNumber] && [pixelRateNumber isKindOfClass:[NSNumber class]]) {
         self.viewabilityPixelRate = pixelRateNumber.intValue;
     }
     NSNumber *displayTimeNumber = data[@"displayTime"];
-    if (displayTimeNumber && ![[NSNull null] isEqual:displayTimeNumber]) {
+    if ([self isNotNull:displayTimeNumber] && [displayTimeNumber isKindOfClass:[NSNumber class]]) {
         self.viewabilityDisplayTime = displayTimeNumber.intValue;
     }
     NSNumber *timerIntervalNumber = data[@"timerInterval"];
-    if (timerIntervalNumber && ![[NSNull null] isEqual:timerIntervalNumber]) {
+    if ([self isNotNull:timerIntervalNumber] && [timerIntervalNumber isKindOfClass:[NSNumber class]]) {
         self.viewabilityTimerInterval = timerIntervalNumber.intValue;
     }
 }
 
 -(void)initAdnetworkIfNeeded {
-    if (!self.adView) {
-        self.adView = [[ALAdView alloc] initWithSdk:[ALSdk sharedWithKey:self.appLovinSdkKey]
-                                               size:ALAdSize.banner
-                                     zoneIdentifier:self.zoneIdentifier];
+    if (!self.adView && self.appLovinSdkKey && self.zoneIdentifier) {
+        @try {
+            self.adView = [[ALAdView alloc] initWithSdk:[ALSdk sharedWithKey:self.appLovinSdkKey]
+                                                   size:ALAdSize.banner
+                                         zoneIdentifier:self.zoneIdentifier];
+        } @catch (NSException *exception) {
+            [self adnetworkExceptionHandling:exception];
+        }
+        
         self.adView.adLoadDelegate = self;
         self.adView.adDisplayDelegate = self;
     }
@@ -66,9 +70,12 @@
     [super startAd];
     
     self.isAdLoaded = NO;
-    self.impFlag = YES;
     if (self.adView) {
-        [self.adView loadNextAd];
+        @try {
+            [self.adView loadNextAd];
+        } @catch (NSException *exception) {
+            [self adnetworkExceptionHandling:exception];
+        }
     }
 }
 
@@ -80,6 +87,7 @@
 #pragma mark - Ad Load Delegate
 
 - (void)adService:(ALAdService *)adService didLoadAd:(ALAd *)ad {
+    NSLog(@"%s", __FUNCTION__);
     self.isAdLoaded = YES;
     if (self.delegate) {
         if ([self.delegate respondsToSelector:@selector(onNativeMovieAdLoadFinish:)]) {
@@ -91,6 +99,9 @@
             info.adapter = self;
             [info setupMediaView:self.adView];
             self.adInfo = info;
+            
+            [self.delegate onNativeMovieAdLoadFinish:self.adInfo];
+            
         } else {
             NSLog(@"Banner6000: %s onNativeMovieAdLoadFinish selector is not responding", __FUNCTION__);
         }
@@ -100,6 +111,7 @@
 }
 
 - (void)adService:(ALAdService *)adService didFailToLoadAdWithError:(int)code {
+    NSLog(@"%s", __FUNCTION__);
     self.isAdLoaded = NO;
     NSLog(@"AppLovin Banner load error :%d", code);
     if (self.delegate) {
@@ -120,23 +132,6 @@
 
 - (void)ad:(ALAd *)ad wasDisplayedIn:(UIView *)view {
     NSLog(@"%s", __FUNCTION__);
-    if (self.impFlag == NO) {
-        return;
-    }
-    self.impFlag = NO;
-
-    [self setCustomMediaview:view];
-    [self startViewabilityCheck];
-
-    if (self.adInfo.mediaView.adapterInnerDelegate) {
-        if ([self.adInfo.mediaView.adapterInnerDelegate respondsToSelector:@selector(onADFMediaViewRendering)]) {
-            [self.adInfo.mediaView.adapterInnerDelegate onADFMediaViewRendering];
-        } else {
-            NSLog(@"Banner6000: %s onADFMediaViewRendering selector is not responding", __FUNCTION__);
-        }
-    } else {
-        NSLog(@"Banner6000: %s adInfo.mediaView.adapterInnerDelegate is not setting", __FUNCTION__);
-    }
 }
 
 - (void)ad:(ALAd *)ad wasHiddenIn:(UIView *)view {
@@ -158,5 +153,17 @@
 @end
 
 @implementation NativeAdInfo6000
+
+- (void)playMediaView {
+    if (self.adapter) {
+        if (self.mediaView.adapterInnerDelegate) {
+            if ([self.mediaView.adapterInnerDelegate respondsToSelector:@selector(onADFMediaViewRendering)]) {
+                [self.mediaView.adapterInnerDelegate onADFMediaViewRendering];
+            }
+        }
+        [self.adapter setCustomMediaview:self.mediaView];
+        [self.adapter startViewabilityCheck];
+    }
+}
 
 @end

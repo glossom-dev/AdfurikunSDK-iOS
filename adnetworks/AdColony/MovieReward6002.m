@@ -16,12 +16,11 @@
 @property (nonatomic, weak) UIViewController* appViewController;
 @property (nonatomic) BOOL test_flg;
 @property (nonatomic) AdColonyInterstitial *ad;
+@property (nonatomic) BOOL hasPendingStartAd;
 
 @end
 
 @implementation MovieReward6002
-
-static BOOL hasConfigured = NO;
 
 //課題：ANDW SDKのバージョン情報をSDKから取得できるようにする
 + (NSString *)getSDKVersion {
@@ -29,7 +28,7 @@ static BOOL hasConfigured = NO;
 }
 
 +(NSString *)getAdapterVersion {
-    return @"4.3.1.1";
+    return @"4.4.1.3";
 }
 
 -(id)init {
@@ -54,19 +53,30 @@ static BOOL hasConfigured = NO;
 -(void)setData:(NSDictionary *)data {
     [super setData:data];
 
-    _adColonyAppId = [data objectForKey:@"app_id"];
-    _adShowZoneId = [data objectForKey:@"zone_id"];
+    NSString *adColonyAppId = [data objectForKey:@"app_id"];
+    if ([self isNotNull:adColonyAppId]) {
+        _adColonyAppId = [NSString stringWithFormat:@"%@", adColonyAppId];
+    }
+    NSString *adShowZoneId = [data objectForKey:@"zone_id"];
+    if ([self isNotNull:adShowZoneId]) {
+        _adShowZoneId = [NSString stringWithFormat:@"%@", adShowZoneId];
+    }
     
     NSArray *colonyAllZones = [data objectForKey:@"all_zones"];
-    _adColonyAllZones = colonyAllZones;
+    if ([self isNotNull:colonyAllZones] && [colonyAllZones isKindOfClass:[NSArray class]]) {
+        _adColonyAllZones = colonyAllZones;
+    }
     
-    if (_adColonyAllZones == nil) {
+    if (_adColonyAllZones == nil && _adShowZoneId != nil) {
         _adColonyAllZones = @[_adShowZoneId];
     }
     if (ADFMovieOptions.getTestMode) {
         self.test_flg = YES;
     } else {
-        self.test_flg = [[data objectForKey:@"test_flg"] boolValue];
+        NSNumber *testFlg = [data objectForKey:@"test_flg"];
+        if ([self isNotNull:testFlg] && [testFlg isKindOfClass:[NSNumber class]]) {
+            self.test_flg = [testFlg boolValue];
+        }
     }
 }
 
@@ -79,16 +89,22 @@ static BOOL hasConfigured = NO;
     // 初期化が失敗した場合はAdColonyが自分でリトライする
     static dispatch_once_t adfAdColonyOnceToken;
     dispatch_once(&adfAdColonyOnceToken, ^{
-        AdColonyAppOptions *options = nil;
-        if (self.hasGdprConsent != nil) {
-            options = [AdColonyAppOptions new];
-            options.gdprRequired = self.hasGdprConsent.boolValue;
-            options.gdprConsentString = @"gdpr";
-            options.testMode = self.test_flg;
+        @try {
+            AdColonyAppOptions *options = nil;
+            if (self.hasGdprConsent != nil) {
+                options = [AdColonyAppOptions new];
+                options.testMode = self.test_flg;
+            }
+            [AdColony configureWithAppID:self.adColonyAppId zoneIDs:self.adColonyAllZones options:options completion:^(NSArray<AdColonyZone *> * _Nonnull zones) {
+                hasConfigured = YES;
+                if (self.hasPendingStartAd) {
+                    self.hasPendingStartAd = NO;
+                    [self startAd];
+                }
+            }];
+        } @catch (NSException *exception) {
+            NSLog(@"adcolony configuration exception %@", exception);
         }
-        [AdColony configureWithAppID:_adColonyAppId zoneIDs:_adColonyAllZones options:options completion:^(NSArray<AdColonyZone *> * _Nonnull zones) {
-            hasConfigured = YES;
-        }];
     });
 }
 
@@ -97,8 +113,14 @@ static BOOL hasConfigured = NO;
  */
 -(void)startAd {
     // 初期化に成功したら以降はインタースティシャルのリクエストのみ行う
-    if (hasConfigured) {
-        [AdColony requestInterstitialInZone:_adShowZoneId options:nil andDelegate:self];
+    @try {
+        if (!hasConfigured) {
+            self.hasPendingStartAd = YES;
+        } else if (self.adShowZoneId) {
+            [AdColony requestInterstitialInZone:_adShowZoneId options:nil andDelegate:self];
+        }
+    } @catch (NSException *exception) {
+        [self adnetworkExceptionHandling:exception];
     }
 }
 
@@ -110,7 +132,12 @@ static BOOL hasConfigured = NO;
 
     UIViewController *topMostViewController = [self topMostViewController];
     if (topMostViewController) {
-        [_ad showWithPresentingViewController:topMostViewController];
+        @try {
+            [_ad showWithPresentingViewController:topMostViewController];
+        } @catch (NSException *exception) {
+            [self adnetworkExceptionHandling:exception];
+            [self setCallbackStatus:MovieRewardCallbackPlayFail];
+        }
     }
 
     if (topMostViewController == nil) {
@@ -127,7 +154,12 @@ static BOOL hasConfigured = NO;
 
     // 表示を呼び出す
     if ([self isPrepared]) {
-        [_ad showWithPresentingViewController:viewController];
+        @try {
+            [_ad showWithPresentingViewController:viewController];
+        } @catch (NSException *exception) {
+            [self adnetworkExceptionHandling:exception];
+            [self setCallbackStatus:MovieRewardCallbackPlayFail];
+        }
     }
 }
 

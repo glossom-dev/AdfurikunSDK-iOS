@@ -20,7 +20,7 @@
 @implementation MovieInterstitial6016
 
 +(NSString *)getAdapterVersion {
-    return @"5.9.0.1";
+    return @"6.2.0.2";
 }
 
 -(id)init {
@@ -33,27 +33,41 @@
 - (void)setData:(NSDictionary *)data {
     [super setData:data];
     
-    NSString *placementId = [NSString stringWithFormat:@"%@", [data objectForKey:@"placement_id"]];
-    if (placementId && ![placementId isEqual:[NSNull null]]) {
-        self.placementId = placementId;
+    NSString *placementId = [data objectForKey:@"placement_id"];
+    if ([self isNotNull:placementId]) {
+        self.placementId = [NSString stringWithFormat:@"%@", placementId];
+    }
+    NSNumber *testFlg = [data objectForKey:@"test_flg"];
+    if ([self isNotNull:testFlg] && [testFlg isKindOfClass:[NSNumber class]]) {
+        self.test_flg = [testFlg boolValue];
     }
 }
 
 - (void)initAdnetworkIfNeeded {
-    static dispatch_once_t adfAdColonyOnceToken;
-    dispatch_once(&adfAdColonyOnceToken, ^{
-        if (self.test_flg) {
-            [FBAdSettings addTestDevice:[FBAdSettings testDeviceHash]];
-        } else {
-            [FBAdSettings clearTestDevices];
+    static dispatch_once_t adfFANOnceToken;
+    dispatch_once(&adfFANOnceToken, ^{
+        @try {
+            if (self.test_flg) {
+                [FBAdSettings addTestDevice:[FBAdSettings testDeviceHash]];
+            } else {
+                [FBAdSettings clearTestDevices];
+            }
+        } @catch (NSException *exception) {
+            [self adnetworkExceptionHandling:exception];
         }
     });
 }
 
 - (void)startAd {
-    self.interstitialVideoAd = [[FBInterstitialAd alloc] initWithPlacementID:self.placementId];
-    self.interstitialVideoAd.delegate = self;
-    [self.interstitialVideoAd loadAd];
+    if (self.placementId) {
+        @try {
+            self.interstitialVideoAd = [[FBInterstitialAd alloc] initWithPlacementID:self.placementId];
+            self.interstitialVideoAd.delegate = self;
+            [self.interstitialVideoAd loadAd];
+        } @catch (NSException *exception) {
+            [self adnetworkExceptionHandling:exception];
+        }
+    }
 }
 
 -(BOOL)isClassReference {
@@ -94,7 +108,12 @@
 
     if ([self isPrepared]) {
         if (viewController) {
-            [self.interstitialVideoAd showAdFromRootViewController:viewController];
+            @try {
+                [self.interstitialVideoAd showAdFromRootViewController:viewController];
+            } @catch (NSException *exception) {
+                [self adnetworkExceptionHandling:exception];
+                [self setCallbackStatus:MovieRewardCallbackPlayFail];
+            }
         } else {
             NSLog(@"Error encountered playing ad : viewController cannot be nil");
             [self setCallbackStatus:MovieRewardCallbackPlayFail];

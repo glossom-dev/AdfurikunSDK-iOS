@@ -12,46 +12,55 @@
 @implementation MovieInterstitial6020
 
 +(NSString *)getAdapterVersion {
-    return @"5.13.1.1";
+    return @"5.14.1.2";
 }
 
 - (void)setData:(NSDictionary *)data {
     NSLog(@"mopub inst: setData");
     [super setData:data];
 
-    NSString *adUnitId = [NSString stringWithFormat:@"%@", [data objectForKey:@"ad_unit_id"]];
-    if (adUnitId && ![adUnitId isEqual:[NSNull null]]) {
-        self.adUnitId = adUnitId;
+    NSString *adUnitId = [data objectForKey:@"ad_unit_id"];
+    if ([self isNotNull:adUnitId]) {
+        self.adUnitId = [NSString stringWithFormat:@"%@", adUnitId];
     }
 }
 
 - (void)initAdnetworkIfNeeded {
     NSLog(@"mopub inst: initAdnetworkIfNeeded");
-    if (self.adUnitId && ![self.adUnitId isEqual:[NSNull null]]) {
-        MPMoPubConfiguration *sdkConfig = [[MPMoPubConfiguration alloc] initWithAdUnitIdForAppInitialization:self.adUnitId];
-        [[MoPub sharedInstance] initializeSdkWithConfiguration:sdkConfig completion:^{
-            NSLog(@"mopub inst: SDK has been initted!!!!!");
-            if (self.hasPendingStartAd) {
-                self.hasPendingStartAd = false;
-                [self startAd];
-            }
-        }];
+    if (self.adUnitId) {
+        @try {
+            MPMoPubConfiguration *sdkConfig = [[MPMoPubConfiguration alloc] initWithAdUnitIdForAppInitialization:self.adUnitId];
+            [[MoPub sharedInstance] initializeSdkWithConfiguration:sdkConfig completion:^{
+                NSLog(@"mopub inst: SDK has been initted!!!!!");
+                if (self.hasPendingStartAd) {
+                    self.hasPendingStartAd = false;
+                    [self startAd];
+                }
+            }];
+        } @catch (NSException *exception) {
+            [self adnetworkExceptionHandling:exception];
+        }
     }
 }
 
 - (void)startAd {
-    dispatch_async(dispatch_get_main_queue(), ^{
-        NSLog(@"mopub inst: startAd");
-        if (![MoPub sharedInstance].isSdkInitialized) {
-            NSLog(@"mopub: mopub is not initialized");
-            self.hasPendingStartAd = YES;
-            return;
-        }
-        self.interstitial = [MPInterstitialAdController
-            interstitialAdControllerForAdUnitId:self.adUnitId];
-        self.interstitial.delegate = self;
-        [self.interstitial loadAd]; // Fetch the interstitial ad.
-    });
+    if (self.adUnitId) {
+        dispatch_async(dispatch_get_main_queue(), ^{
+            NSLog(@"mopub inst: startAd");
+            if (![MoPub sharedInstance].isSdkInitialized) {
+                NSLog(@"mopub: mopub is not initialized");
+                self.hasPendingStartAd = YES;
+                return;
+            }
+            @try {
+                self.interstitial = [MPInterstitialAdController interstitialAdControllerForAdUnitId:self.adUnitId];
+                self.interstitial.delegate = self;
+                [self.interstitial loadAd]; // Fetch the interstitial ad.
+            } @catch (NSException *exception) {
+                [self adnetworkExceptionHandling:exception];
+            }
+        });
+    }
 }
 
 -(BOOL)isClassReference {
@@ -83,7 +92,12 @@
 
     if ([self isPrepared]) {
         if (viewController) {
-            [self.interstitial showFromViewController: viewController];
+            @try {
+                [self.interstitial showFromViewController: viewController];
+            } @catch (NSException *exception) {
+                [self adnetworkExceptionHandling:exception];
+                [self setCallbackStatus:MovieRewardCallbackPlayFail];
+            }
         } else {
             NSLog(@"Error encountered playing ad : viewController cannot be nil");
             [self setCallbackStatus:MovieRewardCallbackPlayFail];

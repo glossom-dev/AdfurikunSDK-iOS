@@ -8,12 +8,13 @@
 #import "MovieReward6001.h"
 #import <ADFMovieReward/ADFMovieOptions.h>
 
+#define kUnityAdsStartAdToCallbackInterval 3.0
 
 @interface MovieReward6001()
 @property (nonatomic, strong)NSString *gameId;
 @property (nonatomic, strong)NSString *placement_id;
 @property (nonatomic, assign)BOOL isCompleted;
-@property (nonatomic) BOOL isCalledFetchCompleted;
+@property (nonatomic) BOOL hasSentCallback;
 @property (nonatomic) BOOL test_flg;
 
 @property (strong) UMONPlacementContent *rewardedVideo;
@@ -27,7 +28,7 @@
 }
 
 +(NSString *)getAdapterVersion {
-    return @"3.4.8.1";
+    return @"3.5.1.2";
 }
 
 /**
@@ -36,26 +37,44 @@
 -(void)setData:(NSDictionary *)data {
     [super setData:data];
     
-    self.gameId = [NSString stringWithFormat:@"%@",[data objectForKey:@"game_id"]];
-    NSString *data_placement_id = [data objectForKey:@"placement_id"];
-    if (data_placement_id && ![data_placement_id isEqual:[NSNull null]]) {
-        self.placement_id = [NSString stringWithFormat:@"%@",[data objectForKey:@"placement_id"]];
+    if (ADFMovieOptions.getTestMode) {
+        self.test_flg = YES;
+    } else {
+        NSNumber *testFlg = [data objectForKey:@"test_flg"];
+        if ([self isNotNull:testFlg] && [testFlg isKindOfClass:[NSNumber class]]) {
+            self.test_flg = [testFlg boolValue];
+        }
     }
-    self.test_flg = [[data objectForKey:@"test_flg"] boolValue];
+
+    NSString *dataGameId = [data objectForKey:@"game_id"];
+    if ([self isNotNull:dataGameId]) {
+        self.gameId = [NSString stringWithFormat:@"%@", dataGameId];
+    }
+    NSString *dataPlacementId = [data objectForKey:@"placement_id"];
+    if ([self isNotNull:dataPlacementId]) {
+        self.placement_id = [NSString stringWithFormat:@"%@",dataPlacementId];
+    }
+    
     _isCompleted = NO;
 }
 
 -(void)initAdnetworkIfNeeded {
-    MovieDelegate6001 *delegate = [MovieDelegate6001 sharedInstance];
-    [delegate setMovieReward:self inZone:self.placement_id];
-    [UnityServices setDebugMode:self.test_flg];
-    if (![UnityServices isInitialized]) {
-        __weak MovieReward6001 *weakSelf = self;
-        dispatch_queue_t queue = dispatch_get_main_queue();
-        dispatch_async(queue, ^{
-            [UnityAds addDelegate:[MovieDelegate6001 sharedInstance]];
-            [UnityAds initialize:weakSelf.gameId];
-        });
+    if (self.gameId && self.placement_id) {
+        MovieDelegate6001 *delegate = [MovieDelegate6001 sharedInstance];
+        [delegate setMovieReward:self inZone:self.placement_id];
+        [UnityServices setDebugMode:self.test_flg];
+        if (![UnityServices isInitialized]) {
+            __weak MovieReward6001 *weakSelf = self;
+            dispatch_queue_t queue = dispatch_get_main_queue();
+            dispatch_async(queue, ^{
+                @try {
+                    [UnityAds addDelegate:[MovieDelegate6001 sharedInstance]];
+                    [UnityAds initialize:weakSelf.gameId];
+                } @catch (NSException *exception) {
+                    [weakSelf adnetworkExceptionHandling:exception];
+                }
+            });
+        }
     }
 }
 
@@ -63,19 +82,25 @@
  *  広告の読み込みを開始する
  */
 -(void)startAd {
-    self.isCalledFetchCompleted = false;
-    [self isPrepared];
+    self.hasSentCallback = false;
+    if ([self isPrepared]) {
+        [self sendFetchComplete];
+    } else {
+        dispatch_after(dispatch_time(DISPATCH_TIME_NOW, kUnityAdsStartAdToCallbackInterval * NSEC_PER_SEC), dispatch_get_main_queue(), ^{
+            if (self.hasSentCallback == false) {
+                if ([self isPrepared]) {
+                    [self sendFetchComplete];
+                } else {
+                    [self sendFetchFail];
+                }
+            }
+        });
+    }
 }
 
 -(BOOL)isPrepared{
     if (self.delegate != nil) {
-        BOOL isReady = [UnityAds isReady:self.placement_id];
-        if (self.isCalledFetchCompleted == false && isReady) {
-            self.isCalledFetchCompleted = true;
-            MovieDelegate6001 *delegate = [MovieDelegate6001 sharedInstance];
-            [delegate setCallbackStatus:MovieRewardCallbackFetchComplete zone:self.placement_id];
-        }
-        return isReady;
+        return [UnityAds isReady:self.placement_id];
     }
     return NO;
 }
@@ -91,7 +116,13 @@
     [super showAdWithPresentingViewController:viewController];
 
     if (viewController != nil && self.isPrepared) {
-        [UnityAds show:viewController placementId:self.placement_id];
+        @try {
+            [UnityAds show:viewController placementId:self.placement_id];
+        } @catch (NSException *exception) {
+            [self adnetworkExceptionHandling:exception];
+            MovieDelegate6001 *delegate = [MovieDelegate6001 sharedInstance];
+            [delegate setCallbackStatus:MovieRewardCallbackPlayFail zone:self.placement_id];
+        }
     } else {
         NSLog(@"Error encountered playing ad : could not fetch topmost viewcontroller");
         [self setErrorWithMessage:@"Error encountered playing ad : could not fetch topmost viewcontroller" code:0];
@@ -135,6 +166,20 @@
     _gameId = nil;
 }
 
+-(void)sendFetchComplete {
+    if (self.hasSentCallback == false) {
+        self.hasSentCallback = true;
+        [self setCallbackStatus:MovieRewardCallbackFetchComplete];
+    }
+}
+
+-(void)sendFetchFail {
+    if (self.hasSentCallback == false) {
+        self.hasSentCallback = true;
+        [self setCallbackStatus:MovieRewardCallbackFetchFail];
+    }
+}
+
 @end
 
 @implementation MovieDelegate6001
@@ -157,8 +202,7 @@
     MovieReward6001 *movieReward = (MovieReward6001 *)[self getMovieRewardWithZone:placementId];
     if ([placementId isEqualToString:movieReward.placement_id]) {
         NSLog(@"%s %@", __func__, placementId);
-        movieReward.isCalledFetchCompleted = true;
-        [self setCallbackStatus:MovieRewardCallbackFetchComplete zone:placementId];
+        [movieReward sendFetchComplete];
     }
 }
 

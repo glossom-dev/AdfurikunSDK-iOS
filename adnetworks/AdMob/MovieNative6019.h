@@ -29,4 +29,8 @@ NS_ASSUME_NONNULL_BEGIN
 
 @end
 
+@interface MovieNative6060 : MovieNative6019
+
+@end
+
 NS_ASSUME_NONNULL_END

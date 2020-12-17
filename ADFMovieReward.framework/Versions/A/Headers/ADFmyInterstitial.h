@@ -6,7 +6,7 @@
 //  Copyright © 2019 A .D F. U. L. L. Y Co., Ltd. All rights reserved.
 //
 
-#import <ADFMovieReward/ADFMovieReward.h>
+#import "ADFmyMovieInterstitial.h"
 
 NS_ASSUME_NONNULL_BEGIN
 

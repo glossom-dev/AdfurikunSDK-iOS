@@ -18,7 +18,7 @@
 @implementation MovieReward6020
 
 +(NSString *)getAdapterVersion {
-    return @"5.13.1.1";
+    return @"5.14.1.2";
 }
 
 /**
@@ -28,23 +28,27 @@
     NSLog(@"mopub: setData");
     [super setData:data];
     
-    NSString *adUnitId = [NSString stringWithFormat:@"%@", [data objectForKey:@"ad_unit_id"]];
-    if (adUnitId && ![adUnitId isEqual:[NSNull null]]) {
-        self.adUnitId = adUnitId;
+    NSString *adUnitId = [data objectForKey:@"ad_unit_id"];
+    if ([self isNotNull:adUnitId]) {
+        self.adUnitId = [NSString stringWithFormat:@"%@", adUnitId];
     }
 }
 
 -(void)initAdnetworkIfNeeded {
     NSLog(@"mopub: initAdnetworkIfNeeded");
-    if (self.adUnitId && ![self.adUnitId isEqual:[NSNull null]]) {
-        MPMoPubConfiguration *sdkConfig = [[MPMoPubConfiguration alloc] initWithAdUnitIdForAppInitialization:self.adUnitId];
-        [[MoPub sharedInstance] initializeSdkWithConfiguration:sdkConfig completion:^{
-            NSLog(@"mopub: SDK has been initted!!!!!");
-            if (self.hasPendingStartAd) {
-               self.hasPendingStartAd = false;
-               [self startAd];
-           }
-        }];
+    if (self.adUnitId) {
+        @try {
+            MPMoPubConfiguration *sdkConfig = [[MPMoPubConfiguration alloc] initWithAdUnitIdForAppInitialization:self.adUnitId];
+            [[MoPub sharedInstance] initializeSdkWithConfiguration:sdkConfig completion:^{
+                NSLog(@"mopub: SDK has been initted!!!!!");
+                if (self.hasPendingStartAd) {
+                    self.hasPendingStartAd = false;
+                    [self startAd];
+                }
+            }];
+        } @catch (NSException *exception) {
+            [self adnetworkExceptionHandling:exception];
+        }
     }
 }
 
@@ -52,16 +56,22 @@
  *  広告の読み込みを開始する
  */
 -(void)startAd {
-    dispatch_async(dispatch_get_main_queue(), ^{
-        NSLog(@"mopub: startAd");
-        if (![MoPub sharedInstance].isSdkInitialized) {
-            NSLog(@"mopub: mopub is not initialized");
-            self.hasPendingStartAd = YES;
-            return;
-        }
-        [MPRewardedVideo setDelegate:self forAdUnitId:self.adUnitId];
-        [MPRewardedVideo loadRewardedVideoAdWithAdUnitID:self.adUnitId withMediationSettings:[[NSMutableArray alloc] init]];
-    });
+    if (self.adUnitId) {
+        dispatch_async(dispatch_get_main_queue(), ^{
+            NSLog(@"mopub: startAd");
+            if (![MoPub sharedInstance].isSdkInitialized) {
+                NSLog(@"mopub: mopub is not initialized");
+                self.hasPendingStartAd = YES;
+                return;
+            }
+            @try {
+                [MPRewardedVideo setDelegate:self forAdUnitId:self.adUnitId];
+                [MPRewardedVideo loadRewardedVideoAdWithAdUnitID:self.adUnitId withMediationSettings:[[NSMutableArray alloc] init]];
+            } @catch (NSException *exception) {
+                [self adnetworkExceptionHandling:exception];
+            }
+        });
+    }
 }
 
 -(BOOL)isPrepared{
@@ -90,19 +100,23 @@
 -(void)showAdWithPresentingViewController:(UIViewController *)viewController {
     NSLog(@"mopub: showAdWithPresentingViewController");
     [super showAdWithPresentingViewController:viewController];
-
+    
     if ([self isPrepared]) {
         if (viewController) {
-            NSArray *ads = [MPRewardedVideo availableRewardsForAdUnitID:self.adUnitId];
-            NSLog(@"mopub: ad count %lu", (unsigned long)ads.count);
-            [MPRewardedVideo presentRewardedVideoAdForAdUnitID:self.adUnitId fromViewController:viewController withReward:ads[0]];
+            @try {
+                NSArray *ads = [MPRewardedVideo availableRewardsForAdUnitID:self.adUnitId];
+                NSLog(@"mopub: ad count %lu", (unsigned long)ads.count);
+                [MPRewardedVideo presentRewardedVideoAdForAdUnitID:self.adUnitId fromViewController:viewController withReward:ads[0]];
+            } @catch (NSException *exception) {
+                [self adnetworkExceptionHandling:exception];
+                [self setCallbackStatus:MovieRewardCallbackPlayFail];
+            }
         } else {
             NSLog(@"Error encountered playing ad : viewController cannot be nil");
             [self setCallbackStatus:MovieRewardCallbackPlayFail];
         }
     }
 }
-
 
 /**
  * 対象のクラスがあるかどうか？

@@ -26,7 +26,7 @@
 }
 
 +(NSString *)getAdapterVersion {
-    return @"6.13.5.1";
+    return @"6.14.8.2";
 }
 
 /**
@@ -36,27 +36,44 @@
 {
     [super setData:data];
     
-    self.appLovinSdkKey = [data objectForKey:@"sdk_key"];
+    NSString *appLovinSdkKey = [data objectForKey:@"sdk_key"];
+    if ([self isNotNull:appLovinSdkKey]) {
+        self.appLovinSdkKey = [NSString stringWithFormat:@"%@", appLovinSdkKey];
+    }
+    
     NSDictionary* infoDict = [[NSBundle mainBundle] infoDictionary];
     if ( ![infoDict objectForKey:@"AppLovinSdkKey"] ) {
-        [infoDict setValue:self.appLovinSdkKey  forKey:@"AppLovinSdkKey"];
+        [infoDict setValue:self.appLovinSdkKey forKey:@"AppLovinSdkKey"];
     }
     //申請されたパッケージ名を受け取り
-    self.submittedPackageName = [data objectForKey:@"package_name"];
-    self.zoneIdentifier = [data objectForKey:@"zone_id"];
+    NSString *submittedPackageName = [data objectForKey:@"package_name"];
+    if ([self isNotNull:submittedPackageName]) {
+        self.submittedPackageName = [NSString stringWithFormat:@"%@", submittedPackageName];
+    }
+    
+    NSString *zoneIdentifier = [data objectForKey:@"zone_id"];
+    if ([self isNotNull:zoneIdentifier]) {
+        self.zoneIdentifier = [NSString stringWithFormat:@"%@", zoneIdentifier];
+    }
 }
 
 -(void)initAdnetworkIfNeeded {
-    // Delegateを設定
-    [MovieConfigure6000 configure];
-    if (!self.incentivizedInterstitial) {
-        if (self.zoneIdentifier && ![self.zoneIdentifier isEqual: [NSNull null]] && [self.zoneIdentifier length] != 0) {
-            self.incentivizedInterstitial = [[ALIncentivizedInterstitialAd alloc] initWithZoneIdentifier:self.zoneIdentifier sdk:[ALSdk sharedWithKey:self.appLovinSdkKey]];
-        } else {
-            self.incentivizedInterstitial = [[ALIncentivizedInterstitialAd alloc] initWithSdk:[ALSdk sharedWithKey:self.appLovinSdkKey]];
+    if (self.appLovinSdkKey) {
+        // Delegateを設定
+        [MovieConfigure6000 configure];
+        if (!self.incentivizedInterstitial) {
+            @try {
+                if (self.zoneIdentifier && ![self.zoneIdentifier isEqual: [NSNull null]] && [self.zoneIdentifier length] != 0) {
+                    self.incentivizedInterstitial = [[ALIncentivizedInterstitialAd alloc] initWithZoneIdentifier:self.zoneIdentifier sdk:[ALSdk sharedWithKey:self.appLovinSdkKey]];
+                } else {
+                    self.incentivizedInterstitial = [[ALIncentivizedInterstitialAd alloc] initWithSdk:[ALSdk sharedWithKey:self.appLovinSdkKey]];
+                }
+            } @catch (NSException *exception) {
+                [self adnetworkExceptionHandling:exception];
+            }
+            self.incentivizedInterstitial.adDisplayDelegate = self;
+            self.incentivizedInterstitial.adVideoPlaybackDelegate = self;
         }
-        self.incentivizedInterstitial.adDisplayDelegate = self;
-        self.incentivizedInterstitial.adVideoPlaybackDelegate = self;
     }
 }
 
@@ -65,8 +82,13 @@
  */
 -(void)startAd
 {
-    //NSLog(@"startAd");
-    [self.incentivizedInterstitial preloadAndNotify: self];
+    if (self.incentivizedInterstitial) {
+        @try {
+            [self.incentivizedInterstitial preloadAndNotify: self];
+        } @catch (NSException *exception) {
+            [self adnetworkExceptionHandling:exception];
+        }
+    }
 }
 
 -(BOOL)isPrepared{
@@ -89,9 +111,15 @@
     [super showAd];
 
     if (self.incentivizedInterstitial && self.incentivizedInterstitial.isReadyForDisplay) {
-        [self.incentivizedInterstitial show];
+        @try {
+            [self.incentivizedInterstitial show];
+        } @catch (NSException *exception) {
+            [self adnetworkExceptionHandling:exception];
+            [self setCallbackStatus:MovieRewardCallbackPlayFail];
+        }
     } else{
         NSLog(@"could not load ad");
+        [self setCallbackStatus:MovieRewardCallbackPlayFail];
     }
 }
 
@@ -196,7 +224,11 @@
 + (void)configure {
     static dispatch_once_t onceToken;
     dispatch_once(&onceToken, ^{
-        [ALSdk initializeSdk];
+        @try {
+            [ALSdk initializeSdk];
+        } @catch (NSException *exception) {
+            NSLog(@"adnetwork exception : %@", exception);
+        }
     });
 }
 @end

@@ -21,40 +21,58 @@
 @implementation MovieReward6016
 
 +(NSString *)getAdapterVersion {
-    return @"5.9.0.1";
+    return @"6.2.0.2";
 }
 
 - (void)setData:(NSDictionary *)data {
     [super setData:data];
     
-    NSString *placementId = [NSString stringWithFormat:@"%@", [data objectForKey:@"placement_id"]];
-    if (placementId && ![placementId isEqual:[NSNull null]]) {
-        self.placementId = placementId;
-        NSInteger animatedValue = [[data valueForKey:@"is_animated"] integerValue];
+    NSString *placementId = [data objectForKey:@"placement_id"];
+    if ([self isNotNull:placementId]) {
+        self.placementId = [NSString stringWithFormat:@"%@", placementId];
+    }
+    
+    NSNumber *isAnimated = [data objectForKey:@"is_animated"];
+    if ([self isNotNull:isAnimated] && [isAnimated isKindOfClass:[NSNumber class]]) {
+        NSInteger animatedValue = isAnimated.integerValue;
         self.isAnimated = animatedValue == 1 ? YES : NO;
-        if (ADFMovieOptions.getTestMode) {
-            self.test_flg = YES;
-        } else {
-            self.test_flg = [[data objectForKey:@"test_flg"] boolValue];
+    }
+    
+    if (ADFMovieOptions.getTestMode) {
+        self.test_flg = YES;
+    } else {
+        NSNumber *testFlg = [data objectForKey:@"test_flg"];
+        if ([self isNotNull:testFlg] && [testFlg isKindOfClass:[NSNumber class]]) {
+            self.test_flg = [testFlg boolValue];
         }
     }
 }
 
 - (void)initAdnetworkIfNeeded {
-    static dispatch_once_t adfAdColonyOnceToken;
-    dispatch_once(&adfAdColonyOnceToken, ^{
-        if (self.test_flg) {
-            [FBAdSettings addTestDevice:[FBAdSettings testDeviceHash]];
-        } else {
-            [FBAdSettings clearTestDevices];
+    static dispatch_once_t adfFANOnceToken;
+    dispatch_once(&adfFANOnceToken, ^{
+        @try {
+            if (self.test_flg) {
+                [FBAdSettings addTestDevice:[FBAdSettings testDeviceHash]];
+            } else {
+                [FBAdSettings clearTestDevices];
+            }
+        } @catch (NSException *exception) {
+            [self adnetworkExceptionHandling:exception];
         }
     });
 }
 
 - (void)startAd {
-    self.rewardedVideoAd = [[FBRewardedVideoAd alloc] initWithPlacementID:self.placementId];
-    self.rewardedVideoAd.delegate = self;
-    [self.rewardedVideoAd loadAd];
+    if (self.placementId) {
+        @try {
+            self.rewardedVideoAd = [[FBRewardedVideoAd alloc] initWithPlacementID:self.placementId];
+            self.rewardedVideoAd.delegate = self;
+            [self.rewardedVideoAd loadAd];
+        } @catch (NSException *exception) {
+            [self adnetworkExceptionHandling:exception];
+        }
+    }
 }
 
 -(BOOL)isClassReference {
@@ -90,7 +108,12 @@
 
     if ([self isPrepared]) {
         if (viewController) {
-            [self.rewardedVideoAd showAdFromRootViewController:viewController animated:self.isAnimated];
+            @try {
+                [self.rewardedVideoAd showAdFromRootViewController:viewController animated:self.isAnimated];
+            } @catch (NSException *exception) {
+                [self adnetworkExceptionHandling:exception];
+                [self setCallbackStatus:MovieRewardCallbackPlayFail];
+            }
         } else {
             NSLog(@"Error encountered playing ad : viewController cannot be nil");
             [self setCallbackStatus:MovieRewardCallbackPlayFail];
@@ -104,7 +127,7 @@
 }
 
 - (void)rewardedVideoAd:(FBRewardedVideoAd *)rewardedVideoAd didFailWithError:(NSError *)error {
-    NSLog(@"MovieReward6016: reward video loading failed \n%@", error);
+    NSLog(@"MovieReward6016: reward video loading failed. error : %@", error);
     [self setErrorWithMessage:error.localizedDescription code:error.code];
     [self setCallbackStatus:MovieRewardCallbackFetchFail];
 }

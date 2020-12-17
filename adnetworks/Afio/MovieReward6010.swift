@@ -20,7 +20,7 @@ class MovieReward6010: ADFmyMovieRewardInterface {
     private var didLoad = false
 
     override class func getAdapterVersion() -> String! {
-        return "6.0.4.1"
+        return "6.1.0.1"
     }
     
     override func setData(_ data: [AnyHashable : Any]!) {
