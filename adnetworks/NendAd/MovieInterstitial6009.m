@@ -247,3 +247,15 @@
 }
 
 @end
+
+@implementation MovieInterstitial6080
+
+@end
+
+@implementation MovieInterstitial6081
+
+@end
+
+@implementation MovieInterstitial6082
+
+@end

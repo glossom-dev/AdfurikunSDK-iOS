@@ -10,3 +10,15 @@
 @interface MovieInterstitial6009 : ADFmyMovieRewardInterface
 
 @end
+
+@interface MovieInterstitial6080 : MovieInterstitial6009
+
+@end
+
+@interface MovieInterstitial6081 : MovieInterstitial6009
+
+@end
+
+@interface MovieInterstitial6082 : MovieInterstitial6009
+
+@end

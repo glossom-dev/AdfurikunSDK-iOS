@@ -10,3 +10,15 @@
 @interface MovieReward6009 : ADFmyMovieRewardInterface
 
 @end
+
+@interface MovieReward6080 : MovieReward6009
+
+@end
+
+@interface MovieReward6081 : MovieReward6009
+
+@end
+
+@interface MovieReward6082 : MovieReward6009
+
+@end

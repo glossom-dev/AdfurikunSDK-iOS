@@ -279,3 +279,14 @@
 
 @end
 
+@implementation MovieNative6080
+
+@end
+
+@implementation MovieNative6081
+
+@end
+
+@implementation MovieNative6082
+
+@end

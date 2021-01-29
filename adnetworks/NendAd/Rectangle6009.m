@@ -15,3 +15,15 @@
 }
 
 @end
+
+@implementation Rectangle6080
+
+@end
+
+@implementation Rectangle6081
+
+@end
+
+@implementation Rectangle6082
+
+@end

@@ -22,4 +22,16 @@ NS_ASSUME_NONNULL_BEGIN
 
 @end
 
+@interface Banner6080 : Banner6009
+
+@end
+
+@interface Banner6081 : Banner6009
+
+@end
+
+@interface Banner6082 : Banner6009
+
+@end
+
 NS_ASSUME_NONNULL_END

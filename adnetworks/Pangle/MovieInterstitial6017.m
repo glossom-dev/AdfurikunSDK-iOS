@@ -26,7 +26,7 @@
 }
 
 +(NSString *)getAdapterVersion {
-    return @"3.3.0.5.2";
+    return @"3.3.6.2.3";
 }
 
 -(id)init {
@@ -152,5 +152,17 @@
 - (void)fullscreenVideoAdDidClickSkip:(BUFullscreenVideoAd *)fullscreenVideoAd {
     NSLog(@"%s", __func__);
 }
+
+@end
+
+@implementation MovieInterstitial6090
+
+@end
+
+@implementation MovieInterstitial6091
+
+@end
+
+@implementation MovieInterstitial6092
 
 @end

@@ -27,7 +27,7 @@
 }
 
 +(NSString *)getAdapterVersion {
-    return @"3.3.0.5.2";
+    return @"3.3.6.2.3";
 }
 
 - (void)setData:(NSDictionary *)data {
@@ -150,5 +150,17 @@
 - (void)rewardedVideoAdDidClickSkip:(BURewardedVideoAd *)rewardedVideoAd {
     NSLog(@"%s", __func__);
 }
+
+@end
+
+@implementation MovieReward6090
+
+@end
+
+@implementation MovieReward6091
+
+@end
+
+@implementation MovieReward6092
 
 @end

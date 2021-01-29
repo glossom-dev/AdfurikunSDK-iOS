@@ -18,3 +18,15 @@
 @interface MovieNativeAdInfo6009 : ADFMovieNativeAdInfo
 
 @end
+
+@interface MovieNative6080 : MovieNative6009
+
+@end
+
+@interface MovieNative6081 : MovieNative6009
+
+@end
+
+@interface MovieNative6082 : MovieNative6009
+
+@end

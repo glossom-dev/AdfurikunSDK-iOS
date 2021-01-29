@@ -343,3 +343,15 @@ This method is called when videoadview end of play.
 }
 
 @end
+
+@implementation MovieNative6090
+
+@end
+
+@implementation MovieNative6091
+
+@end
+
+@implementation MovieNative6092
+
+@end
