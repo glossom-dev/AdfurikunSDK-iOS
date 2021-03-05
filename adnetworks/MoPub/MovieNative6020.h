@@ -6,7 +6,7 @@
 //  Copyright © 2020 Glossom, Inc. All rights reserved.
 //
 
-#import <MoPub/MoPub.h>
+#import "MoPub.h"
 #import <ADFMovieReward/ADFMovieReward.h>
 
 NS_ASSUME_NONNULL_BEGIN

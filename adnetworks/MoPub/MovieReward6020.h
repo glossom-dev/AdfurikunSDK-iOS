@@ -9,8 +9,8 @@
 #import <ADFMovieReward/ADFmyMovieRewardInterface.h>
 #import <ADFMovieReward/ADFmyMovieDelegateBase.h>
 
-#import <MoPub/MoPub.h>
-#import <MoPub/MPRewardedVideo.h>
+#import "MoPub.h"
+#import "MPRewardedVideo.h"
 
 @interface MovieReward6020 : ADFmyMovieRewardInterface<MPRewardedVideoDelegate>
 
