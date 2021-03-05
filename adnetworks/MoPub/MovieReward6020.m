@@ -12,13 +12,12 @@
 
 @property (nonatomic, strong) NSString *adUnitId;
 @property (nonatomic) MPRewardedVideo *rewardVideoAd;
-@property (nonatomic) BOOL hasPendingStartAd;
 
 @end
 @implementation MovieReward6020
 
-+(NSString *)getAdapterVersion {
-    return @"5.14.1.2";
++ (NSString *)getAdapterRevisionVersion {
+    return @"3";
 }
 
 /**
@@ -36,15 +35,16 @@
 
 -(void)initAdnetworkIfNeeded {
     NSLog(@"mopub: initAdnetworkIfNeeded");
+    if (![self needsToInit]) {
+        return;
+    }
+
     if (self.adUnitId) {
         @try {
             MPMoPubConfiguration *sdkConfig = [[MPMoPubConfiguration alloc] initWithAdUnitIdForAppInitialization:self.adUnitId];
             [[MoPub sharedInstance] initializeSdkWithConfiguration:sdkConfig completion:^{
                 NSLog(@"mopub: SDK has been initted!!!!!");
-                if (self.hasPendingStartAd) {
-                    self.hasPendingStartAd = false;
-                    [self startAd];
-                }
+                [self initCompleteAndRetryStartAdIfNeeded];
             }];
         } @catch (NSException *exception) {
             [self adnetworkExceptionHandling:exception];
@@ -56,14 +56,13 @@
  *  広告の読み込みを開始する
  */
 -(void)startAd {
+    if (![self canStartAd]) {
+        return;
+    }
+
     if (self.adUnitId) {
         dispatch_async(dispatch_get_main_queue(), ^{
             NSLog(@"mopub: startAd");
-            if (![MoPub sharedInstance].isSdkInitialized) {
-                NSLog(@"mopub: mopub is not initialized");
-                self.hasPendingStartAd = YES;
-                return;
-            }
             @try {
                 [MPRewardedVideo setDelegate:self forAdUnitId:self.adUnitId];
                 [MPRewardedVideo loadRewardedVideoAdWithAdUnitID:self.adUnitId withMediationSettings:[[NSMutableArray alloc] init]];
@@ -133,14 +132,6 @@
         return NO;
     }
     return YES;
-}
-
-/**
- *  広告の読み込みを中止
- */
--(void)cancel {
-// 2.0で廃止  [UnityAds stopAll];
-    NSLog(@"mopub: cancel");
 }
 
 -(void)dealloc {

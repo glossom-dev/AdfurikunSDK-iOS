@@ -99,10 +99,27 @@ typedef NS_ENUM(NSInteger, ADFMovieOptions_Sound) {
 + (void)setTransitInApp:(BOOL)transitInApp;
 + (BOOL)getTransitInApp;
 
+/**
+ *  配信情報が有効期限以内の場合、アプリ起動時に配信情報のCacheデータを使うようにする
+ *
+ */
 + (void)enableStartupCache;
 + (BOOL)isEnableStartupCache;
 
+/**
+ *  配信情報が有効期限内でもLoadする度に必ず配信情報を取得する
+ *  検証目的以外には使わないでください。
+ *
+ */
 + (void)disableAdnetworkInfoCacheForDebug;
 + (BOOL)isDisableAdnetworkInfoCacheForDebug;
+
+/**
+ *  配信情報の有効期限が切れても必ず配信情報のCacheを使うようにする
+ *
+ *  @param appIdList : 枠IDリスト
+ */
++ (void)setAppIdsForStartupCacheRegardlessOfExpiring:( NSArray <NSString *>* _Nonnull)appIdList;
++ (NSArray <NSString *>* _Nullable)getAppIdsForStartupCacheRegardlessOfExpiring;
 
 @end

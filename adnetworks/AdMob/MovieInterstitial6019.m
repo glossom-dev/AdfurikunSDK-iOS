@@ -10,16 +10,16 @@
 #import <ADFMovieReward/ADFMovieOptions.h>
 #import <GoogleMobileAds/GoogleMobileAds.h>
 
-@interface MovieInterstitial6019 ()<GADInterstitialDelegate>
-@property(nonatomic) GADInterstitial *interstitial;
+@interface MovieInterstitial6019 ()<GADFullScreenContentDelegate>
+@property(nonatomic) GADInterstitialAd *interstitial;
 @property(nonatomic) NSString *unitID;
 @property (nonatomic) BOOL testFlg;
 @end
 
 @implementation MovieInterstitial6019
 
-+(NSString *)getAdapterVersion {
-    return @"7.68.0.2";
++ (NSString *)getAdapterRevisionVersion {
+    return @"4";
 }
 
 -(id)init {
@@ -55,7 +55,7 @@
 }
 
 - (BOOL)isPrepared {
-    return self.interstitial.isReady;
+    return [self.interstitial canPresentFromRootViewController:[self topMostViewController] error:nil];
 }
 
 - (void)startAd {
@@ -63,15 +63,24 @@
         return;
     }
     
-    if (!self.interstitial || !self.interstitial.isReady) {
-        @try {
-            self.interstitial = [[GADInterstitial alloc] initWithAdUnitID:self.unitID];
-            self.interstitial.delegate = self;
-            GADRequest *request = [GADRequest request];
-            [self.interstitial loadRequest:request];
-        } @catch (NSException *exception) {
-            [self adnetworkExceptionHandling:exception];
-        }
+    if ([self isPrepared]) {
+        [self adRequestSccess:self.interstitial];
+        return;
+    }
+    
+    @try {
+        GADRequest *request = [GADRequest request];
+        [GADInterstitialAd loadWithAdUnitID:self.unitID
+                                    request:request
+                          completionHandler:^(GADInterstitialAd * _Nullable interstitialAd, NSError * _Nullable error) {
+            if (error) {
+                [self adRequestFailure:error];
+            } else {
+                [self adRequestSccess:interstitialAd];
+            }
+        }];
+    } @catch (NSException *exception) {
+        [self adnetworkExceptionHandling:exception];
     }
 }
 
@@ -82,7 +91,7 @@
 - (void)showAdWithPresentingViewController:(UIViewController *)viewController {
     [super showAdWithPresentingViewController:viewController];
 
-    if (self.interstitial.isReady) {
+    if ([self isPrepared]) {
         @try {
             [self.interstitial presentFromRootViewController:viewController];
         } @catch (NSException *exception) {
@@ -93,46 +102,59 @@
 }
 
 - (BOOL)isClassReference {
-    Class clazz = NSClassFromString(@"GADInterstitial");
+    Class clazz = NSClassFromString(@"GADInterstitialAd");
     if (clazz) {
-        NSLog(@"Found Class: GADInterstitial");
+        NSLog(@"Found Class: GADInterstitialAd");
     } else {
-        NSLog(@"Not found Class: GADInterstitial");
+        NSLog(@"Not found Class: GADInterstitialAd");
         return NO;
     }
     return YES;
 }
 
-#pragma mark - GADInterstitialDelegate
-
-- (void)interstitialDidReceiveAd:(GADInterstitial *)ad {
+- (void)adRequestSccess:(GADInterstitialAd * _Nullable)interstitialAd {
     NSLog(@"%s", __FUNCTION__);
-    [self setCallbackStatus:MovieRewardCallbackFetchComplete];
+    if ([self isNotNull:interstitialAd]) {
+        self.interstitial = interstitialAd;
+        self.interstitial.fullScreenContentDelegate = self;
+        [self setCallbackStatus:MovieRewardCallbackFetchComplete];
+    } else {
+        NSString *message = @"interstitialAd is null";
+        NSError *error = [NSError errorWithDomain:@"jp.glossom.adfurikun.error"
+                                             code:0
+                                         userInfo:@{NSLocalizedDescriptionKey: message,
+                                                    NSLocalizedRecoverySuggestionErrorKey: message}];
+        [self adRequestFailure:error];
+    }
 }
 
-- (void)interstitial:(GADInterstitial *)ad didFailToReceiveAdWithError:(GADRequestError *)error {
+- (void)adRequestFailure:(NSError *)error {
     NSLog(@"%s error: %@", __FUNCTION__, error);
     [self setErrorWithMessage:error.localizedDescription code:error.code];
     [self setCallbackStatus:MovieRewardCallbackFetchFail];
 }
 
-- (void)interstitialWillPresentScreen:(GADInterstitial *)ad {
+#pragma mark - GADFullScreenContentDelegate
+
+- (void)adDidRecordImpression:(nonnull id<GADFullScreenPresentingAd>)ad {
     NSLog(@"%s", __FUNCTION__);
     [self setCallbackStatus:MovieRewardCallbackPlayStart];
 }
 
-- (void)interstitialWillDismissScreen:(GADInterstitial *)ad {
+- (void)ad:(nonnull id<GADFullScreenPresentingAd>)ad didFailToPresentFullScreenContentWithError:(nonnull NSError *)error {
+    NSLog(@"%s", __FUNCTION__);
+    [self setErrorWithMessage:error.localizedDescription code:error.code];
+    [self setCallbackStatus:MovieRewardCallbackPlayFail];
+}
+
+- (void)adDidPresentFullScreenContent:(nonnull id<GADFullScreenPresentingAd>)ad {
+    NSLog(@"%s called", __func__);
+}
+
+- (void)adDidDismissFullScreenContent:(nonnull id<GADFullScreenPresentingAd>)ad {
     NSLog(@"%s", __FUNCTION__);
     [self setCallbackStatus:MovieRewardCallbackPlayComplete];
-}
-
-- (void)interstitialDidDismissScreen:(GADInterstitial *)ad {
-    NSLog(@"%s", __FUNCTION__);
     [self setCallbackStatus:MovieRewardCallbackClose];
-}
-
-- (void)interstitialWillLeaveApplication:(GADInterstitial *)ad {
-    NSLog(@"%s", __FUNCTION__);
 }
 
 @end

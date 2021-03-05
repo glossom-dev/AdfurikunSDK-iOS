@@ -7,13 +7,19 @@
 //
 
 #import "Banner6019.h"
+#import <WebKit/WebKit.h>
 
 #import <ADFMovieReward/ADFMovieOptions.h>
 #import <GoogleMobileAds/GoogleMobileAds.h>
 
 @implementation Banner6019
 
++ (NSString *)getAdapterRevisionVersion {
+    return @"2";
+}
+
 - (void)setData:(NSDictionary *)data {
+    [[GADMobileAds sharedInstance] startWithCompletionHandler:nil];
     [super setData:data];
     
     NSString* admobId = [data objectForKey:@"ad_unit_id"];
@@ -23,19 +29,6 @@
     NSNumber *testFlg = [data objectForKey:@"test_flg"];
     if ([self isNotNull:testFlg] && [testFlg isKindOfClass:[NSNumber class]]) {
         self.testFlg = [testFlg boolValue];
-    }
-    
-    NSNumber *pixelRateNumber = data[@"pixelRate"];
-    if ([self isNotNull:pixelRateNumber] && [pixelRateNumber isKindOfClass:[NSNumber class]]) {
-        self.viewabilityPixelRate = pixelRateNumber.intValue;
-    }
-    NSNumber *displayTimeNumber = data[@"displayTime"];
-    if ([self isNotNull:displayTimeNumber] && [displayTimeNumber isKindOfClass:[NSNumber class]]) {
-        self.viewabilityDisplayTime = displayTimeNumber.intValue;
-    }
-    NSNumber *timerIntervalNumber = data[@"timerInterval"];
-    if ([self isNotNull:timerIntervalNumber] && [timerIntervalNumber isKindOfClass:[NSNumber class]]) {
-        self.viewabilityTimerInterval = timerIntervalNumber.intValue;
     }
 }
 
@@ -71,7 +64,7 @@
         self.bannerView.rootViewController = [self topMostViewController];
         self.bannerView.delegate = self;
         
-        GADRequest *request = [GADRequest new];
+        GADRequest *request = [GADRequest request];
         if (option) {
             NSLog(@"custom event option : %@", option);
             NSString *label = option[@"label"];
@@ -80,8 +73,8 @@
                 [extras setExtras:option forLabel:label];
                 [request registerAdNetworkExtras:extras];
             }
-            [self.bannerView loadRequest:request];
         }
+        [self.bannerView loadRequest:request];
     } @catch (NSException *exception) {
         [self adnetworkExceptionHandling:exception];
     }
@@ -99,15 +92,7 @@
 }
 
 - (void)callbackClick {
-    if (self.adInfo.mediaView.adapterInnerDelegate) {
-        if ([self.adInfo.mediaView.adapterInnerDelegate respondsToSelector:@selector(onADFMediaViewClick)]) {
-            [self.adInfo.mediaView.adapterInnerDelegate onADFMediaViewClick];
-        } else {
-            NSLog(@"Banner6019: %s onADFMediaViewClick selector is not responding", __FUNCTION__);
-        }
-    } else {
-        NSLog(@"Banner6019: %s adInfo.mediaView.adapterInnerDelegate is not setting", __FUNCTION__);
-    }
+    [self setCallbackStatus:NativeAdCallbackClick];
 }
 
 - (void)dealloc {
@@ -119,8 +104,7 @@
 
 #pragma mark - GADBannerViewDelegate
 
-/// Tells the delegate an ad request loaded an ad.
-- (void)adViewDidReceiveAd:(GADBannerView *)adView {
+- (void)bannerViewDidReceiveAd:(GADBannerView *)bannerView {
     NSLog(@"%s called", __func__);
     if (self.isAdLoaded) {
         return;
@@ -133,61 +117,37 @@
                                                                      adnetworkKey:@"6019"];
     info.mediaType = ADFNativeAdType_Image;
     info.adapter = self;
-    [info setupMediaView:adView];
+    [info setupMediaView:bannerView];
     self.adInfo = info;
 
-    [self setCustomMediaview:adView];
-
-    if (self.delegate) {
-        if ([self.delegate respondsToSelector: @selector(onNativeMovieAdLoadFinish:)]) {
-            [self.delegate onNativeMovieAdLoadFinish:self.adInfo];
-        } else {
-            NSLog(@"Banner6019: %s onNativeMovieAdLoadFinish selector is not responding", __FUNCTION__);
-        }
-    } else {
-        NSLog(@"Banner6019: %s Delegate is not setting", __FUNCTION__);
-    }
+    [self setCustomMediaview:bannerView];
+    
+    [self setCallbackStatus:NativeAdCallbackLoadFinish];
 }
 
-/// Tells the delegate an ad request failed.
-- (void)adView:(GADBannerView *)adView didFailToReceiveAdWithError:(GADRequestError *)error {
+- (void)bannerView:(GADBannerView *)bannerView didFailToReceiveAdWithError:(NSError *)error {
     NSLog(@"%s error: %@", __FUNCTION__, error);
-    if (self.delegate) {
-        if ([self.delegate respondsToSelector:@selector(onNativeMovieAdLoadError:)]) {
-            if (error) {
-                [self setErrorWithMessage:error.localizedDescription code:error.code];
-            }
-            [self.delegate onNativeMovieAdLoadError: self];
-        } else {
-            NSLog(@"Banner6019: selector onNativeMovieAdLoadError is not responding");
-        }
-    } else {
-        NSLog(@"%s Delegate is not setting", __FUNCTION__);
+    if (error) {
+        [self setErrorWithMessage:error.localizedDescription code:error.code];
     }
+    [self setCallbackStatus:NativeAdCallbackLoadError];
 }
 
-/// Tells the delegate that a full-screen view will be presented in response
-/// to the user clicking on an ad.
-- (void)adViewWillPresentScreen:(GADBannerView *)adView {
-    NSLog(@"adViewWillPresentScreen");
+- (void)bannerViewDidRecordImpression:(GADBannerView *)bannerView {
+    NSLog(@"%s called", __func__);
+}
+
+- (void)bannerViewWillPresentScreen:(GADBannerView *)bannerView {
+    NSLog(@"%s called", __func__);
     [self callbackClick];
 }
 
-/// Tells the delegate that the full-screen view will be dismissed.
-- (void)adViewWillDismissScreen:(GADBannerView *)adView {
-    NSLog(@"adViewWillDismissScreen");
+- (void)bannerViewWillDismissScreen:(GADBannerView *)bannerView {
+    NSLog(@"%s called", __func__);
 }
 
-/// Tells the delegate that the full-screen view has been dismissed.
-- (void)adViewDidDismissScreen:(GADBannerView *)adView {
-    NSLog(@"adViewDidDismissScreen");
-}
-
-/// Tells the delegate that a user click will open another app (such as
-/// the App Store), backgrounding the current app.
-- (void)adViewWillLeaveApplication:(GADBannerView *)adView {
-    NSLog(@"adViewWillLeaveApplication");
-    [self callbackClick];
+- (void)bannerViewDidDismissScreen:(GADBannerView *)bannerView {
+    NSLog(@"%s called", __func__);
 }
 
 @end

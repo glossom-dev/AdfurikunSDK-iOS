@@ -27,8 +27,8 @@
     return AdColony.getSDKVersion;
 }
 
-+(NSString *)getAdapterVersion {
-    return @"4.4.1.3";
++ (NSString *)getAdapterRevisionVersion {
+    return @"4";
 }
 
 -(id)init {
@@ -85,6 +85,9 @@
 }
 
 -(void)initAdnetworkIfNeeded {
+    if (![self needsToInit]) {
+        return;
+    }
     // AdColonyの初期化は一度だけしか行わない
     // 初期化が失敗した場合はAdColonyが自分でリトライする
     static dispatch_once_t adfAdColonyOnceToken;
@@ -96,11 +99,7 @@
                 options.testMode = self.test_flg;
             }
             [AdColony configureWithAppID:self.adColonyAppId zoneIDs:self.adColonyAllZones options:options completion:^(NSArray<AdColonyZone *> * _Nonnull zones) {
-                hasConfigured = YES;
-                if (self.hasPendingStartAd) {
-                    self.hasPendingStartAd = NO;
-                    [self startAd];
-                }
+                [self initCompleteAndRetryStartAdIfNeeded];
             }];
         } @catch (NSException *exception) {
             NSLog(@"adcolony configuration exception %@", exception);
@@ -112,11 +111,11 @@
  *  広告の読み込みを開始する
  */
 -(void)startAd {
-    // 初期化に成功したら以降はインタースティシャルのリクエストのみ行う
+    if (![self canStartAd]) {
+        return;
+    }
     @try {
-        if (!hasConfigured) {
-            self.hasPendingStartAd = YES;
-        } else if (self.adShowZoneId) {
+        if (self.adShowZoneId) {
             [AdColony requestInterstitialInZone:_adShowZoneId options:nil andDelegate:self];
         }
     } @catch (NSException *exception) {

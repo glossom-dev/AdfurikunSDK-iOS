@@ -29,6 +29,10 @@
     return BUAdSDKManager.SDKVersion;
 }
 
++ (NSString *)getAdapterRevisionVersion {
+    return @"2";
+}
+
 - (BOOL)isClassReference {
     NSLog(@"MovieNatve6017 isClassReference");
     Class clazz = NSClassFromString(@"BUNativeAd");
@@ -54,19 +58,6 @@
     NSString *slotID = [data objectForKey:@"ad_slot_id"];
     if ([self isNotNull:slotID]) {
         self.pangleSlotID = [NSString stringWithFormat:@"%@", slotID];
-    }
-
-    NSNumber *pixelRateNumber = data[@"pixelRate"];
-    if ([self isNotNull:pixelRateNumber] && [pixelRateNumber isKindOfClass:[NSNumber class]]) {
-        self.viewabilityPixelRate = pixelRateNumber.intValue;
-    }
-    NSNumber *displayTimeNumber = data[@"displayTime"];
-    if ([self isNotNull:displayTimeNumber] && [displayTimeNumber isKindOfClass:[NSNumber class]]) {
-        self.viewabilityDisplayTime = displayTimeNumber.intValue;
-    }
-    NSNumber *timerIntervalNumber = data[@"timerInterval"];
-    if ([self isNotNull:timerIntervalNumber] && [timerIntervalNumber isKindOfClass:[NSNumber class]]) {
-        self.viewabilityTimerInterval = timerIntervalNumber.intValue;
     }
 }
 
@@ -129,9 +120,6 @@
     [self startAd];
 }
 
-- (void)cancel {
-}
-
 #pragma mark BUNativeAdDelegate
 
 /**
@@ -158,6 +146,8 @@ This method is called when native ad material loaded successfully.
         self.relatedView.videoAdView.delegate = self;
         [info setupMediaView:self.relatedView.videoAdView];
         [self setCustomMediaview:self.relatedView.videoAdView];
+        
+        [self.nativeAd registerContainer:self.relatedView.videoAdView withClickableViews:@[]];
     } else {
         if (adMeta.imageAry.count == 0 || adMeta.imageAry.firstObject.imageURL.length == 0) {
             NSLog(@"%s metadata is invalid %@", __FUNCTION__, adMeta);
@@ -189,35 +179,19 @@ This method is called when native ad material loaded successfully.
     self.adInfo = info;
     self.isAdLoaded = true;
 
-    if (self.delegate) {
-        if ([self.delegate respondsToSelector:@selector(onNativeMovieAdLoadFinish:)]) {
-            [self.delegate onNativeMovieAdLoadFinish:self.adInfo];
-        }
-    }
+    [self setCallbackStatus:NativeAdCallbackLoadFinish];
 }
 
 - (void)sendLoadError:(NSError *)error {
     NSLog(@"%s error : %@", __FUNCTION__, error);
-    if (self.delegate) {
-        if ([self.delegate respondsToSelector:@selector(onNativeMovieAdLoadError:)]) {
-            if (error) {
-                [self setErrorWithMessage:error.localizedDescription code:error.code];
-            }
-            [self.delegate onNativeMovieAdLoadError:self];
-        }
+    if (error) {
+        [self setErrorWithMessage:error.localizedDescription code:error.code];
     }
+    [self setCallbackStatus:NativeAdCallbackLoadError];
 }
 
 - (void)sendRendering {
-    if (self.adInfo.mediaView.adapterInnerDelegate) {
-        if ([self.adInfo.mediaView.adapterInnerDelegate respondsToSelector:@selector(onADFMediaViewRendering)]) {
-            [self.adInfo.mediaView.adapterInnerDelegate onADFMediaViewRendering];
-        } else {
-            NSLog(@"%s onADFMediaViewRendering selector is not responding", __FUNCTION__);
-        }
-    } else {
-        NSLog(@"%s adInfo.mediaView.adapterInnerDelegate is not setting", __FUNCTION__);
-    }
+    [self setCallbackStatus:NativeAdCallbackRendering];
 }
 
 - (void)sendPlayStart {
@@ -225,16 +199,7 @@ This method is called when native ad material loaded successfully.
         return;;
     }
     self.didSendPlayStartCallback = true;
-    
-    if (self.adInfo.mediaView.adapterInnerDelegate) {
-        if ([self.adInfo.mediaView.adapterInnerDelegate respondsToSelector:@selector(onADFMediaViewPlayStart)]) {
-            [self.adInfo.mediaView.adapterInnerDelegate onADFMediaViewPlayStart];
-        } else {
-            NSLog(@"%s onADFMediaViewPlayStart selector is not responding", __FUNCTION__);
-        }
-    } else {
-        NSLog(@"%s adInfo.mediaView.adapterInnerDelegate is not setting", __FUNCTION__);
-    }
+    [self setCallbackStatus:NativeAdCallbackPlayStart];
 }
 
 /**
@@ -251,8 +216,10 @@ This method is called when native ad slot has been shown.
 */
 - (void)nativeAdDidBecomeVisible:(BUNativeAd *)nativeAd {
     NSLog(@"%s called", __FUNCTION__);
-    [self sendRendering];
-    [self startViewabilityCheck];
+    if (self.adInfo.mediaType == ADFNativeAdType_Image) {
+        [self sendRendering];
+        [self startViewabilityCheck];
+    }
 }
 
 /**
@@ -260,16 +227,7 @@ This method is called when native ad is clicked.
 */
 - (void)nativeAdDidClick:(BUNativeAd *)nativeAd withView:(UIView *_Nullable)view {
     NSLog(@"%s called", __FUNCTION__);
-    if (self.adInfo.mediaView.adapterInnerDelegate) {
-        if ([self.adInfo.mediaView.adapterInnerDelegate respondsToSelector:@selector(onADFMediaViewClick)]) {
-            [self.adInfo.mediaView.adapterInnerDelegate onADFMediaViewClick];
-        } else {
-            NSLog(@"%s onADFMediaViewClick selector is not responding", __FUNCTION__);
-        }
-    } else {
-        NSLog(@"%s adInfo.mediaView.adapterInnerDelegate is not setting", __FUNCTION__);
-    }
-
+    [self setCallbackStatus:NativeAdCallbackClick];
 }
 
 /**
@@ -289,15 +247,7 @@ This method is called when videoadview failed to play.
 */
 - (void)videoAdView:(BUVideoAdView *)videoAdView didLoadFailWithError:(NSError *_Nullable)error {
     NSLog(@"%s called", __FUNCTION__);
-    if (self.adInfo.mediaView.adapterInnerDelegate) {
-        if ([self.adInfo.mediaView.adapterInnerDelegate respondsToSelector:@selector(onADFMediaViewPlayFail)]) {
-            [self.adInfo.mediaView.adapterInnerDelegate onADFMediaViewPlayFail];
-        } else {
-            NSLog(@"%s onADFMediaViewPlayFail selector is not responding", __FUNCTION__);
-        }
-    } else {
-        NSLog(@"%s adInfo.mediaView.adapterInnerDelegate is not setting", __FUNCTION__);
-    }
+    [self setCallbackStatus:NativeAdCallbackPlayFail];
 }
 
 /**
@@ -321,15 +271,7 @@ This method is called when videoadview end of play.
     }
     self.didSendPlayFinishCallback = true;
 
-    if (self.adInfo.mediaView.adapterInnerDelegate) {
-        if ([self.adInfo.mediaView.adapterInnerDelegate respondsToSelector:@selector(onADFMediaViewPlayFinish)]) {
-            [self.adInfo.mediaView.adapterInnerDelegate onADFMediaViewPlayFinish];
-        } else {
-            NSLog(@"%s onADFMediaViewPlayFinish selector is not responding", __FUNCTION__);
-        }
-    } else {
-        NSLog(@"%s adInfo.mediaView.adapterInnerDelegate is not setting", __FUNCTION__);
-    }
+    [self setCallbackStatus:NativeAdCallbackPlayFinish];
 }
 
 @end

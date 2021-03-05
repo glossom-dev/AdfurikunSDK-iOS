@@ -20,6 +20,7 @@
 #import <ADFMovieReward/ADFMovieError.h>
 #import <ADFMovieReward/ADFMovieNativeAdInfo.h>
 #import <ADFMovieReward/ADFmyMovieDelegateBase.h>
+#import <ADFMovieReward/ADFmyBaseAdapterInterface.h>
 #import <ADFMovieReward/ADFmyMovieNativeInterface.h>
 #import <ADFMovieReward/ADFmyMovieRewardInterface.h>
 

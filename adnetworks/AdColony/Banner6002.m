@@ -14,7 +14,6 @@
 @property (nonatomic) NSString *adShowZoneId;
 @property (nonatomic) NSArray *allZones;
 @property (nonatomic) BOOL test_flg;
-@property (nonatomic) BOOL hasPendingStartAd;
 
 @property (nonatomic, weak) AdColonyAdView *banner;
 
@@ -24,6 +23,10 @@
 
 + (NSString *)getSDKVersion {
     return AdColony.getSDKVersion;
+}
+
++ (NSString *)getAdapterRevisionVersion {
+    return @"1";
 }
 
 - (BOOL)isClassReference {
@@ -74,23 +77,13 @@
             self.test_flg = [testFlg boolValue];
         }
     }
-
-    NSNumber *pixelRateNumber = data[@"pixelRate"];
-    if ([self isNotNull:pixelRateNumber] && [pixelRateNumber isKindOfClass:[NSNumber class]]) {
-        self.viewabilityPixelRate = pixelRateNumber.intValue;
-    }
-    NSNumber *displayTimeNumber = data[@"displayTime"];
-    if ([self isNotNull:displayTimeNumber] && [displayTimeNumber isKindOfClass:[NSNumber class]]) {
-        self.viewabilityDisplayTime = displayTimeNumber.intValue;
-    }
-    NSNumber *timerIntervalNumber = data[@"timerInterval"];
-    if ([self isNotNull:timerIntervalNumber] && [timerIntervalNumber isKindOfClass:[NSNumber class]]) {
-        self.viewabilityTimerInterval = timerIntervalNumber.intValue;
-    }
 }
 
 // SDKの初期化ロジックを入れる。ただし、Instance化を毎回する必要がある場合にはこちらではなくてstartAdで行うこと
 -(void)initAdnetworkIfNeeded {
+    if (![self needsToInit]) {
+        return;
+    }
     static dispatch_once_t adfAdColonyOnceToken;
     dispatch_once(&adfAdColonyOnceToken, ^{
         @try {
@@ -100,11 +93,7 @@
                 options.testMode = self.test_flg;
             }
             [AdColony configureWithAppID:self.adColonyAppId zoneIDs:self.allZones options:options completion:^(NSArray<AdColonyZone *> * _Nonnull zones) {
-                hasConfigured = YES;
-                if (self.hasPendingStartAd) {
-                    self.hasPendingStartAd = NO;
-                    [self startAd];
-                }
+                [self initCompleteAndRetryStartAdIfNeeded];
             }];
         } @catch (NSException *exception) {
             NSLog(@"adcolony configuration exception %@", exception);
@@ -124,8 +113,7 @@
 
 // SDKのLoading関数を呼び出す
 - (void)startAd {
-    if (!hasConfigured) {
-        self.hasPendingStartAd = YES;
+    if (![self canStartAd]) {
         return;
     }
     
@@ -150,9 +138,6 @@
     [self startAd];
 }
 
-- (void)cancel {
-}
-
 #pragma mark - AdColony AdView Delegate
 
 // handle new banner
@@ -174,32 +159,15 @@
     }
     self.banner = adView;
 
-    if (self.delegate) {
-        if ([self.delegate respondsToSelector: @selector(onNativeMovieAdLoadFinish:)]) {
-            [self.delegate onNativeMovieAdLoadFinish:self.adInfo];
-        } else {
-            NSLog(@"Banner6002: %s onNativeMovieAdLoadFinish selector is not responding", __FUNCTION__);
-        }
-    } else {
-        NSLog(@"Banner6002: %s Delegate is not setting", __FUNCTION__);
-    }
+    [self setCallbackStatus:NativeAdCallbackLoadFinish];
 }
 
 // handler banner loading failure
 - (void)adColonyAdViewDidFailToLoad:(AdColonyAdRequestError *)error {
     NSString *message = [NSString stringWithFormat:@"error: %@ and suggestion: %@",error.localizedDescription, error.localizedRecoverySuggestion];
     NSLog(@"adColonyAdViewDidFailToLoad with %@", message);
-    if (self.delegate) {
-        if ([self.delegate respondsToSelector:@selector(onNativeMovieAdLoadError:)]) {
-            [self setErrorWithMessage:message code:error.code];
-            [self.delegate onNativeMovieAdLoadError: self];
-        } else {
-            NSLog(@"Banner6002: selector onNativeMovieAdLoadError is not responding");
-        }
-    } else {
-        NSLog(@"%s Delegate is not setting", __FUNCTION__);
-    }
-
+    [self setErrorWithMessage:message code:error.code];
+    [self setCallbackStatus:NativeAdCallbackLoadError];
 }
 
 - (void)adColonyAdViewWillOpen:(AdColonyAdView *)adView {
@@ -216,15 +184,7 @@
 
 - (void)adColonyAdViewDidReceiveClick:(AdColonyAdView *)adView {
     NSLog(@"AdView received a click");
-    if (self.adInfo.mediaView.adapterInnerDelegate) {
-        if ([self.adInfo.mediaView.adapterInnerDelegate respondsToSelector:@selector(onADFMediaViewClick)]) {
-            [self.adInfo.mediaView.adapterInnerDelegate onADFMediaViewClick];
-        } else {
-            NSLog(@"Banner6000: %s onADFMediaViewClick selector is not responding", __FUNCTION__);
-        }
-    } else {
-        NSLog(@"Banner6000: %s adInfo.mediaView.adapterInnerDelegate is not setting", __FUNCTION__);
-    }
+    [self setCallbackStatus:NativeAdCallbackClick];
 }
 
 @end
@@ -233,11 +193,7 @@
 
 - (void)playMediaView {
     if (self.adapter) {
-        if (self.mediaView.adapterInnerDelegate) {
-            if ([self.mediaView.adapterInnerDelegate respondsToSelector:@selector(onADFMediaViewRendering)]) {
-                [self.mediaView.adapterInnerDelegate onADFMediaViewRendering];
-            }
-        }
+        [self.adapter setCallbackStatus:NativeAdCallbackRendering];
         [self.adapter startViewabilityCheck];
     }
 }

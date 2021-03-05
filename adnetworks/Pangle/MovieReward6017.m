@@ -17,7 +17,6 @@
 @property (nonatomic, strong) NSString *tiktokAppID;
 @property (nonatomic, strong) NSString *tiktokSlotID;
 @property (nonatomic) BOOL didInitAdnetwork;
-@property (nonatomic) BOOL isAdLoaded;
 @end
 
 @implementation MovieReward6017
@@ -26,8 +25,8 @@
     return BUAdSDKManager.SDKVersion;
 }
 
-+(NSString *)getAdapterVersion {
-    return @"3.3.6.2.3";
++ (NSString *)getAdapterRevisionVersion {
+    return @"4";
 }
 
 - (void)setData:(NSDictionary *)data {

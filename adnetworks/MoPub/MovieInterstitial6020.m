@@ -5,14 +5,13 @@
 
 @property (nonatomic, strong) NSString *adUnitId;
 @property (nonatomic, retain) MPInterstitialAdController *interstitial;
-@property (nonatomic) BOOL hasPendingStartAd;
 
 @end
 
 @implementation MovieInterstitial6020
 
-+(NSString *)getAdapterVersion {
-    return @"5.14.1.2";
++ (NSString *)getAdapterRevisionVersion {
+    return @"3";
 }
 
 - (void)setData:(NSDictionary *)data {
@@ -27,15 +26,15 @@
 
 - (void)initAdnetworkIfNeeded {
     NSLog(@"mopub inst: initAdnetworkIfNeeded");
+    if (![self needsToInit]) {
+        return;
+    }
     if (self.adUnitId) {
         @try {
             MPMoPubConfiguration *sdkConfig = [[MPMoPubConfiguration alloc] initWithAdUnitIdForAppInitialization:self.adUnitId];
             [[MoPub sharedInstance] initializeSdkWithConfiguration:sdkConfig completion:^{
                 NSLog(@"mopub inst: SDK has been initted!!!!!");
-                if (self.hasPendingStartAd) {
-                    self.hasPendingStartAd = false;
-                    [self startAd];
-                }
+                [self initCompleteAndRetryStartAdIfNeeded];
             }];
         } @catch (NSException *exception) {
             [self adnetworkExceptionHandling:exception];
@@ -44,14 +43,12 @@
 }
 
 - (void)startAd {
+    if (![self canStartAd]) {
+        return;
+    }
     if (self.adUnitId) {
         dispatch_async(dispatch_get_main_queue(), ^{
             NSLog(@"mopub inst: startAd");
-            if (![MoPub sharedInstance].isSdkInitialized) {
-                NSLog(@"mopub: mopub is not initialized");
-                self.hasPendingStartAd = YES;
-                return;
-            }
             @try {
                 self.interstitial = [MPInterstitialAdController interstitialAdControllerForAdUnitId:self.adUnitId];
                 self.interstitial.delegate = self;

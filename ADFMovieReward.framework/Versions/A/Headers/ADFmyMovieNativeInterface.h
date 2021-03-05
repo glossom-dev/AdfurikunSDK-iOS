@@ -10,32 +10,32 @@
 #import <UIKit/UIKit.h>
 #import "ADFMovieError.h"
 #import "ADFmyMovieRewardInterface.h"
+#import "ADFmyBaseAdapterInterface.h"
+
+typedef enum : NSInteger {
+    NativeAdCallbackLoadFinish,
+    NativeAdCallbackLoadError,
+    NativeAdCallbackRendering,
+    NativeAdCallbackPlayStart,
+    NativeAdCallbackPlayFinish,
+    NativeAdCallbackPlayFail,
+    NativeAdCallbackClick,
+} NativeAdCallbackStatus;
 
 @class UIViewController;
 
 @protocol ADFMovieNativeDelegate;
 @class ADFMovieNativeAdInfo;
 
-@interface ADFmyMovieNativeInterface : NSObject<NSCopying>
+@interface ADFmyMovieNativeInterface : ADFmyBaseAdapterInterface
 
 @property (nonatomic, weak) NSObject<ADFMovieNativeDelegate> *delegate;
 @property (nonatomic) ADFMovieNativeAdInfo *adInfo;
-@property (atomic) BOOL isAdLoaded;
-@property (nonatomic, strong) NSError *lastError;
-@property (nonatomic, strong) NSNumber *hasGdprConsent;
 
 @property (nonatomic) int viewabilityPixelRate;
 @property (nonatomic) int viewabilityDisplayTime;
 @property (nonatomic) int viewabilityTimerInterval;
 
-- (BOOL)isClassReference;
-- (void)setData:(NSDictionary *)data;
-- (void)clearStatusIfNeeded;
-- (void)initAdnetworkIfNeeded;
-- (BOOL)isPrepared;
-- (void)startAd;
-- (void)startAdWithOption:(NSDictionary *)option;
-- (void)cancel;
 - (void)startViewabilityCheck;
 
 - (void)onImpression;
@@ -49,26 +49,11 @@
 
 - (void)dispose;
 
-/** Errorを設定する */
--(void)setErrorWithMessage:(NSString *)description code:(NSInteger)code;
-/** 最後のエラーを返す */
--(NSError *)getLastError;
-/** EU居住者がEU 一般データ保護規則（GDPR）に同意をしたのかを設定します。 */
--(void)setHasUserConsent:(BOOL)hasUserConsent;
--(UIViewController *)topMostViewController;
-
-//課題：ADNW SDKのバージョン情報をSDKから取得できるようにする
-+ (NSString *)getSDKVersion;
-
 - (void)setCustomMediaview:(UIView *)view;
 
+- (void)setCallbackStatus:(NativeAdCallbackStatus)status;
+
 - (void)showDebugInformation;
-
-// MovieRewardInterfaceと同じ関数Formatを使う
-- (void)setCallbackStatus:(MovieRewardCallbackStatus)status;
-
-- (void)adnetworkExceptionHandling:(NSException *)exception;
-- (BOOL)isNotNull:(id)obj;
 
 @end
 

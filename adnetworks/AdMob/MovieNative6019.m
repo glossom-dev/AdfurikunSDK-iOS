@@ -11,9 +11,10 @@
 #import <ADFMovieReward/ADFMovieOptions.h>
 #import <GoogleMobileAds/GoogleMobileAds.h>
 
-@interface MovieNative6019 ()<GADUnifiedNativeAdLoaderDelegate, GADUnifiedNativeAdDelegate, GADVideoControllerDelegate>
+@interface MovieNative6019 ()<GADNativeAdLoaderDelegate, GADNativeAdDelegate, GADVideoControllerDelegate>
 
 @property (nonatomic, nullable) NSString *unitID;
+@property (nonatomic, nullable) NSString *adChoicesPlacement;
 @property (nonatomic) GADAdLoader *adLoader;
 @property (nonatomic) BOOL testFlg;
 @property (nonatomic) BOOL sendPlayCallback;
@@ -22,6 +23,10 @@
 @end
 
 @implementation MovieNative6019
+
++ (NSString *)getAdapterRevisionVersion {
+    return @"2";
+}
 
 - (void)setData:(NSDictionary *)data {
     [super setData:data];
@@ -34,36 +39,16 @@
     if ([self isNotNull:testFlg] && [testFlg isKindOfClass:[NSNumber class]]) {
         self.testFlg = [testFlg boolValue];
     }
-
-    NSNumber *pixelRateNumber = data[@"pixelRate"];
-    if ([self isNotNull:pixelRateNumber] && [pixelRateNumber isKindOfClass:[NSNumber class]]) {
-        self.viewabilityPixelRate = pixelRateNumber.intValue;
-    }
-    NSNumber *displayTimeNumber = data[@"displayTime"];
-    if ([self isNotNull:displayTimeNumber] && [displayTimeNumber isKindOfClass:[NSNumber class]]) {
-        self.viewabilityDisplayTime = displayTimeNumber.intValue;
-    }
-    NSNumber *timerIntervalNumber = data[@"timerInterval"];
-    if ([self isNotNull:timerIntervalNumber] && [timerIntervalNumber isKindOfClass:[NSNumber class]]) {
-        self.viewabilityTimerInterval = timerIntervalNumber.intValue;
+    NSString* adChoicesPlacement = [data objectForKey:@"adChoices_placement"];
+    if ([self isNotNull:adChoicesPlacement]) {
+        self.adChoicesPlacement = [[NSString alloc] initWithFormat:@"%@", adChoicesPlacement];
     }
 }
 
 - (void)initAdnetworkIfNeeded {
-    @try {
-        if (self.testFlg) {
-            // GADMobileAds.sharedInstance.requestConfiguration.testDeviceIdentifiers = @[@"コンソールに出力されたデバイスIDを入力してください。"];
-            //詳細　https://developers.google.com/admob/ios/test-ads?hl=ja
-        }
-        if (self.adLoader == nil && self.unitID != nil) {
-            self.adLoader = [[GADAdLoader alloc] initWithAdUnitID:self.unitID
-                                               rootViewController:nil
-                                                          adTypes:@[kGADAdLoaderAdTypeUnifiedNative]
-                                                          options:nil];
-            self.adLoader.delegate = self;
-        }
-    } @catch (NSException *exception) {
-        [self adnetworkExceptionHandling:exception];
+    if (self.testFlg) {
+        // GADMobileAds.sharedInstance.requestConfiguration.testDeviceIdentifiers = @[@"コンソールに出力されたデバイスIDを入力してください。"];
+        //詳細　https://developers.google.com/admob/ios/test-ads?hl=ja
     }
 }
 
@@ -72,7 +57,7 @@
 }
 
 - (void)startAdWithOption:(NSDictionary *)option {
-    if (self.adLoader == nil) {
+    if (self.unitID == nil) {
         return;
     }
 
@@ -80,6 +65,30 @@
 
     self.isAdLoaded = false;
     @try {
+        if (self.adLoader == nil) {
+            GADNativeAdViewAdOptions *adViewOptions = [[GADNativeAdViewAdOptions alloc] init];
+            if (option) {
+                NSLog(@"custom event option : %@", option);
+                self.adChoicesPlacement = option[@"adChoices_placement"];
+            }
+            if ([self isNotNull:self.adChoicesPlacement]) {
+                if ([self.adChoicesPlacement isEqualToString:@"top_right"]) {
+                    adViewOptions.preferredAdChoicesPosition = GADAdChoicesPositionTopRightCorner;
+                } else if ([self.adChoicesPlacement isEqualToString:@"top_left"]) {
+                    adViewOptions.preferredAdChoicesPosition = GADAdChoicesPositionTopLeftCorner;
+                } else if ([self.adChoicesPlacement isEqualToString:@"bottom_right"]) {
+                    adViewOptions.preferredAdChoicesPosition = GADAdChoicesPositionBottomRightCorner;
+                } else if ([self.adChoicesPlacement isEqualToString:@"bottom_left"]) {
+                    adViewOptions.preferredAdChoicesPosition = GADAdChoicesPositionBottomLeftCorner;
+                }
+            }
+            //AdMobのDefaultは右上
+            self.adLoader = [[GADAdLoader alloc] initWithAdUnitID:self.unitID
+                                               rootViewController:nil
+                                                          adTypes:@[kGADAdLoaderAdTypeNative]
+                                                          options:@[adViewOptions]];
+            self.adLoader.delegate = self;
+        }
         [self.adLoader loadRequest:[GADRequest request]];
     } @catch (NSException *exception) {
         [self adnetworkExceptionHandling:exception];
@@ -98,59 +107,27 @@
 }
 
 - (void)callbackRender {
-    if (self.adInfo.mediaView.adapterInnerDelegate) {
-        if ([self.adInfo.mediaView.adapterInnerDelegate respondsToSelector:@selector(onADFMediaViewRendering)]) {
-            [self.adInfo.mediaView.adapterInnerDelegate onADFMediaViewRendering];
-        } else {
-            NSLog(@"MovieNative6019: %s onADFMediaViewRendering selector is not responding", __FUNCTION__);
-        }
-    } else {
-        NSLog(@"MovieNative6019: %s adInfo.mediaView.adapterInnerDelegate is not setting", __FUNCTION__);
-    }
+    [self setCallbackStatus:NativeAdCallbackRendering];
 }
 
 - (void)callbackImpression {
-    if (self.adInfo.mediaView.adapterInnerDelegate) {
-        if ([self.adInfo.mediaView.adapterInnerDelegate respondsToSelector:@selector(onADFMediaViewPlayStart)]) {
-            [self.adInfo.mediaView.adapterInnerDelegate onADFMediaViewPlayStart];
-        } else {
-            NSLog(@"MovieNative6019: %s onADFMediaViewPlayStart selector is not responding", __FUNCTION__);
-        }
-    } else {
-        NSLog(@"MovieNative6019: %s adInfo.mediaView.adapterInnerDelegate is not setting", __FUNCTION__);
-    }
+    [self setCallbackStatus:NativeAdCallbackPlayStart];
 }
 
 - (void)callbackFinish {
-    if (self.adInfo.mediaView.adapterInnerDelegate) {
-        if ([self.adInfo.mediaView.adapterInnerDelegate respondsToSelector:@selector(onADFMediaViewPlayFinish)]) {
-            [self.adInfo.mediaView.adapterInnerDelegate onADFMediaViewPlayFinish];
-        } else {
-            NSLog(@"MovieNative6019: %s onADFMediaViewPlayFinish selector is not responding", __FUNCTION__);
-        }
-    } else {
-        NSLog(@"MovieNative6019: %s adInfo.mediaView.adapterInnerDelegate is not setting", __FUNCTION__);
-    }
+    [self setCallbackStatus:NativeAdCallbackPlayFinish];
 }
 
 - (void)callbackClick {
-    if (self.adInfo.mediaView.adapterInnerDelegate) {
-        if ([self.adInfo.mediaView.adapterInnerDelegate respondsToSelector:@selector(onADFMediaViewClick)]) {
-            [self.adInfo.mediaView.adapterInnerDelegate onADFMediaViewClick];
-        } else {
-            NSLog(@"MovieNative6019: %s onADFMediaViewClick selector is not responding", __FUNCTION__);
-        }
-    } else {
-        NSLog(@"MovieNative6019: %s adInfo.mediaView.adapterInnerDelegate is not setting", __FUNCTION__);
-    }
+    [self setCallbackStatus:NativeAdCallbackClick];
 }
 
 - (void)dealloc {
 }
 
-#pragma mark - GADUnifiedNativeAdLoaderDelegate
+#pragma mark - GADNativeAdLoaderDelegate
 
-- (void)adLoader:(nonnull GADAdLoader *)adLoader didReceiveUnifiedNativeAd:(nonnull GADUnifiedNativeAd *)nativeAd {
+- (void)adLoader:(GADAdLoader *)adLoader didReceiveNativeAd:(GADNativeAd *)nativeAd {
     NSLog(@"%s called", __func__);
     self.isAdLoaded = true;
     self.sendPlayCallback = false;
@@ -176,31 +153,15 @@
 
     [self setCustomMediaview:nativeAdView];
 
-    if (self.delegate) {
-        if ([self.delegate respondsToSelector: @selector(onNativeMovieAdLoadFinish:)]) {
-            [self.delegate onNativeMovieAdLoadFinish:self.adInfo];
-        } else {
-            NSLog(@"MovieNative6019: %s onNativeMovieAdLoadFinish selector is not responding", __FUNCTION__);
-        }
-    } else {
-        NSLog(@"MovieNative6019: %s Delegate is not setting", __FUNCTION__);
-    }
+    [self setCallbackStatus:NativeAdCallbackLoadFinish];
 }
 
-- (void)adLoader:(GADAdLoader *)adLoader didFailToReceiveAdWithError:(GADRequestError *)error {
+- (void)adLoader:(GADAdLoader *)adLoader didFailToReceiveAdWithError:(NSError *)error {
     NSLog(@"%s error: %@", __FUNCTION__, error);
-    if (self.delegate) {
-        if ([self.delegate respondsToSelector:@selector(onNativeMovieAdLoadError:)]) {
-            if (error) {
-                [self setErrorWithMessage:error.localizedDescription code:error.code];
-            }
-            [self.delegate onNativeMovieAdLoadError: self];
-        } else {
-            NSLog(@"MovieNative6019: selector onNativeMovieAdLoadError is not responding");
-        }
-    } else {
-        NSLog(@"%s Delegate is not setting", __FUNCTION__);
+    if (error) {
+        [self setErrorWithMessage:error.localizedDescription code:error.code];
     }
+    [self setCallbackStatus:NativeAdCallbackLoadError];
 }
 
 #pragma mark - GADVideoControllerDelegate
@@ -239,39 +200,33 @@
 }
 
 
-#pragma mark - GADUnifiedNativeAdDelegate
+#pragma mark - GADNativeAdDelegate
 
-- (void)nativeAdDidRecordImpression:(GADUnifiedNativeAd *)nativeAd {
+- (void)nativeAdDidRecordImpression:(nonnull GADNativeAd *)nativeAd {
     NSLog(@"%s called", __func__);
     if (self.adInfo.mediaType == ADFNativeAdType_Image) {
         [self callbackRender];
     }
 }
 
-- (void)nativeAdDidRecordClick:(GADUnifiedNativeAd *)nativeAd {
-  // The native ad was clicked on.
+- (void)nativeAdDidRecordClick:(nonnull GADNativeAd *)nativeAd {
     NSLog(@"%s called", __func__);
     [self callbackClick];
 }
 
-- (void)nativeAdWillPresentScreen:(GADUnifiedNativeAd *)nativeAd {
-  // The native ad will present a full screen view.
+- (void)nativeAdWillPresentScreen:(nonnull GADNativeAd *)nativeAd {
     NSLog(@"%s called", __func__);
 }
 
-- (void)nativeAdWillDismissScreen:(GADUnifiedNativeAd *)nativeAd {
-  // The native ad will dismiss a full screen view.
+- (void)nativeAdWillDismissScreen:(nonnull GADNativeAd *)nativeAd {
     NSLog(@"%s called", __func__);
 }
 
-- (void)nativeAdDidDismissScreen:(GADUnifiedNativeAd *)nativeAd {
-  // The native ad did dismiss a full screen view.
+- (void)nativeAdDidDismissScreen:(nonnull GADNativeAd *)nativeAd {
     NSLog(@"%s called", __func__);
 }
 
-- (void)nativeAdWillLeaveApplication:(GADUnifiedNativeAd *)nativeAd {
-  // The native ad will cause the application to become inactive and
-  // open a new application.
+- (void)nativeAdIsMuted:(nonnull GADNativeAd *)nativeAd {
     NSLog(@"%s called", __func__);
 }
 
@@ -313,7 +268,7 @@
     _view.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
 }
 
-- (void)setupAdView:(GADUnifiedNativeAd *)nativeAd {
+- (void)setupAdView:(GADNativeAd *)nativeAd {
     self.nativeAd = nativeAd;
 
     GADMediaView *tempMediaView = [[GADMediaView alloc] initWithFrame:self.adMediaView.bounds];
@@ -368,9 +323,9 @@
     
     [self.nativeAd registerAdView:self
               clickableAssetViews:@{
-                  GADUnifiedNativeHeadlineAsset: self.headlineLabel,
-                  GADUnifiedNativeCallToActionAsset: self.callToActionLabel,
-                  GADUnifiedNativeIconAsset: self.iconImageView}
+                  GADNativeHeadlineAsset: self.headlineLabel,
+                  GADNativeCallToActionAsset: self.callToActionLabel,
+                  GADNativeIconAsset: self.iconImageView}
            nonclickableAssetViews:@{}
      ];
 }
@@ -394,20 +349,17 @@
 
 - (void)playMediaView {
     if (self.adapter && self.nativeAdView.isVideoContents == false) {
-        // UI組立方式では静止画のImpression Callbackが来ないため、PlayMediaViewが呼ばれるタイミングでRender Eventを発生させる
-        if (self.isCustomNativeAdComponents && self.mediaView.adapterInnerDelegate) {
-            if ([self.mediaView.adapterInnerDelegate respondsToSelector:@selector(onADFMediaViewRendering)]) {
-                [self.mediaView.adapterInnerDelegate onADFMediaViewRendering];
-            }
+        if (self.isCustomNativeAdComponents) {
+            // UI組立方式では静止画のImpression Callbackが来ないため、PlayMediaViewが呼ばれるタイミングでRender Eventを発生させる
+            [self.adapter setCallbackStatus:NativeAdCallbackRendering];
         }
-
         [self.adapter startViewabilityCheck];
     }
 }
 
 - (NSDictionary *)getCustomNativeAdComponents {
     if (self.nativeAdView && self.nativeAdView.nativeAd) {
-        GADUnifiedNativeAd *nativeAd = self.nativeAdView.nativeAd;
+        GADNativeAd *nativeAd = self.nativeAdView.nativeAd;
         NSMutableDictionary *result = [NSMutableDictionary new];
         result[@"adInfo"] = nativeAd;
 
@@ -437,8 +389,8 @@
     return nil;
 }
 
-- (GADUnifiedNativeAdView *)createGADUnifiedNativeAdView:(NSDictionary *)parts {
-    GADUnifiedNativeAdView *view = [GADUnifiedNativeAdView new];
+- (GADNativeAdView *)createViewForCarousel:(NSDictionary *)parts {
+    GADNativeAdView *view = [GADNativeAdView new];
     view.nativeAd = self.nativeAdView.nativeAd;
     view.bodyView = parts[@"body"];
     view.advertiserView = parts[@"advertiser"];
@@ -446,10 +398,10 @@
     view.mediaView = parts[@"media"];
     [view.nativeAd registerAdView:view
               clickableAssetViews:@{
-                  GADUnifiedNativeCallToActionAsset: view.callToActionView,
-                          GADUnifiedNativeBodyAsset: view.bodyView,
-                     GADUnifiedNativeMediaViewAsset: view.mediaView,
-                    GADUnifiedNativeAdvertiserAsset: view.advertiserView
+                  GADNativeCallToActionAsset: view.callToActionView,
+                          GADNativeBodyAsset: view.bodyView,
+                     GADNativeMediaViewAsset: view.mediaView,
+                    GADNativeAdvertiserAsset: view.advertiserView
               }
            nonclickableAssetViews:@{}];
     return view;

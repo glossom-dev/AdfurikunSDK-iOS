@@ -28,8 +28,8 @@
     return Tapjoy.getVersion;
 }
 
-+(NSString *)getAdapterVersion {
-    return @"12.7.1.2";
++ (NSString *)getAdapterRevisionVersion {
+    return @"3";
 }
 
 - (id)init {
@@ -99,7 +99,7 @@
             [self adnetworkExceptionHandling:exception];
         }
     });
-    NSLog(@"%@ connectSetting end", ADAPTER_CLASS_NAME);
+    NSLog(@"%@ initAdnetworkIfNeeded end", ADAPTER_CLASS_NAME);
 }
 
 /**
@@ -188,15 +188,6 @@
         return NO;
     }
     return YES;
-}
-
-
-/**
- *  広告の読み込みを中止
- */
--(void)cancel {
-    NSLog(@"%@ cancel", ADAPTER_CLASS_NAME);
-    // Tapjoy には対象の処理が無いため何もしない
 }
 
 -(void)setHasUserConsent:(BOOL)hasUserConsent {

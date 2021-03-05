@@ -19,8 +19,8 @@
 
 @implementation MovieInterstitial6016
 
-+(NSString *)getAdapterVersion {
-    return @"6.2.0.2";
++ (NSString *)getAdapterRevisionVersion {
+    return @"3";
 }
 
 -(id)init {

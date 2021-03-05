@@ -10,7 +10,7 @@
 #import <ADFMovieReward/ADFMovieOptions.h>
 #import <GoogleMobileAds/GoogleMobileAds.h>
 
-@interface MovieReward6019 ()<GADRewardedAdDelegate>
+@interface MovieReward6019 ()<GADFullScreenContentDelegate>
 @property(nonatomic) GADRewardedAd *rewardedAd;
 @property(nonatomic) NSString *unitID;
 @property(nonatomic) BOOL testFlg;
@@ -19,8 +19,8 @@
 
 @implementation MovieReward6019
 
-+(NSString *)getAdapterVersion {
-    return @"7.68.0.2";
++ (NSString *)getAdapterRevisionVersion {
+    return @"4";
 }
 
 -(id)init {
@@ -62,25 +62,29 @@
         return;
     }
     
+    if ([self isPrepared]) {
+        [self adRequestSccess:self.rewardedAd];
+        return;
+    }
+    
     @try {
-        if (!self.rewardedAd || !self.rewardedAd.isReady) {
-            self.rewardedAd = [[GADRewardedAd alloc] initWithAdUnitID:self.unitID];
-            GADRequest *request = [GADRequest request];
-            [self.rewardedAd loadRequest:request completionHandler:^(GADRequestError * _Nullable error) {
-                if (error) {
-                    [self adRequestFailure:error];
-                } else {
-                    [self adRequestSccess];
-                }
-            }];
-        }
+        GADRequest *request = [GADRequest request];
+        [GADRewardedAd loadWithAdUnitID:self.unitID
+                                request:request
+                      completionHandler:^(GADRewardedAd * _Nullable rewardedAd, NSError * _Nullable error) {
+            if (error) {
+                [self adRequestFailure:error];
+            } else {
+                [self adRequestSccess:rewardedAd];
+            }
+        }];
     } @catch (NSException *exception) {
         [self adnetworkExceptionHandling:exception];
     }
 }
 
 - (BOOL)isPrepared {
-    return self.rewardedAd.isReady;
+    return [self.rewardedAd canPresentFromRootViewController:[self topMostViewController] error:nil];
 }
 
 - (void)showAd {
@@ -90,9 +94,12 @@
 - (void)showAdWithPresentingViewController:(UIViewController *)viewController {
     [super showAdWithPresentingViewController:viewController];
 
-    if (self.rewardedAd.isReady) {
+    if ([self isPrepared]) {
         @try {
-            [self.rewardedAd presentFromRootViewController:[self topMostViewController] delegate:self];
+            [self.rewardedAd presentFromRootViewController:[self topMostViewController]
+                                  userDidEarnRewardHandler:^{
+                [self adCompleteShow];
+            }];
         } @catch (NSException *exception) {
             [self adnetworkExceptionHandling:exception];
             [self setCallbackStatus:MovieRewardCallbackPlayFail];
@@ -111,9 +118,20 @@
     return YES;
 }
 
-- (void)adRequestSccess {
+- (void)adRequestSccess:(GADRewardedAd * _Nullable)rewardedAd {
     NSLog(@"%s", __FUNCTION__);
-    [self setCallbackStatus:MovieRewardCallbackFetchComplete];
+    if ([self isNotNull:rewardedAd]) {
+        self.rewardedAd = rewardedAd;
+        self.rewardedAd.fullScreenContentDelegate = self;
+        [self setCallbackStatus:MovieRewardCallbackFetchComplete];
+    } else {
+        NSString *message = @"rewardedAd is null";
+        NSError *error = [NSError errorWithDomain:@"jp.glossom.adfurikun.error"
+                                             code:0
+                                         userInfo:@{NSLocalizedDescriptionKey: message,
+                                                    NSLocalizedRecoverySuggestionErrorKey: message}];
+        [self adRequestFailure:error];
+    }
 }
 
 - (void)adRequestFailure:(NSError *)error {
@@ -122,27 +140,30 @@
     [self setCallbackStatus:MovieRewardCallbackFetchFail];
 }
 
-#pragma mark - GADRewardedAdDelegate
-
-- (void)rewardedAd:(GADRewardedAd *)rewardedAd userDidEarnReward:(GADAdReward *)reward {
-    NSLog(@"%s", __FUNCTION__);
+- (void)adCompleteShow {
     self.isAdsCompleteShow = YES;
     [self setCallbackStatus:MovieRewardCallbackPlayComplete];
 }
 
-- (void)rewardedAdDidPresent:(GADRewardedAd *)rewardedAd {
+#pragma mark - GADFullScreenContentDelegate
+
+- (void)adDidRecordImpression:(nonnull id<GADFullScreenPresentingAd>)ad {
     NSLog(@"%s", __FUNCTION__);
     self.isAdsCompleteShow = NO;
     [self setCallbackStatus:MovieRewardCallbackPlayStart];
 }
 
-- (void)rewardedAd:(GADRewardedAd *)rewardedAd didFailToPresentWithError:(NSError *)error {
+- (void)ad:(nonnull id<GADFullScreenPresentingAd>)ad didFailToPresentFullScreenContentWithError:(nonnull NSError *)error {
     NSLog(@"%s", __FUNCTION__);
     [self setErrorWithMessage:error.localizedDescription code:error.code];
     [self setCallbackStatus:MovieRewardCallbackPlayFail];
 }
 
-- (void)rewardedAdDidDismiss:(GADRewardedAd *)rewardedAd {
+- (void)adDidPresentFullScreenContent:(nonnull id<GADFullScreenPresentingAd>)ad {
+    NSLog(@"%s", __FUNCTION__);
+}
+
+- (void)adDidDismissFullScreenContent:(nonnull id<GADFullScreenPresentingAd>)ad {
     NSLog(@"%s", __FUNCTION__);
     if (!self.isAdsCompleteShow) {
         [self setCallbackStatus:MovieRewardCallbackPlayFail];

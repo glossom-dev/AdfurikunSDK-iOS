@@ -16,6 +16,7 @@
 
 @interface MovieConfigure6000 : NSObject
 + (void)configure;
++ (void)configureWithCompletion:(void (^)(void))completionHandler;
 @end
 
 // 同一広告枠に複数のAppLovin Zoneをサポートする

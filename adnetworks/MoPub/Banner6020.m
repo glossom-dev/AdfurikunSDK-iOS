@@ -7,21 +7,23 @@
 //
 
 #import "Banner6020.h"
-#import "MoPub.h"
+#import <MoPub/MoPub.h>
 
 @interface Banner6020() <MPAdViewDelegate>
 
 @property (nonatomic, strong) NSString *adUnitId;
 @property (nonatomic) MPAdView *adView;
-@property (nonatomic) BOOL hasPendedLoad;
 @end
 
 @implementation Banner6020
 
++ (NSString *)getAdapterRevisionVersion {
+    return @"1";
+}
+
 - (instancetype)init {
     self = [super init];
     if (self) {
-        self.hasPendedLoad = false;
         self.adSize = kMPPresetMaxAdSize50Height;
     }
     return self;
@@ -39,28 +41,20 @@
 
 - (void)setData:(NSDictionary *)data {
     NSLog(@"Banner6020 : setData");
-
+    [super setData:data];
+    
     NSString *adUnitId = [data objectForKey:@"ad_unit_id"];
     if ([self isNotNull:adUnitId]) {
         self.adUnitId = [NSString stringWithFormat:@"%@", adUnitId];
     }
 
-    NSNumber *pixelRateNumber = data[@"pixelRate"];
-    if ([self isNotNull:pixelRateNumber] && [pixelRateNumber isKindOfClass:[NSNumber class]]) {
-        self.viewabilityPixelRate = pixelRateNumber.intValue;
-    }
-    NSNumber *displayTimeNumber = data[@"displayTime"];
-    if ([self isNotNull:displayTimeNumber] && [displayTimeNumber isKindOfClass:[NSNumber class]]) {
-        self.viewabilityDisplayTime = displayTimeNumber.intValue;
-    }
-    NSNumber *timerIntervalNumber = data[@"timerInterval"];
-    if ([self isNotNull:timerIntervalNumber] && [timerIntervalNumber isKindOfClass:[NSNumber class]]) {
-        self.viewabilityTimerInterval = timerIntervalNumber.intValue;
-    }
 }
 
 -(void)initAdnetworkIfNeeded {
     NSLog(@"Banner6020 : initAdnetworkIfNeeded");
+    if (![self needsToInit]) {
+        return;
+    }
     
     @try {
         MPMoPubConfiguration *sdkConfig = [[MPMoPubConfiguration alloc] initWithAdUnitIdForAppInitialization:self.adUnitId];
@@ -70,10 +64,7 @@
         
         [[MoPub sharedInstance] initializeSdkWithConfiguration:sdkConfig completion:^{
             NSLog(@"SDK initialization complete");
-            if (self.hasPendedLoad) {
-                self.hasPendedLoad = false;
-                [self startAd];
-            }
+            [self initCompleteAndRetryStartAdIfNeeded];
         }];
     } @catch (NSException *exception) {
         [self adnetworkExceptionHandling:exception];
@@ -91,13 +82,12 @@
     if (self.adUnitId == nil) {
         return;
     }
-    if (![MoPub sharedInstance].isSdkInitialized) {
-        self.hasPendedLoad = true;
+    if (![self canStartAd]) {
+        return;
     }
 
     [super startAd];
 
-    self.hasPendedLoad = false;
     self.isAdLoaded = false;
 
     if (self.adView) {
@@ -135,45 +125,20 @@
     self.adInfo = info;
 
     [self setCustomMediaview:view];
-
-    if (self.delegate) {
-        if ([self.delegate respondsToSelector: @selector(onNativeMovieAdLoadFinish:)]) {
-            [self.delegate onNativeMovieAdLoadFinish:self.adInfo];
-        } else {
-            NSLog(@"Banner6020: %s onNativeMovieAdLoadFinish selector is not responding", __FUNCTION__);
-        }
-    } else {
-        NSLog(@"Banner6020: %s Delegate is not setting", __FUNCTION__);
-    }
+    [self setCallbackStatus:NativeAdCallbackLoadFinish];
 }
 
 - (void)adView:(MPAdView *)view didFailToLoadAdWithError:(NSError *)error {
     NSLog(@"Banner6020 : didFailToLoadAdWithError %@", error);
-    if (self.delegate) {
-        if ([self.delegate respondsToSelector:@selector(onNativeMovieAdLoadError:)]) {
-            if (error) {
-                [self setErrorWithMessage:error.localizedDescription code:error.code];
-            }
-            [self.delegate onNativeMovieAdLoadError: self];
-        } else {
-            NSLog(@"Banner6020: selector onNativeMovieAdLoadError is not responding");
-        }
-    } else {
-        NSLog(@"Banner6020: %s Delegate is not setting", __FUNCTION__);
+    if (error) {
+        [self setErrorWithMessage:error.localizedDescription code:error.code];
     }
+    [self setCallbackStatus:NativeAdCallbackLoadError];
 }
 
 - (void)willPresentModalViewForAd:(MPAdView *)view {
     NSLog(@"willPresentModalViewForAd");
-    if (self.adInfo.mediaView.adapterInnerDelegate) {
-        if ([self.adInfo.mediaView.adapterInnerDelegate respondsToSelector:@selector(onADFMediaViewClick)]) {
-            [self.adInfo.mediaView.adapterInnerDelegate onADFMediaViewClick];
-        } else {
-            NSLog(@"Banner6020: %s onADFMediaViewClick selector is not responding", __FUNCTION__);
-        }
-    } else {
-        NSLog(@"Banner6020: %s adInfo.mediaView.adapterInnerDelegate is not setting", __FUNCTION__);
-    }
+    [self setCallbackStatus:NativeAdCallbackClick];
 }
 
 - (void)didDismissModalViewForAd:(MPAdView *)view {
@@ -193,17 +158,8 @@
 @implementation NativeAdInfo6020
 
 - (void)playMediaView {
-    if (self.mediaView.adapterInnerDelegate) {
-        if ([self.mediaView.adapterInnerDelegate respondsToSelector:@selector(onADFMediaViewRendering)]) {
-            [self.mediaView.adapterInnerDelegate onADFMediaViewRendering];
-        } else {
-            NSLog(@"NativeAdInfo6020: %s onADFMediaViewRendering selector is not responding", __FUNCTION__);
-        }
-    } else {
-        NSLog(@"NativeAdInfo6020: %s adInfo.mediaView.adapterInnerDelegate is not setting", __FUNCTION__);
-    }
-
     if (self.adapter) {
+        [self.adapter setCallbackStatus:NativeAdCallbackRendering];
         [self.adapter startViewabilityCheck];
     }
 }

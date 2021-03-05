@@ -21,6 +21,10 @@
 
 @implementation MovieNative6009
 
++ (NSString *)getAdapterRevisionVersion {
+    return @"2";
+}
+
 - (BOOL)isClassReference {
     // Nend:iOS 8.1以上が動作保障対象となります。それ以外のOSおよび端末では正常に動作しない場合があります。
     if (NSFoundationVersionNumber < NSFoundationVersionNumber_iOS_8_1) {
@@ -100,39 +104,18 @@
                     weakSelf.adInfo = info;
                     weakSelf.isAdLoaded = true;
                     
-                    if (weakSelf.delegate) {
-                        if ([weakSelf.delegate respondsToSelector:@selector(onNativeMovieAdLoadFinish:)]) {
-                            [weakSelf.delegate onNativeMovieAdLoadFinish:weakSelf.adInfo];
-                        } else {
-                            NSLog(@"%s onNativeMovieAdLoadFinish selector is not responding", __FUNCTION__);
-                        }
-                    } else {
-                        NSLog(@"%s Delegate is not setting", __FUNCTION__);
-                    }
-                    
-                    
+                    [weakSelf setCallbackStatus:NativeAdCallbackLoadFinish];
                 } else {
                     weakSelf.isAdLoaded = false;
                     NSLog(@"nend NativeAd load error : %@", error.localizedDescription);
-                    if (weakSelf.delegate) {
-                        if ([weakSelf.delegate respondsToSelector:@selector(onNativeMovieAdLoadError:)]) {
-                            [self setErrorWithMessage:error.localizedDescription code:error.code];
-                            [weakSelf.delegate onNativeMovieAdLoadError:weakSelf];
-                        } else {
-                            NSLog(@"%s onNativeMovieAdLoadError selector is not responding", __FUNCTION__);
-                        }
-                    } else {
-                        NSLog(@"%s Delegate is not setting", __FUNCTION__);
-                    }
+                    [weakSelf setErrorWithMessage:error.localizedDescription code:error.code];
+                    [self setCallbackStatus:NativeAdCallbackLoadError];
                 }
             }
         }];
     } @catch (NSException *exception) {
         [self adnetworkExceptionHandling:exception];
     }
-}
-
-- (void)cancel {
 }
 
 - (void)setTargeting {
@@ -172,16 +155,7 @@
 
 - (void)nadNativeVideoDidClickAd:(NADNativeVideo *)ad {
     NSLog(@"%s", __func__);
-
-    if (self.adInfo.mediaView.mediaViewDelegate) {
-        if ([self.adInfo.mediaView.mediaViewDelegate respondsToSelector:@selector(onADFMediaViewClick)]) {
-            [self.adInfo.mediaView.mediaViewDelegate onADFMediaViewClick];
-        } else {
-            NSLog(@"%s onADFMediaViewClick selector is not responding", __FUNCTION__);
-        }
-    } else {
-        NSLog(@"%s adInfo.mediaView.mediaViewDelegate is not setting", __FUNCTION__);
-    }
+    [self setCallbackStatus:NativeAdCallbackClick];
 }
 
 - (void)nadNativeVideoDidClickInformation:(NADNativeVideo *)ad {
@@ -191,16 +165,7 @@
 #pragma mark - NADNativeVideoViewDelegate
 - (void)nadNativeVideoViewDidStartPlay:(NADNativeVideoView *)videoView {
     NSLog(@"%s", __func__);
-
-    if (self.adInfo.mediaView.adapterInnerDelegate) {
-        if ([self.adInfo.mediaView.adapterInnerDelegate respondsToSelector:@selector(onADFMediaViewPlayStart)]) {
-            [self.adInfo.mediaView.adapterInnerDelegate onADFMediaViewPlayStart];
-        } else {
-            NSLog(@"%s onADFMediaViewPlayStart selector is not responding", __FUNCTION__);
-        }
-    } else {
-        NSLog(@"%s adInfo.mediaView.adapterInnerDelegate is not setting", __FUNCTION__);
-    }
+    [self setCallbackStatus:NativeAdCallbackPlayStart];
 }
 
 - (void)nadNativeVideoViewDidStartFullScreenPlaying:(NADNativeVideoView *)videoView {
@@ -217,30 +182,12 @@
 
 - (void)nadNativeVideoViewDidFailToPlay:(NADNativeVideoView *)videoView {
     NSLog(@"%s", __func__);
-
-    if (self.adInfo.mediaView.adapterInnerDelegate) {
-        if ([self.adInfo.mediaView.adapterInnerDelegate respondsToSelector:@selector(onADFMediaViewPlayFail)]) {
-            [self.adInfo.mediaView.adapterInnerDelegate onADFMediaViewPlayFail];
-        } else {
-            NSLog(@"%s onADFMediaViewPlayFail selector is not responding", __FUNCTION__);
-        }
-    } else {
-        NSLog(@"%s adInfo.mediaView.adapterInnerDelegate is not setting", __FUNCTION__);
-    }
+    [self setCallbackStatus:NativeAdCallbackPlayFail];
 }
 
 - (void)nadNativeVideoViewDidCompletePlay:(NADNativeVideoView *)videoView {
     NSLog(@"%s", __func__);
-
-    if (self.adInfo.mediaView.adapterInnerDelegate) {
-        if ([self.adInfo.mediaView.adapterInnerDelegate respondsToSelector:@selector(onADFMediaViewPlayFinish)]) {
-            [self.adInfo.mediaView.adapterInnerDelegate onADFMediaViewPlayFinish];
-        } else {
-            NSLog(@"%s onADFMediaViewPlayFinish selector is not responding", __FUNCTION__);
-        }
-    } else {
-        NSLog(@"%s adInfo.mediaView.adapterInnerDelegate is not setting", __FUNCTION__);
-    }
+    [self setCallbackStatus:NativeAdCallbackPlayFinish];
 }
 
 - (void)nadNativeVideoViewDidOpenFullScreen:(NADNativeVideoView *)videoView {

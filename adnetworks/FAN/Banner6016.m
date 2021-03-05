@@ -14,25 +14,17 @@
 @end
 
 @implementation Banner6016
+
++ (NSString *)getAdapterRevisionVersion {
+    return @"1";
+}
+
 -(void)setData:(NSDictionary *)data {
     [super setData:data];
     
     NSString *data_placement_id = [data objectForKey:@"placement_id"];
     if ([self isNotNull:data_placement_id]) {
         self.placement_id = [NSString stringWithFormat:@"%@",data_placement_id];
-    }
-
-    NSNumber *pixelRateNumber = data[@"pixelRate"];
-    if ([self isNotNull:pixelRateNumber] && [pixelRateNumber isKindOfClass:[NSNumber class]]) {
-        self.viewabilityPixelRate = pixelRateNumber.intValue;
-    }
-    NSNumber *displayTimeNumber = data[@"displayTime"];
-    if ([self isNotNull:displayTimeNumber] && [displayTimeNumber isKindOfClass:[NSNumber class]]) {
-        self.viewabilityDisplayTime = displayTimeNumber.intValue;
-    }
-    NSNumber *timerIntervalNumber = data[@"timerInterval"];
-    if ([self isNotNull:timerIntervalNumber] && [timerIntervalNumber isKindOfClass:[NSNumber class]]) {
-        self.viewabilityTimerInterval = timerIntervalNumber.intValue;
     }
 }
 
@@ -85,31 +77,15 @@
     info.adapter = self;
     [info setupMediaView:adView];
     self.adInfo = info;
-    if (self.delegate) {
-        if ([self.delegate respondsToSelector: @selector(onNativeMovieAdLoadFinish:)]) {
-            [self.delegate onNativeMovieAdLoadFinish:self.adInfo];
-        } else {
-            NSLog(@"Banner6016: %s onNativeMovieAdLoadFinish selector is not responding", __FUNCTION__);
-        }
-    } else {
-        NSLog(@"Banner6016: %s Delegate is not setting", __FUNCTION__);
-    }
+    [self setCallbackStatus:NativeAdCallbackLoadFinish];
 }
 
 - (void)adView:(FBAdView *)adView didFailWithError:(NSError *)error {
     NSLog(@"FAN Banner load error :%@", error);
-    if (self.delegate) {
-        if ([self.delegate respondsToSelector:@selector(onNativeMovieAdLoadError:)]) {
-            if (error) {
-                [self setErrorWithMessage:error.localizedDescription code:error.code];
-            }
-            [self.delegate onNativeMovieAdLoadError:self];
-        } else {
-            NSLog(@"Banner6016: selector onNativeMovieAdLoadError is not responding");
-        }
-    } else {
-        NSLog(@"Banner6016: delegate is not set");
+    if (error) {
+        [self setErrorWithMessage:error.localizedDescription code:error.code];
     }
+    [self setCallbackStatus:NativeAdCallbackLoadError];
 }
 
 - (void)adViewWillLogImpression:(FBAdView *)adView {
@@ -121,27 +97,11 @@
     [self setCustomMediaview:adView];
     [self startViewabilityCheck];
 
-    if (self.adInfo.mediaView.adapterInnerDelegate) {
-        if ([self.adInfo.mediaView.adapterInnerDelegate respondsToSelector:@selector(onADFMediaViewRendering)]) {
-            [self.adInfo.mediaView.adapterInnerDelegate onADFMediaViewRendering];
-        } else {
-            NSLog(@"MovieNative6016: %s onADFMediaViewRendering selector is not responding", __FUNCTION__);
-        }
-    } else {
-        NSLog(@"MovieNative6016: %s adInfo.mediaView.adapterInnerDelegate is not setting", __FUNCTION__);
-    }
+    [self setCallbackStatus:NativeAdCallbackRendering];
 }
 
 - (void)adViewDidClick:(FBAdView *)adView {
-    if (self.adInfo.mediaView.adapterInnerDelegate) {
-        if ([self.adInfo.mediaView.adapterInnerDelegate respondsToSelector:@selector(onADFMediaViewClick)]) {
-            [self.adInfo.mediaView.adapterInnerDelegate onADFMediaViewClick];
-        } else {
-            NSLog(@"Banner6016: %s onADFMediaViewClick selector is not responding", __FUNCTION__);
-        }
-    } else {
-        NSLog(@"Banner6016: %s adInfo.mediaView.adapterInnerDelegate is not setting", __FUNCTION__);
-    }
+    [self setCallbackStatus:NativeAdCallbackClick];
 }
 
 - (void)adViewDidFinishHandlingClick:(FBAdView *)adView {

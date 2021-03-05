@@ -26,8 +26,8 @@
     return ALSdk.version;
 }
 
-+(NSString *)getAdapterVersion {
-    return @"6.14.8.2";
++ (NSString *)getAdapterRevisionVersion {
+    return @"3";
 }
 
 -(id)init {
@@ -66,18 +66,24 @@
 }
 
 -(void)initAdnetworkIfNeeded {
+    if (![self needsToInit]) {
+        return;
+    }
+
     if (self.appLovinSdkKey) {
-        [MovieConfigure6000 configure];
-        if (!self.interstitialAd) {
-            @try {
-                self.interstitialAd = [[ALInterstitialAd alloc] initWithSdk: [ALSdk sharedWithKey:self.appLovinSdkKey]];
-                self.interstitialAd.adDisplayDelegate = self;
-                self.interstitialAd.adLoadDelegate = self;
-                self.interstitialAd.adVideoPlaybackDelegate = self;
-            } @catch (NSException *exception) {
-                [self adnetworkExceptionHandling:exception];
+        [MovieConfigure6000 configureWithCompletion:^{
+            if (!self.interstitialAd) {
+                @try {
+                    self.interstitialAd = [[ALInterstitialAd alloc] initWithSdk: [ALSdk sharedWithKey:self.appLovinSdkKey]];
+                    self.interstitialAd.adDisplayDelegate = self;
+                    self.interstitialAd.adLoadDelegate = self;
+                    self.interstitialAd.adVideoPlaybackDelegate = self;
+                    [self initCompleteAndRetryStartAdIfNeeded];
+                } @catch (NSException *exception) {
+                    [self adnetworkExceptionHandling:exception];
+                }
             }
-        }
+        }];
     }
 }
 
@@ -85,6 +91,10 @@
  *  広告の読み込みを開始する
  */
 -(void)startAd {
+    if (![self canStartAd]) {
+        return;
+    }
+
     @try {
         if ([self isNotNull:_appLovinSdkKey] && [self isNotNull:self.zoneIdentifier] && [self.zoneIdentifier length] != 0) {
             [[ALSdk sharedWithKey:self.appLovinSdkKey].adService loadNextAdForZoneIdentifier:self.zoneIdentifier andNotify:self];
@@ -149,12 +159,6 @@
         return NO;
     }
     return YES;
-}
-
-/**
- *  広告の読み込みを中止
- */
--(void)cancel {
 }
 
 -(void)setHasUserConsent:(BOOL)hasUserConsent {

@@ -8,9 +8,7 @@
 
 #import <Foundation/Foundation.h>
 
-@class UIViewController;
-
-@protocol ADFMovieRewardDelegate;
+#import "ADFmyBaseAdapterInterface.h"
 
 typedef enum : NSInteger {
     MovieRewardCallbackInit,
@@ -22,54 +20,27 @@ typedef enum : NSInteger {
     MovieRewardCallbackPlayFail,
 } MovieRewardCallbackStatus;
 
-@interface ADFmyMovieRewardInterface : NSObject<NSCopying>
+@class UIViewController;
+
+@protocol ADFMovieRewardDelegate;
+
+@interface ADFmyMovieRewardInterface : ADFmyBaseAdapterInterface
 
 @property (nonatomic, strong) NSString *objectId;
-@property (nonatomic, strong) NSObject<ADFMovieRewardDelegate> *delegate;
-@property (nonatomic, strong) NSError *lastError;
-@property (nonatomic, strong) NSNumber *hasGdprConsent;
+@property (nonatomic, weak) NSObject<ADFMovieRewardDelegate> *delegate;
+
 @property (nonatomic, copy) NSString *appId;
 @property (nonatomic, copy) NSString *adnetworkKey;
 
-//ADNW SDKのバージョン情報をSDKから取得できるようにする
-+ (NSString *)getSDKVersion;
-+ (NSString *)getAdapterVersion;
-
-/**< 設定データの送信 */
--(void)setData:(NSDictionary *)data;
-/**< Adnetwork SDKを初期化する （Optional） */
--(void)initAdnetworkIfNeeded;
-/**< 広告データの初期化 （Optional） */
--(void)clearStatusIfNeeded;
-/**< 広告が準備できているか？ */
--(BOOL)isPrepared;
-/**< 広告の読み込み開始 */
--(void)startAd;
--(void)startAdWithOption:(NSDictionary *)option;
 /**< 広告の表示 */
 -(void)showAd;
 -(void)showAdWithPresentingViewController:(UIViewController *)viewController;
-/**< SDKが読み込まれているかどうか？ */
--(BOOL)isClassReference;
-/**< 広告の読み込みを中止する処理 */
--(void)cancel;
-/** アドネットワーク接続(特定のアドネットワーク) */
--(void)connectSetting:(NSDictionary*)keyDict;
-/** Errorを設定する */
--(void)setErrorWithMessage:(NSString *)description code:(NSInteger)code;
-/** 最後のエラーを返す */
--(NSError *)getLastError;
--(UIViewController *)topMostViewController;
-/** EU居住者がEU 一般データ保護規則（GDPR）に同意をしたのかを設定します。 */
--(void)setHasUserConsent:(BOOL)hasUserConsent;
 
--(void)setCallbackStatus:(MovieRewardCallbackStatus)status;
+- (void)setCallbackStatus:(MovieRewardCallbackStatus)status;
+
 -(void)invalidViewControllerTimer;
 
 -(NSString *)debugDescriptionForCallback;
-
--(void)adnetworkExceptionHandling:(NSException *)exception;
--(BOOL)isNotNull:(id)obj;
 
 @end
 

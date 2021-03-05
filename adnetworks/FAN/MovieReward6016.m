@@ -20,8 +20,8 @@
 
 @implementation MovieReward6016
 
-+(NSString *)getAdapterVersion {
-    return @"6.2.0.2";
++ (NSString *)getAdapterRevisionVersion {
+    return @"3";
 }
 
 - (void)setData:(NSDictionary *)data {

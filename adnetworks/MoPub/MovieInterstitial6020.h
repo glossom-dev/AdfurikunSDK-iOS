@@ -7,10 +7,10 @@
 //
 
 #import <Foundation/Foundation.h>
-#import "MoPub.h"
-#import "MPInterstitialAdControllerDelegate.h"
+#import <MoPub/MoPub.h>
+#import <MoPub/MPInterstitialAdControllerDelegate.h>
 #import <ADFMovieReward/ADFmyMovieRewardInterface.h>
-#import "MPInterstitialAdController.h"
+#import <MoPub/MPInterstitialAdController.h>
 
 @interface MovieInterstitial6020 : ADFmyMovieRewardInterface<MPInterstitialAdControllerDelegate>
 

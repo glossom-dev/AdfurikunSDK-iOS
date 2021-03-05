@@ -15,6 +15,14 @@
 
 @implementation Banner6000
 
++ (NSString *)getSDKVersion {
+    return ALSdk.version;
+}
+
++ (NSString *)getAdapterRevisionVersion {
+    return @"1";
+}
+
 - (BOOL)isClassReference {
     Class clazz = NSClassFromString(@"ALAdView");
     if (clazz) {
@@ -35,19 +43,6 @@
     NSString *data_zoneID = [data objectForKey:@"zone_id"];
     if ([self isNotNull:data_zoneID]) {
         self.zoneIdentifier = [NSString stringWithFormat:@"%@", data_zoneID];
-    }
-
-    NSNumber *pixelRateNumber = data[@"pixelRate"];
-    if ([self isNotNull:pixelRateNumber] && [pixelRateNumber isKindOfClass:[NSNumber class]]) {
-        self.viewabilityPixelRate = pixelRateNumber.intValue;
-    }
-    NSNumber *displayTimeNumber = data[@"displayTime"];
-    if ([self isNotNull:displayTimeNumber] && [displayTimeNumber isKindOfClass:[NSNumber class]]) {
-        self.viewabilityDisplayTime = displayTimeNumber.intValue;
-    }
-    NSNumber *timerIntervalNumber = data[@"timerInterval"];
-    if ([self isNotNull:timerIntervalNumber] && [timerIntervalNumber isKindOfClass:[NSNumber class]]) {
-        self.viewabilityTimerInterval = timerIntervalNumber.intValue;
     }
 }
 
@@ -100,7 +95,7 @@
             [info setupMediaView:self.adView];
             self.adInfo = info;
             
-            [self.delegate onNativeMovieAdLoadFinish:self.adInfo];
+            [self setCallbackStatus:NativeAdCallbackLoadFinish];
             
         } else {
             NSLog(@"Banner6000: %s onNativeMovieAdLoadFinish selector is not responding", __FUNCTION__);
@@ -114,18 +109,10 @@
     NSLog(@"%s", __FUNCTION__);
     self.isAdLoaded = NO;
     NSLog(@"AppLovin Banner load error :%d", code);
-    if (self.delegate) {
-        if ([self.delegate respondsToSelector:@selector(onNativeMovieAdLoadError:)]) {
-            if (code) {
-                [self setErrorWithMessage:nil code:code];
-            }
-            [self.delegate onNativeMovieAdLoadError:self];
-        } else {
-            NSLog(@"Banner6000: selector onNativeMovieAdLoadError is not responding");
-        }
-    } else {
-        NSLog(@"Banner6000: delegate is not set");
+    if (code) {
+        [self setErrorWithMessage:nil code:code];
     }
+    [self setCallbackStatus:NativeAdCallbackLoadError];
 }
 
 #pragma mark - Ad Display Delegate
@@ -139,15 +126,7 @@
 }
 
 - (void)ad:(ALAd *)ad wasClickedIn:(UIView *)view {
-    if (self.adInfo.mediaView.adapterInnerDelegate) {
-        if ([self.adInfo.mediaView.adapterInnerDelegate respondsToSelector:@selector(onADFMediaViewClick)]) {
-            [self.adInfo.mediaView.adapterInnerDelegate onADFMediaViewClick];
-        } else {
-            NSLog(@"Banner6000: %s onADFMediaViewClick selector is not responding", __FUNCTION__);
-        }
-    } else {
-        NSLog(@"Banner6000: %s adInfo.mediaView.adapterInnerDelegate is not setting", __FUNCTION__);
-    }
+    [self setCallbackStatus:NativeAdCallbackClick];
 }
 
 @end
@@ -156,11 +135,7 @@
 
 - (void)playMediaView {
     if (self.adapter) {
-        if (self.mediaView.adapterInnerDelegate) {
-            if ([self.mediaView.adapterInnerDelegate respondsToSelector:@selector(onADFMediaViewRendering)]) {
-                [self.mediaView.adapterInnerDelegate onADFMediaViewRendering];
-            }
-        }
+        [self.adapter setCallbackStatus:NativeAdCallbackRendering];
         [self.adapter setCustomMediaview:self.mediaView];
         [self.adapter startViewabilityCheck];
     }

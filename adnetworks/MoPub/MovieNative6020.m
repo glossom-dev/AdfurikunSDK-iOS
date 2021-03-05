@@ -6,7 +6,7 @@
 //  Copyright © 2020 Glossom, Inc. All rights reserved.
 //
 
-#import "MoPub.h"
+#import <MoPub/MoPub.h>
 
 #import "MovieNative6020.h"
 
@@ -17,11 +17,14 @@
 @property (nonatomic) MPNativeAdRendererConfiguration *config;
 @property (nonatomic) MPStaticNativeAdRendererSettings *settings;
 @property (nonatomic, strong) NSString *adUnitId;
-@property (nonatomic) BOOL hasPendedLoad;
 
 @end
 
 @implementation MovieNative6020
+
++ (NSString *)getAdapterRevisionVersion {
+    return @"1";
+}
 
 - (BOOL)isClassReference {
     NSLog(@"MovieNatve6020 isClassReference");
@@ -46,26 +49,16 @@
     if ([self isNotNull:adUnitId]) {
         self.adUnitId = [NSString stringWithFormat:@"%@", adUnitId];
     }
-
-    NSNumber *pixelRateNumber = data[@"pixelRate"];
-    if ([self isNotNull:pixelRateNumber] && [pixelRateNumber isKindOfClass:[NSNumber class]]) {
-        self.viewabilityPixelRate = pixelRateNumber.intValue;
-    }
-    NSNumber *displayTimeNumber = data[@"displayTime"];
-    if ([self isNotNull:displayTimeNumber] && [displayTimeNumber isKindOfClass:[NSNumber class]]) {
-        self.viewabilityDisplayTime = displayTimeNumber.intValue;
-    }
-    NSNumber *timerIntervalNumber = data[@"timerInterval"];
-    if ([self isNotNull:timerIntervalNumber] && [timerIntervalNumber isKindOfClass:[NSNumber class]]) {
-        self.viewabilityTimerInterval = timerIntervalNumber.intValue;
-    }
 }
 
 // SDKの初期化ロジックを入れる。ただし、Instance化を毎回する必要がある場合にはこちらではなくてSstartAdで行うこと
 -(void)initAdnetworkIfNeeded {
+    if (![self needsToInit]) {
+        return;
+    }
+
     if (self.adUnitId) {
         @try {
-            
             NSLog(@"MovieNatve6020 initAdnetworkIfNeeded");
             MPMoPubConfiguration *sdkConfig = [[MPMoPubConfiguration alloc] initWithAdUnitIdForAppInitialization:self.adUnitId];
             
@@ -74,10 +67,7 @@
             
             [[MoPub sharedInstance] initializeSdkWithConfiguration:sdkConfig completion:^{
                 NSLog(@"MovieNatve6020 SDK initialization complete");
-                if (self.hasPendedLoad) {
-                    self.hasPendedLoad = false;
-                    [self startAd];
-                }
+                [self initCompleteAndRetryStartAdIfNeeded];
             }];
             
             self.settings = [[MPStaticNativeAdRendererSettings alloc] init];
@@ -103,8 +93,7 @@
     if (self.adUnitId == nil) {
         return;
     }
-    if (![MoPub sharedInstance].isSdkInitialized) {
-        self.hasPendedLoad = true;
+    if (![self canStartAd]) {
         return;
     }
 
@@ -144,9 +133,6 @@
     [self startAd];
 }
 
-- (void)cancel {
-}
-
 - (void)loadAdInfo:(MPNativeAd *)response {
     MovieNativeAdInfo6020 *info = [[MovieNativeAdInfo6020 alloc] initWithVideoUrl:nil
                                                                             title:@""
@@ -170,25 +156,17 @@
         self.adInfo = info;
         self.isAdLoaded = YES;
 
-        if (self.delegate) {
-            if ([self.delegate respondsToSelector:@selector(onNativeMovieAdLoadFinish:)]) {
-                [self.delegate onNativeMovieAdLoadFinish:self.adInfo];
-            }
-        }
+        [self setCallbackStatus:NativeAdCallbackLoadFinish];
     } else {
         [self sendLoadFail:errrr];
     }
 }
 
 - (void)sendLoadFail:(NSError *)error {
-    if (self.delegate) {
-        if ([self.delegate respondsToSelector:@selector(onNativeMovieAdLoadError:)]) {
-            if (error) {
-                [self setErrorWithMessage:error.localizedDescription code:error.code];
-            }
-            [self.delegate onNativeMovieAdLoadError:self];
-        }
+    if (error) {
+        [self setErrorWithMessage:error.localizedDescription code:error.code];
     }
+    [self setCallbackStatus:NativeAdCallbackLoadError];
 }
 
 - (void)printSubView:(UIView *)view {
@@ -272,17 +250,8 @@
 
 - (void)playMediaView {
     NSLog(@"%s", __func__);
-    if (self.mediaView.adapterInnerDelegate) {
-        if ([self.mediaView.adapterInnerDelegate respondsToSelector:@selector(onADFMediaViewRendering)]) {
-            [self.mediaView.adapterInnerDelegate onADFMediaViewRendering];
-        } else {
-            NSLog(@"MovieNativeAdInfo6020: %s onADFMediaViewRendering selector is not responding", __FUNCTION__);
-        }
-    } else {
-        NSLog(@"MovieNativeAdInfo6020: %s adInfo.mediaView.adapterInnerDelegate is not setting", __FUNCTION__);
-    }
-
     if (self.adapter) {
+        [self.adapter setCallbackStatus:NativeAdCallbackRendering];
         [self.adapter startViewabilityCheck];
     }
 }

@@ -27,8 +27,8 @@
     return UnityServices.getVersion;
 }
 
-+(NSString *)getAdapterVersion {
-    return @"3.5.1.2";
++ (NSString *)getAdapterRevisionVersion {
+    return @"3";
 }
 
 /**
@@ -146,13 +146,6 @@
         NSLog(@"Not found Class: UnityAds");
         return NO;
     }
-}
-
-/**
- *  広告の読み込みを中止
- */
--(void)cancel {
-// 2.0で廃止  [UnityAds stopAll];
 }
 
 -(void)setHasUserConsent:(BOOL)hasUserConsent {

@@ -23,8 +23,8 @@
     return VungleSDKVersion;
 }
 
-+(NSString *)getAdapterVersion {
-    return @"6.8.1.2";
++ (NSString *)getAdapterRevisionVersion {
+    return @"3";
 }
 
 - (id)init{
@@ -208,16 +208,6 @@
         return NO;
     }
     return YES;
-}
-
-
-/**
- *  広告の読み込みを中止
- */
--(void)cancel
-{
-    NSLog(@"MovieReward6006 cancel");
-    // VungleSDK には対象の処理が無いため何もしない
 }
 
 -(void)setHasUserConsent:(BOOL)hasUserConsent {

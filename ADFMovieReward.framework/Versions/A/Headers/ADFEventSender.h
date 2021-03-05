@@ -8,6 +8,7 @@
 NS_ASSUME_NONNULL_BEGIN
 
 @interface ADFEventSender : NSObject
++ (NSString *)getLastSentLog;
 + (void)sendApplicationLog:(NSString *)log;
 + (void)sendApplicationLog:(NSString *)log appId:(NSString * _Nullable)appId;
 @end

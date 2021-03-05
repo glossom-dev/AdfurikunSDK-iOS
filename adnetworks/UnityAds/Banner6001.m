@@ -19,6 +19,14 @@
 
 @implementation Banner6001
 
++ (NSString *)getSDKVersion {
+    return UnityServices.getVersion;
+}
+
++ (NSString *)getAdapterRevisionVersion {
+    return @"1";
+}
+
 -(void)setData:(NSDictionary *)data {
     [super setData:data];
     
@@ -39,19 +47,6 @@
     NSString *dataPlacementId = [data objectForKey:@"placement_id"];
     if ([self isNotNull:dataPlacementId]) {
         self.placementId = [NSString stringWithFormat:@"%@",dataPlacementId];
-    }
-
-    NSNumber *pixelRateNumber = data[@"pixelRate"];
-    if ([self isNotNull:pixelRateNumber] && [pixelRateNumber isKindOfClass:[NSNumber class]]) {
-        self.viewabilityPixelRate = pixelRateNumber.intValue;
-    }
-    NSNumber *displayTimeNumber = data[@"displayTime"];
-    if ([self isNotNull:displayTimeNumber] && [displayTimeNumber isKindOfClass:[NSNumber class]]) {
-        self.viewabilityDisplayTime = displayTimeNumber.intValue;
-    }
-    NSNumber *timerIntervalNumber = data[@"timerInterval"];
-    if ([self isNotNull:timerIntervalNumber] && [timerIntervalNumber isKindOfClass:[NSNumber class]]) {
-        self.viewabilityTimerInterval = timerIntervalNumber.intValue;
     }
 }
 
@@ -138,29 +133,12 @@
 
     [self setCustomMediaview:bannerView];
     [self startViewabilityCheck];
-
-    if (self.delegate) {
-        if ([self.delegate respondsToSelector: @selector(onNativeMovieAdLoadFinish:)]) {
-            [self.delegate onNativeMovieAdLoadFinish:self.adInfo];
-        } else {
-            NSLog(@"Banner6001: %s onNativeMovieAdLoadFinish selector is not responding", __FUNCTION__);
-        }
-    } else {
-        NSLog(@"Banner6001: %s Delegate is not setting", __FUNCTION__);
-    }
+    [self setCallbackStatus:NativeAdCallbackLoadFinish];
 }
 
 -(void)bannerViewDidClick:(UADSBannerView *)bannerView {
     NSLog(@"%s called", __func__);
-    if (self.adInfo.mediaView.adapterInnerDelegate) {
-        if ([self.adInfo.mediaView.adapterInnerDelegate respondsToSelector:@selector(onADFMediaViewClick)]) {
-            [self.adInfo.mediaView.adapterInnerDelegate onADFMediaViewClick];
-        } else {
-            NSLog(@"Banner6001: %s onADFMediaViewClick selector is not responding", __FUNCTION__);
-        }
-    } else {
-        NSLog(@"Banner6001: %s adInfo.mediaView.adapterInnerDelegate is not setting", __FUNCTION__);
-    }
+    [self setCallbackStatus:NativeAdCallbackClick];
 }
 
 -(void)bannerViewDidLeaveApplication:(UADSBannerView *)bannerView {
@@ -170,18 +148,10 @@
 -(void)bannerViewDidError:(UADSBannerView *)bannerView error:(UADSBannerError *)error {
     NSLog(@"%s called", __func__);
     NSLog(@"UnityAds Banner load error :%ld", error.code);
-    if (self.delegate) {
-        if ([self.delegate respondsToSelector:@selector(onNativeMovieAdLoadError:)]) {
-            if (error) {
-                [self setErrorWithMessage:@"" code:error.code];
-            }
-            [self.delegate onNativeMovieAdLoadError:self];
-        } else {
-            NSLog(@"Banner6001: selector onNativeMovieAdLoadError is not responding");
-        }
-    } else {
-        NSLog(@"Banner6001: delegate is not set");
+    if (error) {
+        [self setErrorWithMessage:@"" code:error.code];
     }
+    [self setCallbackStatus:NativeAdCallbackLoadError];
 }
 
 @end
@@ -190,14 +160,8 @@
 @implementation NativeAdInfo6001
 
 -(void)playMediaView {
-    if (self.mediaView.adapterInnerDelegate) {
-        if ([self.mediaView.adapterInnerDelegate respondsToSelector:@selector(onADFMediaViewRendering)]) {
-            [self.mediaView.adapterInnerDelegate onADFMediaViewRendering];
-        } else {
-            NSLog(@"NativeAdInfo6001: %s onADFMediaViewRendering selector is not responding", __FUNCTION__);
-        }
-    } else {
-        NSLog(@"NativeAdInfo6001: %s adInfo.mediaView.adapterInnerDelegate is not setting", __FUNCTION__);
+    if (self.adapter) {
+        [self.adapter setCallbackStatus:NativeAdCallbackRendering];
     }
 }
 

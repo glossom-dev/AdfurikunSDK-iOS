@@ -18,8 +18,8 @@
 
 @implementation Banner6009
 
-+ (NSString *)getSDKVersion {
-    return @"7.0.2";
++ (NSString *)getAdapterRevisionVersion {
+    return @"2";
 }
 
 - (BOOL)isClassReference {
@@ -46,19 +46,6 @@
     NSString *spotId = [data objectForKey:@"adspot_id"];
     if ([self isNotNull:spotId] && ([spotId isKindOfClass:[NSString class]] || [spotId isKindOfClass:[NSNumber class]])) {
         self.nendAdspotId = [spotId integerValue];
-    }
-
-    NSNumber *pixelRateNumber = data[@"pixelRate"];
-    if ([self isNotNull:pixelRateNumber] && [pixelRateNumber isKindOfClass:[NSNumber class]]) {
-        self.viewabilityPixelRate = pixelRateNumber.intValue;
-    }
-    NSNumber *displayTimeNumber = data[@"displayTime"];
-    if ([self isNotNull:displayTimeNumber] && [displayTimeNumber isKindOfClass:[NSNumber class]]) {
-        self.viewabilityDisplayTime = displayTimeNumber.intValue;
-    }
-    NSNumber *timerIntervalNumber = data[@"timerInterval"];
-    if ([self isNotNull:timerIntervalNumber] && [timerIntervalNumber isKindOfClass:[NSNumber class]]) {
-        self.viewabilityTimerInterval = timerIntervalNumber.intValue;
     }
 }
 
@@ -98,9 +85,6 @@
 
 - (void)startAdWithOption:(NSDictionary *)option {
     [self startAd];
-}
-
-- (void)cancel {
 }
 
 // 広告ロードが初めて成功した際に通知されます。(任意)
@@ -157,15 +141,7 @@
     [self setCustomMediaview:self.adView];
     [self.adView pause];
     
-    if (self.delegate) {
-        if ([self.delegate respondsToSelector: @selector(onNativeMovieAdLoadFinish:)]) {
-            [self.delegate onNativeMovieAdLoadFinish:self.adInfo];
-        } else {
-            NSLog(@"Banner6009: %s onNativeMovieAdLoadFinish selector is not responding", __FUNCTION__);
-        }
-    } else {
-        NSLog(@"Banner6009: %s Delegate is not setting", __FUNCTION__);
-    }
+    [self setCallbackStatus:NativeAdCallbackLoadFinish];
 }
 
 // 広告受信が成功した際に通知されます。(任意)
@@ -176,29 +152,13 @@
 // 広告受信に失敗した際に通知されます。(任意)
 - (void)nadViewDidFailToReceiveAd:(NADView *)adView {
     NSLog(@"%s", __FUNCTION__);
-    if (self.delegate) {
-        if ([self.delegate respondsToSelector:@selector(onNativeMovieAdLoadError:)]) {
-            [self.delegate onNativeMovieAdLoadError:self];
-        } else {
-            NSLog(@"Banner6009: selector onNativeMovieAdLoadError is not responding");
-        }
-    } else {
-        NSLog(@"%s Delegate is not setting", __FUNCTION__);
-    }
+    [self setCallbackStatus:NativeAdCallbackLoadError];
 }
 
 // 広告バナークリック時に通知されます。(任意)
 - (void)nadViewDidClickAd:(NADView *)adView {
     NSLog(@"%s", __FUNCTION__);
-    if (self.adInfo.mediaView.adapterInnerDelegate) {
-        if ([self.adInfo.mediaView.adapterInnerDelegate respondsToSelector:@selector(onADFMediaViewClick)]) {
-            [self.adInfo.mediaView.adapterInnerDelegate onADFMediaViewClick];
-        } else {
-            NSLog(@"Banner6009: %s onADFMediaViewClick selector is not responding", __FUNCTION__);
-        }
-    } else {
-        NSLog(@"Banner6009: %s adInfo.mediaView.adapterInnerDelegate is not setting", __FUNCTION__);
-    }
+    [self setCallbackStatus:NativeAdCallbackClick];
 }
 
 // インフォメーションボタンクリック時に通知されます。(任意)
@@ -212,11 +172,7 @@
 
 - (void)playMediaView {
     if (self.adapter) {
-        if (self.mediaView.adapterInnerDelegate) {
-            if ([self.mediaView.adapterInnerDelegate respondsToSelector:@selector(onADFMediaViewRendering)]) {
-                [self.mediaView.adapterInnerDelegate onADFMediaViewRendering];
-            }
-        }
+        [self.adapter setCallbackStatus:NativeAdCallbackRendering];
         [self.adapter startViewabilityCheck];
     }
 }

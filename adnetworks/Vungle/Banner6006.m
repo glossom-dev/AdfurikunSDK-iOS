@@ -25,6 +25,10 @@
     return VungleSDKVersion;
 }
 
++ (NSString *)getAdapterRevisionVersion {
+    return @"1";
+}
+
 - (BOOL)isClassReference {
     NSLog(@"Banner6006 isClassReference");
     Class clazz = NSClassFromString(@"VungleSDK");
@@ -76,19 +80,6 @@
     }
     if (self.allPlacementIDs.count == 0) {
         self.allPlacementIDs = @[self.placementID];
-    }
-
-    NSNumber *pixelRateNumber = data[@"pixelRate"];
-    if ([self isNotNull:pixelRateNumber] && [pixelRateNumber isKindOfClass:[NSNumber class]]) {
-        self.viewabilityPixelRate = pixelRateNumber.intValue;
-    }
-    NSNumber *displayTimeNumber = data[@"displayTime"];
-    if ([self isNotNull:displayTimeNumber] && [displayTimeNumber isKindOfClass:[NSNumber class]]) {
-        self.viewabilityDisplayTime = displayTimeNumber.intValue;
-    }
-    NSNumber *timerIntervalNumber = data[@"timerInterval"];
-    if ([self isNotNull:timerIntervalNumber] && [timerIntervalNumber isKindOfClass:[NSNumber class]]) {
-        self.viewabilityTimerInterval = timerIntervalNumber.intValue;
     }
 }
 
@@ -175,9 +166,6 @@
     [self startAd];
 }
 
-- (void)cancel {
-}
-
 -(void)loadCompleted {
     NSLog(@"%s vungle 6006 loadCompleted", __FUNCTION__);
     if (self.sendCallback) {
@@ -210,15 +198,8 @@
         [self setCustomMediaview:self.adView];
 
         self.sendCallback = true;
-        if (self.delegate) {
-            if ([self.delegate respondsToSelector: @selector(onNativeMovieAdLoadFinish:)]) {
-                [self.delegate onNativeMovieAdLoadFinish:self.adInfo];
-            } else {
-                NSLog(@"Banner6006: %s onNativeMovieAdLoadFinish selector is not responding", __FUNCTION__);
-            }
-        } else {
-            NSLog(@"Banner6006: %s Delegate is not setting", __FUNCTION__);
-        }
+        
+        [self setCallbackStatus:NativeAdCallbackLoadFinish];
     } else {
         if (error) {
             NSLog(@"%s vungle 6006 Error encountered while playing an ad: %@", __FUNCTION__, error);
@@ -236,27 +217,11 @@
 
     self.sendCallback = true;
 
-    if (self.delegate) {
-        if ([self.delegate respondsToSelector:@selector(onNativeMovieAdLoadError:)]) {
-            [self.delegate onNativeMovieAdLoadError:self];
-        } else {
-            NSLog(@"Banner6006: selector onNativeMovieAdLoadError is not responding");
-        }
-    } else {
-        NSLog(@"%s Delegate is not setting", __FUNCTION__);
-    }
+    [self setCallbackStatus:NativeAdCallbackLoadError];
 }
 
 -(void)adClicked {
-    if (self.adInfo.mediaView.adapterInnerDelegate) {
-        if ([self.adInfo.mediaView.adapterInnerDelegate respondsToSelector:@selector(onADFMediaViewClick)]) {
-            [self.adInfo.mediaView.adapterInnerDelegate onADFMediaViewClick];
-        } else {
-            NSLog(@"Banner6006: %s onADFMediaViewClick selector is not responding", __FUNCTION__);
-        }
-    } else {
-        NSLog(@"Banner6006: %s adInfo.mediaView.adapterInnerDelegate is not setting", __FUNCTION__);
-    }
+    [self setCallbackStatus:NativeAdCallbackClick];
 }
 
 -(void)destroyAdViewIfNeeded {
@@ -272,11 +237,7 @@
 
 - (void)playMediaView {
     if (self.adapter) {
-        if (self.mediaView.adapterInnerDelegate) {
-            if ([self.mediaView.adapterInnerDelegate respondsToSelector:@selector(onADFMediaViewRendering)]) {
-                [self.mediaView.adapterInnerDelegate onADFMediaViewRendering];
-            }
-        }
+        [self.adapter setCallbackStatus:NativeAdCallbackRendering];
         [self.adapter startViewabilityCheck];
     }
 }

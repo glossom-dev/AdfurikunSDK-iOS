@@ -26,8 +26,8 @@
     return Maio.sdkVersion;
 }
 
-+(NSString *)getAdapterVersion {
-    return @"1.5.5.2";
++ (NSString *)getAdapterRevisionVersion {
+    return @"3";
 }
 
 -(id)init {
@@ -135,10 +135,6 @@
         return NO;
     }
     return YES;
-}
-
--(void)cancel {
-    // Maio には対象の処理がないので、何もしない。
 }
 
 -(void)dealloc {

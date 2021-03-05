@@ -25,8 +25,8 @@
     return ALSdk.version;
 }
 
-+(NSString *)getAdapterVersion {
-    return @"6.14.8.2";
++ (NSString *)getAdapterRevisionVersion {
+    return @"3";
 }
 
 /**
@@ -58,22 +58,27 @@
 }
 
 -(void)initAdnetworkIfNeeded {
+    if (![self needsToInit]) {
+        return;
+    }
+
     if (self.appLovinSdkKey) {
-        // Delegateを設定
-        [MovieConfigure6000 configure];
-        if (!self.incentivizedInterstitial) {
-            @try {
-                if (self.zoneIdentifier && ![self.zoneIdentifier isEqual: [NSNull null]] && [self.zoneIdentifier length] != 0) {
-                    self.incentivizedInterstitial = [[ALIncentivizedInterstitialAd alloc] initWithZoneIdentifier:self.zoneIdentifier sdk:[ALSdk sharedWithKey:self.appLovinSdkKey]];
-                } else {
-                    self.incentivizedInterstitial = [[ALIncentivizedInterstitialAd alloc] initWithSdk:[ALSdk sharedWithKey:self.appLovinSdkKey]];
+        [MovieConfigure6000 configureWithCompletion:^{
+            if (!self.incentivizedInterstitial) {
+                @try {
+                    if (self.zoneIdentifier && ![self.zoneIdentifier isEqual: [NSNull null]] && [self.zoneIdentifier length] != 0) {
+                        self.incentivizedInterstitial = [[ALIncentivizedInterstitialAd alloc] initWithZoneIdentifier:self.zoneIdentifier sdk:[ALSdk sharedWithKey:self.appLovinSdkKey]];
+                    } else {
+                        self.incentivizedInterstitial = [[ALIncentivizedInterstitialAd alloc] initWithSdk:[ALSdk sharedWithKey:self.appLovinSdkKey]];
+                    }
+                } @catch (NSException *exception) {
+                    [self adnetworkExceptionHandling:exception];
                 }
-            } @catch (NSException *exception) {
-                [self adnetworkExceptionHandling:exception];
+                self.incentivizedInterstitial.adDisplayDelegate = self;
+                self.incentivizedInterstitial.adVideoPlaybackDelegate = self;
             }
-            self.incentivizedInterstitial.adDisplayDelegate = self;
-            self.incentivizedInterstitial.adVideoPlaybackDelegate = self;
-        }
+            [self initCompleteAndRetryStartAdIfNeeded];
+        }];
     }
 }
 
@@ -82,6 +87,10 @@
  */
 -(void)startAd
 {
+    if (![self canStartAd]) {
+        return;
+    }
+
     if (self.incentivizedInterstitial) {
         @try {
             [self.incentivizedInterstitial preloadAndNotify: self];
@@ -231,6 +240,22 @@
         }
     });
 }
+
++ (void)configureWithCompletion:(void (^)(void))completionHandler {
+    static bool isInitialized = false;
+    if (!isInitialized) {
+        @try {
+            [ALSdk initializeSdkWithCompletionHandler:^(ALSdkConfiguration * _Nonnull configuration) {
+                completionHandler();
+            }];
+        } @catch (NSException *exception) {
+            NSLog(@"adnetwork exception : %@", exception);
+        }
+    } else {
+        completionHandler();
+    }
+}
+
 @end
 
 @implementation MovieReward6011

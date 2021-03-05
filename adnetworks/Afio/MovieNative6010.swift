@@ -31,6 +31,10 @@ class MovieNative6010: ADFmyMovieNativeInterface {
         }
     }
 
+    override class func getAdapterRevisionVersion() -> String! {
+        return "1"
+    }
+
     override func setData(_ data: [AnyHashable : Any]!) {
         print("MovieNative6010: setData")
         super.setData(data)

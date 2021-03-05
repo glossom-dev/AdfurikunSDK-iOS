@@ -9,8 +9,6 @@
 #import <AdColony/AdColony.h>
 #import <ADFMovieReward/ADFmyMovieRewardInterface.h>
 
-static BOOL hasConfigured = NO;
-
 @interface MovieReward6002 : ADFmyMovieRewardInterface
 
 @end

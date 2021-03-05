@@ -16,9 +16,9 @@ NS_ASSUME_NONNULL_BEGIN
 
 @end
 
-@interface MovieNativeAdView6019 : GADUnifiedNativeAdView
+@interface MovieNativeAdView6019 : GADNativeAdView
 
-- (void)setupAdView:(GADUnifiedNativeAd *)nativeAd;
+- (void)setupAdView:(GADNativeAd *)nativeAd;
 - (BOOL)isVideoContents;
 
 @end

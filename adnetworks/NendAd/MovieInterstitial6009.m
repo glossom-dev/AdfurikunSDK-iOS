@@ -24,8 +24,8 @@
 
 #pragma mark - ADFmyMovieRewardInterface
 
-+(NSString *)getAdapterVersion {
-    return @"7.0.2.2";
++ (NSString *)getAdapterRevisionVersion {
+    return @"4";
 }
 
 -(id)init {
@@ -139,16 +139,6 @@
         return NO;
     }
     return YES;
-}
-
-/**< 広告の読み込みを中止する処理 */
--(void)cancel {
-    
-}
-
-/** アドネットワーク接続(特定のアドネットワーク) */
--(void)connectSetting:(NSDictionary*)keyDict {
-    
 }
 
 - (void)setTargeting {
