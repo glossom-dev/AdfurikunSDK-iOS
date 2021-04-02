@@ -2,7 +2,7 @@
 //  ADFmyMovieReward.h
 //  ADFMovieReword
 //
-//  (3.8.0)
+//  (3.8.1)
 //  Created by tsukui on 2016/05/28.
 //  (c) 2015 ADFULLY Inc.
 //  (ご利用になられる前に、必ずマニュアルにて実装方法をご参照ください。
@@ -122,6 +122,7 @@
 /**< 広告の表示準備が終わった時のイベント */
 - (void)AdsFetchCompleted:(BOOL)isTestMode_inApp __deprecated_msg("Please use 'AdsFetchCompleted:isTestMode:' instead");
 - (void)AdsFetchCompleted:(NSString *)appID isTestMode:(BOOL)isTestMode_inApp;
+- (void)AdsFetchCompleted:(NSString *)appID isTestMode:(BOOL)isTestMode_inApp isManualMode:(BOOL)isManualMode;
 
 /**< 広告の表示準備が失敗した時のイベント */
 - (void)AdsFetchFailed:(NSString *)appID error:(NSError *)error;
