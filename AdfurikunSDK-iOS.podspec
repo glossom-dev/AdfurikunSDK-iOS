@@ -33,7 +33,7 @@ Pod::Spec.new do |s|
 
   s.subspec 'AppLovin' do |applovin|
     applovin.dependency 'AdfurikunSDK-iOS/Core'
-    applovin.dependency 'AppLovinSDK', '6.15.2'
+    applovin.dependency 'AppLovinSDK', '10.1.1'
     applovin.source_files = '**/adnetworks/AppLovin/*.{h,m}'
     applovin.resource = '**/adnetworks/AppLovin/*.txt'
   end
@@ -68,7 +68,7 @@ Pod::Spec.new do |s|
 
   s.subspec 'Tapjoy' do |tapjoy|
     tapjoy.dependency 'AdfurikunSDK-iOS/Core'
-    tapjoy.dependency 'TapjoySDK', '12.7.1'
+    tapjoy.dependency 'TapjoySDK', '12.8.0'
     tapjoy.source_files = '**/adnetworks/Tapjoy/*.{h,m}'
     tapjoy.resource = '**/adnetworks/Tapjoy/*.txt'
   end
