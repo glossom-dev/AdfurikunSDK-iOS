@@ -29,9 +29,6 @@ typedef enum : NSInteger {
 @property (nonatomic, strong) NSString *objectId;
 @property (nonatomic, weak) NSObject<ADFMovieRewardDelegate> *delegate;
 
-@property (nonatomic, copy) NSString *appId;
-@property (nonatomic, copy) NSString *adnetworkKey;
-
 /**< 広告の表示 */
 -(void)showAd;
 -(void)showAdWithPresentingViewController:(UIViewController *)viewController;

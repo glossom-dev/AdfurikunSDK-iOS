@@ -20,6 +20,9 @@ NS_ASSUME_NONNULL_BEGIN
 @property (nonatomic) BOOL isInitialized;
 @property (nonatomic) BOOL hasPendedStartAd;
 
+@property (nonatomic, copy) NSString *appId;
+@property (nonatomic, copy) NSString *adnetworkKey;
+
 @property (nonatomic, strong) NSError *lastError;
 @property (nonatomic, strong) NSNumber *hasGdprConsent;
 

@@ -11,7 +11,7 @@
 @implementation MovieInterstitial6020
 
 + (NSString *)getAdapterRevisionVersion {
-    return @"3";
+    return @"4";
 }
 
 - (void)setData:(NSDictionary *)data {
@@ -116,8 +116,10 @@
     [self setCallbackStatus:MovieRewardCallbackFetchComplete];
 }
 
-- (void)interstitialDidFailToLoadAd:(MPInterstitialAdController *)interstitial { // fetch failed
-    NSLog(@"MovieInterstitial6020: interstitial video loading failed");
+- (void)interstitialDidFailToLoadAd:(MPInterstitialAdController *)interstitial withError:(NSError *)error {
+    // fetch failed
+    NSLog(@"%s error: %@", __FUNCTION__, error);
+    [self setErrorWithMessage:error.localizedDescription code:error.code];
     [self setCallbackStatus:MovieRewardCallbackFetchFail];
 }
 

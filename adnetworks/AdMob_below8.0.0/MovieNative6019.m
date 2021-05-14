@@ -388,7 +388,7 @@
     return nil;
 }
 
-- (GADUnifiedNativeAdView *)createGADUnifiedNativeAdView:(NSDictionary *)parts {
+- (GADUnifiedNativeAdView *)createViewForCarousel:(NSDictionary *)parts {
     GADUnifiedNativeAdView *view = [GADUnifiedNativeAdView new];
     view.nativeAd = self.nativeAdView.nativeAd;
     view.bodyView = parts[@"body"];

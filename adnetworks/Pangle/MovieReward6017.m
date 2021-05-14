@@ -112,8 +112,10 @@
 
 
 - (void)rewardedVideoAd:(BURewardedVideoAd *)rewardedVideoAd didFailWithError:(NSError *_Nullable)error {
-    NSLog(@"didFailToLoadAdWithError : %@", error);
-    [self setErrorWithMessage:error.localizedDescription code:error.code];
+    if (error) {
+        NSLog(@"didFailToLoadAdWithError : %@", error);
+        [self setErrorWithMessage:error.localizedDescription code:error.code];
+    }
     [self setCallbackStatus:MovieRewardCallbackFetchFail];
 }
 
@@ -143,7 +145,13 @@
 }
 
 - (void)rewardedVideoAdDidPlayFinish:(BURewardedVideoAd *)rewardedVideoAd didFailWithError:(NSError *_Nullable)error {
-    [self setCallbackStatus:MovieRewardCallbackPlayComplete];
+    if (error) {
+        NSLog(@"rewardedVideoAdDidPlayFinishWithError : %@", error);
+        [self setErrorWithMessage:error.localizedDescription code:error.code];
+        [self setCallbackStatus:MovieRewardCallbackPlayFail];
+    } else {
+        [self setCallbackStatus:MovieRewardCallbackPlayComplete];
+    }
 }
 
 - (void)rewardedVideoAdDidClickSkip:(BURewardedVideoAd *)rewardedVideoAd {

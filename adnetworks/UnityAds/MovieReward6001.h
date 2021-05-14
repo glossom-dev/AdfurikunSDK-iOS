@@ -15,7 +15,7 @@
 
 @end
 
-@interface MovieDelegate6001 : ADFmyMovieDelegateBase<UnityAdsDelegate>
+@interface MovieDelegate6001 : ADFmyMovieDelegateBase<UnityAdsDelegate, UnityAdsShowDelegate>
 
 + (instancetype)sharedInstance;
 

@@ -6,7 +6,7 @@
 //  Copyright © 2020 Glossom, Inc. All rights reserved.
 //
 
-#import "MoPub.h"
+#import <MoPubSDK/MoPub.h>
 
 #import "MovieNative6020.h"
 

@@ -7,14 +7,14 @@
 //
 
 #import "Rectangle6020.h"
-#import "MoPub.h"
+#import <MoPubSDK/MoPub.h>
 
 @implementation Rectangle6020
 
 - (instancetype)init {
     self = [super init];
     if (self) {
-        self.adSize = kMPPresetMaxAdSize250Height;
+        self.adSize = CGSizeMake(300, 250);
     }
     return self;
 }

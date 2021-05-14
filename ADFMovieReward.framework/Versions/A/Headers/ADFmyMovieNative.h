@@ -12,6 +12,9 @@
 #import "ADFMovieError.h"
 
 @protocol ADFmyMovieNativeDelegate;
+
+DEPRECATED_MSG_ATTRIBUTE("Please use 'ADFmyNativeAd' instead")
+
 /**
  動画ネイティブ広告API
  */

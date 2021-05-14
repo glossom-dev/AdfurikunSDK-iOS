@@ -19,7 +19,7 @@
 @implementation MovieInterstitial6019
 
 + (NSString *)getAdapterRevisionVersion {
-    return @"4";
+    return @"5";
 }
 
 -(id)init {
@@ -148,6 +148,10 @@
 }
 
 - (void)adDidPresentFullScreenContent:(nonnull id<GADFullScreenPresentingAd>)ad {
+    NSLog(@"%s called", __func__);
+}
+
+- (void)adWillDismissFullScreenContent:(id<GADFullScreenPresentingAd>)ad {
     NSLog(@"%s called", __func__);
 }
 

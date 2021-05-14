@@ -8,6 +8,8 @@
 
 #import "ADFmyMovieReward.h"
 
+DEPRECATED_MSG_ATTRIBUTE("Please use 'ADFmyInterstitial' instead")
+
 @interface ADFmyMovieInterstitial : NSObject<ADFMovieRewardDelegate>
 @property (nonatomic, weak) UIViewController *displayViewController;
 @property (nonatomic, weak) NSObject<ADFmyMovieRewardDelegate> *delegate;

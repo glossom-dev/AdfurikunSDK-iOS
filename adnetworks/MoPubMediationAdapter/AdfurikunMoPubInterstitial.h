@@ -4,7 +4,7 @@
 //
 
 #import <Foundation/Foundation.h>
-#import <MoPub/MoPub.h>
+#import <MoPubSDK/MoPub.h>
 #import "AdfurikunMoPubReward.h"
 
 NS_ASSUME_NONNULL_BEGIN

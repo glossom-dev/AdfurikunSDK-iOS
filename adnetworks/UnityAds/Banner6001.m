@@ -24,7 +24,7 @@
 }
 
 + (NSString *)getAdapterRevisionVersion {
-    return @"1";
+    return @"2";
 }
 
 -(void)setData:(NSDictionary *)data {
@@ -76,9 +76,7 @@
             self.bannerView = [[UADSBannerView alloc] initWithPlacementId:self.placementId size:CGSizeMake(320.0, 50.0)];
         }
         
-        BOOL isReady = [UnityAds isReady:self.placementId];
-        NSLog(@"%s unityAds placement id : %@, is ready : %@", __func__, self.placementId, (isReady ? @"true" : @"false"));
-        if (isReady && self.bannerView) {
+        if (self.bannerView) {
             self.bannerView.delegate = self;
             [self.bannerView load];
         }

@@ -7,7 +7,7 @@
 //
 
 #import "Banner6020.h"
-#import "MoPub.h"
+#import <MoPubSDK/MoPub.h>
 
 @interface Banner6020() <MPAdViewDelegate>
 
@@ -18,13 +18,13 @@
 @implementation Banner6020
 
 + (NSString *)getAdapterRevisionVersion {
-    return @"1";
+    return @"2";
 }
 
 - (instancetype)init {
     self = [super init];
     if (self) {
-        self.adSize = kMPPresetMaxAdSize50Height;
+        self.adSize = CGSizeMake(320, 50);
     }
     return self;
 }
@@ -100,7 +100,7 @@
         self.adView.frame = CGRectZero;
         [self.adView stopAutomaticallyRefreshingContents];
         
-        [self.adView loadAdWithMaxAdSize:kMPPresetMaxAdSize50Height];
+        [self.adView loadAdWithMaxAdSize:self.adSize];
     } @catch (NSException *exception) {
         [self adnetworkExceptionHandling:exception];
     }

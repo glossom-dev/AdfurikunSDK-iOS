@@ -56,11 +56,7 @@
     if ([self.adView respondsToSelector:@selector(nativeTitleTextLabel)]) {
         self.adView.nativeTitleTextLabel.text = [adapter.properties objectForKey:kAdTitleKey];
     }
-    if ([self.adView respondsToSelector:@selector(nativeVideoView)]) {
-        UIView *mediaView = self.adapter.mainMediaView;
-        mediaView.frame = self.adView.nativeVideoView.bounds;
-        [self.adView.nativeVideoView addSubview:mediaView];
-    } else if ([self.adView respondsToSelector:@selector(nativeMainImageView)]) {
+    if ([self.adView respondsToSelector:@selector(nativeMainImageView)]) {
         UIView *mediaView = self.adapter.mainMediaView;
         mediaView.frame = self.adView.nativeMainImageView.bounds;
         [self.adView.nativeMainImageView addSubview:mediaView];
