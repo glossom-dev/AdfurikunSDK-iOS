@@ -7,7 +7,7 @@
 //
 
 #import "Rectangle6020.h"
-#import <MoPubSDK/MoPub.h>
+#import "MoPub.h"
 
 @implementation Rectangle6020
 
