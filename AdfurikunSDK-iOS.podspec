@@ -9,7 +9,11 @@ Pod::Spec.new do |s|
   s.source          = { :git => "https://github.com/glossom-dev/AdfurikunSDK-iOS", :tag => "#{s.version}" }
   s.default_subspec = 'All'
   s.static_framework = true
-  s.xcconfig = { "VALID_ARCHS": "armv7 armv7s x86_64 arm64" }
+  s.xcconfig = { "VALID_ARCHS": "armv7 armv7s x86_64" }
+  s.pod_target_xcconfig = {
+    'EXCLUDED_ARCHS[sdk=iphonesimulator*]' => 'arm64'
+  }
+  s.user_target_xcconfig = { 'EXCLUDED_ARCHS[sdk=iphonesimulator*]' => 'arm64' }
   
   s.subspec 'Core' do |core|
     core.vendored_frameworks = '**/ADFMovieReward.framework'
