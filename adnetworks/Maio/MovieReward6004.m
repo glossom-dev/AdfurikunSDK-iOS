@@ -286,3 +286,15 @@
 }
 
 @end
+
+@implementation MovieReward6100
+
+@end
+
+@implementation MovieReward6101
+
+@end
+
+@implementation MovieReward6102
+
+@end

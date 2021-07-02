@@ -17,6 +17,17 @@
 
 @end
 
+@interface MovieReward6100 : MovieReward6004
+
+@end
+
+@interface MovieReward6101 : MovieReward6004
+
+@end
+
+@interface MovieReward6102 : MovieReward6004
+
+@end
 
 /**
  *  Maio用のDelegateクラス

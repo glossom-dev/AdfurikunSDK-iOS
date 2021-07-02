@@ -88,23 +88,18 @@
     if (![self needsToInit]) {
         return;
     }
-    // AdColonyの初期化は一度だけしか行わない
-    // 初期化が失敗した場合はAdColonyが自分でリトライする
-    static dispatch_once_t adfAdColonyOnceToken;
-    dispatch_once(&adfAdColonyOnceToken, ^{
-        @try {
-            AdColonyAppOptions *options = nil;
-            if (self.hasGdprConsent != nil) {
-                options = [AdColonyAppOptions new];
-                options.testMode = self.test_flg;
-            }
-            [AdColony configureWithAppID:self.adColonyAppId zoneIDs:self.adColonyAllZones options:options completion:^(NSArray<AdColonyZone *> * _Nonnull zones) {
-                [self initCompleteAndRetryStartAdIfNeeded];
-            }];
-        } @catch (NSException *exception) {
-            NSLog(@"adcolony configuration exception %@", exception);
+    @try {
+        AdColonyAppOptions *options = nil;
+        if (self.hasGdprConsent != nil) {
+            options = [AdColonyAppOptions new];
+            options.testMode = self.test_flg;
         }
-    });
+        [AdColony configureWithAppID:self.adColonyAppId zoneIDs:self.adColonyAllZones options:options completion:^(NSArray<AdColonyZone *> * _Nonnull zones) {
+            [self initCompleteAndRetryStartAdIfNeeded];
+        }];
+    } @catch (NSException *exception) {
+        NSLog(@"adcolony configuration exception %@", exception);
+    }
 }
 
 /**

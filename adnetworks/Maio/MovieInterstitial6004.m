@@ -15,3 +15,15 @@
 }
 
 @end
+
+@implementation MovieInterstitial6100
+
+@end
+
+@implementation MovieInterstitial6101
+
+@end
+
+@implementation MovieInterstitial6102
+
+@end

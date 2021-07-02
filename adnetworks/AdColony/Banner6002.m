@@ -84,21 +84,18 @@
     if (![self needsToInit]) {
         return;
     }
-    static dispatch_once_t adfAdColonyOnceToken;
-    dispatch_once(&adfAdColonyOnceToken, ^{
-        @try {
-            AdColonyAppOptions *options = nil;
-            if (self.hasGdprConsent != nil) {
-                options = [AdColonyAppOptions new];
-                options.testMode = self.test_flg;
-            }
-            [AdColony configureWithAppID:self.adColonyAppId zoneIDs:self.allZones options:options completion:^(NSArray<AdColonyZone *> * _Nonnull zones) {
-                [self initCompleteAndRetryStartAdIfNeeded];
-            }];
-        } @catch (NSException *exception) {
-            NSLog(@"adcolony configuration exception %@", exception);
+    @try {
+        AdColonyAppOptions *options = nil;
+        if (self.hasGdprConsent != nil) {
+            options = [AdColonyAppOptions new];
+            options.testMode = self.test_flg;
         }
-    });
+        [AdColony configureWithAppID:self.adColonyAppId zoneIDs:self.allZones options:options completion:^(NSArray<AdColonyZone *> * _Nonnull zones) {
+            [self initCompleteAndRetryStartAdIfNeeded];
+        }];
+    } @catch (NSException *exception) {
+        NSLog(@"adcolony configuration exception %@", exception);
+    }
     
     self.adSize = kAdColonyAdSizeBanner;
 }
