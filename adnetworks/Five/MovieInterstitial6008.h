@@ -9,12 +9,18 @@
 #import <FiveAd/FiveAd.h>
 #import <ADFMovieReward/ADFmyMovieRewardInterface.h>
 
+NS_ASSUME_NONNULL_BEGIN
+
+typedef void(^completionHandlerType)(void);
 
 @interface MovieInterstitial6008 : ADFmyMovieRewardInterface
 
 @end
 @interface MovieConfigure6008 : NSObject
-+ (void)configureWithAppId:(NSString *)fiveAppId isTest:(BOOL)isTest;
+
++ (instancetype)sharedInstance;
+- (void)configureWithAppId:(NSString *)fiveAppId isTest:(BOOL)isTest completion:(completionHandlerType)completionHandler;
+
 @end
 
 @interface MovieInterstitial6070 : MovieInterstitial6008
@@ -28,3 +34,5 @@
 @interface MovieInterstitial6072 : MovieInterstitial6008
 
 @end
+
+NS_ASSUME_NONNULL_END

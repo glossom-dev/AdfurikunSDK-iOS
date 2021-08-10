@@ -26,6 +26,8 @@ NS_ASSUME_NONNULL_BEGIN
 @property (nonatomic, strong) NSError *lastError;
 @property (nonatomic, strong) NSNumber *hasGdprConsent;
 
+@property (nonatomic) NSDate *lastPlayedTime;
+
 //ADNW SDKのバージョン情報をSDKから取得できるようにする
 + (NSString *)getSDKVersion;
 + (NSString *)getAdapterVersion;

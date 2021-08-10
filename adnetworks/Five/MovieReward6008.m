@@ -64,12 +64,22 @@
 }
 
 -(void)initAdnetworkIfNeeded {
+    if (![self needsToInit]) {
+        return;
+    }
+
     if (self.fiveAppId && self.fiveSlotId && [self.fiveAppId length] > 0 && [self.fiveSlotId length] > 0) {
-        [MovieConfigure6008 configureWithAppId:self.fiveAppId isTest:self.testFlg];
+        [MovieConfigure6008.sharedInstance configureWithAppId:self.fiveAppId isTest:self.testFlg completion:^{
+            [self initCompleteAndRetryStartAdIfNeeded];
+        }];
     }
 }
 
 -(void)startAd {
+    if (![self canStartAd]) {
+        return;
+    }
+    
     if (self.fullscreen) {
         self.fullscreen = nil;
     }

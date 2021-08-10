@@ -15,7 +15,7 @@
 @implementation Banner6019
 
 + (NSString *)getAdapterRevisionVersion {
-    return @"2";
+    return @"3";
 }
 
 - (void)setData:(NSDictionary *)data {
@@ -139,7 +139,6 @@
 
 - (void)bannerViewWillPresentScreen:(GADBannerView *)bannerView {
     NSLog(@"%s called", __func__);
-    [self callbackClick];
 }
 
 - (void)bannerViewWillDismissScreen:(GADBannerView *)bannerView {
@@ -148,6 +147,11 @@
 
 - (void)bannerViewDidDismissScreen:(GADBannerView *)bannerView {
     NSLog(@"%s called", __func__);
+}
+
+- (void)bannerViewDidRecordClick:(GADBannerView *)bannerView {
+    NSLog(@"%s called", __func__);
+    [self setCallbackStatus:NativeAdCallbackClick];
 }
 
 @end

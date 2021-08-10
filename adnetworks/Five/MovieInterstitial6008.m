@@ -29,7 +29,7 @@
 }
 
 + (NSString *)getAdapterRevisionVersion {
-    return @"4";
+    return @"5";
 }
 
 -(id)init {
@@ -84,8 +84,15 @@
 }
 
 -(void)initAdnetworkIfNeeded {
+    if (![self needsToInit]) {
+        return;
+    }
+
     if (self.fiveAppId && self.fiveSlotId && [self.fiveAppId length] > 0 && [self.fiveSlotId length] > 0) {
-        [MovieConfigure6008 configureWithAppId:self.fiveAppId isTest:self.testFlg];
+        [MovieConfigure6008.sharedInstance configureWithAppId:self.fiveAppId isTest:self.testFlg completion:^{
+            NSLog(@"### init complete");
+            [self initCompleteAndRetryStartAdIfNeeded];
+        }];
     }
 }
 
@@ -93,6 +100,11 @@
  *  広告の読み込みを開始する
  */
 -(void)startAd {
+    NSLog(@"### startAd func");
+    if (![self canStartAd]) {
+        return;
+    }
+
     @try {
         if (self.interstitial) {
             self.interstitial = nil;
@@ -227,55 +239,97 @@
     [self setCallbackStatus:MovieRewardCallbackPlayStart];
 }
 
+@end
+
+typedef enum : NSUInteger {
+    initializeNotYet,
+    initializing,
+    initializeComplete,
+} FADInitializeStatus;
+
+@interface MovieConfigure6008()
+
+@property (nonatomic) FADInitializeStatus initStatus;
+@property (nonatomic) NSMutableArray <completionHandlerType> *handlers;
 
 @end
 
 @implementation MovieConfigure6008
-+ (void)configureWithAppId:(NSString *)fiveAppId isTest:(BOOL)isTest {
-    static dispatch_once_t adfFiveOnceToken;
-    dispatch_once_on_main_thread(&adfFiveOnceToken, ^{
-        @try {
-            FADConfig *config = [[FADConfig alloc] initWithAppId:fiveAppId];
-            config.fiveAdFormat = [NSSet setWithObjects:
-                                   [NSNumber numberWithInt:kFADFormatVideoReward],
-                                   [NSNumber numberWithInt:kFADFormatCustomLayout],
-                                   nil];
-            if (isTest) {
-                config.isTest =  YES;
-            }
-            
-            int age = ADFMovieOptions.getUserAge;
-            if (age >= 18) {
-                config.maxAdAgeRating = kFADAdAgeRatingAge18AndOver;
-            } else if (age >= 15) {
-                config.maxAdAgeRating = kFADAdAgeRatingAge15AndOver;
-            } else if (age >= 13) {
-                config.maxAdAgeRating = kFADAdAgeRatingAge13AndOver;
-            } else {
-                config.maxAdAgeRating = kFADAdAgeRatingUnspecified;
-            }
-            
-            if (![FADSettings isConfigRegistered]) {
-                [FADSettings registerConfig:config];
-            }
-        } @catch (NSException *exception) {
-            NSLog(@"adnetwork exception : %@", exception);
-        }
++ (instancetype)sharedInstance {
+    static MovieConfigure6008 *sharedInstance = nil;
+    static dispatch_once_t onceToken;
+    dispatch_once(&onceToken, ^{
+        sharedInstance = [self new];
     });
+    return sharedInstance;
 }
 
-void dispatch_once_on_main_thread(dispatch_once_t *predicate,
-                                  dispatch_block_t block) {
-    if ([NSThread isMainThread]) {
-        dispatch_once(predicate, block);
-    } else {
-        if (DISPATCH_EXPECT(*predicate == 0L, NO)) {
-            dispatch_sync(dispatch_get_main_queue(), ^{
-                dispatch_once(predicate, block);
-            });
-        }
+- (instancetype)init {
+    self = [super init];
+    if (self) {
+        self.initStatus = initializeNotYet;
+        self.handlers = [NSMutableArray new];
+    }
+    return self;
+}
+
+- (void)configureWithAppId:(NSString *)fiveAppId isTest:(BOOL)isTest completion:(completionHandlerType)completionHandler {
+    if (!fiveAppId || !completionHandler) {
+        return;
+    }
+    
+    if (self.initStatus == initializeComplete) {
+        completionHandler();
+        return;
+    }
+    
+    if (self.initStatus == initializing) {
+        [self.handlers addObject:completionHandler];
+        return;
+    }
+    
+    if (self.initStatus == initializeNotYet) {
+        self.initStatus = initializing;
+        [self.handlers addObject:completionHandler];
+        
+        dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(0.1 * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
+            @try {
+                FADConfig *config = [[FADConfig alloc] initWithAppId:fiveAppId];
+                config.fiveAdFormat = [NSSet setWithObjects:
+                                       [NSNumber numberWithInt:kFADFormatVideoReward],
+                                       [NSNumber numberWithInt:kFADFormatCustomLayout],
+                                       nil];
+                if (isTest) {
+                    config.isTest =  YES;
+                }
+                
+                int age = ADFMovieOptions.getUserAge;
+                if (age >= 18) {
+                    config.maxAdAgeRating = kFADAdAgeRatingAge18AndOver;
+                } else if (age >= 15) {
+                    config.maxAdAgeRating = kFADAdAgeRatingAge15AndOver;
+                } else if (age >= 13) {
+                    config.maxAdAgeRating = kFADAdAgeRatingAge13AndOver;
+                } else {
+                    config.maxAdAgeRating = kFADAdAgeRatingUnspecified;
+                }
+                
+                if (![FADSettings isConfigRegistered]) {
+                    [FADSettings registerConfig:config];
+                }
+
+                self.initStatus = initializeComplete;
+
+                for (completionHandlerType handler in self.handlers) {
+                    handler();
+                }
+            } @catch (NSException *exception) {
+                NSLog(@"adnetwork exception : %@", exception);
+            }
+        });
     }
 }
+
 @end
 
 @implementation MovieInterstitial6070

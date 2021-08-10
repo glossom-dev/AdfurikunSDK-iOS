@@ -1,6 +1,6 @@
 Pod::Spec.new do |s|
   s.name            = "AdfurikunSDK-iOS"
-  s.version         = "3.10.0.1"
+  s.version         = "3.10.1"
   s.summary         = "An iOS SDK for ADFURIKUN Movie Reward Ads"
   s.homepage        = "https://adfurikun.jp/adfurikun/"
   s.license         = { :type => 'Copyright', :text => 'Copyright Glossom Inc. All rights reserved.' }
@@ -14,6 +14,7 @@ Pod::Spec.new do |s|
   s.subspec 'Core' do |core|
     core.vendored_frameworks = '**/ADFMovieReward.framework'
     core.frameworks = 'AdSupport', 'AVFoundation', 'CoreGraphics', 'CoreMedia', 'CoreTelephony', 'MediaPlayer', 'StoreKit', 'SystemConfiguration', 'SafariServices', 'UIKit', 'WebKit'
+    core.libraries = 'z'
     core.pod_target_xcconfig = { 'OTHER_LDFLAGS' => ['-ObjC', '-fobjc-arc'] }
   end
 
@@ -26,21 +27,21 @@ Pod::Spec.new do |s|
 
   s.subspec 'AdMob' do |admob|
     admob.dependency 'AdfurikunSDK-iOS/Core'
-    admob.dependency 'Google-Mobile-Ads-SDK', '8.4.0'
+    admob.dependency 'Google-Mobile-Ads-SDK', '8.8.0'
     admob.source_files = '**/adnetworks/AdMob/*.{h,m}'
     admob.resource = '**/adnetworks/AdMob/*.txt'
   end
 
   s.subspec 'AppLovin' do |applovin|
     applovin.dependency 'AdfurikunSDK-iOS/Core'
-    applovin.dependency 'AppLovinSDK', '10.1.1'
+    applovin.dependency 'AppLovinSDK', '10.3.3'
     applovin.source_files = '**/adnetworks/AppLovin/*.{h,m}'
     applovin.resource = '**/adnetworks/AppLovin/*.txt'
   end
 
   s.subspec 'FAN' do |fan|
     fan.dependency 'AdfurikunSDK-iOS/Core'
-    fan.dependency 'FBAudienceNetwork', '6.4.1'
+    fan.dependency 'FBAudienceNetwork', '6.5.1'
     fan.source_files = '**/adnetworks/FAN/*.{h,m}'
     fan.resource = '**/adnetworks/FAN/*.txt'
   end
@@ -54,14 +55,14 @@ Pod::Spec.new do |s|
 
   s.subspec 'Five' do |five|
     five.dependency 'AdfurikunSDK-iOS/Core'
-    five.dependency 'FiveAd', '2.3.20210326'
+    five.dependency 'FiveAd', '2.3.20210524'
     five.source_files = '**/adnetworks/Five/*.{h,m}'
     five.resource = '**/adnetworks/Five/*.txt'
   end
 
   s.subspec 'NendAd' do |nendad|
     nendad.dependency 'AdfurikunSDK-iOS/Core'
-    nendad.dependency 'NendSDK_iOS', '7.0.4'
+    nendad.dependency 'NendSDK_iOS', '7.0.6'
     nendad.source_files = '**/adnetworks/NendAd/*.{h,m}'
     nendad.resource = '**/adnetworks/NendAd/*.txt'
   end
@@ -75,14 +76,14 @@ Pod::Spec.new do |s|
 
   s.subspec 'Tapjoy' do |tapjoy|
     tapjoy.dependency 'AdfurikunSDK-iOS/Core'
-    tapjoy.dependency 'TapjoySDK', '12.8.0'
+    tapjoy.dependency 'TapjoySDK', '12.8.1'
     tapjoy.source_files = '**/adnetworks/Tapjoy/*.{h,m}'
     tapjoy.resource = '**/adnetworks/Tapjoy/*.txt'
   end
 
   s.subspec 'UnityAds' do |unityads|
     unityads.dependency 'AdfurikunSDK-iOS/Core'
-    unityads.dependency 'UnityAds', '3.7.1'
+    unityads.dependency 'UnityAds', '3.7.5'
     unityads.source_files = '**/adnetworks/UnityAds/*.{h,m}'
     unityads.resource = '**/adnetworks/UnityAds/*.txt'
   end
