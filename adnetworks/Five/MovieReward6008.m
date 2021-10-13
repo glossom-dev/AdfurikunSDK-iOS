@@ -9,7 +9,7 @@
 #import <FiveAd/FiveAd.h>
 #import <ADFMovieReward/ADFMovieOptions.h>
 
-@interface MovieReward6008()<FADDelegate>
+@interface MovieReward6008()<FADLoadDelegate, FADAdViewEventListener>
 
 @property (nonatomic) FADVideoReward *fullscreen;
 @property (nonatomic, strong)NSString *fiveAppId;
@@ -69,7 +69,7 @@
     }
 
     if (self.fiveAppId && self.fiveSlotId && [self.fiveAppId length] > 0 && [self.fiveSlotId length] > 0) {
-        [MovieConfigure6008.sharedInstance configureWithAppId:self.fiveAppId isTest:self.testFlg completion:^{
+        [MovieConfigure6008.sharedInstance configureWithAppId:self.fiveAppId isTest:self.testFlg gdprStatus:self.gdprStatus completion:^{
             [self initCompleteAndRetryStartAdIfNeeded];
         }];
     }
@@ -83,10 +83,13 @@
     if (self.fullscreen) {
         self.fullscreen = nil;
     }
+    
     if (self.fiveSlotId && self.fiveSlotId.length > 0) {
         @try {
             self.fullscreen = [[FADVideoReward alloc] initWithSlotId:self.fiveSlotId];
-            self.fullscreen.delegate = self;
+            [self.fullscreen setLoadDelegate:self];
+            [self.fullscreen setAdViewEventListener:self];
+
             //音出力設定
             ADFMovieOptions_Sound soundState = [ADFMovieOptions getSoundState];
             if (ADFMovieOptions_Sound_On == soundState) {

@@ -1,6 +1,6 @@
 Pod::Spec.new do |s|
   s.name            = "AdfurikunSDK-iOS"
-  s.version         = "3.10.1"
+  s.version         = "3.11.0"
   s.summary         = "An iOS SDK for ADFURIKUN Movie Reward Ads"
   s.homepage        = "https://adfurikun.jp/adfurikun/"
   s.license         = { :type => 'Copyright', :text => 'Copyright Glossom Inc. All rights reserved.' }
@@ -20,28 +20,28 @@ Pod::Spec.new do |s|
 
   s.subspec 'AdColony' do |adcolony|
     adcolony.dependency 'AdfurikunSDK-iOS/Core'
-    adcolony.dependency 'AdColony', '4.6.0'
+    adcolony.dependency 'AdColony', '4.7.2'
     adcolony.source_files = '**/adnetworks/AdColony/*.{h,m}'
     adcolony.resource = '**/adnetworks/AdColony/*.txt'
   end
 
   s.subspec 'AdMob' do |admob|
     admob.dependency 'AdfurikunSDK-iOS/Core'
-    admob.dependency 'Google-Mobile-Ads-SDK', '8.8.0'
+    admob.dependency 'Google-Mobile-Ads-SDK', '8.11.0'
     admob.source_files = '**/adnetworks/AdMob/*.{h,m}'
-    admob.resource = '**/adnetworks/AdMob/*.txt'
+    admob.resource = '**/adnetworks/AdMob/*.{txt,xib}'
   end
 
   s.subspec 'AppLovin' do |applovin|
     applovin.dependency 'AdfurikunSDK-iOS/Core'
-    applovin.dependency 'AppLovinSDK', '10.3.3'
+    applovin.dependency 'AppLovinSDK', '10.3.6'
     applovin.source_files = '**/adnetworks/AppLovin/*.{h,m}'
     applovin.resource = '**/adnetworks/AppLovin/*.txt'
   end
 
   s.subspec 'FAN' do |fan|
     fan.dependency 'AdfurikunSDK-iOS/Core'
-    fan.dependency 'FBAudienceNetwork', '6.5.1'
+    fan.dependency 'FBAudienceNetwork', '6.7.0'
     fan.source_files = '**/adnetworks/FAN/*.{h,m}'
     fan.resource = '**/adnetworks/FAN/*.txt'
   end
@@ -55,7 +55,7 @@ Pod::Spec.new do |s|
 
   s.subspec 'Five' do |five|
     five.dependency 'AdfurikunSDK-iOS/Core'
-    five.dependency 'FiveAd', '2.3.20210524'
+    five.dependency 'FiveAd', '2.4.20211004'
     five.source_files = '**/adnetworks/Five/*.{h,m}'
     five.resource = '**/adnetworks/Five/*.txt'
   end
@@ -69,7 +69,7 @@ Pod::Spec.new do |s|
 
   s.subspec 'Pangle' do |pangle|
     pangle.dependency 'AdfurikunSDK-iOS/Core'
-    pangle.dependency 'Ads-Global', '3.7.0.6'
+    pangle.dependency 'Ads-Global', '3.9.0.8'
     pangle.source_files = '**/adnetworks/Pangle/*.{h,m}'
     pangle.resource = '**/adnetworks/Pangle/*.txt'
   end
@@ -90,7 +90,7 @@ Pod::Spec.new do |s|
 
   s.subspec 'Vungle' do |vungle|
     vungle.dependency 'AdfurikunSDK-iOS/Core'
-    vungle.dependency 'VungleSDK-iOS', '6.9.2'
+    vungle.dependency 'VungleSDK-iOS', '6.10.3'
     vungle.source_files = '**/adnetworks/Vungle/*.{h,m}'
     vungle.resource = '**/adnetworks/Vungle/*.txt'
   end
@@ -99,7 +99,7 @@ Pod::Spec.new do |s|
     mopub.dependency 'AdfurikunSDK-iOS/Core'
     mopub.dependency 'mopub-ios-sdk', '5.16.2'
     mopub.source_files = '**/adnetworks/MoPub/*.{h,m}'
-    mopub.resource = '**/adnetworks/MoPub/*.txt'
+    mopub.resource = '**/adnetworks/MoPub/*.{txt,xib}'
   end
 
   s.subspec 'All' do |all|

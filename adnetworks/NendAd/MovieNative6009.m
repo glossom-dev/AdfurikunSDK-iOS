@@ -22,7 +22,7 @@
 @implementation MovieNative6009
 
 + (NSString *)getAdapterRevisionVersion {
-    return @"2";
+    return @"3";
 }
 
 - (BOOL)isClassReference {
@@ -70,6 +70,8 @@
             [self setTargeting];
             
             self.didInit = YES;
+            
+            [self initCompleteAndRetryStartAdIfNeeded];
         } @catch (NSException *exception) {
             [self adnetworkExceptionHandling:exception];
         }
@@ -77,6 +79,10 @@
 }
 
 - (void)startAd {
+    if (![self canStartAd]) {
+        return;
+    }
+
     [super startAd];
     
     MovieNative6009 __weak *weakSelf = self;

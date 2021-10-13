@@ -19,7 +19,7 @@
 @implementation Banner6009
 
 + (NSString *)getAdapterRevisionVersion {
-    return @"2";
+    return @"3";
 }
 
 - (BOOL)isClassReference {
@@ -51,6 +51,7 @@
 
 -(void)initAdnetworkIfNeeded {
     self.adSize = CGSizeMake(320.0, 50.0);
+    [self initCompleteAndRetryStartAdIfNeeded];
 }
 
 - (void)clearStatusIfNeeded {
@@ -61,6 +62,10 @@
 }
 
 - (void)startAd {
+    if (![self canStartAd]) {
+        return;
+    }
+
     if (self.nendKey == nil) {
         return;
     }

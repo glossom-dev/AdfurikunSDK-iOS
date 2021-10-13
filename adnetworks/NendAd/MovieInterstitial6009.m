@@ -25,7 +25,7 @@
 #pragma mark - ADFmyMovieRewardInterface
 
 + (NSString *)getAdapterRevisionVersion {
-    return @"4";
+    return @"5";
 }
 
 -(id)init {
@@ -69,6 +69,7 @@
             } else if (ADFMovieOptions_Sound_Off == soundState) {
                 self.interstitialVideo.isMuteStartPlaying = true;
             }
+            [self initCompleteAndRetryStartAdIfNeeded];
         } @catch (NSException *exception) {
             [self adnetworkExceptionHandling:exception];
         }
@@ -80,6 +81,10 @@
 
 /**< 広告の読み込み開始 */
 -(void)startAd {
+    if (![self canStartAd]) {
+        return;
+    }
+
     if (self.interstitialVideo) {
         @try {
             [self.interstitialVideo loadAd];

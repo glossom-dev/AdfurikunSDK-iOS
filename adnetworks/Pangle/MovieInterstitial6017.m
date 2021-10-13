@@ -7,6 +7,7 @@
 //
 
 #import "MovieInterstitial6017.h"
+#import "MovieReward6017.h"
 #import <ADFMovieReward/ADFMovieOptions.h>
 #import <BUAdSDK/BUFullscreenVideoAd.h>
 #import <BUAdSDK/BUAdSDKManager.h>
@@ -15,7 +16,6 @@
 @property (nonatomic, strong) BUFullscreenVideoAd *fullscreenVideoAd;
 @property (nonatomic, strong) NSString *tiktokAppID;
 @property (nonatomic, strong) NSString *tiktokSlotID;
-@property (nonatomic) BOOL didInitAdnetwork;
 @end
 
 @implementation MovieInterstitial6017
@@ -25,7 +25,7 @@
 }
 
 + (NSString *)getAdapterRevisionVersion {
-    return @"4";
+    return @"5";
 }
 
 -(id)init {
@@ -53,22 +53,31 @@
 }
 
 - (void)initAdnetworkIfNeeded {
-    if (!self.didInitAdnetwork && self.tiktokAppID) {
+    if (![self needsToInit]) {
+        return;
+    }
+
+    if (self.tiktokAppID) {
         @try {
-            [BUAdSDKManager setAppID:self.tiktokAppID];
+            [MovieConfigure6017.sharedInstance configureWithAppId:self.tiktokAppID completion:^{
+                [self initCompleteAndRetryStartAdIfNeeded];
+            }];
         } @catch (NSException *exception) {
             [self adnetworkExceptionHandling:exception];
         }
-        self.didInitAdnetwork = YES;
     }
 }
 
 - (void)startAd {
+    if (![self canStartAd]) {
+        return;
+    }
+
     self.isAdLoaded = NO;
     if (self.fullscreenVideoAd) {
         self.fullscreenVideoAd = nil;
     }
-    if (self.didInitAdnetwork && self.tiktokSlotID) {
+    if (self.tiktokSlotID) {
         @try {
             self.fullscreenVideoAd = [[BUFullscreenVideoAd alloc] initWithSlotID:self.tiktokSlotID];
             self.fullscreenVideoAd.delegate = self;

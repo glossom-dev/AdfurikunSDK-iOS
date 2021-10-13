@@ -10,7 +10,7 @@
 
 #define kRetryTimeForNoCache 30.0
 
-@interface MovieInterstitial6008()<FADDelegate>
+@interface MovieInterstitial6008()<FADLoadDelegate, FADAdViewEventListener>
 @property (nonatomic)FADInterstitial *interstitial;
 @property (nonatomic, strong)NSString *fiveAppId;
 @property (nonatomic, strong)NSString *fiveSlotId;
@@ -29,14 +29,19 @@
 }
 
 + (NSString *)getAdapterRevisionVersion {
-    return @"5";
+    return @"6";
 }
 
 -(id)init {
     self = [super init];
     if (self) {
+        self.gdprStatus = kFADNeedGdprNonPersonalizedAdsTreatmentUnspecified;
     }
     return self;
+}
+
+- (void)setHasUserConsent:(BOOL)hasUserConsent {
+    self.gdprStatus = (hasUserConsent) ? kFADNeedGdprNonPersonalizedAdsTreatmentFalse : kFADNeedGdprNonPersonalizedAdsTreatmentTrue;
 }
 
 /**
@@ -89,8 +94,7 @@
     }
 
     if (self.fiveAppId && self.fiveSlotId && [self.fiveAppId length] > 0 && [self.fiveSlotId length] > 0) {
-        [MovieConfigure6008.sharedInstance configureWithAppId:self.fiveAppId isTest:self.testFlg completion:^{
-            NSLog(@"### init complete");
+        [MovieConfigure6008.sharedInstance configureWithAppId:self.fiveAppId isTest:self.testFlg gdprStatus:self.gdprStatus completion:^{
             [self initCompleteAndRetryStartAdIfNeeded];
         }];
     }
@@ -100,7 +104,6 @@
  *  広告の読み込みを開始する
  */
 -(void)startAd {
-    NSLog(@"### startAd func");
     if (![self canStartAd]) {
         return;
     }
@@ -110,7 +113,8 @@
             self.interstitial = nil;
         }
         self.interstitial = [[FADInterstitial alloc] initWithSlotId:self.fiveSlotId];
-        self.interstitial.delegate = self;
+        [self.interstitial setLoadDelegate:self];
+        [self.interstitial setAdViewEventListener:self];
         //音出力設定
         ADFMovieOptions_Sound soundState = [ADFMovieOptions getSoundState];
         if (ADFMovieOptions_Sound_On == soundState) {
@@ -179,13 +183,19 @@
     [self setErrorWithMessage:nil code:errorCode];
     [self setCallbackStatus:MovieRewardCallbackFetchFail];
 
-    if (errorCode == kFADErrorNoCachedAd && self.didRetryForNoCache == false) {
+    if (errorCode == kFADErrorCodeNoAd && self.didRetryForNoCache == false) {
         self.didRetryForNoCache = true;
         MovieInterstitial6008 __weak *weakSelf = self;
         dispatch_after(dispatch_time(DISPATCH_TIME_NOW, kRetryTimeForNoCache * NSEC_PER_SEC), dispatch_get_main_queue(), ^{
             [weakSelf startAd];
         });
     }
+}
+
+- (void)fiveAd:(id<FADAdInterface>)ad didFailedToShowAdWithError:(FADErrorCode)errorCode {
+    NSLog(@"Five SDK %s Errorcode:%ld, slotId : %@", __func__, (long)errorCode, self.fiveSlotId);
+    [self setErrorWithMessage:nil code:errorCode];
+    [self setCallbackStatus:MovieRewardCallbackPlayFail];
 }
 
 - (void)fiveAdDidClick:(id<FADAdInterface>)ad {
@@ -197,10 +207,9 @@
     [self setCallbackStatus:MovieRewardCallbackClose];
 }
 
-- (void)fiveAdDidStart:(id<FADAdInterface>)ad {
+- (void)fiveAdDidImpression:(id<FADAdInterface>)ad {
     NSLog(@"%s", __func__);
-    
-    self.isReplay = NO;
+    self.isReplay = false;
     [self setCallbackStatus:MovieRewardCallbackPlayStart];
 }
 
@@ -211,7 +220,7 @@
 - (void)fiveAdDidReplay:(id<FADAdInterface>)ad {
     NSLog(@"%s", __func__);
     
-    self.isReplay = YES;
+    self.isReplay = true;
 }
 
 - (void)fiveAdDidResume:(id<FADAdInterface>)ad {
@@ -232,11 +241,6 @@
 
 - (void)fiveAdDidRecover:(id<FADAdInterface>)ad {
     NSLog(@"%s", __func__);
-}
-
-- (void)fiveAdDidImpressionImage:(id<FADAdInterface>)ad {
-    NSLog(@"%s", __func__);
-    [self setCallbackStatus:MovieRewardCallbackPlayStart];
 }
 
 @end
@@ -273,7 +277,10 @@ typedef enum : NSUInteger {
     return self;
 }
 
-- (void)configureWithAppId:(NSString *)fiveAppId isTest:(BOOL)isTest completion:(completionHandlerType)completionHandler {
+- (void)configureWithAppId:(NSString *)fiveAppId
+                    isTest:(BOOL)isTest
+                gdprStatus:(FADNeedGdprNonPersonalizedAdsTreatment)gdprStatus
+                completion:(completionHandlerType)completionHandler {
     if (!fiveAppId || !completionHandler) {
         return;
     }
@@ -295,10 +302,6 @@ typedef enum : NSUInteger {
         dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(0.1 * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
             @try {
                 FADConfig *config = [[FADConfig alloc] initWithAppId:fiveAppId];
-                config.fiveAdFormat = [NSSet setWithObjects:
-                                       [NSNumber numberWithInt:kFADFormatVideoReward],
-                                       [NSNumber numberWithInt:kFADFormatCustomLayout],
-                                       nil];
                 if (isTest) {
                     config.isTest =  YES;
                 }
@@ -313,6 +316,8 @@ typedef enum : NSUInteger {
                 } else {
                     config.maxAdAgeRating = kFADAdAgeRatingUnspecified;
                 }
+                
+                config.needGdprNonPersonalizedAdsTreatment = gdprStatus;
                 
                 if (![FADSettings isConfigRegistered]) {
                     [FADSettings registerConfig:config];

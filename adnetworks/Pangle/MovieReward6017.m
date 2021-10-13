@@ -8,15 +8,12 @@
 
 #import "MovieReward6017.h"
 #import <ADFMovieReward/ADFMovieOptions.h>
-#import <BUAdSDK/BURewardedVideoAd.h>
-#import <BUAdSDK/BURewardedVideoModel.h>
-#import <BUAdSDK/BUAdSDKManager.h>
+#import <BUAdSDK/BUAdSDK.h>
 
 @interface MovieReward6017 ()<BURewardedVideoAdDelegate>
 @property (nonatomic, strong) BURewardedVideoAd *rewardedVideoAd;
 @property (nonatomic, strong) NSString *tiktokAppID;
 @property (nonatomic, strong) NSString *tiktokSlotID;
-@property (nonatomic) BOOL didInitAdnetwork;
 @end
 
 @implementation MovieReward6017
@@ -26,7 +23,7 @@
 }
 
 + (NSString *)getAdapterRevisionVersion {
-    return @"4";
+    return @"5";
 }
 
 - (void)setData:(NSDictionary *)data {
@@ -47,22 +44,31 @@
 }
 
 - (void)initAdnetworkIfNeeded {
-    if (!self.didInitAdnetwork && self.tiktokAppID) {
+    if (![self needsToInit]) {
+        return;
+    }
+
+    if (self.tiktokAppID) {
         @try {
-            [BUAdSDKManager setAppID:self.tiktokAppID];
+            [MovieConfigure6017.sharedInstance configureWithAppId:self.tiktokAppID completion:^{
+                [self initCompleteAndRetryStartAdIfNeeded];
+            }];
         } @catch (NSException *exception) {
             [self adnetworkExceptionHandling:exception];
         }
-        self.didInitAdnetwork = YES;
     }
 }
 
 - (void)startAd {
+    if (![self canStartAd]) {
+        return;
+    }
+
     self.isAdLoaded = NO;
     if (self.rewardedVideoAd) {
         self.rewardedVideoAd = nil;
     }
-    if (self.didInitAdnetwork && self.tiktokSlotID) {
+    if (self.tiktokSlotID) {
         @try {
             BURewardedVideoModel *model = [[BURewardedVideoModel alloc] init];
             self.rewardedVideoAd = [[BURewardedVideoAd alloc] initWithSlotID:self.tiktokSlotID rewardedVideoModel:model];
@@ -169,5 +175,83 @@
 @end
 
 @implementation MovieReward6092
+
+@end
+
+typedef enum : NSUInteger {
+    initializeNotYet,
+    initializing,
+    initializeComplete,
+} PangleInitializeStatus;
+
+@interface MovieConfigure6017()
+
+@property (nonatomic) PangleInitializeStatus initStatus;
+@property (nonatomic) NSMutableArray <completionHandlerType> *handlers;
+
+@end
+
+@implementation MovieConfigure6017
++ (instancetype)sharedInstance {
+    static MovieConfigure6017 *sharedInstance = nil;
+    static dispatch_once_t onceToken;
+    dispatch_once(&onceToken, ^{
+        sharedInstance = [self new];
+    });
+    return sharedInstance;
+}
+
+- (instancetype)init {
+    self = [super init];
+    if (self) {
+        self.initStatus = initializeNotYet;
+        self.handlers = [NSMutableArray new];
+    }
+    return self;
+}
+
+- (void)configureWithAppId:(NSString *)appId completion:(completionHandlerType)completionHandler {
+    if (!appId || !completionHandler) {
+        return;
+    }
+    
+    if (self.initStatus == initializeComplete) {
+        completionHandler();
+        return;
+    }
+    
+    if (self.initStatus == initializing) {
+        [self.handlers addObject:completionHandler];
+        return;
+    }
+    
+    if (self.initStatus == initializeNotYet) {
+        self.initStatus = initializing;
+        [self.handlers addObject:completionHandler];
+        
+        dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(0.1 * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
+            @try {
+
+                BUAdSDKConfiguration *configuration = [BUAdSDKConfiguration configuration];
+                configuration.territory = BUAdSDKTerritory_NO_CN;
+                configuration.coppa = @(0);
+                configuration.logLevel = BUAdSDKLogLevelNone;
+                //configuration.logLevel = BUAdSDKLogLevelDebug;
+                configuration.appID = appId;
+                [BUAdSDKManager startWithAsyncCompletionHandler:^(BOOL success, NSError *error) {
+                    if (success) {
+                        self.initStatus = initializeComplete;
+
+                        for (completionHandlerType handler in self.handlers) {
+                            handler();
+                        }
+                    }
+                }];
+            } @catch (NSException *exception) {
+                NSLog(@"adnetwork exception : %@", exception);
+            }
+        });
+    }
+}
 
 @end

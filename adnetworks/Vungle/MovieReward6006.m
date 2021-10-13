@@ -24,7 +24,7 @@
 }
 
 + (NSString *)getAdapterRevisionVersion {
-    return @"3";
+    return @"4";
 }
 
 - (id)init{
@@ -113,6 +113,7 @@
     } else if (ADFMovieOptions_Sound_Off == soundState) {
         [VungleSDK sharedSDK].muted = true;
     }
+    [self initCompleteAndRetryStartAdIfNeeded];
 }
 
 /**
@@ -120,6 +121,10 @@
  */
 -(void)startAd
 {
+    if (![self canStartAd]) {
+        return;
+    }
+
     @try {
         VungleSDK *sdk = [VungleSDK sharedSDK];
         if (!sdk.initialized) {

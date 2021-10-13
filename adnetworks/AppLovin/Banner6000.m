@@ -20,7 +20,7 @@
 }
 
 + (NSString *)getAdapterRevisionVersion {
-    return @"1";
+    return @"2";
 }
 
 - (BOOL)isClassReference {
@@ -58,10 +58,15 @@
         
         self.adView.adLoadDelegate = self;
         self.adView.adDisplayDelegate = self;
+        [self initCompleteAndRetryStartAdIfNeeded];
     }
 }
 
 - (void)startAd {
+    if (![self canStartAd]) {
+        return;
+    }
+
     [super startAd];
     
     self.isAdLoaded = NO;

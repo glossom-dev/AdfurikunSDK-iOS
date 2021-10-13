@@ -28,7 +28,7 @@
 }
 
 + (NSString *)getAdapterRevisionVersion {
-    return @"4";
+    return @"5";
 }
 
 /**
@@ -70,6 +70,7 @@
                 @try {
                     [UnityAds addDelegate:[MovieDelegate6001 sharedInstance]];
                     [UnityAds initialize:weakSelf.gameId];
+                    [self initCompleteAndRetryStartAdIfNeeded];
                 } @catch (NSException *exception) {
                     [weakSelf adnetworkExceptionHandling:exception];
                 }
@@ -82,6 +83,10 @@
  *  広告の読み込みを開始する
  */
 -(void)startAd {
+    if (![self canStartAd]) {
+        return;
+    }
+
     self.hasSentCallback = false;
     if ([self isPrepared]) {
         [self sendFetchComplete];

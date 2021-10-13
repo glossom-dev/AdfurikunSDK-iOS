@@ -7,13 +7,14 @@
 //
 
 #import "Banner6017.h"
+#import "MovieReward6017.h"
 
 @interface Banner6017()<BUNativeExpressBannerViewDelegate>
 
 @property (nonatomic) NSString *pangleAppID;
 @property (nonatomic) NSString *pangleSlotID;
-@property (nonatomic) BOOL didInitAdnetwork;
 @property (nonatomic) BUNativeExpressBannerView *adView;
+@property (nonatomic) BOOL didInvokeImpression;
 @end
 
 @implementation Banner6017
@@ -23,7 +24,7 @@
 }
 
 + (NSString *)getAdapterRevisionVersion {
-    return @"1";
+    return @"3";
 }
 
 - (BOOL)isClassReference {
@@ -50,15 +51,20 @@
 }
 
 -(void)initAdnetworkIfNeeded {
+    if (![self needsToInit]) {
+        return;
+    }
+
     NSLog(@"Banner6017 initAdnetworkIfNeeded");
-    if (!self.didInitAdnetwork && self.pangleAppID) {
+    if (self.pangleAppID) {
         NSLog(@"%s", __FUNCTION__);
         @try {
-            [BUAdSDKManager setAppID:self.pangleAppID];
+            [MovieConfigure6017.sharedInstance configureWithAppId:self.pangleAppID completion:^{
+                [self initCompleteAndRetryStartAdIfNeeded];
+            }];
         } @catch (NSException *exception) {
             [self adnetworkExceptionHandling:exception];
         }
-        self.didInitAdnetwork = true;
     }
 
     self.adSize = CGSizeMake(320.0, 50.0);
@@ -73,6 +79,10 @@
 
 - (void)startAd {
     NSLog(@"%s called", __FUNCTION__);
+    if (![self canStartAd]) {
+        return;
+    }
+
     if (self.pangleSlotID == nil) {
         return;
     }
@@ -158,6 +168,7 @@
     info.isCustomComponentSupported = false;
     self.adInfo = info;
     self.isAdLoaded = true;
+    self.didInvokeImpression = false;
     
     [self setCallbackStatus:NativeAdCallbackLoadFinish];
 }
@@ -184,8 +195,11 @@
 
 - (void)nativeExpressBannerAdViewWillBecomVisible:(BUNativeExpressBannerView *)bannerAdView {
     NSLog(@"%s called", __FUNCTION__);
-    [self setCallbackStatus:NativeAdCallbackRendering];
-    [self startViewabilityCheck];
+    if (!self.didInvokeImpression) {
+        [self setCallbackStatus:NativeAdCallbackRendering];
+        [self startViewabilityCheck];
+        self.didInvokeImpression = true;
+    }
 }
 
 - (void)nativeExpressBannerAdViewDidClick:(BUNativeExpressBannerView *)bannerAdView {

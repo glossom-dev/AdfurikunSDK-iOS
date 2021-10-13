@@ -19,7 +19,7 @@
 @implementation MovieInterstitial6019
 
 + (NSString *)getAdapterRevisionVersion {
-    return @"5";
+    return @"6";
 }
 
 -(id)init {
@@ -52,6 +52,7 @@
     } else if (ADFMovieOptions_Sound_Off == soundState) {
         GADMobileAds.sharedInstance.applicationMuted = YES;
     }
+    [self initCompleteAndRetryStartAdIfNeeded];
 }
 
 - (BOOL)isPrepared {
@@ -59,6 +60,10 @@
 }
 
 - (void)startAd {
+    if (![self canStartAd]) {
+        return;
+    }
+
     if (self.unitID == nil) {
         return;
     }

@@ -29,7 +29,7 @@
 }
 
 + (NSString *)getAdapterRevisionVersion {
-    return @"3";
+    return @"4";
 }
 
 - (id)init {
@@ -95,6 +95,7 @@
             
             [Tapjoy limitedConnect:self.sdkKey];
             [Tapjoy setDebugEnabled:self.test_flg];
+            [self initCompleteAndRetryStartAdIfNeeded];
         } @catch (NSException *exception) {
             [self adnetworkExceptionHandling:exception];
         }
@@ -106,6 +107,10 @@
  *  広告の読み込みを開始する
  */
 -(void)startAd {
+    if (![self canStartAd]) {
+        return;
+    }
+
     if (self.sdkKey && self.placement_id) {
         @try {
             if (![Tapjoy isLimitedConnected]) {

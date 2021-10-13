@@ -16,7 +16,7 @@
 @implementation Banner6016
 
 + (NSString *)getAdapterRevisionVersion {
-    return @"1";
+    return @"2";
 }
 
 -(void)setData:(NSDictionary *)data {
@@ -36,6 +36,10 @@
  *  広告の読み込みを開始する
  */
 -(void)startAd {
+    if (![self canStartAd]) {
+        return;
+    }
+
     if (self.placement_id) {
         @try {
             [super startAd];

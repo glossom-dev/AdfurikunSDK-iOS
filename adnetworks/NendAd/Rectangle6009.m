@@ -12,6 +12,7 @@
 
 -(void)initAdnetworkIfNeeded {
     self.adSize = CGSizeMake(300.0, 250.0);
+    [self initCompleteAndRetryStartAdIfNeeded];
 }
 
 @end

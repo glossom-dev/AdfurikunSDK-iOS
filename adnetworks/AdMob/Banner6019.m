@@ -15,7 +15,7 @@
 @implementation Banner6019
 
 + (NSString *)getAdapterRevisionVersion {
-    return @"3";
+    return @"5";
 }
 
 - (void)setData:(NSDictionary *)data {
@@ -37,6 +37,7 @@
         // GADMobileAds.sharedInstance.requestConfiguration.testDeviceIdentifiers = @[@"コンソールに出力されたデバイスIDを入力してください。"];
         //詳細　https://developers.google.com/admob/ios/test-ads?hl=ja
     }
+    [self initCompleteAndRetryStartAdIfNeeded];
     self.adSize = kGADAdSizeBanner;
 }
 
@@ -46,10 +47,15 @@
 
 - (void)startAdWithOption:(NSDictionary *)option {
     NSLog(@"%s called", __func__);
+    if (![self canStartAd]) {
+        return;
+    }
+
     [super startAd];
 
     self.isAdLoaded = false;
-
+    self.isBannerViewLoaded = false;
+    
     if (self.unitID == nil) {
         return;
     }
@@ -106,21 +112,22 @@
 
 - (void)bannerViewDidReceiveAd:(GADBannerView *)bannerView {
     NSLog(@"%s called", __func__);
-    if (self.isAdLoaded) {
+    if (self.isBannerViewLoaded) {
         return;
     }
-    
     self.isAdLoaded = true;
-    MovieNativeAdInfo6019 *info = [[MovieNativeAdInfo6019 alloc] initWithVideoUrl:nil
-                                                                            title:@""
-                                                                      description:@""
-                                                                     adnetworkKey:@"6019"];
+    self.isBannerViewLoaded = true;
+    
+    BannerAdInfo6019 *info = [[BannerAdInfo6019 alloc] initWithVideoUrl:nil
+                                                                  title:@""
+                                                            description:@""
+                                                           adnetworkKey:@"6019"];
     info.mediaType = ADFNativeAdType_Image;
     info.adapter = self;
-    [info setupMediaView:bannerView];
+    [info setupMediaView:self.bannerView];
     self.adInfo = info;
 
-    [self setCustomMediaview:bannerView];
+    [self setCustomMediaview:self.bannerView];
     
     [self setCallbackStatus:NativeAdCallbackLoadFinish];
 }
@@ -157,5 +164,16 @@
 @end
 
 @implementation Banner6060
+
+@end
+
+@implementation BannerAdInfo6019
+
+- (void)playMediaView {
+    if (self.adapter) {
+        [self.adapter setCallbackStatus:NativeAdCallbackRendering];
+        [self.adapter startViewabilityCheck];
+    }
+}
 
 @end

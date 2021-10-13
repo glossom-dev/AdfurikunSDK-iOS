@@ -25,7 +25,7 @@
 @implementation MovieNative6019
 
 + (NSString *)getAdapterRevisionVersion {
-    return @"2";
+    return @"3";
 }
 
 - (void)setData:(NSDictionary *)data {
@@ -50,6 +50,7 @@
         // GADMobileAds.sharedInstance.requestConfiguration.testDeviceIdentifiers = @[@"コンソールに出力されたデバイスIDを入力してください。"];
         //詳細　https://developers.google.com/admob/ios/test-ads?hl=ja
     }
+    [self initCompleteAndRetryStartAdIfNeeded];
 }
 
 - (void)startAd {
@@ -57,6 +58,10 @@
 }
 
 - (void)startAdWithOption:(NSDictionary *)option {
+    if (![self canStartAd]) {
+        return;
+    }
+
     if (self.unitID == nil) {
         return;
     }

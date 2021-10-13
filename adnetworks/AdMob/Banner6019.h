@@ -19,10 +19,15 @@ NS_ASSUME_NONNULL_BEGIN
 @property (nonatomic, nullable) NSString *unitID;
 @property (nonatomic) GADAdSize adSize;
 @property (nonatomic) BOOL testFlg;
+@property (nonatomic) BOOL isBannerViewLoaded;
 
 @end
 
 @interface Banner6060 : Banner6019
+
+@end
+
+@interface BannerAdInfo6019 : ADFNativeAdInfo
 
 @end
 

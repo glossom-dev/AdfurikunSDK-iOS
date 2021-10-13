@@ -78,6 +78,10 @@
     }
 }
 
+-(void)initAdnetworkIfNeeded {
+    [self initCompleteAndRetryStartAdIfNeeded];
+}
+
 -(void)startAd {
     if (self.maioMediaId == nil) {
         return;

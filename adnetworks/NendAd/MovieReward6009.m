@@ -21,7 +21,7 @@
 @implementation MovieReward6009
 
 + (NSString *)getAdapterRevisionVersion {
-    return @"4";
+    return @"5";
 }
 
 #pragma mark - ADFmyMovieRewardInterface
@@ -52,6 +52,8 @@
             [NADLogger setLogLevel:NADLogLevelError];
             self.rewardedVideo.delegate = self;
             self.didInit = YES;
+            
+            [self initCompleteAndRetryStartAdIfNeeded];
         } @catch (NSException *exception) {
             [self adnetworkExceptionHandling:exception];
         }
@@ -63,6 +65,10 @@
 
 /**< 広告の読み込み開始 */
 -(void)startAd {
+    if (![self canStartAd]) {
+        return;
+    }
+
     if (self.rewardedVideo) {
         @try {
             [self.rewardedVideo loadAd];

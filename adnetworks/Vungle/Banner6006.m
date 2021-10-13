@@ -26,7 +26,7 @@
 }
 
 + (NSString *)getAdapterRevisionVersion {
-    return @"1";
+    return @"2";
 }
 
 - (BOOL)isClassReference {
@@ -116,6 +116,7 @@
     }
 
     self.isBannerSize = true;
+    [self initCompleteAndRetryStartAdIfNeeded];
 }
 
 - (void)clearStatusIfNeeded {
@@ -131,6 +132,10 @@
 
 // SDKのLoading関数を呼び出す
 - (void)startAd {
+    if (![self canStartAd]) {
+        return;
+    }
+
     @try {
         VungleSDK *sdk = [VungleSDK sharedSDK];
         if (!sdk.initialized) {

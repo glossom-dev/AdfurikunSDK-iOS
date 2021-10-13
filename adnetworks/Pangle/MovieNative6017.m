@@ -7,6 +7,7 @@
 //
 
 #import "MovieNative6017.h"
+#import "MovieReward6017.h"
 
 #pragma mark MovieNative6017
 
@@ -17,7 +18,6 @@
 @property (nonatomic) UIImageView *imageView;
 @property (nonatomic) NSString *pangleAppID;
 @property (nonatomic) NSString *pangleSlotID;
-@property (nonatomic) BOOL didInitAdnetwork;
 @property (nonatomic) BOOL didSendPlayStartCallback;
 @property (nonatomic) BOOL didSendPlayFinishCallback;
 
@@ -30,7 +30,7 @@
 }
 
 + (NSString *)getAdapterRevisionVersion {
-    return @"2";
+    return @"3";
 }
 
 - (BOOL)isClassReference {
@@ -63,15 +63,20 @@
 
 // SDKの初期化ロジックを入れる。ただし、Instance化を毎回する必要がある場合にはこちらではなくてSstartAdで行うこと
 -(void)initAdnetworkIfNeeded {
+    if (![self needsToInit]) {
+        return;
+    }
+
     NSLog(@"MovieNatve6017 initAdnetworkIfNeeded");
-    if (!self.didInitAdnetwork && self.pangleAppID) {
+    if (self.pangleAppID) {
         NSLog(@"%s", __FUNCTION__);
         @try {
-            [BUAdSDKManager setAppID:self.pangleAppID];
+            [MovieConfigure6017.sharedInstance configureWithAppId:self.pangleAppID completion:^{
+                [self initCompleteAndRetryStartAdIfNeeded];
+            }];
         } @catch (NSException *exception) {
             [self adnetworkExceptionHandling:exception];
         }
-        self.didInitAdnetwork = true;
     }
 }
 
@@ -84,7 +89,11 @@
 
 // SDKのLoading関数を呼び出す
 - (void)startAd {
-    if (self.pangleAppID == nil || self.pangleSlotID == nil || !self.didInitAdnetwork) {
+    if (![self canStartAd]) {
+        return;
+    }
+
+    if (self.pangleAppID == nil || self.pangleSlotID == nil) {
         return;
     }
     NSLog(@"MovieNatve6017 : startAd");
@@ -104,7 +113,6 @@
         slot.AdType = BUAdSlotAdTypeFeed;
         slot.position = BUAdSlotPositionFeed;
         slot.imgSize = imgSize;
-        slot.isSupportDeepLink = YES;
         self.nativeAd.adslot = slot;
         
         self.nativeAd.rootViewController = [self topMostViewController];

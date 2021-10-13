@@ -20,6 +20,12 @@ NS_ASSUME_NONNULL_BEGIN
 @property (nonatomic) BOOL isInitialized;
 @property (nonatomic) BOOL hasPendedStartAd;
 
+@property (nonatomic) int playErrorCheckInterval;
+@property (nonatomic) int playErrorCheckCount;
+@property (nonatomic) int playErrorSuspendTime;
+
+@property (nonatomic) int playedPointInterval;
+
 @property (nonatomic, copy) NSString *appId;
 @property (nonatomic, copy) NSString *adnetworkKey;
 
@@ -67,6 +73,12 @@ NS_ASSUME_NONNULL_BEGIN
 -(void)initCompleteAndRetryStartAdIfNeeded;
 
 -(nullable NSString *)getPlayingAdCreativeId;
+
+-(void)handlePlayError;
+-(void)resetPlayErrorCountIfNeeded;
+-(bool)isRequestAdSuspending;
+-(void)performLoadFail;
+-(BOOL)isPlayErrorCheckMode;
 
 @end
 

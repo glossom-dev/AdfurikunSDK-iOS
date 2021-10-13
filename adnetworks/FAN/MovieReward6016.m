@@ -21,7 +21,7 @@
 @implementation MovieReward6016
 
 + (NSString *)getAdapterRevisionVersion {
-    return @"3";
+    return @"4";
 }
 
 - (void)setData:(NSDictionary *)data {
@@ -57,6 +57,7 @@
             } else {
                 [FBAdSettings clearTestDevices];
             }
+            [self initCompleteAndRetryStartAdIfNeeded];
         } @catch (NSException *exception) {
             [self adnetworkExceptionHandling:exception];
         }
@@ -64,6 +65,10 @@
 }
 
 - (void)startAd {
+    if (![self canStartAd]) {
+        return;
+    }
+
     if (self.placementId) {
         @try {
             self.rewardedVideoAd = [[FBRewardedVideoAd alloc] initWithPlacementID:self.placementId];

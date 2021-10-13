@@ -22,7 +22,7 @@
 @implementation MovieNative6016
 
 + (NSString *)getAdapterRevisionVersion {
-    return @"1";
+    return @"2";
 }
 
 - (BOOL)isClassReference {
@@ -67,6 +67,7 @@
             } else {
                 [FBAdSettings clearTestDevices];
             }
+            [self initCompleteAndRetryStartAdIfNeeded];
         } @catch (NSException *exception) {
             [self adnetworkExceptionHandling:exception];
         }
@@ -74,6 +75,10 @@
 }
 
 - (void)startAd {
+    if (![self canStartAd]) {
+        return;
+    }
+
     if (self.placement_id) {
         [super startAd];
         

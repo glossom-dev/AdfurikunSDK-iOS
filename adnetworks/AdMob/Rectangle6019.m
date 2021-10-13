@@ -19,6 +19,7 @@
         //詳細　https://developers.google.com/admob/ios/test-ads?hl=ja
     }
     self.adSize = kGADAdSizeMediumRectangle;
+    [self initCompleteAndRetryStartAdIfNeeded];
 }
 
 @end

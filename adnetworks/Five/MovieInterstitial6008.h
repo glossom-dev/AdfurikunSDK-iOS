@@ -15,11 +15,13 @@ typedef void(^completionHandlerType)(void);
 
 @interface MovieInterstitial6008 : ADFmyMovieRewardInterface
 
+@property (nonatomic)FADNeedGdprNonPersonalizedAdsTreatment gdprStatus;
+
 @end
 @interface MovieConfigure6008 : NSObject
 
 + (instancetype)sharedInstance;
-- (void)configureWithAppId:(NSString *)fiveAppId isTest:(BOOL)isTest completion:(completionHandlerType)completionHandler;
+- (void)configureWithAppId:(NSString *)fiveAppId isTest:(BOOL)isTest gdprStatus:(FADNeedGdprNonPersonalizedAdsTreatment)gdprStatus completion:(completionHandlerType)completionHandler;
 
 @end
 

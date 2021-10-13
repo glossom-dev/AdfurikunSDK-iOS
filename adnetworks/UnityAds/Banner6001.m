@@ -24,7 +24,7 @@
 }
 
 + (NSString *)getAdapterRevisionVersion {
-    return @"2";
+    return @"3";
 }
 
 -(void)setData:(NSDictionary *)data {
@@ -54,6 +54,7 @@
     if (![UnityServices isInitialized] && self.gameId) {
         @try {
             [UnityAds initialize:self.gameId testMode:self.testFlg];
+            [self initCompleteAndRetryStartAdIfNeeded];
         } @catch (NSException *exception) {
             [self adnetworkExceptionHandling:exception];
         }
@@ -64,6 +65,10 @@
  *  広告の読み込みを開始する
  */
 -(void)startAd {
+    if (![self canStartAd]) {
+        return;
+    }
+
     @try {
         [super startAd];
         
