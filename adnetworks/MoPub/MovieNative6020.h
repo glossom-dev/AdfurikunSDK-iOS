@@ -19,7 +19,7 @@ NS_ASSUME_NONNULL_BEGIN
 
 @end
 
-@interface MovieNativeAdInfo6020 : ADFMovieNativeAdInfo
+@interface MovieNativeAdInfo6020 : ADFNativeAdInfo
 
 @property (nonatomic, strong) MPNativeAd *nativeAd;
 
