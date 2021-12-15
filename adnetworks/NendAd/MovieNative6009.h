@@ -8,14 +8,14 @@
 
 #import <NendAd/NendAd.h>
 #import <ADFMovieReward/ADFmyMovieNativeInterface.h>
-#import <ADFMovieReward/ADFMovieNativeAdInfo.h>
+#import <ADFMovieReward/ADFNativeAdInfo.h>
 
 @interface MovieNative6009 : ADFmyMovieNativeInterface
 @property (nonatomic, strong) NADNativeVideoView *nativeVideoView;
 @property (nonatomic, strong) NADNativeVideoLoader *videoAdLoader;
 @end
 
-@interface MovieNativeAdInfo6009 : ADFMovieNativeAdInfo
+@interface MovieNativeAdInfo6009 : ADFNativeAdInfo
 
 @end
 

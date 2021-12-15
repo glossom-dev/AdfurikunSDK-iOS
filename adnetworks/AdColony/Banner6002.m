@@ -26,7 +26,7 @@
 }
 
 + (NSString *)getAdapterRevisionVersion {
-    return @"1";
+    return @"2";
 }
 
 - (BOOL)isClassReference {
@@ -90,6 +90,7 @@
             options = [AdColonyAppOptions new];
             options.testMode = self.test_flg;
         }
+        [self requireToAsyncInit];
         [AdColony configureWithAppID:self.adColonyAppId zoneIDs:self.allZones options:options completion:^(NSArray<AdColonyZone *> * _Nonnull zones) {
             [self initCompleteAndRetryStartAdIfNeeded];
         }];
@@ -121,6 +122,7 @@
     UIViewController *vc = [self topMostViewController];
     if (vc && self.adShowZoneId) {
         @try {
+            [self requireToAsyncRequestAd];
             [AdColony requestAdViewInZone:self.adShowZoneId
                                  withSize:self.adSize
                            viewController:vc

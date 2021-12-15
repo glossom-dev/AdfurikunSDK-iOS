@@ -22,7 +22,7 @@
 @implementation MovieNative6009
 
 + (NSString *)getAdapterRevisionVersion {
-    return @"3";
+    return @"4";
 }
 
 - (BOOL)isClassReference {
@@ -87,6 +87,8 @@
     
     MovieNative6009 __weak *weakSelf = self;
     @try {
+        [self requireToAsyncRequestAd];
+        
         [self.videoAdLoader loadAdWithCompletionHandler:^(NADNativeVideo * _Nullable videoAd, NSError * _Nullable error) {
             if (weakSelf) {
                 if (videoAd) {

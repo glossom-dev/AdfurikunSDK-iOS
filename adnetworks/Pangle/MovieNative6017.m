@@ -30,7 +30,7 @@
 }
 
 + (NSString *)getAdapterRevisionVersion {
-    return @"3";
+    return @"4";
 }
 
 - (BOOL)isClassReference {
@@ -71,6 +71,8 @@
     if (self.pangleAppID) {
         NSLog(@"%s", __FUNCTION__);
         @try {
+            [self requireToAsyncInit];
+            
             [MovieConfigure6017.sharedInstance configureWithAppId:self.pangleAppID completion:^{
                 [self initCompleteAndRetryStartAdIfNeeded];
             }];
@@ -105,6 +107,8 @@
     [super startAd];
     
     @try {
+        [self requireToAsyncRequestAd];
+        
         self.nativeAd = [BUNativeAd new];
         BUAdSlot *slot = [[BUAdSlot alloc] init];
         BUSize *imgSize = [BUSize sizeBy:BUProposalSize_Feed690_388];

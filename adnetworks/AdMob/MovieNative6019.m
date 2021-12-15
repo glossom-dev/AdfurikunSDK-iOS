@@ -25,7 +25,7 @@
 @implementation MovieNative6019
 
 + (NSString *)getAdapterRevisionVersion {
-    return @"3";
+    return @"5";
 }
 
 - (void)setData:(NSDictionary *)data {
@@ -90,10 +90,11 @@
             //AdMobのDefaultは右上
             self.adLoader = [[GADAdLoader alloc] initWithAdUnitID:self.unitID
                                                rootViewController:nil
-                                                          adTypes:@[kGADAdLoaderAdTypeNative]
+                                                          adTypes:@[GADAdLoaderAdTypeNative]
                                                           options:@[adViewOptions]];
             self.adLoader.delegate = self;
         }
+        [self requireToAsyncRequestAd];
         [self.adLoader loadRequest:[GADRequest request]];
     } @catch (NSException *exception) {
         [self adnetworkExceptionHandling:exception];

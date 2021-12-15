@@ -29,7 +29,7 @@
 }
 
 + (NSString *)getAdapterRevisionVersion {
-    return @"6";
+    return @"8";
 }
 
 -(id)init {
@@ -94,6 +94,7 @@
     }
 
     if (self.fiveAppId && self.fiveSlotId && [self.fiveAppId length] > 0 && [self.fiveSlotId length] > 0) {
+        [self requireToAsyncInit];
         [MovieConfigure6008.sharedInstance configureWithAppId:self.fiveAppId isTest:self.testFlg gdprStatus:self.gdprStatus completion:^{
             [self initCompleteAndRetryStartAdIfNeeded];
         }];
@@ -109,6 +110,7 @@
     }
 
     @try {
+        [self requireToAsyncRequestAd];
         if (self.interstitial) {
             self.interstitial = nil;
         }
@@ -138,6 +140,7 @@
     
     if (self.interstitial) {
         @try {
+            [self requireToAsyncPlay];
             BOOL res = [self.interstitial show];
             if (!res) {
                 [self setCallbackStatus:MovieRewardCallbackPlayFail];
@@ -319,9 +322,7 @@ typedef enum : NSUInteger {
                 
                 config.needGdprNonPersonalizedAdsTreatment = gdprStatus;
                 
-                if (![FADSettings isConfigRegistered]) {
-                    [FADSettings registerConfig:config];
-                }
+                [FADSettings registerConfig:config];
 
                 self.initStatus = initializeComplete;
 

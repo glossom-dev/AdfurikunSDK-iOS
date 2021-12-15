@@ -28,7 +28,7 @@
 }
 
 + (NSString *)getAdapterRevisionVersion {
-    return @"4";
+    return @"5";
 }
 
 -(id)init {
@@ -94,6 +94,7 @@
             options = [AdColonyAppOptions new];
             options.testMode = self.test_flg;
         }
+        [self requireToAsyncInit];
         [AdColony configureWithAppID:self.adColonyAppId zoneIDs:self.adColonyAllZones options:options completion:^(NSArray<AdColonyZone *> * _Nonnull zones) {
             [self initCompleteAndRetryStartAdIfNeeded];
         }];
@@ -111,6 +112,7 @@
     }
     @try {
         if (self.adShowZoneId) {
+            [self requireToAsyncRequestAd];
             [AdColony requestInterstitialInZone:_adShowZoneId options:nil andDelegate:self];
         }
     } @catch (NSException *exception) {
@@ -127,6 +129,7 @@
     UIViewController *topMostViewController = [self topMostViewController];
     if (topMostViewController) {
         @try {
+            [self requireToAsyncPlay];
             [_ad showWithPresentingViewController:topMostViewController];
         } @catch (NSException *exception) {
             [self adnetworkExceptionHandling:exception];
@@ -149,6 +152,7 @@
     // 表示を呼び出す
     if ([self isPrepared]) {
         @try {
+            [self requireToAsyncPlay];
             [_ad showWithPresentingViewController:viewController];
         } @catch (NSException *exception) {
             [self adnetworkExceptionHandling:exception];

@@ -26,7 +26,7 @@
 }
 
 + (NSString *)getAdapterRevisionVersion {
-    return @"2";
+    return @"3";
 }
 
 - (BOOL)isClassReference {
@@ -110,9 +110,9 @@
     //音出力設定
     ADFMovieOptions_Sound soundState = [ADFMovieOptions getSoundState];
     if (ADFMovieOptions_Sound_On == soundState) {
-        [VungleSDK sharedSDK].muted = false;
+        [[VungleSDK sharedSDK] setMuted:false];
     } else if (ADFMovieOptions_Sound_Off == soundState) {
-        [VungleSDK sharedSDK].muted = true;
+        [[VungleSDK sharedSDK] setMuted:true];
     }
 
     self.isBannerSize = true;
@@ -154,6 +154,9 @@
         
         NSError* error;
         BOOL result = false;
+        
+        [self requireToAsyncRequestAd];
+        
         if (self.isBannerSize) {
             result = [sdk loadPlacementWithID:self.placementID withSize:VungleAdSizeBanner error:&error];
         } else {

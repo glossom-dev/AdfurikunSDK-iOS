@@ -22,7 +22,7 @@
 @implementation MovieNative6016
 
 + (NSString *)getAdapterRevisionVersion {
-    return @"2";
+    return @"3";
 }
 
 - (BOOL)isClassReference {
@@ -83,6 +83,7 @@
         [super startAd];
         
         @try {
+            [self requireToAsyncRequestAd];
             if (_banner_type == kFANNativeAdPlacementTypeNative) {
                 FBNativeAd *nativeAd = [[FBNativeAd alloc] initWithPlacementID: self.placement_id];
                 nativeAd.delegate = self;

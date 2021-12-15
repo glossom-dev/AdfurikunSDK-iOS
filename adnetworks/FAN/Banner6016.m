@@ -16,7 +16,7 @@
 @implementation Banner6016
 
 + (NSString *)getAdapterRevisionVersion {
-    return @"2";
+    return @"3";
 }
 
 -(void)setData:(NSDictionary *)data {
@@ -48,6 +48,7 @@
                                                          adSize:kFBAdSizeHeight50Banner
                                              rootViewController:[self topMostViewController]];
             self.adView.delegate = self;
+            [self requireToAsyncRequestAd];
             [self.adView loadAd];
         } @catch (NSException *exception) {
             [self adnetworkExceptionHandling:exception];

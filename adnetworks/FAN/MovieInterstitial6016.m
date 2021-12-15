@@ -20,7 +20,7 @@
 @implementation MovieInterstitial6016
 
 + (NSString *)getAdapterRevisionVersion {
-    return @"5";
+    return @"6";
 }
 
 -(id)init {
@@ -68,6 +68,7 @@
         @try {
             self.interstitialVideoAd = [[FBInterstitialAd alloc] initWithPlacementID:self.placementId];
             self.interstitialVideoAd.delegate = self;
+            [self requireToAsyncRequestAd];
             [self.interstitialVideoAd loadAd];
         } @catch (NSException *exception) {
             [self adnetworkExceptionHandling:exception];
@@ -114,6 +115,7 @@
     if ([self isPrepared]) {
         if (viewController) {
             @try {
+                [self requireToAsyncPlay];
                 [self.interstitialVideoAd showAdFromRootViewController:viewController];
             } @catch (NSException *exception) {
                 [self adnetworkExceptionHandling:exception];

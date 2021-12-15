@@ -15,7 +15,7 @@ NS_ASSUME_NONNULL_BEGIN
 
 @end
 
-@interface MovieNativeAdInfo6017 : ADFMovieNativeAdInfo
+@interface MovieNativeAdInfo6017 : ADFNativeAdInfo
 
 @end
 

@@ -20,7 +20,7 @@
 }
 
 + (NSString *)getAdapterRevisionVersion {
-    return @"2";
+    return @"3";
 }
 
 - (BOOL)isClassReference {
@@ -72,6 +72,7 @@
     self.isAdLoaded = NO;
     if (self.adView) {
         @try {
+            [self requireToAsyncRequestAd];
             [self.adView loadNextAd];
         } @catch (NSException *exception) {
             [self adnetworkExceptionHandling:exception];

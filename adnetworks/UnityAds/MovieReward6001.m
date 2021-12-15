@@ -28,7 +28,7 @@
 }
 
 + (NSString *)getAdapterRevisionVersion {
-    return @"5";
+    return @"6";
 }
 
 /**
@@ -105,7 +105,10 @@
 
 -(BOOL)isPrepared{
     if (self.delegate != nil) {
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wdeprecated-declarations"
         return [UnityAds isReady:self.placement_id];
+#pragma clang diagnostic pop
     }
     return NO;
 }
@@ -123,6 +126,8 @@
     MovieDelegate6001 *delegate = [MovieDelegate6001 sharedInstance];
     if (viewController != nil && self.isPrepared) {
         @try {
+            [self requireToAsyncPlay];
+            
             [UnityAds show:viewController placementId:self.placement_id showDelegate:delegate];
         } @catch (NSException *exception) {
             [self adnetworkExceptionHandling:exception];

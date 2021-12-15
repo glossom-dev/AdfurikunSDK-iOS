@@ -15,7 +15,7 @@ NS_ASSUME_NONNULL_BEGIN
 @property (nonatomic) CGSize adSize;
 @end
 
-@interface NativeAdInfo6017 : ADFMovieNativeAdInfo
+@interface NativeAdInfo6017 : ADFNativeAdInfo
 
 @end
 

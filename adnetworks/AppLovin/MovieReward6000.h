@@ -10,13 +10,15 @@
 //#import "ADFmyMovieRewardInterface.h"
 #import <AppLovinSDK/AppLovinSDK.h>
 
+typedef void(^completionHandlerType)(void);
+
 @interface MovieReward6000 : ADFmyMovieRewardInterface
 
 @end
 
 @interface MovieConfigure6000 : NSObject
-+ (void)configure;
-+ (void)configureWithCompletion:(void (^)(void))completionHandler;
++ (instancetype)sharedInstance;
+- (void)configureWithCompletion:(void (^)(void))completionHandler;
 @end
 
 // 同一広告枠に複数のAppLovin Zoneをサポートする

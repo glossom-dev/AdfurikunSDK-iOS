@@ -24,7 +24,7 @@
 }
 
 + (NSString *)getAdapterRevisionVersion {
-    return @"3";
+    return @"4";
 }
 
 - (BOOL)isClassReference {
@@ -59,6 +59,8 @@
     if (self.pangleAppID) {
         NSLog(@"%s", __FUNCTION__);
         @try {
+            [self requireToAsyncInit];
+            
             [MovieConfigure6017.sharedInstance configureWithAppId:self.pangleAppID completion:^{
                 [self initCompleteAndRetryStartAdIfNeeded];
             }];
@@ -102,6 +104,8 @@
     self.isAdLoaded = false;
     
     @try {
+        [self requireToAsyncRequestAd];
+        
         self.adView = [[BUNativeExpressBannerView alloc] initWithSlotID:self.pangleSlotID
                                                      rootViewController:topMostVC
                                                                  adSize:self.adSize];

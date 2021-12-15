@@ -29,7 +29,7 @@
 }
 
 + (NSString *)getAdapterRevisionVersion {
-    return @"4";
+    return @"5";
 }
 
 - (id)init {
@@ -122,6 +122,7 @@
                 
                 return;
             }
+            [self requireToAsyncRequestAd];
             
             MovieDelegate6005 *delegate = [MovieDelegate6005 sharedInstance];
             [delegate setMovieReward:self inZone:self.placement_id];
@@ -153,6 +154,8 @@
     [super showAd];
 
     @try {
+        [self requireToAsyncPlay];
+        
         [_p showContentWithViewController:nil];
     } @catch (NSException *exception) {
         [self adnetworkExceptionHandling:exception];
@@ -170,6 +173,8 @@
     if (_p.isContentAvailable) {
         //渡したviewControllerを強制的にご利用したい場合、必ずテストしてください。
         @try {
+            [self requireToAsyncPlay];
+            
             [_p showContentWithViewController:viewController];
         } @catch (NSException *exception) {
             [self adnetworkExceptionHandling:exception];
@@ -197,7 +202,8 @@
 
 -(void)setHasUserConsent:(BOOL)hasUserConsent {
     [super setHasUserConsent:hasUserConsent];
-    [Tapjoy setUserConsent:hasUserConsent ? @"1" : @"0"];
+    TJPrivacyPolicy *privacyPolicy = [Tapjoy getPrivacyPolicy];
+    [privacyPolicy setUserConsent:hasUserConsent ? @"1" : @"0"];
 }
 
 -(void)dealloc {

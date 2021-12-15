@@ -25,7 +25,7 @@
 #pragma mark - ADFmyMovieRewardInterface
 
 + (NSString *)getAdapterRevisionVersion {
-    return @"5";
+    return @"6";
 }
 
 -(id)init {
@@ -87,6 +87,8 @@
 
     if (self.interstitialVideo) {
         @try {
+            [self requireToAsyncRequestAd];
+            
             [self.interstitialVideo loadAd];
         } @catch (NSException *exception) {
             [self adnetworkExceptionHandling:exception];
@@ -103,6 +105,8 @@
         UIViewController *topMostViewController = [self topMostViewController];
         if (topMostViewController) {
             @try {
+                [self requireToAsyncPlay];
+                
                 [self.interstitialVideo showAdFromViewController:topMostViewController];
             } @catch (NSException *exception) {
                 [self adnetworkExceptionHandling:exception];
@@ -122,6 +126,8 @@
 
     if (self.interstitialVideo.isReady) {
         @try {
+            [self requireToAsyncPlay];
+
             [self.interstitialVideo showAdFromViewController:viewController];
         } @catch (NSException *exception) {
             [self adnetworkExceptionHandling:exception];

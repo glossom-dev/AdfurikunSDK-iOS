@@ -8,14 +8,14 @@
 
 #import <Foundation/Foundation.h>
 #import <ADFMovieReward/ADFmyMovieNativeInterface.h>
-#import <ADFMovieReward/ADFMovieNativeAdInfo.h>
+#import <ADFMovieReward/ADFNativeAdInfo.h>
 #import <FBAudienceNetwork/FBAudienceNetwork.h>
 
 @interface MovieNative6016 : ADFmyMovieNativeInterface
 
 @end
 
-@interface MovieNativeAdInfo6016 : ADFMovieNativeAdInfo
+@interface MovieNativeAdInfo6016 : ADFNativeAdInfo
 
 @property (nonatomic) FBNativeAd *nativeAd;
 

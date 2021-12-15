@@ -13,7 +13,6 @@
 @property (nonatomic, assign) BOOL testFlg;
 @property (nonatomic, strong) NSString *gameId;
 @property (nonatomic, strong) NSString *placementId;
-@property (nonatomic) BOOL isInitialized;
 @property (nonatomic, strong) UADSBannerView *bannerView;
 @end
 
@@ -24,7 +23,7 @@
 }
 
 + (NSString *)getAdapterRevisionVersion {
-    return @"3";
+    return @"4";
 }
 
 -(void)setData:(NSDictionary *)data {
@@ -71,6 +70,8 @@
 
     @try {
         [super startAd];
+        
+        [self requireToAsyncRequestAd];
         
         self.isAdLoaded = false;
         

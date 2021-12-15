@@ -21,7 +21,7 @@
 @implementation MovieReward6016
 
 + (NSString *)getAdapterRevisionVersion {
-    return @"4";
+    return @"5";
 }
 
 - (void)setData:(NSDictionary *)data {
@@ -73,6 +73,7 @@
         @try {
             self.rewardedVideoAd = [[FBRewardedVideoAd alloc] initWithPlacementID:self.placementId];
             self.rewardedVideoAd.delegate = self;
+            [self requireToAsyncRequestAd];
             [self.rewardedVideoAd loadAd];
         } @catch (NSException *exception) {
             [self adnetworkExceptionHandling:exception];
@@ -114,6 +115,7 @@
     if ([self isPrepared]) {
         if (viewController) {
             @try {
+                [self requireToAsyncPlay];
                 [self.rewardedVideoAd showAdFromRootViewController:viewController animated:self.isAnimated];
             } @catch (NSException *exception) {
                 [self adnetworkExceptionHandling:exception];

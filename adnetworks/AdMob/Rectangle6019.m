@@ -18,7 +18,7 @@
         // GADMobileAds.sharedInstance.requestConfiguration.testDeviceIdentifiers = @[@"コンソールに出力されたデバイスIDを入力してください。"];
         //詳細　https://developers.google.com/admob/ios/test-ads?hl=ja
     }
-    self.adSize = kGADAdSizeMediumRectangle;
+    self.adSize = GADAdSizeMediumRectangle;
     [self initCompleteAndRetryStartAdIfNeeded];
 }
 

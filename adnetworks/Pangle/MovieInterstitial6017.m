@@ -25,7 +25,7 @@
 }
 
 + (NSString *)getAdapterRevisionVersion {
-    return @"5";
+    return @"6";
 }
 
 -(id)init {
@@ -59,6 +59,8 @@
 
     if (self.tiktokAppID) {
         @try {
+            [self requireToAsyncInit];
+            
             [MovieConfigure6017.sharedInstance configureWithAppId:self.tiktokAppID completion:^{
                 [self initCompleteAndRetryStartAdIfNeeded];
             }];
@@ -79,6 +81,8 @@
     }
     if (self.tiktokSlotID) {
         @try {
+            [self requireToAsyncRequestAd];
+            
             self.fullscreenVideoAd = [[BUFullscreenVideoAd alloc] initWithSlotID:self.tiktokSlotID];
             self.fullscreenVideoAd.delegate = self;
             [self.fullscreenVideoAd loadAdData];
@@ -96,6 +100,8 @@
     [super showAdWithPresentingViewController:viewController];
 
     @try {
+        [self requireToAsyncPlay];
+        
         [self.fullscreenVideoAd showAdFromRootViewController:viewController];
     } @catch (NSException *exception) {
         [self adnetworkExceptionHandling:exception];

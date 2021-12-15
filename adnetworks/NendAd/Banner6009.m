@@ -19,7 +19,7 @@
 @implementation Banner6009
 
 + (NSString *)getAdapterRevisionVersion {
-    return @"3";
+    return @"4";
 }
 
 - (BOOL)isClassReference {
@@ -79,6 +79,8 @@
     self.isAdLoaded = false;
     
     @try {
+        [self requireToAsyncRequestAd];
+        
         self.adView = [[NADView alloc] initWithIsAdjustAdSize:false];
         [self.adView setNendID:self.nendAdspotId apiKey:self.nendKey];
         [self.adView setDelegate:self];

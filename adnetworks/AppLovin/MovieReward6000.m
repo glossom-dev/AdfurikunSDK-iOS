@@ -26,7 +26,7 @@
 }
 
 + (NSString *)getAdapterRevisionVersion {
-    return @"3";
+    return @"4";
 }
 
 /**
@@ -63,7 +63,8 @@
     }
 
     if (self.appLovinSdkKey) {
-        [MovieConfigure6000 configureWithCompletion:^{
+        [self requireToAsyncInit];
+        [[MovieConfigure6000 sharedInstance] configureWithCompletion:^{
             if (!self.incentivizedInterstitial) {
                 @try {
                     if (self.zoneIdentifier && ![self.zoneIdentifier isEqual: [NSNull null]] && [self.zoneIdentifier length] != 0) {
@@ -93,6 +94,7 @@
 
     if (self.incentivizedInterstitial) {
         @try {
+            [self requireToAsyncRequestAd];
             [self.incentivizedInterstitial preloadAndNotify: self];
         } @catch (NSException *exception) {
             [self adnetworkExceptionHandling:exception];
@@ -121,6 +123,7 @@
 
     if (self.incentivizedInterstitial && self.incentivizedInterstitial.isReadyForDisplay) {
         @try {
+            [self requireToAsyncPlay];
             [self.incentivizedInterstitial show];
         } @catch (NSException *exception) {
             [self adnetworkExceptionHandling:exception];
@@ -229,33 +232,74 @@
 
 @end
 
+typedef enum : NSUInteger {
+    initializeNotYet,
+    initializing,
+    initializeComplete,
+} ALSDKInitializeStatus;
+
+@interface MovieConfigure6000()
+
+@property (nonatomic) ALSDKInitializeStatus initStatus;
+@property (nonatomic) NSMutableArray <completionHandlerType> *handlers;
+
+@end
+
 @implementation MovieConfigure6000
-+ (void)configure {
+
++ (instancetype)sharedInstance {
+    static MovieConfigure6000 *sharedInstance = nil;
     static dispatch_once_t onceToken;
     dispatch_once(&onceToken, ^{
-        @try {
-            [ALSdk initializeSdk];
-        } @catch (NSException *exception) {
-            NSLog(@"adnetwork exception : %@", exception);
-        }
+        sharedInstance = [self new];
     });
+    return sharedInstance;
 }
 
-+ (void)configureWithCompletion:(void (^)(void))completionHandler {
-    static bool isInitialized = false;
-    if (!isInitialized) {
-        @try {
-            [ALSdk initializeSdkWithCompletionHandler:^(ALSdkConfiguration * _Nonnull configuration) {
-                completionHandler();
-            }];
-        } @catch (NSException *exception) {
-            NSLog(@"adnetwork exception : %@", exception);
-        }
-    } else {
+- (instancetype)init {
+    self = [super init];
+    if (self) {
+        self.initStatus = initializeNotYet;
+        self.handlers = [NSMutableArray new];
+    }
+    return self;
+}
+
+- (void)configureWithCompletion:(void (^)(void))completionHandler {
+    if (!completionHandler) {
+        return;
+    }
+    
+    if (self.initStatus == initializeComplete) {
         completionHandler();
+        return;
+    }
+    
+    if (self.initStatus == initializing) {
+        [self.handlers addObject:completionHandler];
+        return;
+    }
+    
+    if (self.initStatus == initializeNotYet) {
+        self.initStatus = initializing;
+        [self.handlers addObject:completionHandler];
+        
+        dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(0.1 * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
+            @try {
+                [ALSdk initializeSdkWithCompletionHandler:^(ALSdkConfiguration * _Nonnull configuration) {
+                    self.initStatus = initializeComplete;
+                    
+                    for (completionHandlerType handler in self.handlers) {
+                        handler();
+                    }
+                }];
+            } @catch (NSException *exception) {
+                NSLog(@"adnetwork exception : %@", exception);
+            }
+        });
     }
 }
-
+    
 @end
 
 @implementation MovieReward6011

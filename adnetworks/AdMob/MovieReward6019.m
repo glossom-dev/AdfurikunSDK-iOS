@@ -20,7 +20,7 @@
 @implementation MovieReward6019
 
 + (NSString *)getAdapterRevisionVersion {
-    return @"6";
+    return @"7";
 }
 
 -(id)init {
@@ -74,6 +74,7 @@
     
     @try {
         GADRequest *request = [GADRequest request];
+        [self requireToAsyncRequestAd];
         [GADRewardedAd loadWithAdUnitID:self.unitID
                                 request:request
                       completionHandler:^(GADRewardedAd * _Nullable rewardedAd, NSError * _Nullable error) {
@@ -101,6 +102,7 @@
 
     if ([self isPrepared]) {
         @try {
+            [self requireToAsyncPlay];
             [self.rewardedAd presentFromRootViewController:[self topMostViewController]
                                   userDidEarnRewardHandler:^{
                 [self adCompleteShow];

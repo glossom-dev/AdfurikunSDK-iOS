@@ -15,7 +15,7 @@
 @implementation Banner6019
 
 + (NSString *)getAdapterRevisionVersion {
-    return @"5";
+    return @"7";
 }
 
 - (void)setData:(NSDictionary *)data {
@@ -38,7 +38,7 @@
         //詳細　https://developers.google.com/admob/ios/test-ads?hl=ja
     }
     [self initCompleteAndRetryStartAdIfNeeded];
-    self.adSize = kGADAdSizeBanner;
+    self.adSize = GADAdSizeBanner;
 }
 
 - (void)startAd {
@@ -80,6 +80,7 @@
                 [request registerAdNetworkExtras:extras];
             }
         }
+        [self requireToAsyncRequestAd];
         [self.bannerView loadRequest:request];
     } @catch (NSException *exception) {
         [self adnetworkExceptionHandling:exception];

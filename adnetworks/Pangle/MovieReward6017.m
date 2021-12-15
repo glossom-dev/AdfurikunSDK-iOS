@@ -23,7 +23,7 @@
 }
 
 + (NSString *)getAdapterRevisionVersion {
-    return @"5";
+    return @"6";
 }
 
 - (void)setData:(NSDictionary *)data {
@@ -50,6 +50,8 @@
 
     if (self.tiktokAppID) {
         @try {
+            [self requireToAsyncInit];
+            
             [MovieConfigure6017.sharedInstance configureWithAppId:self.tiktokAppID completion:^{
                 [self initCompleteAndRetryStartAdIfNeeded];
             }];
@@ -70,6 +72,8 @@
     }
     if (self.tiktokSlotID) {
         @try {
+            [self requireToAsyncRequestAd];
+            
             BURewardedVideoModel *model = [[BURewardedVideoModel alloc] init];
             self.rewardedVideoAd = [[BURewardedVideoAd alloc] initWithSlotID:self.tiktokSlotID rewardedVideoModel:model];
             self.rewardedVideoAd.delegate = self;
@@ -89,6 +93,8 @@
         [super showAdWithPresentingViewController:viewController];
         
         @try {
+            [self requireToAsyncPlay];
+            
             [self.rewardedVideoAd showAdFromRootViewController:viewController];
         } @catch (NSException *exception) {
             [self adnetworkExceptionHandling:exception];

@@ -21,7 +21,7 @@
 @implementation MovieReward6009
 
 + (NSString *)getAdapterRevisionVersion {
-    return @"5";
+    return @"6";
 }
 
 #pragma mark - ADFmyMovieRewardInterface
@@ -71,6 +71,8 @@
 
     if (self.rewardedVideo) {
         @try {
+            [self requireToAsyncRequestAd];
+            
             [self.rewardedVideo loadAd];
         } @catch (NSException *exception) {
             [self adnetworkExceptionHandling:exception];
@@ -86,6 +88,8 @@
         UIViewController *topMostViewController = [self topMostViewController];
         if (topMostViewController) {
             @try {
+                [self requireToAsyncPlay];
+                
                 [self.rewardedVideo showAdFromViewController:topMostViewController];
             } @catch (NSException *exception) {
                 [self adnetworkExceptionHandling:exception];
@@ -104,6 +108,8 @@
 
     if (self.rewardedVideo.isReady) {
         @try {
+            [self requireToAsyncPlay];
+
             [self.rewardedVideo showAdFromViewController:viewController];
         } @catch (NSException *exception) {
             [self adnetworkExceptionHandling:exception];

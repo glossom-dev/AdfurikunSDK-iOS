@@ -27,7 +27,7 @@
 }
 
 + (NSString *)getAdapterRevisionVersion {
-    return @"3";
+    return @"4";
 }
 
 -(id)init {
@@ -91,6 +91,7 @@
     static dispatch_once_t adfMaioOnceToken;
     dispatch_once(&adfMaioOnceToken, ^{
         @try {
+            [self requireToAsyncRequestAd];
             // テストモードに変更（リリース前必ず本番モードに戻してください）
             // [Maio setAdTestMode:YES];
             if(self.testFlg) {
@@ -113,6 +114,7 @@
     if (self.maioZoneId) {
         if ([Maio canShowAtZoneId:self.maioZoneId]) {
             @try {
+                [self requireToAsyncPlay];
                 [Maio showAtZoneId:self.maioZoneId vc:viewController];
             }
             @catch (NSException *exception) {
@@ -122,6 +124,7 @@
     } else {
         if ([Maio canShow]) {
             @try {
+                [self requireToAsyncPlay];
                 [Maio showWithViewController:viewController];
             }
             @catch (NSException *exception) {

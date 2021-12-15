@@ -24,7 +24,7 @@
 }
 
 + (NSString *)getAdapterRevisionVersion {
-    return @"4";
+    return @"5";
 }
 
 - (id)init{
@@ -109,9 +109,9 @@
     //音出力設定
     ADFMovieOptions_Sound soundState = [ADFMovieOptions getSoundState];
     if (ADFMovieOptions_Sound_On == soundState) {
-        [VungleSDK sharedSDK].muted = false;
+        [[VungleSDK sharedSDK] setMuted:false];
     } else if (ADFMovieOptions_Sound_Off == soundState) {
-        [VungleSDK sharedSDK].muted = true;
+        [[VungleSDK sharedSDK] setMuted:true];
     }
     [self initCompleteAndRetryStartAdIfNeeded];
 }
@@ -131,6 +131,8 @@
             self.isNeedToStartAd = YES;
             return;
         }
+        
+        [self requireToAsyncRequestAd];
         
         NSError *error = nil;
         if (![sdk loadPlacementWithID:self.placementID error:&error]) {
@@ -164,6 +166,8 @@
     UIViewController *topMostViewController = [self topMostViewController];
     if (topMostViewController) {
         @try {
+            [self requireToAsyncPlay];
+            
             [sdk playAd:topMostViewController options:nil placementID:self.placementID error:&error];
         } @catch (NSException *exception) {
             [self adnetworkExceptionHandling:exception];
@@ -185,6 +189,8 @@
     NSError* error;
     
     @try {
+        [self requireToAsyncPlay];
+        
         [sdk playAd:viewController options:nil placementID:self.placementID error:&error];
     } @catch (NSException *exception) {
         [self adnetworkExceptionHandling:exception];

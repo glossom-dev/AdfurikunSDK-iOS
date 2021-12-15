@@ -180,7 +180,7 @@ extension MovieNative6010: AMoAdNativeAppDelegate {
     }
 }
 
-class MovieNativeAdInfo6010: ADFMovieNativeAdInfo {
+class MovieNativeAdInfo6010: ADFNativeAdInfo {
     override func registerInteractionViews(_ views: [UIView]) {
         print("[ADF] [SEVERE] AfiOはregisterInteractionViewsをサポートしません。")
     }

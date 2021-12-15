@@ -75,6 +75,7 @@
     
     @try {
         GADRequest *request = [GADRequest request];
+        [self requireToAsyncRequestAd];
         [GADInterstitialAd loadWithAdUnitID:self.unitID
                                     request:request
                           completionHandler:^(GADInterstitialAd * _Nullable interstitialAd, NSError * _Nullable error) {
@@ -98,6 +99,7 @@
 
     if ([self isPrepared]) {
         @try {
+            [self requireToAsyncPlay];
             [self.interstitial presentFromRootViewController:viewController];
         } @catch (NSException *exception) {
             [self adnetworkExceptionHandling:exception];

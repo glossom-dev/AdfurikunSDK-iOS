@@ -69,6 +69,7 @@
     }
 
     if (self.fiveAppId && self.fiveSlotId && [self.fiveAppId length] > 0 && [self.fiveSlotId length] > 0) {
+        [self requireToAsyncInit];
         [MovieConfigure6008.sharedInstance configureWithAppId:self.fiveAppId isTest:self.testFlg gdprStatus:self.gdprStatus completion:^{
             [self initCompleteAndRetryStartAdIfNeeded];
         }];
@@ -86,6 +87,7 @@
     
     if (self.fiveSlotId && self.fiveSlotId.length > 0) {
         @try {
+            [self requireToAsyncRequestAd];
             self.fullscreen = [[FADVideoReward alloc] initWithSlotId:self.fiveSlotId];
             [self.fullscreen setLoadDelegate:self];
             [self.fullscreen setAdViewEventListener:self];
@@ -109,6 +111,7 @@
     
     if (self.fullscreen) {
         @try {
+            [self requireToAsyncPlay];
             BOOL res = [self.fullscreen show];
             if (!res) {
                 [self setCallbackStatus:MovieRewardCallbackPlayFail];
