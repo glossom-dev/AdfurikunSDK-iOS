@@ -29,7 +29,7 @@
 }
 
 + (NSString *)getAdapterRevisionVersion {
-    return @"5";
+    return @"6";
 }
 
 - (id)init {
@@ -151,14 +151,10 @@
  *  広告の表示を行う
  */
 -(void)showAd {
-    [super showAd];
-
-    @try {
-        [self requireToAsyncPlay];
-        
-        [_p showContentWithViewController:nil];
-    } @catch (NSException *exception) {
-        [self adnetworkExceptionHandling:exception];
+    UIViewController *topMostVC = [self topMostViewController];
+    if (topMostVC) {
+        [self showAdWithPresentingViewController:topMostVC];
+    } else {
         MovieDelegate6005 *delegate = [MovieDelegate6005 sharedInstance];
         [delegate setCallbackStatus:MovieRewardCallbackPlayFail zone:self.placement_id];
     }

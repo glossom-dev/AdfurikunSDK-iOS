@@ -27,7 +27,4 @@
 #import <ADFMovieReward/ADFmyRectangle.h>
 #import <ADFMovieReward/ADFmyCarousel.h>
 
-#import <ADFMovieReward/GlossomAds.h>
-
-
 #endif /* ADFMovieReward_h */

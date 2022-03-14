@@ -46,7 +46,6 @@
 @property (nonatomic, nullable, weak) id <ADFMediaViewDelegate> adapterInnerDelegate;
 
 - (void)setupWithView:(UIView * _Nonnull)view;
-- (void)setupWithImage:(NSURL * _Nullable)imageUrl movieUrl:(NSURL * _Nullable)movieUrl;
 - (void)setupWithHtml:(NSDictionary * _Nonnull)htmlData
               bgColor:(NSString * _Nullable)bgColor
             pixelRate:(int)pixelRate

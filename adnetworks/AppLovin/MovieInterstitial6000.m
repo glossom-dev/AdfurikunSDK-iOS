@@ -9,6 +9,7 @@
 #import <AppLovinSDK/AppLovinSDK.h>
 #import "MovieInterstitial6000.h"
 #import "MovieReward6000.h"
+#import <ADFMovieReward/ADFMovieOptions.h>
 
 @interface MovieInterstitial6000()<ALAdLoadDelegate, ALAdDisplayDelegate, ALAdVideoPlaybackDelegate>
 @property (nonatomic, strong)NSString* appLovinSdkKey;
@@ -85,6 +86,11 @@
                 }
             }
         }];
+        //音出力設定
+        ADFMovieOptions_Sound soundState = [ADFMovieOptions getSoundState];
+        if (ADFMovieOptions_Sound_Default != soundState) {
+            [ALSdk shared].settings.muted = (ADFMovieOptions_Sound_Off == soundState);
+        }
     }
 }
 

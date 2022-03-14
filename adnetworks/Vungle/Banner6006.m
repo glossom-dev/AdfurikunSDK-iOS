@@ -26,7 +26,7 @@
 }
 
 + (NSString *)getAdapterRevisionVersion {
-    return @"3";
+    return @"4";
 }
 
 - (BOOL)isClassReference {
@@ -127,7 +127,7 @@
     if (!self.delegate || !self.placementID) {
         return NO;
     }
-    return [[VungleSDK sharedSDK] isAdCachedForPlacementID:self.placementID];
+    return self.isAdLoaded;
 }
 
 // SDKのLoading関数を呼び出す

@@ -6,6 +6,7 @@
 //
 #import <AppLovinSDK/AppLovinSDK.h>
 #import "Banner6000.h"
+#import <ADFMovieReward/ADFMovieOptions.h>
 
 @interface Banner6000 () <ALAdLoadDelegate, ALAdDisplayDelegate>
 @property (nonatomic, strong)ALAdView *adView;
@@ -58,6 +59,13 @@
         
         self.adView.adLoadDelegate = self;
         self.adView.adDisplayDelegate = self;
+        
+        //音出力設定
+        ADFMovieOptions_Sound soundState = [ADFMovieOptions getSoundState];
+        if (ADFMovieOptions_Sound_Default != soundState) {
+            [ALSdk shared].settings.muted = (ADFMovieOptions_Sound_Off == soundState);
+        }
+
         [self initCompleteAndRetryStartAdIfNeeded];
     }
 }

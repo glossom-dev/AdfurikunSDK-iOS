@@ -99,7 +99,7 @@
             } else if (ADFMovieOptions_Sound_Off == soundState) {
                 [self.fullscreen enableSound:false];
             }
-            [self.fullscreen  loadAdAsync];
+            [self.fullscreen loadAdAsync];
         } @catch (NSException *exception) {
             [self adnetworkExceptionHandling:exception];
         }

@@ -98,7 +98,6 @@ typedef NS_ENUM(NSInteger, ADFNativeAdType) {
 - (void)launchClickTarget;
 
 - (void)setupMediaView:(UIView *)view;
-- (void)setupMediaView:(NSURL *)imageUrl movieUrl:(NSURL *)movieUrl;
 - (void)setupMediaViewWithHtml:(NSDictionary *)htmlData
                  containerView:(UIView *_Nullable)containerView
                      pixelRate:(int)pixelRate

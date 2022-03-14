@@ -1,6 +1,6 @@
 Pod::Spec.new do |s|
   s.name            = "AdfurikunSDK-iOS"
-  s.version         = "3.12.0"
+  s.version         = "3.13.0"
   s.summary         = "An iOS SDK for ADFURIKUN Movie Reward Ads"
   s.homepage        = "https://adfurikun.jp/adfurikun/"
   s.license         = { :type => 'Copyright', :text => 'Copyright Glossom Inc. All rights reserved.' }
@@ -34,7 +34,7 @@ Pod::Spec.new do |s|
 
   s.subspec 'AppLovin' do |applovin|
     applovin.dependency 'AdfurikunSDK-iOS/Core'
-    applovin.dependency 'AppLovinSDK', '10.3.7'
+    applovin.dependency 'AppLovinSDK', '11.1.1'
     applovin.source_files = '**/adnetworks/AppLovin/*.{h,m}'
     applovin.resource = '**/adnetworks/AppLovin/*.txt'
   end
@@ -48,49 +48,49 @@ Pod::Spec.new do |s|
 
   s.subspec 'Maio' do |maio|
     maio.dependency 'AdfurikunSDK-iOS/Core'
-    maio.dependency 'MaioSDK', '1.5.8'
+    maio.dependency 'MaioSDK', '1.6.0'
     maio.source_files = '**/adnetworks/Maio/*.{h,m}'
     maio.resource = '**/adnetworks/Maio/*.txt'
   end
 
   s.subspec 'Five' do |five|
     five.dependency 'AdfurikunSDK-iOS/Core'
-    five.dependency 'FiveAd', '2.4.20211028'
+    five.dependency 'FiveAd', '2.4.20220225'
     five.source_files = '**/adnetworks/Five/*.{h,m}'
     five.resource = '**/adnetworks/Five/*.txt'
   end
 
   s.subspec 'NendAd' do |nendad|
     nendad.dependency 'AdfurikunSDK-iOS/Core'
-    nendad.dependency 'NendSDK_iOS', '7.1.0'
+    nendad.dependency 'NendSDK_iOS', '7.2.0'
     nendad.source_files = '**/adnetworks/NendAd/*.{h,m}'
     nendad.resource = '**/adnetworks/NendAd/*.txt'
   end
 
   s.subspec 'Pangle' do |pangle|
     pangle.dependency 'AdfurikunSDK-iOS/Core'
-    pangle.dependency 'Ads-Global', '4.1.0.2'
+    pangle.dependency 'Ads-Global', '4.2.5.6'
     pangle.source_files = '**/adnetworks/Pangle/*.{h,m}'
     pangle.resource = '**/adnetworks/Pangle/*.txt'
   end
 
   s.subspec 'Tapjoy' do |tapjoy|
     tapjoy.dependency 'AdfurikunSDK-iOS/Core'
-    tapjoy.dependency 'TapjoySDK', '12.8.1'
+    tapjoy.dependency 'TapjoySDK', '12.9.0'
     tapjoy.source_files = '**/adnetworks/Tapjoy/*.{h,m}'
     tapjoy.resource = '**/adnetworks/Tapjoy/*.txt'
   end
 
   s.subspec 'UnityAds' do |unityads|
     unityads.dependency 'AdfurikunSDK-iOS/Core'
-    unityads.dependency 'UnityAds', '3.7.5'
+    unityads.dependency 'UnityAds', '4.0.1'
     unityads.source_files = '**/adnetworks/UnityAds/*.{h,m}'
     unityads.resource = '**/adnetworks/UnityAds/*.txt'
   end
 
   s.subspec 'Vungle' do |vungle|
     vungle.dependency 'AdfurikunSDK-iOS/Core'
-    vungle.dependency 'VungleSDK-iOS', '6.10.5'
+    vungle.dependency 'VungleSDK-iOS', '6.10.6'
     vungle.source_files = '**/adnetworks/Vungle/*.{h,m}'
     vungle.resource = '**/adnetworks/Vungle/*.txt'
   end

@@ -27,7 +27,7 @@
 }
 
 + (NSString *)getAdapterRevisionVersion {
-    return @"4";
+    return @"5";
 }
 
 -(id)init {
@@ -252,9 +252,9 @@
  */
 - (void)maioDidFail:(NSString *)zoneId reason:(MaioFailReason)reason {
     // ログ表示
-    NSLog(@"%s", __func__);
+    NSLog(@"%s : fail reason : %d", __func__, (int)reason);
     NSString *faileMessage;
-    
+
     switch ((int)reason) {
         case MaioFailReasonUnknown:
             faileMessage =  @"Unknown";
@@ -276,6 +276,15 @@
             break;
         case MaioFailReasonAdStockOut:
             faileMessage =  @"AdStockOut";
+            break;
+        case MaioFailReasonIncorrectMediaId:
+            faileMessage =  @"IncorrectMediaId";
+            break;
+        case MaioFailReasonIncorrectZoneId:
+            faileMessage =  @"IncorrectZoneId";
+            break;
+        case MaioFailReasonNotFoundViewContext:
+            faileMessage =  @"NotFoundViewContext";
             break;
     }
     if (faileMessage) {

@@ -36,6 +36,7 @@ NS_ASSUME_NONNULL_BEGIN
 @property (nonatomic) NSDate *lastPlayedTime;
 
 @property (nonatomic) BOOL isTopPriorityLoadingAdnetwork;
+@property (nonatomic) BOOL isOfflineSupportAdnetwork;
 
 //ADNW SDKのバージョン情報をSDKから取得できるようにする
 + (NSString *)getSDKVersion;

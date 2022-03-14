@@ -11,13 +11,7 @@
 
 #import <UnityAds/UnityAds.h>
 
-@interface MovieReward6001 : ADFmyMovieRewardInterface
-
-@end
-
-@interface MovieDelegate6001 : ADFmyMovieDelegateBase<UnityAdsDelegate, UnityAdsShowDelegate>
-
-+ (instancetype)sharedInstance;
+@interface MovieReward6001 : ADFmyMovieRewardInterface<UnityAdsInitializationDelegate, UnityAdsLoadDelegate, UnityAdsShowDelegate>
 
 @end
 

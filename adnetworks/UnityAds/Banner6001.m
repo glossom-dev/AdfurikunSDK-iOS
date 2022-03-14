@@ -9,7 +9,7 @@
 #import <ADFMovieReward/ADFMovieOptions.h>
 #import "Banner6001.h"
 
-@interface Banner6001 () <UADSBannerViewDelegate>
+@interface Banner6001 () <UnityAdsInitializationDelegate, UADSBannerViewDelegate>
 @property (nonatomic, assign) BOOL testFlg;
 @property (nonatomic, strong) NSString *gameId;
 @property (nonatomic, strong) NSString *placementId;
@@ -23,7 +23,7 @@
 }
 
 + (NSString *)getAdapterRevisionVersion {
-    return @"4";
+    return @"6";
 }
 
 -(void)setData:(NSDictionary *)data {
@@ -37,7 +37,6 @@
             self.testFlg = [testFlg boolValue];
         }
     }
-    [UnityServices setDebugMode:self.testFlg];
 
     NSString *dataGameId = [data objectForKey:@"game_id"];
     if ([self isNotNull:dataGameId]) {
@@ -50,12 +49,15 @@
 }
 
 -(void)initAdnetworkIfNeeded {
-    if (![UnityServices isInitialized] && self.gameId) {
-        @try {
-            [UnityAds initialize:self.gameId testMode:self.testFlg];
+    if (self.gameId) {
+        if (!UnityAds.isInitialized) {
+            @try {
+                [UnityAds initialize:self.gameId testMode:self.testFlg initializationDelegate:self];
+            } @catch (NSException *exception) {
+                [self adnetworkExceptionHandling:exception];
+            }
+        } else {
             [self initCompleteAndRetryStartAdIfNeeded];
-        } @catch (NSException *exception) {
-            [self adnetworkExceptionHandling:exception];
         }
     }
 }
@@ -118,6 +120,16 @@
     _gameId = nil;
     _placementId = nil;
     _bannerView = nil;
+}
+
+#pragma mark: UnityAdsInitializationDelegate
+- (void)initializationComplete {
+    NSLog(@"%s called", __func__);
+    [self initCompleteAndRetryStartAdIfNeeded];
+}
+
+- (void)initializationFailed: (UnityAdsInitializationError)error withMessage: (NSString *)message {
+    NSLog(@"%s called, error message : %@", __func__, message);
 }
 
 #pragma mark - UADSBannerViewDelegate

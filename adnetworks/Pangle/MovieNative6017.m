@@ -219,7 +219,7 @@ This method is called when native ad materia failed to load.
 @param error : the reason of error
 */
 - (void)nativeAd:(BUNativeAd *)nativeAd didFailWithError:(NSError *_Nullable)error {
-    NSLog(@"%s called", __FUNCTION__);
+    NSLog(@"%s called (%@)", __FUNCTION__, error);
     [self sendLoadError:error];
 }
 
