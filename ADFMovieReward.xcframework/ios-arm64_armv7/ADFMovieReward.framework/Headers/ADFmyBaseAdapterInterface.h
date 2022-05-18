@@ -10,6 +10,11 @@
 
 NS_ASSUME_NONNULL_BEGIN
 
+#define AdapterTrace [self printLogWithParam:@"Adnetwork SDK callback [%s L:%d]", __func__, __LINE__];
+#define AdapterTraceP(fmt, ...) [self printLogWithParam:@"Adnetwork SDK callback [%s L:%d] %@", __func__, __LINE__, [NSString stringWithFormat:fmt, __VA_ARGS__]];
+#define AdapterLog(str) [self printLogWithParam:@"[%s L:%d] %@", __func__, __LINE__, str];
+#define AdapterLogP(fmt, ...) [self printLogWithParam:@"[%s L:%d] %@", __func__, __LINE__, [NSString stringWithFormat:fmt, __VA_ARGS__]];
+
 @class UIViewController;
 @protocol ADFMovieRewardDelegate;
 
@@ -31,7 +36,7 @@ NS_ASSUME_NONNULL_BEGIN
 @property (nonatomic) NSString *adnetworkKey;
 
 @property (nonatomic, strong) NSError *lastError;
-@property (nonatomic, strong) NSNumber *hasGdprConsent;
+@property (nonatomic, strong, nullable) NSNumber *hasGdprConsent;
 
 @property (nonatomic) NSDate *lastPlayedTime;
 
@@ -92,6 +97,8 @@ NS_ASSUME_NONNULL_BEGIN
 -(void)asyncRequestAdComplete;
 -(void)requireToAsyncPlay;
 -(void)asyncPlayComplete;
+
+-(void)printLogWithParam:(NSString *)format, ...;
 
 @end
 

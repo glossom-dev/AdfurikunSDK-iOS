@@ -51,7 +51,9 @@
             pixelRate:(int)pixelRate
           displayTime:(int)displayTime
         timerInterval:(int)timerInterval
-    availabilityCheck:(BOOL)availabilityCheck;
+    availabilityCheck:(BOOL)availabilityCheck
+      checkPixelCount:(int)checkPixelCount
+       checkThreshold:(int)checkThreshold;
 
 - (void)play;
 

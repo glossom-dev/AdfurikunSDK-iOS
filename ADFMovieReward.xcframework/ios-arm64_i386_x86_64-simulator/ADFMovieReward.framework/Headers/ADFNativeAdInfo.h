@@ -104,6 +104,8 @@ typedef NS_ENUM(NSInteger, ADFNativeAdType) {
                    displayTime:(int)displayTime
                  timerInterval:(int)timerInterval
              availabilityCheck:(BOOL)availabilityCheck
+               checkPixelCount:(int)checkPixelCount
+                checkThreshold:(int)checkThreshold
              mediaViewDelegate:(id<ADFMediaViewDelegate>)delegate;
 - (void)playMediaView;
 
