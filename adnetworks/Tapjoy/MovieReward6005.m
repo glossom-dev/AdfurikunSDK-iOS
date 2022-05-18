@@ -10,8 +10,6 @@
 
 #import <Tapjoy/Tapjoy.h>
 
-#define ADAPTER_CLASS_NAME NSStringFromClass(self.class)
-
 @interface MovieReward6005()
 @property (nonatomic, assign)BOOL test_flg;
 @property (nonatomic, strong)NSString* placement_id;
@@ -29,11 +27,10 @@
 }
 
 + (NSString *)getAdapterRevisionVersion {
-    return @"6";
+    return @"7";
 }
 
 - (id)init {
-    NSLog(@"%@ init", ADAPTER_CLASS_NAME);
     self = [super init];
     if (self) {
         _p = nil;
@@ -79,7 +76,6 @@
 }
 
 -(void)initAdnetworkIfNeeded {
-    //NSLog(@"%@ startAd", ADAPTER_CLASS_NAME);
     static dispatch_once_t onceToken;
     dispatch_once(&onceToken, ^{
         @try {
@@ -100,7 +96,7 @@
             [self adnetworkExceptionHandling:exception];
         }
     });
-    NSLog(@"%@ initAdnetworkIfNeeded end", ADAPTER_CLASS_NAME);
+    AdapterLog(@"initAdnetworkIfNeeded end");
 }
 
 /**
@@ -163,7 +159,7 @@
 -(void)showAdWithPresentingViewController:(UIViewController *)viewController {
     [super showAdWithPresentingViewController:viewController];
 
-    NSLog(@"%@ showAdWithPresentingViewController", ADAPTER_CLASS_NAME);
+    AdapterLog(@"showAdWithPresentingViewController");
     //引数に nil を渡すと弊社SDK側で再前面、全画面の View を推定して表示します。
     //多くの場合にはこれで正常に動作するのですが、View階層が複雑な場合は指定していただく必要があるケースも出ています。
     if (_p.isContentAvailable) {
@@ -184,13 +180,12 @@
  * 対象のクラスがあるかどうか？
  */
 -(BOOL)isClassReference {
-    NSLog(@"%@ isClassReference", ADAPTER_CLASS_NAME);
     Class clazz = NSClassFromString(@"Tapjoy");
     if (clazz) {
-        NSLog(@"found Class: Tapjoy");
+        AdapterLog(@"found Class: Tapjoy");
     }
     else {
-        NSLog(@"Not found Class: Tapjoy");
+        AdapterLog(@"Not found Class: Tapjoy");
         return NO;
     }
     return YES;
@@ -199,7 +194,9 @@
 -(void)setHasUserConsent:(BOOL)hasUserConsent {
     [super setHasUserConsent:hasUserConsent];
     TJPrivacyPolicy *privacyPolicy = [Tapjoy getPrivacyPolicy];
+    [privacyPolicy setSubjectToGDPR: YES];
     [privacyPolicy setUserConsent:hasUserConsent ? @"1" : @"0"];
+    AdapterLogP(@"Adnetwork 6005, gdprConsent : %@, sdk setting value : %@", self.hasGdprConsent, hasUserConsent ? @"1" : @"0");
 }
 
 -(void)dealloc {
@@ -211,7 +208,7 @@
 
 //-----------------AppDelegate内の処理を移動--------------------------------------
 -(void)tjcConnectSuccess:(NSNotification*)notifyObj {
-    NSLog(@"%@ Tapjoy connect Succeeded", ADAPTER_CLASS_NAME);
+    AdapterTrace;
     if (self.isNeedStartAd) {
         [self startAd];
     }
@@ -219,7 +216,7 @@
 }
 
 - (void)tjcConnectFail:(NSNotification*)notifyObj {
-    NSLog(@"%@ Tapjoy connect Failed", ADAPTER_CLASS_NAME);
+    AdapterTrace;
     self.isConnectionFail = YES;
 }
 
@@ -241,7 +238,7 @@
 }
 
 - (void)performAdsFetchError:(TJPlacement *)placement error:(NSError *)error {
-    NSLog(@"Tapjoy load error\n %@", error);
+    NSLog(@"[ADF] Tapjoy load error\n %@", error);
     ADFmyMovieRewardInterface *movieReward = [self getMovieRewardWithZone:placement.placementName];
     if (error) {
         [movieReward setErrorWithMessage:error.localizedDescription code:error.code];
@@ -253,8 +250,7 @@
 
 // SDKがTapjoyのサーバーにコンタクトした際に呼ばれます。但し、必ずしもコンテンツを利用可能であることを意味する訳ではありません。
 - (void)requestDidSucceed:(TJPlacement*)placement {
-    NSLog(@"%@ requestDidSucceed", ADAPTER_CLASS_NAME);
-    NSLog(@"isContentAvailable : %d", placement.isContentAvailable);
+    NSLog(@"[ADF] requestDidSucceed isContentAvailable : %d", placement.isContentAvailable);
     if (!placement.isContentAvailable) { // Loading失敗のケースあり
         [self performAdsFetchError:placement error:nil];
     }
@@ -262,47 +258,47 @@
 
 // Tapjoyのサーバーにコネクトする途中で問題が発生した際に呼ばれます。
 - (void)requestDidFail:(TJPlacement*)placement error:(NSError*)error {
-    NSLog(@"%@ requestDidFail", ADAPTER_CLASS_NAME);
+    NSLog(@"[ADF] %s", __FUNCTION__);
     [self performAdsFetchError:placement error:error];
 }
 
 // コンテンツが表示可能となった際に呼ばれます。
 - (void)contentIsReady:(TJPlacement*)placement {
-    NSLog(@"%@ contentIsReady", ADAPTER_CLASS_NAME);
+    NSLog(@"[ADF] %s", __FUNCTION__);
     // 広告準備完了
     [self setCallbackStatus:MovieRewardCallbackFetchComplete zone:placement.placementName];
 }
 
 // コンテンツが表示される際に呼ばれます。
 - (void)contentDidAppear:(TJPlacement*)placement {
-    NSLog(@"%@ contentDidAppear", ADAPTER_CLASS_NAME);
+    NSLog(@"[ADF] %s", __FUNCTION__);
     [self setCallbackStatus:MovieRewardCallbackPlayStart zone:placement.placementName];
 }
 
 // コンテンツが退去される際に呼ばれます。
 - (void)contentDidDisappear:(TJPlacement*)placement {
-    NSLog(@"%@ contentDidDisappear", ADAPTER_CLASS_NAME);
+    NSLog(@"[ADF] %s", __FUNCTION__);
     [self setCallbackStatus:MovieRewardCallbackClose zone:placement.placementName];
 }
 
 - (void)didClick:(TJPlacement *)placement {
-    NSLog(@"%s", __FUNCTION__);
+    NSLog(@"[ADF] %s", __FUNCTION__);
 }
 
 #pragma mark - TJPlacementVideoDelegate
 
 - (void)videoDidStart:(TJPlacement *)placement {
-    NSLog(@"%@ videoDidStart", ADAPTER_CLASS_NAME);
+    NSLog(@"[ADF] %s", __FUNCTION__);
 }
 
 /** 動画を最後まで視聴した際に呼ばれます。 */
 - (void)videoDidComplete:(TJPlacement *)placement {
-    NSLog(@"%@ videoDidComplete", ADAPTER_CLASS_NAME);
+    NSLog(@"[ADF] %s", __FUNCTION__);
     [self setCallbackStatus:MovieRewardCallbackPlayComplete zone:placement.placementName];
 }
 
 - (void)videoDidFail:(TJPlacement *)placement error:(NSString *)errorMsg {
-    NSLog(@"TJCVideoAdDelegate::videoAdError %@", errorMsg);
+    NSLog(@"[ADF] %s, error : %@", __FUNCTION__, errorMsg);
     ADFmyMovieRewardInterface *movieReward = [self getMovieRewardWithZone:placement.placementName];
     [movieReward setErrorWithMessage:errorMsg code:0];
     [self setCallbackStatus:MovieRewardCallbackPlayFail zone:placement.placementName];

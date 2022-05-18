@@ -26,7 +26,7 @@
     Class clazz = NSClassFromString(@"NADView");
     if (clazz) {
     } else {
-        NSLog(@"Not found Class: NADView");
+        AdapterLog(@"Not found Class: NADView");
         return NO;
     }
     return YES;
@@ -96,7 +96,7 @@
 
 // 広告ロードが初めて成功した際に通知されます。(任意)
 - (void)nadViewDidFinishLoad:(NADView *)adView {
-    NSLog(@"%s", __FUNCTION__);
+    AdapterTrace;
     self.isAdLoaded = true;
     
     for (UIView *subview in adView.subviews) {
@@ -153,24 +153,24 @@
 
 // 広告受信が成功した際に通知されます。(任意)
 - (void)nadViewDidReceiveAd:(NADView *)adView {
-    NSLog(@"%s", __FUNCTION__);
+    AdapterTrace;
 }
 
 // 広告受信に失敗した際に通知されます。(任意)
 - (void)nadViewDidFailToReceiveAd:(NADView *)adView {
-    NSLog(@"%s", __FUNCTION__);
+    AdapterTrace;
     [self setCallbackStatus:NativeAdCallbackLoadError];
 }
 
 // 広告バナークリック時に通知されます。(任意)
 - (void)nadViewDidClickAd:(NADView *)adView {
-    NSLog(@"%s", __FUNCTION__);
+    AdapterTrace;
     [self setCallbackStatus:NativeAdCallbackClick];
 }
 
 // インフォメーションボタンクリック時に通知されます。(任意)
 - (void)nadViewDidClickInformation:(NADView *)adView {
-    NSLog(@"%s", __FUNCTION__);
+    AdapterTrace;
 }
 
 @end

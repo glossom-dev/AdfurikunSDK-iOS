@@ -12,6 +12,7 @@
 
 @interface MovieReward6004()
 
+@property (nonatomic) MaioInstance *maioInstance;
 @property (nonatomic, strong) NSString *maioMediaId;
 @property (nonatomic, strong) NSString *maioZoneId;
 @property (nonatomic, assign) BOOL testFlg;
@@ -27,7 +28,7 @@
 }
 
 + (NSString *)getAdapterRevisionVersion {
-    return @"5";
+    return @"6";
 }
 
 -(id)init {
@@ -61,6 +62,7 @@
         self.maioZoneId = [NSString stringWithFormat:@"%@", maioZoneId];
     }
 
+    AdapterLogP(@"%s maio media id %@, zone id %@", __func__, self.maioMediaId, self.maioZoneId);
     //広告の読み込みがmediaID単位で行われることにより
     //startAdより前にisPrepared=trueになって広告が再生されるケースがあるため
     [[MovieDelegate6004 sharedInstance] setMovieReward:self inZone:self.maioZoneId];
@@ -71,11 +73,15 @@
         NSAssert(NO, @"self.delegate must not be nil");
         return NO;
     }
-    if (self.maioZoneId) {
-        return [Maio canShowAtZoneId:self.maioZoneId];
+    BOOL result;
+    if (self.maioZoneId && self.maioInstance) {
+        AdapterLogP(@"maio zone id (%@) has instance %@", self.maioZoneId, self.maioInstance);
+        result = [self.maioInstance canShowAtZoneId:self.maioZoneId];
     } else {
-        return [Maio canShow];
+        result = [Maio canShow];
     }
+    AdapterLogP(@"maio zone id (%@) canShow : %d", self.maioZoneId, result);
+    return result;
 }
 
 -(void)initAdnetworkIfNeeded {
@@ -87,21 +93,17 @@
         return;
     }
     
-    // 動画の読み込みを開始します。
-    static dispatch_once_t adfMaioOnceToken;
-    dispatch_once(&adfMaioOnceToken, ^{
-        @try {
-            [self requireToAsyncRequestAd];
-            // テストモードに変更（リリース前必ず本番モードに戻してください）
-            // [Maio setAdTestMode:YES];
-            if(self.testFlg) {
-                [Maio setAdTestMode:self.testFlg];
-            }
-            [Maio startWithMediaId:self.maioMediaId delegate:[MovieDelegate6004 sharedInstance]];
-        } @catch (NSException *exception) {
-            [self adnetworkExceptionHandling:exception];
+    @try {
+        [self requireToAsyncRequestAd];
+        // テストモードに変更（リリース前必ず本番モードに戻してください）
+        // [Maio setAdTestMode:YES];
+        if(self.testFlg) {
+            [Maio setAdTestMode:self.testFlg];
         }
-    });
+        self.maioInstance = [[MovieDelegate6004 sharedInstance] startWithMediaId:self.maioMediaId];
+    } @catch (NSException *exception) {
+        [self adnetworkExceptionHandling:exception];
+    }
 }
 
 -(void)showAd {
@@ -111,14 +113,14 @@
 -(void)showAdWithPresentingViewController:(UIViewController *)viewController {
     [super showAd];
 
-    if (self.maioZoneId) {
-        if ([Maio canShowAtZoneId:self.maioZoneId]) {
+    if (self.maioZoneId && self.maioInstance) {
+        if ([self.maioInstance canShowAtZoneId:self.maioZoneId]) {
             @try {
                 [self requireToAsyncPlay];
-                [Maio showAtZoneId:self.maioZoneId vc:viewController];
+                [self.maioInstance showAtZoneId:self.maioZoneId vc:viewController];
             }
             @catch (NSException *exception) {
-                NSLog(@"Maio zone id %@ has exception name[%@] description[%@]", self.maioZoneId, exception.name, exception.description);
+                [self adnetworkExceptionHandling:exception];
             }
         }
     } else {
@@ -128,7 +130,7 @@
                 [Maio showWithViewController:viewController];
             }
             @catch (NSException *exception) {
-                NSLog(@"Maio has exception name[%@] description[%@]", exception.name, exception.description);
+                [self adnetworkExceptionHandling:exception];
             }
         }
     }
@@ -138,7 +140,7 @@
     Class clazz = NSClassFromString(@"Maio");
     if (clazz) {
     } else {
-        NSLog(@"Not found Class: Maio");
+        AdapterLog(@"Not found Class: Maio");
         return NO;
     }
     return YES;
@@ -149,6 +151,12 @@
         _maioMediaId = nil;
     }
 }
+@end
+
+@interface MovieDelegate6004 ()
+
+@property (nonatomic) NSMutableDictionary *instances;
+
 @end
 
 @implementation MovieDelegate6004
@@ -166,8 +174,21 @@
     self = [super init];
     if (self) {
         _closeFlg = NO;
+        _instances = [NSMutableDictionary new];
     }
     return self;
+}
+
+- (MaioInstance *)startWithMediaId:(NSString *)mediaId {
+    MaioInstance *instance = [self.instances objectForKey:mediaId];
+    if (instance) {
+        NSLog(@"[ADF] %s maio %@ has instance", __func__, mediaId);
+        return instance;
+    }
+    instance = [Maio startWithNonDefaultMediaId:mediaId delegate:self];
+    [self.instances setObject:instance forKey:mediaId];
+    NSLog(@"[ADF] %s maio %@ create instance", __func__, mediaId);
+    return instance;
 }
 
 #pragma mark - MaioDelegate
@@ -176,7 +197,7 @@
  *  全てのゾーンの広告表示準備が完了したら呼ばれます。
  */
 - (void)maioDidInitialize {
-    NSLog(@"%s", __func__);
+    NSLog(@"[ADF] %s", __func__);
 }
 
 /**
@@ -186,7 +207,7 @@
  *  @param newValue 変更後のゾーンの状態。YES なら配信可能
  */
 - (void)maioDidChangeCanShow:(NSString *)zoneId newValue:(BOOL)newValue {
-    NSLog(@"%s", __func__);
+    NSLog(@"[ADF] %s, zone id : %@, %d", __func__, zoneId, newValue);
     if (newValue) {
         [self setCallbackStatus:MovieRewardCallbackFetchComplete zone:zoneId];
     }
@@ -199,7 +220,7 @@
  *  @param zoneId  広告が表示されるゾーンの識別子
  */
 - (void)maioWillStartAd:(NSString *)zoneId {
-    NSLog(@"%s", __func__);
+    NSLog(@"[ADF] %s, zone id : %@", __func__, zoneId);
     self.closeFlg = NO;
     // WillShow はないので、DidShow で
     [self setCallbackStatus:MovieRewardCallbackPlayStart zone:zoneId];
@@ -215,7 +236,7 @@
  *  @param rewardParam  ゾーンがリワード型に設定されている場合、予め管理画面にて設定してある任意の文字列パラメータが渡されます。それ以外の場合は nil
  */
 - (void)maioDidFinishAd:(NSString *)zoneId playtime:(NSInteger)playtime skipped:(BOOL)skipped rewardParam:(NSString *)rewardParam {
-    NSLog(@"%s", __func__);
+    NSLog(@"[ADF] %s", __func__);
     if (!skipped) {
         [self setCallbackStatus:MovieRewardCallbackPlayComplete zone:zoneId];
     }
@@ -227,7 +248,7 @@
  *  @param zoneId  広告を表示したゾーンの識別子
  */
 - (void)maioDidClickAd:(NSString *)zoneId {
-    NSLog(@"%s", __func__);
+    NSLog(@"[ADF] %s", __func__);
 }
 
 /**
@@ -240,7 +261,7 @@
         return;
     }
     self.closeFlg = YES;
-    NSLog(@"%s", __func__);
+    NSLog(@"[ADF] %s", __func__);
     [self setCallbackStatus:MovieRewardCallbackClose zone:zoneId];
 }
 
@@ -252,7 +273,7 @@
  */
 - (void)maioDidFail:(NSString *)zoneId reason:(MaioFailReason)reason {
     // ログ表示
-    NSLog(@"%s : fail reason : %d", __func__, (int)reason);
+    NSLog(@"[ADF] %s : zone id : %@, fail reason : %d", __func__, zoneId, (int)reason);
     NSString *faileMessage;
 
     switch ((int)reason) {
@@ -298,7 +319,7 @@
         [self setCallbackStatus:MovieRewardCallbackPlayFail zone:zoneId];
     }
     
-    NSLog(@"Maio SDK Error:%@", faileMessage);
+    NSLog(@"[ADF] Maio SDK Error:%@", faileMessage);
 }
 
 @end

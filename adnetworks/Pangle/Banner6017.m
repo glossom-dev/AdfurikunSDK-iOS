@@ -31,7 +31,7 @@
     Class clazz = NSClassFromString(@"BUNativeExpressBannerView");
     if (clazz) {
     } else {
-        NSLog(@"Not found Class: BUNativeExpressBannerView");
+        AdapterLog(@"Not found Class: BUNativeExpressBannerView");
         return NO;
     }
     return YES;
@@ -55,13 +55,12 @@
         return;
     }
 
-    NSLog(@"Banner6017 initAdnetworkIfNeeded");
+    AdapterLog(@"Banner6017 initAdnetworkIfNeeded");
     if (self.pangleAppID) {
-        NSLog(@"%s", __FUNCTION__);
         @try {
             [self requireToAsyncInit];
             
-            [MovieConfigure6017.sharedInstance configureWithAppId:self.pangleAppID completion:^{
+            [MovieConfigure6017.sharedInstance configureWithAppId:self.pangleAppID gdprStatus:self.hasGdprConsent completion:^{
                 [self initCompleteAndRetryStartAdIfNeeded];
             }];
         } @catch (NSException *exception) {
@@ -80,7 +79,7 @@
 }
 
 - (void)startAd {
-    NSLog(@"%s called", __FUNCTION__);
+    AdapterTrace;
     if (![self canStartAd]) {
         return;
     }
@@ -91,7 +90,7 @@
     
     UIViewController *topMostVC = [self topMostViewController];
     if (topMostVC == nil) {
-        NSLog(@"%s TopMostViewController is nil", __FUNCTION__);
+        AdapterLog(@"TopMostViewController is nil");
         return;
     }
     
@@ -122,7 +121,7 @@
 }
 
 - (void)nativeExpressBannerAdViewDidLoad:(BUNativeExpressBannerView *)bannerAdView {
-    NSLog(@"%s called", __FUNCTION__);
+    AdapterTrace;
     for (UIView *subview in bannerAdView.subviews) {
         if ([subview isKindOfClass:NSClassFromString(@"BUNativeExpressAdView")]) {
             [subview setTranslatesAutoresizingMaskIntoConstraints:false];
@@ -178,7 +177,7 @@
 }
 
 - (void)nativeExpressBannerAdView:(BUNativeExpressBannerView *)bannerAdView didLoadFailWithError:(NSError *)error {
-    NSLog(@"%s called, error : %@", __FUNCTION__, error);
+    AdapterTraceP(@"error : %@", error);
     if (error) {
         [self setErrorWithMessage:error.localizedDescription code:error.code];
     }
@@ -186,11 +185,11 @@
 }
 
 - (void)nativeExpressBannerAdViewRenderSuccess:(BUNativeExpressBannerView *)bannerAdView {
-    NSLog(@"%s called", __FUNCTION__);
+    AdapterTrace;
 }
 
 - (void)nativeExpressBannerAdViewRenderFail:(BUNativeExpressBannerView *)bannerAdView error:(NSError *)error {
-    NSLog(@"%s called, error : %@", __FUNCTION__, error);
+    AdapterTraceP(@"error : %@", error);
     if (error) {
         [self setErrorWithMessage:error.localizedDescription code:error.code];
     }
@@ -198,7 +197,7 @@
 }
 
 - (void)nativeExpressBannerAdViewWillBecomVisible:(BUNativeExpressBannerView *)bannerAdView {
-    NSLog(@"%s called", __FUNCTION__);
+    AdapterTrace;
     if (!self.didInvokeImpression) {
         [self setCallbackStatus:NativeAdCallbackRendering];
         [self startViewabilityCheck];
@@ -207,16 +206,16 @@
 }
 
 - (void)nativeExpressBannerAdViewDidClick:(BUNativeExpressBannerView *)bannerAdView {
-    NSLog(@"%s called", __FUNCTION__);
+    AdapterTrace;
     [self setCallbackStatus:NativeAdCallbackClick];
 }
 
 - (void)nativeExpressBannerAdView:(BUNativeExpressBannerView *)bannerAdView dislikeWithReason:(NSArray<BUDislikeWords *> *)filterwords {
-    NSLog(@"%s called", __FUNCTION__);
+    AdapterTrace;
 }
 
 - (void)nativeExpressBannerAdViewDidCloseOtherController:(BUNativeExpressBannerView *)bannerAdView interactionType:(BUInteractionType)interactionType {
-    NSLog(@"%s called", __FUNCTION__);
+    AdapterTrace;
 }
 
 @end

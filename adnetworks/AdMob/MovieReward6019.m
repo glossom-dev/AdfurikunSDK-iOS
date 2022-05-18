@@ -20,7 +20,7 @@
 @implementation MovieReward6019
 
 + (NSString *)getAdapterRevisionVersion {
-    return @"7";
+    return @"8";
 }
 
 -(id)init {
@@ -74,6 +74,12 @@
     
     @try {
         GADRequest *request = [GADRequest request];
+        if (self.hasGdprConsent) {
+            GADExtras *extras = [[GADExtras alloc] init];
+            extras.additionalParameters = @{@"npa": self.hasGdprConsent.boolValue ? @"1" : @"0"};
+            [request registerAdNetworkExtras:extras];
+            NSLog(@"[ADF] Adnetwork 6019, gdprConsent : %@, sdk setting value : %@", self.hasGdprConsent, extras.additionalParameters);
+        }
         [self requireToAsyncRequestAd];
         [GADRewardedAd loadWithAdUnitID:self.unitID
                                 request:request

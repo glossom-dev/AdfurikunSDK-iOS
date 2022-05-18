@@ -97,14 +97,13 @@
  * 対象のクラスがあるかどうか？
  */
 -(BOOL)isClassReference {
-    NSLog(@"Banner6001 isClassReference");
     Class clazz = NSClassFromString(@"UADSBannerView");
     if (clazz) {
-        NSLog(@"found Class: UADSBannerView");
+        AdapterLog(@"found Class: UADSBannerView");
         return YES;
     }
     else {
-        NSLog(@"Not found Class: UADSBannerView");
+        AdapterLog(@"Not found Class: UADSBannerView");
         return NO;
     }
 }
@@ -114,6 +113,7 @@
     UADSMetaData *gdprConsentMetaData = [[UADSMetaData alloc] init];
     [gdprConsentMetaData set:@"gdpr.consent" value:hasUserConsent ? @YES : @NO];
     [gdprConsentMetaData commit];
+    AdapterLogP(@"Adnetwork 6001, gdprConsent : %@, sdk setting value : %@", self.hasGdprConsent, hasUserConsent ? @YES : @NO);
 }
 
 -(void)dealloc {
@@ -124,18 +124,18 @@
 
 #pragma mark: UnityAdsInitializationDelegate
 - (void)initializationComplete {
-    NSLog(@"%s called", __func__);
+    AdapterTrace;
     [self initCompleteAndRetryStartAdIfNeeded];
 }
 
 - (void)initializationFailed: (UnityAdsInitializationError)error withMessage: (NSString *)message {
-    NSLog(@"%s called, error message : %@", __func__, message);
+    AdapterTraceP(@"%s called, error message : %@", __func__, message);
 }
 
 #pragma mark - UADSBannerViewDelegate
 
 -(void)bannerViewDidLoad:(UADSBannerView *)bannerView {
-    NSLog(@"%s called", __func__);
+    AdapterTrace;
     self.isAdLoaded = true;
     NativeAdInfo6001 *info = [[NativeAdInfo6001 alloc] initWithVideoUrl:nil
                                                                   title:@""
@@ -153,17 +153,16 @@
 }
 
 -(void)bannerViewDidClick:(UADSBannerView *)bannerView {
-    NSLog(@"%s called", __func__);
+    AdapterTrace;
     [self setCallbackStatus:NativeAdCallbackClick];
 }
 
 -(void)bannerViewDidLeaveApplication:(UADSBannerView *)bannerView {
-    NSLog(@"%s called", __func__);
+    AdapterTrace;
 }
 
 -(void)bannerViewDidError:(UADSBannerView *)bannerView error:(UADSBannerError *)error {
-    NSLog(@"%s called", __func__);
-    NSLog(@"UnityAds Banner load error :%ld", error.code);
+    AdapterTraceP(@"UnityAds Banner load error :%d", (int)error.code);
     if (error) {
         [self setErrorWithMessage:@"" code:error.code];
     }

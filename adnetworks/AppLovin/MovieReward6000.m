@@ -117,7 +117,7 @@
             ])
     {
         //表示を消したい場合は、こちらをコメントアウトして下さい。
-        NSLog(@"[ADF] [SEVERE] [Applovin]アプリのバンドルIDが、申請されたもの（%@）と異なります。", self.submittedPackageName);
+        AdapterLogP(@"[SEVERE] [Applovin]アプリのバンドルIDが、申請されたもの（%@）と異なります。", self.submittedPackageName);
     }
     return self.incentivizedInterstitial && self.incentivizedInterstitial.isReadyForDisplay;
 }
@@ -135,7 +135,7 @@
             [self setCallbackStatus:MovieRewardCallbackPlayFail];
         }
     } else{
-        NSLog(@"could not load ad");
+        AdapterLog(@"could not load ad");
         [self setCallbackStatus:MovieRewardCallbackPlayFail];
     }
 }
@@ -153,7 +153,7 @@
     Class clazz = NSClassFromString(@"ALSdk");
     if (clazz) {
     } else {
-        NSLog(@"Not found Class: ALSdk");
+        AdapterLog(@"Not found Class: ALSdk");
         return NO;
     }
     return YES;
@@ -162,6 +162,7 @@
 -(void)setHasUserConsent:(BOOL)hasUserConsent {
     [super setHasUserConsent:hasUserConsent];
     [ALPrivacySettings setHasUserConsent:hasUserConsent];
+    AdapterLogP(@"Adnetwork 6000, gdprConsent : %@, sdk setting value : %d", self.hasGdprConsent, (int)hasUserConsent);
 }
 
 // ------------------------------ -----------------
@@ -172,7 +173,7 @@
  */
 -(void) adService: (ALAdService *) adService didLoadAd: (ALAd *) ad
 {
-    NSLog(@"didLoadAd");
+    AdapterTrace;
     [self setCallbackStatus:MovieRewardCallbackFetchComplete];
 }
 
@@ -181,7 +182,7 @@
  */
 -(void) adService: (ALAdService *) adService didFailToLoadAdWithError: (int) code
 {
-    NSLog(@"didFailToLoadAdWithError : %d", code);
+    AdapterTraceP(@"code : %d", code);
     [self setErrorWithMessage:nil code:code];
     [self setCallbackStatus:MovieRewardCallbackFetchFail];
 }
@@ -191,7 +192,7 @@
  */
 -(void) ad: (ALAd *) ad wasDisplayedIn: (UIView *) view
 {
-    NSLog(@"wasDisplayedIn");
+    AdapterTrace;
 }
 
 /**
@@ -199,7 +200,7 @@
  */
 -(void) ad: (ALAd *) ad wasHiddenIn: (UIView *) view
 {
-    NSLog(@"wasHiddenIn");
+    AdapterTrace;
     [self setCallbackStatus:MovieRewardCallbackClose];
 }
 
@@ -208,7 +209,7 @@
  */
 -(void) ad: (ALAd *) ad wasClickedIn: (UIView *) view
 {
-    NSLog(@"wasClickedIn");
+    AdapterTrace;
 }
 
 /**
@@ -216,7 +217,7 @@
  */
 -(void) videoPlaybackBeganInAd: (ALAd*) ad
 {
-    NSLog(@"videoPlaybackBeganInAd");
+    AdapterTrace;
     // 広告の読み
     [self setCallbackStatus:MovieRewardCallbackPlayStart];
 }
@@ -227,7 +228,7 @@
  */
 -(void) videoPlaybackEndedInAd: (ALAd*) ad atPlaybackPercent: (NSNumber*) percentPlayed fullyWatched: (BOOL) wasFullyWatched
 {
-    NSLog(@"videoPlaybackEndedInAd, atPlaybackPercent : %@, fullyWatched : %d", percentPlayed, wasFullyWatched);
+    AdapterTraceP(@"atPlaybackPercent : %@, fullyWatched : %d", percentPlayed, wasFullyWatched);
     if ( wasFullyWatched ) {
         [self setCallbackStatus:MovieRewardCallbackPlayComplete];
     } else {
@@ -299,7 +300,7 @@ typedef enum : NSUInteger {
                     }
                 }];
             } @catch (NSException *exception) {
-                NSLog(@"adnetwork exception : %@", exception);
+                NSLog(@"[ADF] adnetwork exception : %@", exception);
             }
         });
     }

@@ -12,7 +12,6 @@
 
 @property (nonatomic) NSString *adColonyAppId;
 @property (nonatomic) NSString *adShowZoneId;
-@property (nonatomic) NSArray *allZones;
 @property (nonatomic) BOOL test_flg;
 
 @property (nonatomic, weak) AdColonyAdView *banner;
@@ -26,14 +25,14 @@
 }
 
 + (NSString *)getAdapterRevisionVersion {
-    return @"2";
+    return @"4";
 }
 
 - (BOOL)isClassReference {
     Class clazz = NSClassFromString(@"AdColonyAdView");
     if (clazz) {
     } else {
-        NSLog(@"Not found Class: AdColonyAdView");
+        AdapterLog(@"Not found Class: AdColonyAdView");
         return NO;
     }
     return YES;
@@ -60,15 +59,6 @@
         self.adShowZoneId = [NSString stringWithFormat:@"%@", adShowZoneId];
     }
     
-    NSArray *colonyAllZones = [data objectForKey:@"all_zones"];
-    if ([self isNotNull:colonyAllZones] && [colonyAllZones isKindOfClass:[NSArray class]]) {
-        self.allZones = [NSArray arrayWithArray:colonyAllZones];
-    }
-    
-    if (colonyAllZones == nil && self.adShowZoneId != nil) {
-        self.allZones = @[self.adShowZoneId];
-    }
-    
     if (ADFMovieOptions.getTestMode) {
         self.test_flg = YES;
     } else {
@@ -85,17 +75,20 @@
         return;
     }
     @try {
-        AdColonyAppOptions *options = nil;
+        AdColonyAppOptions *options = [AdColonyAppOptions new];
+        options.testMode = self.test_flg;
         if (self.hasGdprConsent != nil) {
-            options = [AdColonyAppOptions new];
-            options.testMode = self.test_flg;
+            NSString *consent =  self.hasGdprConsent.boolValue ? @"1" : @"0";
+            [options setPrivacyFrameworkOfType:ADC_GDPR isRequired:YES];
+            [options setPrivacyConsentString:consent forType:ADC_GDPR];
+            AdapterLogP(@"Adnetwork 6002, gdprConsent : %@, sdk setting value : %@", self.hasGdprConsent, consent);
         }
         [self requireToAsyncInit];
-        [AdColony configureWithAppID:self.adColonyAppId zoneIDs:self.allZones options:options completion:^(NSArray<AdColonyZone *> * _Nonnull zones) {
+        [AdColony configureWithAppID:self.adColonyAppId options:options completion:^(NSArray<AdColonyZone *> * _Nonnull zones) {
             [self initCompleteAndRetryStartAdIfNeeded];
         }];
     } @catch (NSException *exception) {
-        NSLog(@"adcolony configuration exception %@", exception);
+        [self adnetworkExceptionHandling:exception];
     }
     
     self.adSize = kAdColonyAdSizeBanner;
@@ -141,6 +134,7 @@
 
 // handle new banner
 - (void)adColonyAdViewDidLoad:(AdColonyAdView *)adView {
+    AdapterTrace;
     self.isAdLoaded = true;
     NativeAdInfo6002 *info = [[NativeAdInfo6002 alloc] initWithVideoUrl:nil
                                                                   title:@""
@@ -164,25 +158,25 @@
 // handler banner loading failure
 - (void)adColonyAdViewDidFailToLoad:(AdColonyAdRequestError *)error {
     NSString *message = [NSString stringWithFormat:@"error: %@ and suggestion: %@",error.localizedDescription, error.localizedRecoverySuggestion];
-    NSLog(@"adColonyAdViewDidFailToLoad with %@", message);
+    AdapterTraceP(@"adColonyAdViewDidFailToLoad with %@", message);
     [self setErrorWithMessage:message code:error.code];
     [self setCallbackStatus:NativeAdCallbackLoadError];
 }
 
 - (void)adColonyAdViewWillOpen:(AdColonyAdView *)adView {
-    NSLog(@"AdView will open fullscreen view");
+    AdapterTrace;
 }
 
 - (void)adColonyAdViewDidClose:(AdColonyAdView *)adView {
-    NSLog(@"AdView did close fullscreen views");
+    AdapterTrace;
 }
 
 - (void)adColonyAdViewWillLeaveApplication:(AdColonyAdView *)adView {
-    NSLog(@"AdView will send used outside the app");
+    AdapterTrace;
 }
 
 - (void)adColonyAdViewDidReceiveClick:(AdColonyAdView *)adView {
-    NSLog(@"AdView received a click");
+    AdapterTrace;
     [self setCallbackStatus:NativeAdCallbackClick];
 }
 

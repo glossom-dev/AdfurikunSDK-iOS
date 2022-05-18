@@ -15,7 +15,7 @@
 @implementation Banner6019
 
 + (NSString *)getAdapterRevisionVersion {
-    return @"7";
+    return @"8";
 }
 
 - (void)setData:(NSDictionary *)data {
@@ -79,6 +79,12 @@
                 [extras setExtras:option forLabel:label];
                 [request registerAdNetworkExtras:extras];
             }
+        }
+        if (self.hasGdprConsent) {
+            GADExtras *extras = [[GADExtras alloc] init];
+            extras.additionalParameters = @{@"npa": self.hasGdprConsent.boolValue ? @"1" : @"0"};
+            [request registerAdNetworkExtras:extras];
+            NSLog(@"[ADF] Adnetwork 6019, gdprConsent : %@, sdk setting value : %@", self.hasGdprConsent, extras.additionalParameters);
         }
         [self requireToAsyncRequestAd];
         [self.bannerView loadRequest:request];

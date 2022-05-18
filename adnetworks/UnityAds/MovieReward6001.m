@@ -105,7 +105,7 @@
             [self setCallbackStatus:MovieRewardCallbackPlayFail];
         }
     } else {
-        NSLog(@"Error encountered playing ad : could not fetch topmost viewcontroller");
+        AdapterLog(@"Error encountered playing ad : could not fetch topmost viewcontroller");
         [self setErrorWithMessage:@"Error encountered playing ad : could not fetch topmost viewcontroller" code:0];
         [self setCallbackStatus:MovieRewardCallbackPlayFail];
     }
@@ -116,14 +116,13 @@
  * 対象のクラスがあるかどうか？
  */
 -(BOOL)isClassReference {
-    NSLog(@"MovieReward6001 isClassReference");
     Class clazz = NSClassFromString(@"UnityAds");
     if (clazz) {
-        NSLog(@"found Class: UnityAds");
+        AdapterLog(@"found Class: UnityAds");
         return YES;
     }
     else {
-        NSLog(@"Not found Class: UnityAds");
+        AdapterLog(@"Not found Class: UnityAds");
         return NO;
     }
 }
@@ -133,6 +132,7 @@
     UADSMediationMetaData *gdprConsentMetaData = [[UADSMediationMetaData alloc] init];
     [gdprConsentMetaData set:@"gdpr.consent" value:hasUserConsent ? @YES : @NO];
     [gdprConsentMetaData commit];
+    AdapterLogP(@"Adnetwork 6001, gdprConsent : %@, sdk setting value : %@", self.hasGdprConsent, hasUserConsent ? @YES : @NO);
 }
 
 -(void)sendFetchComplete {
@@ -145,45 +145,46 @@
 
 #pragma mark: UnityAdsInitializationDelegate
 - (void)initializationComplete {
+    AdapterTrace;
     [self initCompleteAndRetryStartAdIfNeeded];
 }
 
 - (void)initializationFailed: (UnityAdsInitializationError)error withMessage: (NSString *)message {
-    NSLog(@"%s called", __func__);
+    AdapterTraceP(@"error message : %@", message);
 }
 
 #pragma mark: UnityAdsLoadDelegate
 - (void)unityAdsAdLoaded: (NSString *)placementId {
-    NSLog(@"unityAdsAdLoaded : %@, placement Id : %@", self, placementId);
+    AdapterTraceP(@"object : %@, placement Id : %@", self, placementId);
     if ([self.placementId isEqualToString:placementId]) {
         self.isAdLoaded = true;
         [self sendFetchComplete];
     } else {
-        NSLog(@"unityAdsAdLoaded(%@), but placemendId(%@) is not equal to %@", self, placementId, self.placementId);
+        AdapterLogP(@"unityAdsAdLoaded(%@), but placemendId(%@) is not equal to %@", self, placementId, self.placementId);
     }
 }
 
 - (void)unityAdsAdFailedToLoad: (NSString *)placementId
                      withError: (UnityAdsLoadError)error
                    withMessage: (NSString *)message {
-    NSLog(@"unityAdsAdFailedToLoad : %@, placement Id : %@, message : %@", self, placementId, message);
+    AdapterTraceP(@"unityAdsAdFailedToLoad : %@, placement Id : %@, message : %@", self, placementId, message);
     [self setErrorWithMessage:message code:0];
     [self sendFetchFail];
 }
 
 #pragma mark: UnityAdsShowDelegate
 - (void)unityAdsShowComplete:(NSString *)placementId withFinishState:(UnityAdsShowCompletionState)state {
-    NSLog(@"unityAdsShowComplete : UnityAdsShowDelegate unityAdsShowComplete %@ %ld", placementId, state);
+    AdapterTraceP(@"unityAdsShowComplete : UnityAdsShowDelegate unityAdsShowComplete %@ %ld", placementId, state);
     switch (state) {
         case kUnityShowCompletionStateCompleted:
-            NSLog(@"unityAdsShowComplete %s kUnityShowCompletionStateCompleted %@", __func__, placementId);
+            AdapterLogP(@"kUnityShowCompletionStateCompleted %@", placementId);
             [self setCallbackStatus:MovieRewardCallbackPlayComplete];
             break;
         case kUnityShowCompletionStateSkipped:
-            NSLog(@"unityAdsShowComplete %s kUnityShowCompletionStateSkipped %@", __func__, placementId);
+            AdapterLogP(@"kUnityShowCompletionStateSkipped %@", placementId);
             break;
         default:
-            NSLog(@"unityAdsShowComplete %s other %@", __func__, placementId);
+            AdapterLogP(@"other %@", placementId);
             [self setErrorWithMessage:@"unityAdsShowComplete with UnityAdsShowCompletionStateError" code:0];
             [self setCallbackStatus:MovieRewardCallbackPlayFail];
             break;
@@ -193,7 +194,7 @@
 }
 
 - (void)unityAdsShowFailed:(NSString *)placementId withError:(UnityAdsShowError)error withMessage:(NSString *)message {
-    NSLog(@"unityAdsShowFailed : UnityAdsShowDelegate unityAdsShowFailed %@ %ld", message, error);
+    AdapterTraceP(@"%@ %ld", message, error);
     NSString *reason;
     switch (error) {
         case kUnityShowErrorNotInitialized:
@@ -224,12 +225,12 @@
 }
  
 - (void)unityAdsShowStart:(NSString *)placementId {
-    NSLog(@"- UnityAdsShowDelegate unityAdsShowStart %@", placementId);
+    AdapterTraceP(@"%@", placementId);
     [self setCallbackStatus:MovieRewardCallbackPlayStart];
 }
  
 - (void)unityAdsShowClick:(NSString *)placementId {
-    NSLog(@"- UnityAdsShowDelegate unityAdsShowClick %@", placementId);
+    AdapterTraceP(@"%@", placementId);
 }
 
 @end

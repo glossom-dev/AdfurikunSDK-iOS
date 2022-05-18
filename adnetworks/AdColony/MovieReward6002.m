@@ -11,7 +11,6 @@
 @interface MovieReward6002()<AdColonyInterstitialDelegate>
 
 @property (nonatomic, strong) NSString *adColonyAppId;
-@property (nonatomic, strong) NSArray *adColonyAllZones;
 @property (nonatomic, strong) NSString *adShowZoneId;
 @property (nonatomic, weak) UIViewController* appViewController;
 @property (nonatomic) BOOL test_flg;
@@ -28,7 +27,7 @@
 }
 
 + (NSString *)getAdapterRevisionVersion {
-    return @"5";
+    return @"7";
 }
 
 -(id)init {
@@ -62,14 +61,6 @@
         _adShowZoneId = [NSString stringWithFormat:@"%@", adShowZoneId];
     }
     
-    NSArray *colonyAllZones = [data objectForKey:@"all_zones"];
-    if ([self isNotNull:colonyAllZones] && [colonyAllZones isKindOfClass:[NSArray class]]) {
-        _adColonyAllZones = colonyAllZones;
-    }
-    
-    if (_adColonyAllZones == nil && _adShowZoneId != nil) {
-        _adColonyAllZones = @[_adShowZoneId];
-    }
     if (ADFMovieOptions.getTestMode) {
         self.test_flg = YES;
     } else {
@@ -89,17 +80,20 @@
         return;
     }
     @try {
-        AdColonyAppOptions *options = nil;
+        AdColonyAppOptions *options = [AdColonyAppOptions new];
+        options.testMode = self.test_flg;
         if (self.hasGdprConsent != nil) {
-            options = [AdColonyAppOptions new];
-            options.testMode = self.test_flg;
+            NSString *consent =  self.hasGdprConsent.boolValue ? @"1" : @"0";
+            [options setPrivacyFrameworkOfType:ADC_GDPR isRequired:YES];
+            [options setPrivacyConsentString:consent forType:ADC_GDPR];
+            AdapterLogP(@"Adnetwork 6002, gdprConsent : %@, sdk setting value : %@", self.hasGdprConsent, consent);
         }
         [self requireToAsyncInit];
-        [AdColony configureWithAppID:self.adColonyAppId zoneIDs:self.adColonyAllZones options:options completion:^(NSArray<AdColonyZone *> * _Nonnull zones) {
+        [AdColony configureWithAppID:self.adColonyAppId options:options completion:^(NSArray<AdColonyZone *> * _Nonnull zones) {
             [self initCompleteAndRetryStartAdIfNeeded];
         }];
     } @catch (NSException *exception) {
-        NSLog(@"adcolony configuration exception %@", exception);
+        [self adnetworkExceptionHandling:exception];
     }
 }
 
@@ -138,7 +132,7 @@
     }
 
     if (topMostViewController == nil) {
-        NSLog(@"Error encountered playing ad : could not fetch topmost viewcontroller");
+        AdapterLog(@"Error encountered playing ad : could not fetch topmost viewcontroller");
         [self setCallbackStatus:MovieRewardCallbackPlayFail];
     }
 }
@@ -168,7 +162,7 @@
     Class clazz = NSClassFromString(@"AdColony");
     if (clazz) {
     } else {
-        NSLog(@"Not found Class: AdColony");
+        AdapterLog(@"Not found Class: AdColony");
         return NO;
     }
     return YES;
@@ -177,9 +171,6 @@
 -(void)dealloc {
     if (_adColonyAppId != nil){
         _adColonyAppId = nil;
-    }
-    if (_adColonyAllZones != nil){
-        _adColonyAllZones = nil;
     }
     if (_adShowZoneId != nil){
         _adShowZoneId = nil;
@@ -190,34 +181,35 @@
 }
 
 - (void)adColonyInterstitialDidLoad:(AdColonyInterstitial * _Nonnull)interstitial {
-    NSLog(@"onAdColonyAdAvailabilityChange");
+    AdapterTrace;
     
     self.ad = interstitial;
     [self setCallbackStatus:MovieRewardCallbackFetchComplete];
 }
 
 - (void)adColonyInterstitialDidFailToLoad:(AdColonyAdRequestError * _Nonnull)error {
-    NSLog(@"Request failed with error: %@ and suggestion: %@", [error localizedDescription], [error localizedRecoverySuggestion]);
+    AdapterTraceP(@"Request failed with error: %@ and suggestion: %@", [error localizedDescription], [error localizedRecoverySuggestion]);
     [self setErrorWithMessage:error.localizedDescription code:error.code];
     [self setCallbackStatus:MovieRewardCallbackFetchFail];
 }
 
 - (void)adColonyInterstitialWillOpen:(AdColonyInterstitial *)interstitial {
-    NSLog(@"onAdColonyAdStarted");
+    AdapterTrace;
     [self setCallbackStatus:MovieRewardCallbackPlayStart];
 }
 
 - (void)adColonyInterstitialDidClose:(AdColonyInterstitial *)interstitial {
-    NSLog(@"onAdColonyAdFinished");
+    AdapterTrace;
     [self setCallbackStatus:MovieRewardCallbackPlayComplete];
     [self setCallbackStatus:MovieRewardCallbackClose];
 }
 
 - (void)adColonyInterstitialDidReceiveClick:(AdColonyInterstitial *)interstitial {
-    NSLog(@"%s", __FUNCTION__);
+    AdapterTrace;
 }
 
 - (void)adColonyInterstitialExpired:(AdColonyInterstitial *)interstitial {
+    AdapterTrace;
     self.ad = nil;
 }
 

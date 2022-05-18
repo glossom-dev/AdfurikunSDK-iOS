@@ -309,19 +309,9 @@ typedef enum : NSUInteger {
                     config.isTest =  YES;
                 }
                 
-                int age = ADFMovieOptions.getUserAge;
-                if (age >= 18) {
-                    config.maxAdAgeRating = kFADAdAgeRatingAge18AndOver;
-                } else if (age >= 15) {
-                    config.maxAdAgeRating = kFADAdAgeRatingAge15AndOver;
-                } else if (age >= 13) {
-                    config.maxAdAgeRating = kFADAdAgeRatingAge13AndOver;
-                } else {
-                    config.maxAdAgeRating = kFADAdAgeRatingUnspecified;
-                }
-                
                 config.needGdprNonPersonalizedAdsTreatment = gdprStatus;
-                
+                NSLog(@"[ADF] Adnetwork 6008, sdk setting value : %d", (int)gdprStatus);
+
                 [FADSettings registerConfig:config];
 
                 self.initStatus = initializeComplete;

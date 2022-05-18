@@ -54,8 +54,6 @@
 {
     [super setData:data];
     
-    NSLog(@"data : %@",data);
-    
     NSString* vungleAppID = [data objectForKey:@"application_id"];
     if ([self isNotNull:vungleAppID]) {
         self.vungleAppID = [[NSString alloc] initWithFormat:@"%@", vungleAppID];
@@ -70,7 +68,7 @@
     }
 
     if (self.vungleAppID == nil || self.placementID == nil) {
-        NSLog(@"%s Vungle data is invalid", __PRETTY_FUNCTION__);
+        AdapterLog(@"Vungle data is invalid");
         return;
     }
     if (self.allPlacementIDs.count == 0) {
@@ -85,7 +83,7 @@
         }
         NSError *error;
         if (![[VungleSDK sharedSDK] startWithAppId:self.vungleAppID error:&error]) {
-            NSLog(@"Error while starting VungleSDK %@", [error localizedDescription]);
+            AdapterLogP(@"Error while starting VungleSDK %@", [error localizedDescription]);
         }
     } @catch (NSException *exception) {
         [self adnetworkExceptionHandling:exception];
@@ -136,7 +134,7 @@
         
         NSError *error = nil;
         if (![sdk loadPlacementWithID:self.placementID error:&error]) {
-            NSLog(@"Unable to load vungle placement with reference ID :%@, Error %@", self.placementID, error);
+            AdapterLogP(@"Unable to load vungle placement with reference ID :%@, Error %@", self.placementID, error);
             [self setErrorWithMessage:error.localizedDescription code:error.code];
             [self setCallbackStatus:MovieRewardCallbackFetchFail];
         }
@@ -176,7 +174,7 @@
     }
 
     if (topMostViewController == nil || error) {
-        NSLog(@"Error encountered playing ad : %@", error);
+        AdapterLogP(@"Error encountered playing ad : %@", error);
         [self setCallbackStatus:MovieRewardCallbackPlayFail];
     }
 }
@@ -198,7 +196,7 @@
     }
 
     if (error) {
-        NSLog(@"Error encountered playing ad : %@", error);
+        AdapterLogP(@"Error encountered playing ad : %@", error);
         [self setErrorWithMessage:error.localizedDescription code:error.code];
         [self setCallbackStatus:MovieRewardCallbackPlayFail];
     }
@@ -209,13 +207,12 @@
  */
 -(BOOL)isClassReference
 {
-    NSLog(@"MovieReward6006 isClassReference");
     Class clazz = NSClassFromString(@"VungleSDK");
     if (clazz) {
-        NSLog(@"Found Class: Vungle");
+        AdapterLog(@"Found Class: Vungle");
     }
     else {
-        NSLog(@"Not found Class: Vungle");
+        AdapterLog(@"Not found Class: Vungle");
         return NO;
     }
     return YES;
@@ -225,6 +222,7 @@
     [super setHasUserConsent:hasUserConsent];
     VungleSDK* sdk = [VungleSDK sharedSDK];
     [sdk updateConsentStatus:hasUserConsent ? VungleConsentAccepted : VungleConsentDenied consentMessageVersion:@"1.0.0"];
+    AdapterLogP(@"Adnetwork 6006, gdprConsent : %@, sdk setting value : %d", self.hasGdprConsent, (int)(hasUserConsent ? VungleConsentAccepted : VungleConsentDenied));
 }
 
 - (void)dealloc{
@@ -288,7 +286,7 @@
 #pragma mark - VungleSDKDelegate
 
 - (void)vungleSDKDidInitialize {
-    NSLog(@"%s", __PRETTY_FUNCTION__);
+    NSLog(@"[ADF] %s", __FUNCTION__);
     NSDictionary *movieRewardList = [self getAllMovieReward];
     [movieRewardList enumerateKeysAndObjectsUsingBlock:^(id  _Nonnull key, MovieReward6006 *  _Nonnull movieReward, BOOL * _Nonnull stop) {
         if (movieReward.isNeedToStartAd) {
@@ -305,15 +303,14 @@
 }
 
 - (void)vungleSDKFailedToInitializeWithError:(NSError *)error {
-    NSLog(@"%s", __PRETTY_FUNCTION__);
-    NSLog(@"%@", error.localizedDescription);
+    NSLog(@"[ADF] %s error : %@", __FUNCTION__, error.localizedDescription);
 }
 
 //Vungle delegate
 /** 広告準備完了 */
 - (void)vungleAdPlayabilityUpdate:(BOOL)isAdPlayable placementID:(nullable NSString *)placementID error:(nullable NSError *)error {
-    NSLog(@"%s isAdPlayable: %@ placementID: %@", __PRETTY_FUNCTION__, (isAdPlayable ? @"YES" : @"NO"), placementID);
-    NSLog(@"%@", [[VungleSDK sharedSDK] debugInfo]);
+    NSLog(@"[ADF] %s isAdPlayable: %@ placementID: %@", __PRETTY_FUNCTION__, (isAdPlayable ? @"YES" : @"NO"), placementID);
+    NSLog(@"[ADF] %@", [[VungleSDK sharedSDK] debugInfo]);
 
     if (isAdPlayable) {
         // 広告準備完了
@@ -333,19 +330,19 @@
 
 /** 動画再生開始 */
 - (void)vungleWillShowAdForPlacementID:(NSString *)placementID {
-    NSLog(@"%s placementID: %@", __PRETTY_FUNCTION__, placementID);
+    NSLog(@"[ADF] %s placementID: %@", __PRETTY_FUNCTION__, placementID);
     [self setCallbackStatus:MovieRewardCallbackPlayStart zone:placementID];
 }
 
 /** 動画再生終了&エンドカード終了 */
 - (void)vungleWillCloseAdForPlacementID:(NSString *)placementID {
-    NSLog(@"%s placementID: %@", __PRETTY_FUNCTION__, placementID);
+    NSLog(@"[ADF] %s placementID: %@", __PRETTY_FUNCTION__, placementID);
     [self setCallbackStatus:MovieRewardCallbackPlayComplete zone:placementID];
     [self setCallbackStatus:MovieRewardCallbackClose zone:placementID];
 }
 
 - (void)vungleTrackClickForPlacementID:(nullable NSString *)placementID {
-    NSLog(@"%s placementID: %@", __PRETTY_FUNCTION__, placementID);
+    NSLog(@"[ADF] %s placementID: %@", __PRETTY_FUNCTION__, placementID);
     Banner6006 *banner = [self getBannerWithZone:placementID];
     if (banner) {
         [banner adClicked];

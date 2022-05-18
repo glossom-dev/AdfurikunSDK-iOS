@@ -28,7 +28,7 @@
     Class clazz = NSClassFromString(@"ALAdView");
     if (clazz) {
     } else {
-        NSLog(@"Not found Class: ALAdView");
+        AdapterLog(@"Not found Class: ALAdView");
         return NO;
     }
     return YES;
@@ -91,12 +91,13 @@
 -(void)setHasUserConsent:(BOOL)hasUserConsent {
     [super setHasUserConsent:hasUserConsent];
     [ALPrivacySettings setHasUserConsent:hasUserConsent];
+    AdapterLogP(@"Adnetwork 6000, gdprConsent : %@, sdk setting value : %d", self.hasGdprConsent, (int)hasUserConsent);
 }
 
 #pragma mark - Ad Load Delegate
 
 - (void)adService:(ALAdService *)adService didLoadAd:(ALAd *)ad {
-    NSLog(@"%s", __FUNCTION__);
+    AdapterTrace;
     self.isAdLoaded = YES;
     if (self.delegate) {
         if ([self.delegate respondsToSelector:@selector(onNativeMovieAdLoadFinish:)]) {
@@ -112,17 +113,16 @@
             [self setCallbackStatus:NativeAdCallbackLoadFinish];
             
         } else {
-            NSLog(@"Banner6000: %s onNativeMovieAdLoadFinish selector is not responding", __FUNCTION__);
+            AdapterLog(@"Banner6000: onNativeMovieAdLoadFinish selector is not responding");
         }
     } else {
-        NSLog(@"Banner6000: %s Delegate is not setting", __FUNCTION__);
+        AdapterLog(@"Banner6000: Delegate is not setting");
     }
 }
 
 - (void)adService:(ALAdService *)adService didFailToLoadAdWithError:(int)code {
-    NSLog(@"%s", __FUNCTION__);
+    AdapterTraceP(@"code : %d", code);
     self.isAdLoaded = NO;
-    NSLog(@"AppLovin Banner load error :%d", code);
     if (code) {
         [self setErrorWithMessage:nil code:code];
     }
@@ -132,14 +132,15 @@
 #pragma mark - Ad Display Delegate
 
 - (void)ad:(ALAd *)ad wasDisplayedIn:(UIView *)view {
-    NSLog(@"%s", __FUNCTION__);
+    AdapterTrace;
 }
 
 - (void)ad:(ALAd *)ad wasHiddenIn:(UIView *)view {
-    NSLog(@"%s", __FUNCTION__);
+    AdapterTrace;
 }
 
 - (void)ad:(ALAd *)ad wasClickedIn:(UIView *)view {
+    AdapterTrace;
     [self setCallbackStatus:NativeAdCallbackClick];
 }
 

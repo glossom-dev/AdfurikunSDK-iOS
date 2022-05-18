@@ -34,7 +34,7 @@
     Class clazz = NSClassFromString(@"NADNativeVideoLoader");
     if (clazz) {
     } else {
-        NSLog(@"Not found Class: NendAd");
+        AdapterLog(@"Not found Class: NendAd");
         return NO;
     }
     return YES;
@@ -66,8 +66,6 @@
         @try {
             self.videoAdLoader = [[NADNativeVideoLoader alloc] initWithSpotID:self.nendAdspotId apiKey:self.nendKey clickAction:self.clickAction];
             self.videoAdLoader.mediationName = @"adfurikun";
-            // 動画広告のターゲティング
-            [self setTargeting];
             
             self.didInit = YES;
             
@@ -92,7 +90,7 @@
         [self.videoAdLoader loadAdWithCompletionHandler:^(NADNativeVideo * _Nullable videoAd, NSError * _Nullable error) {
             if (weakSelf) {
                 if (videoAd) {
-                    NSLog(@"nend NativeAd Load completed");
+                    AdapterLog(@"nend NativeAd Load completed");
                     MovieNativeAdInfo6009 *info = [[MovieNativeAdInfo6009 alloc] initWithVideoUrl:nil
                                                                                             title:videoAd.title
                                                                                       description:videoAd.explanation
@@ -115,35 +113,12 @@
                     [weakSelf setCallbackStatus:NativeAdCallbackLoadFinish];
                 } else {
                     weakSelf.isAdLoaded = false;
-                    NSLog(@"nend NativeAd load error : %@", error.localizedDescription);
+                    AdapterLogP(@"nend NativeAd load error : %@", error.localizedDescription);
                     [weakSelf setErrorWithMessage:error.localizedDescription code:error.code];
                     [self setCallbackStatus:NativeAdCallbackLoadError];
                 }
             }
         }];
-    } @catch (NSException *exception) {
-        [self adnetworkExceptionHandling:exception];
-    }
-}
-
-- (void)setTargeting {
-    @try {
-        NADUserFeature *feature = [NADUserFeature new];
-        // 年齢
-        int age = [ADFMovieOptions getUserAge];
-        if (age > 0) {
-            feature.age = age;
-            self.videoAdLoader.userFeature = feature;
-        }
-        // 性別
-        ADFMovieOptions_Gender gender = [ADFMovieOptions getUserGender];
-        if (ADFMovieOptions_Gender_Male == gender) {
-            feature.gender = NADGenderMale;
-            self.videoAdLoader.userFeature = feature;
-        } else if (ADFMovieOptions_Gender_Female == gender) {
-            feature.gender = NADGenderFemale;
-            self.videoAdLoader.userFeature = feature;
-        }
     } @catch (NSException *exception) {
         [self adnetworkExceptionHandling:exception];
     }
@@ -158,52 +133,52 @@
 
 #pragma mark - NADNativeVideoDelegate
 - (void)nadNativeVideoDidImpression:(NADNativeVideo *)ad {
-    NSLog(@"%s", __func__);
+    AdapterTrace;
 }
 
 - (void)nadNativeVideoDidClickAd:(NADNativeVideo *)ad {
-    NSLog(@"%s", __func__);
+    AdapterTrace;
     [self setCallbackStatus:NativeAdCallbackClick];
 }
 
 - (void)nadNativeVideoDidClickInformation:(NADNativeVideo *)ad {
-    NSLog(@"%s", __func__);
+    AdapterTrace;
 }
 
 #pragma mark - NADNativeVideoViewDelegate
 - (void)nadNativeVideoViewDidStartPlay:(NADNativeVideoView *)videoView {
-    NSLog(@"%s", __func__);
+    AdapterTrace;
     [self setCallbackStatus:NativeAdCallbackPlayStart];
 }
 
 - (void)nadNativeVideoViewDidStartFullScreenPlaying:(NADNativeVideoView *)videoView {
-    NSLog(@"%s", __func__);
+    AdapterTrace;
 }
 
 - (void)nadNativeVideoViewDidStopPlay:(NADNativeVideoView *)videoView {
-    NSLog(@"%s", __func__);
+    AdapterTrace;
 }
 
 - (void)nadNativeVideoViewDidStopFullScreenPlaying:(NADNativeVideoView *)videoView {
-    NSLog(@"%s", __func__);
+    AdapterTrace;
 }
 
 - (void)nadNativeVideoViewDidFailToPlay:(NADNativeVideoView *)videoView {
-    NSLog(@"%s", __func__);
+    AdapterTrace;
     [self setCallbackStatus:NativeAdCallbackPlayFail];
 }
 
 - (void)nadNativeVideoViewDidCompletePlay:(NADNativeVideoView *)videoView {
-    NSLog(@"%s", __func__);
+    AdapterTrace;
     [self setCallbackStatus:NativeAdCallbackPlayFinish];
 }
 
 - (void)nadNativeVideoViewDidOpenFullScreen:(NADNativeVideoView *)videoView {
-    NSLog(@"%s", __func__);
+    AdapterTrace;
 }
 
 - (void)nadNativeVideoViewDidCloseFullScreen:(NADNativeVideoView *)videoView {
-    NSLog(@"%s", __func__);
+    AdapterTrace;
 }
 
 @end
@@ -211,7 +186,7 @@
 @implementation MovieNativeAdInfo6009
 
 - (void)playMediaView {
-    NSLog(@"%s", __func__);
+    NSLog(@"[ADF] %s", __func__);
 }
 
 - (void)registerInteractionViews:(NSArray<__kindof UIView *> *)views {

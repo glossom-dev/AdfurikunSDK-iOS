@@ -26,20 +26,26 @@
 }
 
 + (NSString *)getAdapterRevisionVersion {
-    return @"4";
+    return @"5";
 }
 
 - (BOOL)isClassReference {
-    NSLog(@"Banner6006 isClassReference");
     Class clazz = NSClassFromString(@"VungleSDK");
     if (clazz) {
-        NSLog(@"Found Class: Vungle");
+        AdapterLog(@"Found Class: Vungle");
     }
     else {
-        NSLog(@"Not found Class: Vungle");
+        AdapterLog(@"Not found Class: Vungle");
         return NO;
     }
     return YES;
+}
+
+-(void)setHasUserConsent:(BOOL)hasUserConsent {
+    [super setHasUserConsent:hasUserConsent];
+    VungleSDK* sdk = [VungleSDK sharedSDK];
+    [sdk updateConsentStatus:hasUserConsent ? VungleConsentAccepted : VungleConsentDenied consentMessageVersion:@"1.0.0"];
+    AdapterLogP(@"Adnetwork 6006, gdprConsent : %@, sdk setting value : %d", self.hasGdprConsent, (int)(hasUserConsent ? VungleConsentAccepted : VungleConsentDenied));
 }
 
 - (void)dispose {
@@ -75,7 +81,7 @@
     }
 
     if (self.vungleAppID == nil || self.placementID == nil) {
-        NSLog(@"%s Vungle data is invalid", __PRETTY_FUNCTION__);
+        AdapterLog(@"Vungle data is invalid");
         return;
     }
     if (self.allPlacementIDs.count == 0) {
@@ -90,7 +96,7 @@
         }
         NSError *error;
         if (![[VungleSDK sharedSDK] startWithAppId:self.vungleAppID error:&error]) {
-            NSLog(@"%s Error while starting VungleSDK %@", __FUNCTION__, [error localizedDescription]);
+            AdapterLogP(@"Error while starting VungleSDK %@", [error localizedDescription]);
         }
     } @catch (NSException *exception) {
         [self adnetworkExceptionHandling:exception];
@@ -163,7 +169,7 @@
             result = [sdk loadPlacementWithID:self.placementID error:&error];
         }
         if (!result && error) {
-            NSLog(@"Banner6006: Error occurred when loading placement: %@", error);
+            AdapterLogP(@"Banner6006: Error occurred when loading placement: %@", error);
         }
     } @catch (NSException *exception) {
         [self adnetworkExceptionHandling:exception];
@@ -175,9 +181,9 @@
 }
 
 -(void)loadCompleted {
-    NSLog(@"%s vungle 6006 loadCompleted", __FUNCTION__);
+    AdapterLog(@"vungle 6006 loadCompleted");
     if (self.sendCallback) {
-        NSLog(@"%s already sended callback", __FUNCTION__);
+        AdapterLog(@"already sended callback");
         return;
     }
 
@@ -191,7 +197,7 @@
     }
     self.adView = [[UIView alloc] initWithFrame:viewSize];
     if ([sdk addAdViewToView:self.adView withOptions:options placementID:self.placementID error:&error]) {
-        NSLog(@"%s vungle 6006 addAdViewToView complete", __FUNCTION__);
+        AdapterLog(@"vungle 6006 addAdViewToView complete");
         self.isAdLoaded = true;
 
         NativeAdInfo6006 *info = [[NativeAdInfo6006 alloc] initWithVideoUrl:nil
@@ -210,7 +216,7 @@
         [self setCallbackStatus:NativeAdCallbackLoadFinish];
     } else {
         if (error) {
-            NSLog(@"%s vungle 6006 Error encountered while playing an ad: %@", __FUNCTION__, error);
+            AdapterLogP(@"vungle 6006 Error encountered while playing an ad: %@", error);
             [self loadFailed];
             return;
         }
@@ -219,7 +225,7 @@
 
 -(void)loadFailed {
     if (self.sendCallback) {
-        NSLog(@"%s already sended callback", __FUNCTION__);
+        AdapterLog(@"already sended callback");
         return;
     }
 

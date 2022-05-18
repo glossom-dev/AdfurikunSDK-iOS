@@ -58,9 +58,6 @@
             [self adnetworkExceptionHandling:exception];
         }
     }
-
-    // 動画広告のターゲティング
-    [self setTargeting];
 }
 
 /**< 広告の読み込み開始 */
@@ -97,7 +94,7 @@
             }
         }
         if (topMostViewController == nil) {
-            NSLog(@"Error encountered playing ad : could not fetch topmost viewcontroller");
+            AdapterLog(@"Error encountered playing ad : could not fetch topmost viewcontroller");
             [self setCallbackStatus:MovieRewardCallbackPlayFail];
         }
     }
@@ -128,33 +125,10 @@
     Class clazz = NSClassFromString(@"NADRewardedVideo");
     if (clazz) {
     } else {
-        NSLog(@"Not found Class: NendAd");
+        AdapterLog(@"Not found Class: NendAd");
         return NO;
     }
     return YES;
-}
-
-- (void)setTargeting {
-    @try {
-        NADUserFeature *feature = [NADUserFeature new];
-        // 年齢
-        int age = [ADFMovieOptions getUserAge];
-        if (age > 0) {
-            feature.age = age;
-            self.rewardedVideo.userFeature = feature;
-        }
-        // 性別
-        ADFMovieOptions_Gender gender = [ADFMovieOptions getUserGender];
-        if (ADFMovieOptions_Gender_Male == gender) {
-            feature.gender = NADGenderMale;
-            self.rewardedVideo.userFeature = feature;
-        } else if (ADFMovieOptions_Gender_Female == gender) {
-            feature.gender = NADGenderFemale;
-            self.rewardedVideo.userFeature = feature;
-        }
-    } @catch (NSException *exception) {
-        [self adnetworkExceptionHandling:exception];
-    }
 }
 
 -(void)dealloc {
@@ -164,54 +138,54 @@
 
 #pragma mark - NADRewardedVideoDelegate
 - (void)nadRewardVideoAd:(NADRewardedVideo *)nadRewardedVideoAd didReward:(NADReward *)reward {
-    NSLog(@"%s", __FUNCTION__);
+    AdapterTrace;
     [self setCallbackStatus:MovieRewardCallbackPlayComplete];
 }
 
 - (void)nadRewardVideoAdDidReceiveAd:(NADRewardedVideo *)nadRewardedVideoAd {
-    NSLog(@"%s", __FUNCTION__);
+    AdapterTrace;
     [self setCallbackStatus:MovieRewardCallbackFetchComplete];
 }
 
 - (void)nadRewardVideoAd:(NADRewardedVideo *)nadRewardedVideoAd didFailToLoadWithError:(NSError *)error {
-    NSLog(@"%s error: %@", __FUNCTION__, error);
+    AdapterTraceP(@"error: %@", error);
     [self setErrorWithMessage:error.localizedDescription code:error.code];
     [self setCallbackStatus:MovieRewardCallbackFetchFail];
 }
 
 - (void)nadRewardVideoAdDidFailedToPlay:(NADRewardedVideo *)nadRewardedVideoAd {
-    NSLog(@"%s", __FUNCTION__);
+    AdapterTrace;
     [self setCallbackStatus:MovieRewardCallbackPlayFail];
 }
 
 - (void)nadRewardVideoAdDidOpen:(NADRewardedVideo *)nadRewardedVideoAd {
-    NSLog(@"%s", __FUNCTION__);
+    AdapterTrace;
     [self setCallbackStatus:MovieRewardCallbackPlayStart];
 }
 
 - (void)nadRewardVideoAdDidClose:(NADRewardedVideo *)nadRewardedVideoAd {
-    NSLog(@"%s", __FUNCTION__);
+    AdapterTrace;
     [self setCallbackStatus:MovieRewardCallbackClose];
 }
 
 - (void)nadRewardVideoAdDidClickAd:(NADRewardedVideo *)nadRewardedVideoAd {
-    NSLog(@"%s", __FUNCTION__);
+    AdapterTrace;
 }
 
 - (void)nadRewardVideoAdDidClickInformation:(NADRewardedVideo *)nadRewardedVideoAd {
-    NSLog(@"%s", __FUNCTION__);
+    AdapterTrace;
 }
 //only adType NADVideoAdTypeNormal
 - (void)nadRewardVideoAdDidStartPlaying:(NADRewardedVideo *)nadRewardedVideoAd {
-    NSLog(@"%s", __FUNCTION__);
+    AdapterTrace;
 }
 //only adType NADVideoAdTypeNormal
 - (void)nadRewardVideoAdDidCompletePlaying:(NADRewardedVideo *)nadRewardedVideoAd {
-    NSLog(@"%s", __FUNCTION__);
+    AdapterTrace;
 }
 //only adType NADVideoAdTypeNormal
 - (void)nadRewardVideoAdDidStopPlaying:(NADRewardedVideo *)nadRewardedVideoAd {
-    NSLog(@"%s", __FUNCTION__);
+    AdapterTrace;
 }
 
 

@@ -61,7 +61,7 @@
         @try {
             [self requireToAsyncInit];
             
-            [MovieConfigure6017.sharedInstance configureWithAppId:self.tiktokAppID completion:^{
+            [MovieConfigure6017.sharedInstance configureWithAppId:self.tiktokAppID gdprStatus:self.hasGdprConsent completion:^{
                 [self initCompleteAndRetryStartAdIfNeeded];
             }];
         } @catch (NSException *exception) {
@@ -111,13 +111,12 @@
 }
 
 - (BOOL)isClassReference {
-    NSLog(@"MovieInterstitial6017 isClassReference");
     Class clazz = NSClassFromString(@"BUFullscreenVideoAd");
     if (clazz) {
-        NSLog(@"found Class: BUFullscreenVideoAd");
+        AdapterLog(@"found Class: BUFullscreenVideoAd");
         return YES;
     } else {
-        NSLog(@"Not found Class: BUFullscreenVideoAd");
+        AdapterLog(@"Not found Class: BUFullscreenVideoAd");
         return NO;
     }
 }
@@ -125,46 +124,50 @@
 #pragma BUFullscreenVideoAdDelegate
 
 - (void)fullscreenVideoMaterialMetaAdDidLoad:(BUFullscreenVideoAd *)fullscreenVideoAd {
-    NSLog(@"%s", __func__);
+    AdapterTrace;
 }
 
 - (void)fullscreenVideoAd:(BUFullscreenVideoAd *)fullscreenVideoAd didFailWithError:(NSError *_Nullable)error {
-    NSLog(@"didFailToLoadAdWithError : %@", error);
+    AdapterTraceP(@"error : %@", error);
     [self setErrorWithMessage:error.localizedDescription code:error.code];
     [self setCallbackStatus:MovieRewardCallbackFetchFail];
 }
 
 - (void)fullscreenVideoAdVideoDataDidLoad:(BUFullscreenVideoAd *)fullscreenVideoAd {
+    AdapterTrace;
     self.isAdLoaded = YES;
     [self setCallbackStatus:MovieRewardCallbackFetchComplete];
 }
 
 - (void)fullscreenVideoAdWillVisible:(BUFullscreenVideoAd *)fullscreenVideoAd {
-    NSLog(@"%s", __func__);
+    AdapterTrace;
 }
 
 - (void)fullscreenVideoAdDidVisible:(BUFullscreenVideoAd *)fullscreenVideoAd {
+    AdapterTrace;
     [self setCallbackStatus:MovieRewardCallbackPlayStart];
 }
 
 - (void)fullscreenVideoAdDidClick:(BUFullscreenVideoAd *)fullscreenVideoAd {
-    NSLog(@"%s", __func__);
+    AdapterTrace;
 }
 
 - (void)fullscreenVideoAdWillClose:(BUFullscreenVideoAd *)fullscreenVideoAd {
-    NSLog(@"%s", __func__);
+    AdapterTrace;
 }
 
 - (void)fullscreenVideoAdDidClose:(BUFullscreenVideoAd *)fullscreenVideoAd {
+    AdapterTrace;
     [self setCallbackStatus:MovieRewardCallbackClose];
 }
 
 - (void)fullscreenVideoAdDidPlayFinish:(BUFullscreenVideoAd *)fullscreenVideoAd didFailWithError:(NSError *_Nullable)error {
+    AdapterTrace;
     [self setCallbackStatus:MovieRewardCallbackPlayComplete];
 }
 
 - (void)fullscreenVideoAdDidClickSkip:(BUFullscreenVideoAd *)fullscreenVideoAd {
-    NSLog(@"%s", __func__);
+    AdapterTrace;
 }
 
 @end

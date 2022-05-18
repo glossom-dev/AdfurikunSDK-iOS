@@ -23,7 +23,7 @@
 }
 
 + (NSString *)getAdapterRevisionVersion {
-    return @"6";
+    return @"7";
 }
 
 - (void)setData:(NSDictionary *)data {
@@ -52,7 +52,7 @@
         @try {
             [self requireToAsyncInit];
             
-            [MovieConfigure6017.sharedInstance configureWithAppId:self.tiktokAppID completion:^{
+            [MovieConfigure6017.sharedInstance configureWithAppId:self.tiktokAppID gdprStatus:self.hasGdprConsent completion:^{
                 [self initCompleteAndRetryStartAdIfNeeded];
             }];
         } @catch (NSException *exception) {
@@ -105,13 +105,12 @@
 }
 
 - (BOOL)isClassReference {
-    NSLog(@"MovieReward6017 isClassReference");
     Class clazz = NSClassFromString(@"BURewardedVideoAd");
     if (clazz) {
-        NSLog(@"found Class: BURewardedVideoAd");
+        AdapterLog(@"found Class: BURewardedVideoAd");
         return YES;
     } else {
-        NSLog(@"Not found Class: BURewardedVideoAd");
+        AdapterLog(@"Not found Class: BURewardedVideoAd");
         return NO;
     }
 }
@@ -119,46 +118,51 @@
 #pragma mark - BURewardedVideoAdDelegate
 
 - (void)rewardedVideoAdDidLoad:(BURewardedVideoAd *)rewardedVideoAd {
-    NSLog(@"%s", __func__);
+    AdapterTrace;
 }
 
 
 - (void)rewardedVideoAd:(BURewardedVideoAd *)rewardedVideoAd didFailWithError:(NSError *_Nullable)error {
+    AdapterTrace;
     if (error) {
-        NSLog(@"didFailToLoadAdWithError : %@", error);
+        AdapterTraceP(@"error : %@", error);
         [self setErrorWithMessage:error.localizedDescription code:error.code];
     }
     [self setCallbackStatus:MovieRewardCallbackFetchFail];
 }
 
 - (void)rewardedVideoAdVideoDidLoad:(BURewardedVideoAd *)rewardedVideoAd {
+    AdapterTrace;
     self.isAdLoaded = YES;
     [self setCallbackStatus:MovieRewardCallbackFetchComplete];
 }
 
 - (void)rewardedVideoAdWillVisible:(BURewardedVideoAd *)rewardedVideoAd {
-    NSLog(@"%s", __func__);
+    AdapterTrace;
 }
 
 - (void)rewardedVideoAdDidVisible:(BURewardedVideoAd *)rewardedVideoAd {
+    AdapterTrace;
     [self setCallbackStatus:MovieRewardCallbackPlayStart];
 }
 
 - (void)rewardedVideoAdWillClose:(BURewardedVideoAd *)rewardedVideoAd {
-    NSLog(@"%s", __func__);
+    AdapterTrace;
 }
 
 - (void)rewardedVideoAdDidClose:(BURewardedVideoAd *)rewardedVideoAd {
+    AdapterTrace;
     [self setCallbackStatus:MovieRewardCallbackClose];
 }
 
 - (void)rewardedVideoAdDidClick:(BURewardedVideoAd *)rewardedVideoAd {
-    NSLog(@"%s", __func__);
+    AdapterTrace;
 }
 
 - (void)rewardedVideoAdDidPlayFinish:(BURewardedVideoAd *)rewardedVideoAd didFailWithError:(NSError *_Nullable)error {
+    AdapterTrace;
     if (error) {
-        NSLog(@"rewardedVideoAdDidPlayFinishWithError : %@", error);
+        AdapterTraceP(@"error : %@", error);
         [self setErrorWithMessage:error.localizedDescription code:error.code];
         [self setCallbackStatus:MovieRewardCallbackPlayFail];
     } else {
@@ -167,7 +171,7 @@
 }
 
 - (void)rewardedVideoAdDidClickSkip:(BURewardedVideoAd *)rewardedVideoAd {
-    NSLog(@"%s", __func__);
+    AdapterTrace;
 }
 
 @end
@@ -216,7 +220,7 @@ typedef enum : NSUInteger {
     return self;
 }
 
-- (void)configureWithAppId:(NSString *)appId completion:(completionHandlerType)completionHandler {
+- (void)configureWithAppId:(NSString *)appId gdprStatus:(NSNumber *)gdprStatus completion:(completionHandlerType)completionHandler {
     if (!appId || !completionHandler) {
         return;
     }
@@ -239,8 +243,11 @@ typedef enum : NSUInteger {
             @try {
 
                 BUAdSDKConfiguration *configuration = [BUAdSDKConfiguration configuration];
+                if (gdprStatus) {
+                    configuration.GDPR = gdprStatus;
+                    NSLog(@"[ADF] Adnetwork 6017, gdprConsent : %@, sdk setting value : %@", gdprStatus, configuration.GDPR);
+                }
                 configuration.territory = BUAdSDKTerritory_NO_CN;
-                configuration.coppa = @(0);
                 configuration.logLevel = BUAdSDKLogLevelNone;
                 //configuration.logLevel = BUAdSDKLogLevelDebug;
                 configuration.appID = appId;
@@ -254,7 +261,7 @@ typedef enum : NSUInteger {
                     }
                 }];
             } @catch (NSException *exception) {
-                NSLog(@"adnetwork exception : %@", exception);
+                NSLog(@"[ADF] adnetwork exception : %@", exception);
             }
         });
     }

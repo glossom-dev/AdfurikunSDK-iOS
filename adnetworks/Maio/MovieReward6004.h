@@ -35,5 +35,6 @@
 @interface MovieDelegate6004 : ADFmyMovieDelegateBase<MaioDelegate>
 @property (nonatomic) BOOL closeFlg;
 + (instancetype)sharedInstance;
+- (MaioInstance *)startWithMediaId:(NSString *)mediaId;
 
 @end

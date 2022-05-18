@@ -25,7 +25,7 @@
 @implementation MovieNative6019
 
 + (NSString *)getAdapterRevisionVersion {
-    return @"5";
+    return @"6";
 }
 
 - (void)setData:(NSDictionary *)data {
@@ -95,7 +95,14 @@
             self.adLoader.delegate = self;
         }
         [self requireToAsyncRequestAd];
-        [self.adLoader loadRequest:[GADRequest request]];
+        GADRequest *request = [GADRequest request];
+        if (self.hasGdprConsent) {
+            GADExtras *extras = [[GADExtras alloc] init];
+            extras.additionalParameters = @{@"npa": self.hasGdprConsent.boolValue ? @"1" : @"0"};
+            [request registerAdNetworkExtras:extras];
+            NSLog(@"[ADF] Adnetwork 6019, gdprConsent : %@, sdk setting value : %@", self.hasGdprConsent, extras.additionalParameters);
+        }
+        [self.adLoader loadRequest:request];
     } @catch (NSException *exception) {
         [self adnetworkExceptionHandling:exception];
     }

@@ -34,14 +34,13 @@
 }
 
 - (BOOL)isClassReference {
-    NSLog(@"MovieNatve6017 isClassReference");
     Class clazz = NSClassFromString(@"BUNativeAd");
     if (clazz) {
-        NSLog(@"found Class: BUNativeAd");
+        AdapterLog(@"found Class: BUNativeAd");
         return YES;
     }
     else {
-        NSLog(@"Not found Class: BUNativeAd");
+        AdapterLog(@"Not found Class: BUNativeAd");
         return NO;
     }
     return YES;
@@ -67,13 +66,12 @@
         return;
     }
 
-    NSLog(@"MovieNatve6017 initAdnetworkIfNeeded");
+    AdapterLog(@"MovieNatve6017 initAdnetworkIfNeeded");
     if (self.pangleAppID) {
-        NSLog(@"%s", __FUNCTION__);
         @try {
             [self requireToAsyncInit];
             
-            [MovieConfigure6017.sharedInstance configureWithAppId:self.pangleAppID completion:^{
+            [MovieConfigure6017.sharedInstance configureWithAppId:self.pangleAppID gdprStatus:self.hasGdprConsent completion:^{
                 [self initCompleteAndRetryStartAdIfNeeded];
             }];
         } @catch (NSException *exception) {
@@ -98,7 +96,7 @@
     if (self.pangleAppID == nil || self.pangleSlotID == nil) {
         return;
     }
-    NSLog(@"MovieNatve6017 : startAd");
+    AdapterTrace;
     
     if (self.nativeAd) {
         self.nativeAd = nil;
@@ -138,9 +136,8 @@
 This method is called when native ad material loaded successfully.
 */
 - (void)nativeAdDidLoad:(BUNativeAd *)nativeAd {
-    NSLog(@"%s called", __FUNCTION__);
+    AdapterTraceP(@"nativeAd : %@", nativeAd);
     BUMaterialMeta *adMeta = nativeAd.data;
-    NSLog(@"%s nativeAd : %@", __FUNCTION__, nativeAd);
     MovieNativeAdInfo6017 *info = [[MovieNativeAdInfo6017 alloc] initWithVideoUrl:nil
                                                                             title:adMeta.AdTitle
                                                                       description:adMeta.AdDescription
@@ -162,7 +159,7 @@ This method is called when native ad material loaded successfully.
         [self.nativeAd registerContainer:self.relatedView.videoAdView withClickableViews:@[]];
     } else {
         if (adMeta.imageAry.count == 0 || adMeta.imageAry.firstObject.imageURL.length == 0) {
-            NSLog(@"%s metadata is invalid %@", __FUNCTION__, adMeta);
+            AdapterLogP(@"metadata is invalid %@", adMeta);
             [self sendLoadError:nil];
             return;
         }
@@ -195,7 +192,7 @@ This method is called when native ad material loaded successfully.
 }
 
 - (void)sendLoadError:(NSError *)error {
-    NSLog(@"%s error : %@", __FUNCTION__, error);
+    AdapterLogP(@"error : %@", error);
     if (error) {
         [self setErrorWithMessage:error.localizedDescription code:error.code];
     }
@@ -219,7 +216,7 @@ This method is called when native ad materia failed to load.
 @param error : the reason of error
 */
 - (void)nativeAd:(BUNativeAd *)nativeAd didFailWithError:(NSError *_Nullable)error {
-    NSLog(@"%s called (%@)", __FUNCTION__, error);
+    AdapterTraceP(@"error : %@", error);
     [self sendLoadError:error];
 }
 
@@ -227,7 +224,7 @@ This method is called when native ad materia failed to load.
 This method is called when native ad slot has been shown.
 */
 - (void)nativeAdDidBecomeVisible:(BUNativeAd *)nativeAd {
-    NSLog(@"%s called", __FUNCTION__);
+    AdapterTrace;
     if (self.adInfo.mediaType == ADFNativeAdType_Image) {
         [self sendRendering];
         [self startViewabilityCheck];
@@ -238,7 +235,7 @@ This method is called when native ad slot has been shown.
 This method is called when native ad is clicked.
 */
 - (void)nativeAdDidClick:(BUNativeAd *)nativeAd withView:(UIView *_Nullable)view {
-    NSLog(@"%s called", __FUNCTION__);
+    AdapterTrace;
     [self setCallbackStatus:NativeAdCallbackClick];
 }
 
@@ -248,7 +245,7 @@ Only used for dislikeButton in BUNativeAdRelatedView.h
 @param filterWords : reasons for dislike
 */
 - (void)nativeAd:(BUNativeAd *)nativeAd dislikeWithReason:(NSArray<BUDislikeWords *> *)filterWords {
-    NSLog(@"%s called", __FUNCTION__);
+    AdapterTrace;
 }
 
 #pragma mark BUVideoAdViewDelegate
@@ -258,7 +255,7 @@ This method is called when videoadview failed to play.
 @param error : the reason of error
 */
 - (void)videoAdView:(BUVideoAdView *)videoAdView didLoadFailWithError:(NSError *_Nullable)error {
-    NSLog(@"%s called", __FUNCTION__);
+    AdapterTraceP(@"error : %@", error);
     [self setCallbackStatus:NativeAdCallbackPlayFail];
 }
 
@@ -267,7 +264,7 @@ This method is called when videoadview playback status changed.
 @param playerState : player state after changed
 */
 - (void)videoAdView:(BUVideoAdView *)videoAdView stateDidChanged:(BUPlayerPlayState)playerState {
-    NSLog(@"%s called", __FUNCTION__);
+    AdapterTraceP(@"state : %d", (int)playerState);
     if (playerState == BUPlayerStatePlaying) {
         [self sendPlayStart];
     }
@@ -277,7 +274,7 @@ This method is called when videoadview playback status changed.
 This method is called when videoadview end of play.
 */
 - (void)playerDidPlayFinish:(BUVideoAdView *)videoAdView {
-    NSLog(@"%s called", __FUNCTION__);
+    AdapterTrace;
     if (self.didSendPlayFinishCallback) {
         return;;
     }
@@ -293,7 +290,7 @@ This method is called when videoadview end of play.
 @implementation MovieNativeAdInfo6017
 
 - (void)playMediaView {
-    NSLog(@"%s", __func__);
+    NSLog(@"[ADF] %s", __func__);
 }
 
 @end

@@ -74,9 +74,6 @@
             [self adnetworkExceptionHandling:exception];
         }
     }
-
-    // 動画広告のターゲティング
-    [self setTargeting];
 }
 
 /**< 広告の読み込み開始 */
@@ -114,7 +111,7 @@
             }
         }
         if (topMostViewController == nil) {
-            NSLog(@"Error encountered playing ad : could not fetch topmost viewcontroller");
+            AdapterLog(@"Error encountered playing ad : could not fetch topmost viewcontroller");
             [self setCallbackStatus:MovieRewardCallbackPlayFail];
         }
     }
@@ -146,33 +143,10 @@
     Class clazz = NSClassFromString(@"NADInterstitialVideo");
     if (clazz) {
     } else {
-        NSLog(@"Not found Class: NendAd");
+        AdapterLog(@"Not found Class: NendAd");
         return NO;
     }
     return YES;
-}
-
-- (void)setTargeting {
-    @try {
-        NADUserFeature *feature = [NADUserFeature new];
-        // 年齢
-        int age = [ADFMovieOptions getUserAge];
-        if (age > 0) {
-            feature.age = age;
-            self.interstitialVideo.userFeature = feature;
-        }
-        // 性別
-        ADFMovieOptions_Gender gender = [ADFMovieOptions getUserGender];
-        if (ADFMovieOptions_Gender_Male == gender) {
-            feature.gender = NADGenderMale;
-            self.interstitialVideo.userFeature = feature;
-        } else if (ADFMovieOptions_Gender_Female == gender) {
-            feature.gender = NADGenderFemale;
-            self.interstitialVideo.userFeature = feature;
-        }
-    } @catch (NSException *exception) {
-        [self adnetworkExceptionHandling:exception];
-    }
 }
 
 -(void)dealloc{
@@ -183,7 +157,7 @@
 #pragma mark - NADInterstitialVideoDelegate
 - (void)nadInterstitialVideoAdDidReceiveAd:(NADInterstitialVideo *)nadInterstitialVideoAd
 {
-    NSLog(@"%s", __FUNCTION__);
+    AdapterTrace;
     self.isNADVideoAdTypeNormal = NO;
     self.didPlayComplete = NO;
     [self setCallbackStatus:MovieRewardCallbackFetchComplete];
@@ -191,26 +165,26 @@
 
 - (void)nadInterstitialVideoAd:(NADInterstitialVideo *)nadInterstitialVideoAd didFailToLoadWithError:(NSError *)error
 {
-    NSLog(@"%s error: %@", __FUNCTION__, error);
+    AdapterTraceP(@"error: %@", error);
     [self setErrorWithMessage:error.localizedDescription code:error.code];
     [self setCallbackStatus:MovieRewardCallbackFetchFail];
 }
 
 - (void)nadInterstitialVideoAdDidFailedToPlay:(NADInterstitialVideo *)nadInterstitialVideoAd
 {
-    NSLog(@"%s", __FUNCTION__);
+    AdapterTrace;
     [self setCallbackStatus:MovieRewardCallbackPlayFail];
 }
 
 - (void)nadInterstitialVideoAdDidOpen:(NADInterstitialVideo *)nadInterstitialVideoAd
 {
-    NSLog(@"%s", __FUNCTION__);
+    AdapterTrace;
     [self setCallbackStatus:MovieRewardCallbackPlayStart];
 }
 
 - (void)nadInterstitialVideoAdDidClose:(NADInterstitialVideo *)nadInterstitialVideoAd
 {
-    NSLog(@"%s", __FUNCTION__);
+    AdapterTrace;
     if (!self.isNADVideoAdTypeNormal && !self.didPlayComplete) {
         [self setCallbackStatus:MovieRewardCallbackPlayComplete];
     }
@@ -219,23 +193,23 @@
 
 - (void)nadInterstitialVideoAdDidClickAd:(NADInterstitialVideo *)nadInterstitialVideoAd
 {
-    NSLog(@"%s", __FUNCTION__);
+    AdapterTrace;
 }
 
 - (void)nadInterstitialVideoAdDidClickInformation:(NADInterstitialVideo *)nadInterstitialVideoAd
 {
-    NSLog(@"%s", __FUNCTION__);
+    AdapterTrace;
 }
 // only adType NADVideoAdTypeNormal
 - (void)nadInterstitialVideoAdDidStartPlaying:(NADInterstitialVideo *)nadInterstitialVideoAd
 {
-    NSLog(@"%s", __FUNCTION__);
+    AdapterTrace;
     self.isNADVideoAdTypeNormal = YES;
 }
 // only adType NADVideoAdTypeNormal
 - (void)nadInterstitialVideoAdDidCompletePlaying:(NADInterstitialVideo *)nadInterstitialVideoAd
 {
-    NSLog(@"%s", __FUNCTION__);
+    AdapterTrace;
     if (!self.didPlayComplete) {
         [self setCallbackStatus:MovieRewardCallbackPlayComplete];
         self.didPlayComplete = YES;
@@ -244,7 +218,7 @@
 //only adType NADVideoAdTypeNormal
 - (void)nadInterstitialVideoAdDidStopPlaying:(NADInterstitialVideo *)nadInterstitialVideoAd
 {
-    NSLog(@"%s", __FUNCTION__);
+    AdapterTrace;
 }
 
 @end
