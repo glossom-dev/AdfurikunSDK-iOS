@@ -22,6 +22,12 @@ typedef NS_ENUM(NSInteger, ADFMovieOptions_Sound) {
     ADFMovieOptions_Sound_Off = 2,
 };
 
+typedef NS_ENUM(NSInteger, ADFMovieOptionsRegion) {
+    ADFMovieOptionsRegionDeviceSetting = 0,
+    ADFMovieOptionsRegionJapan = 1,
+    ADFMovieOptionsRegionForeign = 2,
+};
+
 @interface ADFMovieOptions : NSObject
 
 /**
@@ -79,5 +85,8 @@ typedef NS_ENUM(NSInteger, ADFMovieOptions_Sound) {
  */
 + (void)setAppIdsForStartupCacheRegardlessOfExpiring:( NSArray <NSString *>* _Nonnull)appIdList;
 + (NSArray <NSString *>* _Nullable)getAppIdsForStartupCacheRegardlessOfExpiring;
+
++ (void)setRegion:(ADFMovieOptionsRegion)region;
++ (ADFMovieOptionsRegion)getRegion;
 
 @end

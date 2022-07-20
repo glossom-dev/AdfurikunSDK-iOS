@@ -25,7 +25,7 @@
 }
 
 + (NSString *)getAdapterRevisionVersion {
-    return @"4";
+    return @"5";
 }
 
 - (BOOL)isClassReference {
@@ -178,6 +178,10 @@
 - (void)adColonyAdViewDidReceiveClick:(AdColonyAdView *)adView {
     AdapterTrace;
     [self setCallbackStatus:NativeAdCallbackClick];
+}
+
+- (void)adColonyAdViewDidShow:(AdColonyAdView *)adView {
+    AdapterTrace;
 }
 
 @end

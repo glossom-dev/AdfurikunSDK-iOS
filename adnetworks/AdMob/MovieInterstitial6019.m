@@ -160,7 +160,7 @@
     [self setCallbackStatus:MovieRewardCallbackPlayFail];
 }
 
-- (void)adDidPresentFullScreenContent:(nonnull id<GADFullScreenPresentingAd>)ad {
+- (void)adWillPresentFullScreenContent:(nonnull id<GADFullScreenPresentingAd>)ad {
     NSLog(@"%s called", __func__);
 }
 

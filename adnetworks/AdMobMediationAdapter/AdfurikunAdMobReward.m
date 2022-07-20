@@ -32,7 +32,7 @@
     return version;
 }
 
-+ (GADVersionNumber)version {
++ (GADVersionNumber)adapterVersion {
     NSString *versionString = @"1.0.0";
     NSArray *versionComponents = [versionString componentsSeparatedByString:@"."];
     GADVersionNumber version = {0};

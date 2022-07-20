@@ -10,11 +10,7 @@
 
 NS_ASSUME_NONNULL_BEGIN
 
-@interface ADFAdMobNativeAdCustomInfo : NSObject <GADMediatedUnifiedNativeAd, ADFMediaViewDelegate>
-- (id)initWithADFNativeAdInfo:(ADFNativeAdInfo *)adInfo;
-@end
-
-@interface AdfurikunAdMobNativeAd : NSObject <GADCustomEventNativeAd, ADFmyNativeAdDelegate>
+@interface AdfurikunAdMobNativeAd : NSObject <GADMediationAdapter, GADMediationNativeAd, ADFmyNativeAdDelegate, ADFMediaViewDelegate>
 @property (nonatomic)ADFmyNativeAd *nativeAd;
 @end
 

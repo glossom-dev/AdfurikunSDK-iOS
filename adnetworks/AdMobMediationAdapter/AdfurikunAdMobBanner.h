@@ -10,9 +10,11 @@
 
 NS_ASSUME_NONNULL_BEGIN
 
-@interface AdfurikunAdMobBanner : NSObject <GADCustomEventBanner, ADFmyNativeAdDelegate, ADFMediaViewDelegate>
+@interface AdfurikunAdMobBanner : NSObject <GADMediationAdapter, GADMediationBannerAd, ADFmyNativeAdDelegate, ADFMediaViewDelegate>
 @property(nonatomic)ADFmyBanner *bannerAd;
 @property CGRect bannerSize;
+@property(nonatomic, weak, nullable) id<GADMediationAdEventDelegate> delegate;
+@property(nonatomic) GADMediationBannerLoadCompletionHandler closure;
 
 @end
 
