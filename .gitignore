@@ -28,6 +28,8 @@ xcuserdata
 *.xcuserstate
 *.xcscmblueprint
 
+removeSDK.sh
+
 ## CocoaPods
 Pods
 Podfile

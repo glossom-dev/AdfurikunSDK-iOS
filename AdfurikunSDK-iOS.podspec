@@ -46,18 +46,25 @@ Pod::Spec.new do |s|
     fan.resource = '**/adnetworks/FAN/*.txt'
   end
 
-  s.subspec 'Maio' do |maio|
-    maio.dependency 'AdfurikunSDK-iOS/Core'
-    maio.dependency 'MaioSDK', '1.6.2'
-    maio.source_files = '**/adnetworks/Maio/*.{h,m}'
-    maio.resource = '**/adnetworks/Maio/*.txt'
-  end
-
   s.subspec 'Five' do |five|
     five.dependency 'AdfurikunSDK-iOS/Core'
     five.dependency 'FiveAd', '2.4.20220630'
     five.source_files = '**/adnetworks/Five/*.{h,m}'
     five.resource = '**/adnetworks/Five/*.txt'
+  end
+
+  s.subspec 'ironSource' do |ironSource|
+    ironSource.dependency 'AdfurikunSDK-iOS/Core'
+    ironSource.dependency 'IronSourceSDK', '7.2.4.0'
+    ironSource.source_files = '**/adnetworks/IronSource/*.{h,m}'
+    ironSource.resource = '**/adnetworks/IronSource/*.txt'
+  end
+
+  s.subspec 'Maio' do |maio|
+    maio.dependency 'AdfurikunSDK-iOS/Core'
+    maio.dependency 'MaioSDK', '1.6.2'
+    maio.source_files = '**/adnetworks/Maio/*.{h,m}'
+    maio.resource = '**/adnetworks/Maio/*.txt'
   end
 
   s.subspec 'NendAd' do |nendad|
@@ -101,8 +108,9 @@ Pod::Spec.new do |s|
     all.dependency 'AdfurikunSDK-iOS/AdMob'
     all.dependency 'AdfurikunSDK-iOS/AppLovin'
     all.dependency 'AdfurikunSDK-iOS/FAN'
-    all.dependency 'AdfurikunSDK-iOS/Maio'
     all.dependency 'AdfurikunSDK-iOS/Five'
+    all.dependency 'AdfurikunSDK-iOS/ironSource'
+    all.dependency 'AdfurikunSDK-iOS/Maio'
     all.dependency 'AdfurikunSDK-iOS/NendAd'
     all.dependency 'AdfurikunSDK-iOS/Pangle'
     all.dependency 'AdfurikunSDK-iOS/Tapjoy'

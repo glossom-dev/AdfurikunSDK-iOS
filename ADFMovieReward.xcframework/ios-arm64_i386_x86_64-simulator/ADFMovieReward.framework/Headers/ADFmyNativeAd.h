@@ -70,6 +70,7 @@ NS_ASSUME_NONNULL_BEGIN
  */
 + (void)removeAllWebViewData;
 
+
 /**
  広告の取得リクエスト
  @param delegate ADFmyMovieNativeDelegateに準拠したデリゲート
@@ -77,6 +78,8 @@ NS_ASSUME_NONNULL_BEGIN
 - (void)loadAndNotifyTo:(id<ADFmyNativeAdDelegate> _Nullable)delegate;
 - (void)loadAndNotifyTo:(id<ADFmyNativeAdDelegate> _Nullable)delegate customParam:(NSDictionary * _Nullable)param;
 - (void)loadAndNotifyTo:(id<ADFmyNativeAdDelegate>)delegate customParam:(NSDictionary *)param optiton:(NSDictionary *)option;
+
+- (void)setLoadingTimeout:(int)timeout;
 
 -(void)setTrackingId:(NSDictionary*)trackingId;
 
