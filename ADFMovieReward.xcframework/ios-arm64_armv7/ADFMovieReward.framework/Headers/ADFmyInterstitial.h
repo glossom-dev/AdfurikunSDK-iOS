@@ -31,6 +31,15 @@ NS_ASSUME_NONNULL_BEGIN
  *
  */
 -(void)load;
+
+/**
+ *  動画ローディングを開始する。
+ *  広告表示準備のためには必ず呼び出してください。load関数を呼び出さないと広告準備ができなくて再生ができなくなります。
+ 
+  @param timeout 広告準備完了、失敗Callbackが呼ばれるまでのTimeout。1秒から60秒まで設定可能
+ */
+-(void)loadWithTimeout:(int)timeout;
+
 -(void)play;
 -(void)playWithCustomParam:(NSDictionary*)param;
 -(void)playWithPresentingViewController:(UIViewController * _Nullable)viewController;

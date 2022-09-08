@@ -27,7 +27,7 @@ Pod::Spec.new do |s|
 
   s.subspec 'AdMob' do |admob|
     admob.dependency 'AdfurikunSDK-iOS/Core'
-    admob.dependency 'Google-Mobile-Ads-SDK', '8.13.0'
+    admob.dependency 'Google-Mobile-Ads-SDK', '9.5.0'
     admob.source_files = '**/adnetworks/AdMob/*.{h,m}'
     admob.resource = '**/adnetworks/AdMob/*.{txt,xib}'
   end
@@ -37,6 +37,13 @@ Pod::Spec.new do |s|
     applovin.dependency 'AppLovinSDK', '11.4.3'
     applovin.source_files = '**/adnetworks/AppLovin/*.{h,m}'
     applovin.resource = '**/adnetworks/AppLovin/*.txt'
+  end
+
+  s.subspec 'IronSource' do |ironSource|
+    ironSource.dependency 'AdfurikunSDK-iOS/Core'
+    ironSource.dependency 'IronSourceSDK', '7.2.4.0'
+    ironSource.source_files = '**/adnetworks/IronSource/*.{h,m}'
+    ironSource.resource = '**/adnetworks/IronSource/*.txt'
   end
 
   s.subspec 'FAN' do |fan|
@@ -100,6 +107,7 @@ Pod::Spec.new do |s|
     all.dependency 'AdfurikunSDK-iOS/AdColony'
     all.dependency 'AdfurikunSDK-iOS/AdMob'
     all.dependency 'AdfurikunSDK-iOS/AppLovin'
+    all.dependency 'AdfurikunSDK-iOS/IronSource'
     all.dependency 'AdfurikunSDK-iOS/FAN'
     all.dependency 'AdfurikunSDK-iOS/Maio'
     all.dependency 'AdfurikunSDK-iOS/Five'

@@ -10,15 +10,21 @@
 
 NS_ASSUME_NONNULL_BEGIN
 
-#define AdapterTrace [self printLogWithParam:@"Adnetwork SDK callback [%s L:%d]", __func__, __LINE__];
-#define AdapterTraceP(fmt, ...) [self printLogWithParam:@"Adnetwork SDK callback [%s L:%d] %@", __func__, __LINE__, [NSString stringWithFormat:fmt, __VA_ARGS__]];
-#define AdapterLog(str) [self printLogWithParam:@"[%s L:%d] %@", __func__, __LINE__, str];
-#define AdapterLogP(fmt, ...) [self printLogWithParam:@"[%s L:%d] %@", __func__, __LINE__, [NSString stringWithFormat:fmt, __VA_ARGS__]];
+#define AdapterTrace [self printLogWithParam:@"Adnetwork Adapter SDK callback [%s L:%d]", __func__, __LINE__];
+#define AdapterTraceP(fmt, ...) [self printLogWithParam:@"Adnetwork Adapter SDK callback [%s L:%d] %@", __func__, __LINE__, [NSString stringWithFormat:fmt, __VA_ARGS__]];
+#define AdapterLog(str) [self printLogWithParam:@"Adnetwork Adapter Log [%s L:%d] %@", __func__, __LINE__, str];
+#define AdapterLogP(fmt, ...) [self printLogWithParam:@"Adnetwork Adapter Log [%s L:%d] %@", __func__, __LINE__, [NSString stringWithFormat:fmt, __VA_ARGS__]];
 
 @class UIViewController;
 @protocol ADFMovieRewardDelegate;
 
-@interface ADFmyBaseAdapterInterface : NSObject<NSCopying>
+@interface ADFmyAdapterLogger : NSObject
+
+-(void)printLogWithParam:(NSString *)format, ...;
+
+@end
+
+@interface ADFmyBaseAdapterInterface : ADFmyAdapterLogger<NSCopying>
 
 @property (nonatomic, weak) NSObject *delegate;
 
@@ -98,7 +104,10 @@ NS_ASSUME_NONNULL_BEGIN
 -(void)requireToAsyncPlay;
 -(void)asyncPlayComplete;
 
--(void)printLogWithParam:(NSString *)format, ...;
+-(bool)isString:(NSObject *)object;
+-(bool)isNumber:(NSObject *)object;
+-(bool)isArray:(NSObject *)object;
+-(bool)isDictionary:(NSObject *)object;
 
 @end
 
