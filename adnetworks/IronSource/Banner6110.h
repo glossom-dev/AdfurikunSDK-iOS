@@ -14,6 +14,7 @@ NS_ASSUME_NONNULL_BEGIN
 @interface Banner6110 : ADFmyMovieNativeInterface
 
 @property (nonatomic) ISBannerSize *bannerSize;
+@property (nonatomic, nullable) ISBannerView *bannerView;
 
 @end
 

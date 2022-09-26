@@ -12,7 +12,7 @@
 @interface Banner6110 ()
 
 @property (nonatomic) NSString *appKey;
-@property (nonatomic) NSString *placement;
+@property (nonatomic) NSString *instanceId;
 
 @end
 
@@ -26,7 +26,7 @@
 
 // Adapterのバージョン。最初は1にして、修正がある度＋1にする
 + (NSString *)getAdapterRevisionVersion {
-    return @"1";
+    return @"2";
 }
 
 // Adnetwork SDKが設置されているかをチェックする
@@ -50,10 +50,7 @@
         self.appKey = [NSString stringWithFormat:@"%@", appKey];
     }
     
-    NSString *placement = [data objectForKey:@"placement"];
-    if ([self isString:placement]) {
-        self.placement = [NSString stringWithFormat:@"%@", placement];
-    }
+    self.instanceId = kAdnetwork6110DefaultInstanceId;
 }
 
 // 広告準備有無を返す
@@ -77,9 +74,9 @@
     }
     
     self.bannerSize = ISBannerSize_SMART;
-    
+    [IronSource initWithAppKey:self.appKey];
+    [self initCompleteAndRetryStartAdIfNeeded];
     [AdnetworkConfigure6110.sharedInstance initIronSource:self.appKey completion:^{
-        [self initCompleteAndRetryStartAdIfNeeded];
     }];
 }
 
@@ -95,17 +92,22 @@
         return;
     }
     
+    [super startAd];
+    
     self.isAdLoaded = false;
 
-    [AdnetworkConfigure6110.sharedInstance destroyBannerView];
+    if (self.bannerView) {
+        [IronSource destroyBanner:self.bannerView];
+        self.bannerView = nil;
+    }
     
     // Adnetwork SDKの関数を呼び出す際はTryーCatchでException Handlingを行う
     @try {
         // 非同期で行われる場合にはFlag設定を行う
         [self requireToAsyncRequestAd];
-        
-        AdnetworkConfigure6110.sharedInstance.bannerAdapter = self;
-        [IronSource loadBannerWithViewController:topVC size:self.bannerSize placement:self.placement];
+
+        [AdnetworkConfigure6110.sharedInstance setBannerAdapter:self instanceId:kAdnetwork6110DefaultInstanceId];
+        [IronSource loadBannerWithViewController:topVC size:self.bannerSize];
     } @catch (NSException *exception) {
         [self adnetworkExceptionHandling:exception];
     }
@@ -117,7 +119,10 @@
 
 - (void)dispose {
     AdapterTrace;
-    [AdnetworkConfigure6110.sharedInstance destroyBannerView];
+    if (self.bannerView) {
+        [IronSource destroyBanner:self.bannerView];
+        self.bannerView = nil;
+    }
 }
 
 /*

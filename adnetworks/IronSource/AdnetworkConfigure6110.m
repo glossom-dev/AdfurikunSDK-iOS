@@ -11,9 +11,10 @@
 
 @interface AdnetworkConfigure6110 ()
 
-@property (nonatomic) NSMutableArray <completionHandlerType> *handlers;
 @property (nonatomic) bool isInitialized;
-@property (nonatomic, nullable) ISBannerView *bannerView;
+@property (nonatomic) NSMutableDictionary <NSString *, ADFmyMovieRewardInterface*> *movieRewardAdapters;
+@property (nonatomic) NSMutableDictionary <NSString *, ADFmyMovieRewardInterface*> *interstitialAdapters;
+@property (nonatomic) NSMutableDictionary <NSString *, ADFmyMovieNativeInterface*> *bannerAdapters;
 
 @end
 
@@ -31,8 +32,10 @@
 - (instancetype)init {
     self = [super init];
     if (self) {
-        self.handlers = [NSMutableArray new];
         self.isInitialized = false;
+        self.movieRewardAdapters = [NSMutableDictionary new];
+        self.interstitialAdapters = [NSMutableDictionary new];
+        self.bannerAdapters = [NSMutableDictionary new];
     }
     return self;
 }
@@ -43,204 +46,220 @@
         return;
     }
     
-    [self.handlers addObject:completionHandler];
-    
     @try {
-        [IronSource setRewardedVideoManualDelegate:self];
-        [IronSource setInterstitialDelegate:self];
+        [IronSource setISDemandOnlyRewardedVideoDelegate:self];
+        [IronSource setISDemandOnlyInterstitialDelegate:self];
         [IronSource setBannerDelegate:self];
         
-        [IronSource initWithAppKey:appKey delegate:self];
+        [IronSource initISDemandOnly:appKey adUnits:@[IS_REWARDED_VIDEO, IS_INTERSTITIAL, IS_BANNER]];
+        
+        NSString *mediationString = [NSString stringWithFormat:@"Adfurikun%@SDK%@", [Banner6110 getAdapterRevisionVersion], [ADFMovieOptions version]];
+        AdapterLogP(@"mediation string : %@", mediationString);
+        [IronSource setMediationType:mediationString];
+        
+        self.isInitialized = true;
+        completionHandler();
+        
     } @catch (NSException *exception) {
         AdapterLogP(@"[ADF] adnetwork exception : %@", exception);
     }
 }
 
-- (void)destroyBannerView {
-    if (self.bannerView) {
-        [IronSource destroyBanner:self.bannerView];
-        self.bannerView = nil;
+- (void)setMovieRewardAdapter:(ADFmyMovieRewardInterface *)adapter instanceId:(NSString *)instanceId {
+    [self.movieRewardAdapters setObject:adapter forKey:instanceId];
+}
+
+- (void)removeMovieRewardAdapterWithInstanceId:(NSString *)instanceId {
+    [self.movieRewardAdapters removeObjectForKey:instanceId];
+}
+
+- (void)setInterstitialAdapter:(ADFmyMovieRewardInterface *)adapter instanceId:(NSString *)instanceId {
+    [self.interstitialAdapters setObject:adapter forKey:instanceId];
+}
+
+- (void)removeInterstitialAdapterWithInstanceId:(NSString *)instanceId {
+    [self.interstitialAdapters removeObjectForKey:instanceId];
+}
+
+- (void)setBannerAdapter:(ADFmyMovieNativeInterface *)adapter instanceId:(NSString *)instanceId {
+    [self.bannerAdapters setObject:adapter forKey:instanceId];
+}
+
+- (void)removeBannerAdapterWithInstanceId:(NSString *)instanceId {
+    [self.bannerAdapters removeObjectForKey:instanceId];
+}
+
+
+#pragma mark - ISDemandOnlyRewardedVideoDelegate
+//Called after a rewarded video has been requested and load succeed.
+- (void)rewardedVideoDidLoad:(NSString *)instanceId {
+    AdapterTraceP(@"instance id : %@", instanceId);
+    ADFmyMovieRewardInterface *adapter = [self.movieRewardAdapters objectForKey:instanceId];
+    if (adapter) {
+        adapter.isAdLoaded = true;
+        [adapter setCallbackStatus:MovieRewardCallbackFetchComplete];
     }
 }
 
-#pragma mark -ISInitializationDelegate
-
-- (void)initializationDidComplete {
-    AdapterTrace;
-    self.isInitialized = true;
-    
-    for (completionHandlerType handler in self.handlers) {
-        handler();
-    }
-}
-
-
-#pragma mark - RewardedVideoManualListener
-/**
- Called after an rewarded video has been loaded in manual mode
- */
-- (void)rewardedVideoDidLoad {
-    AdapterTrace;
-    if (self.movieRewardAdapter) {
-        self.movieRewardAdapter.isAdLoaded = true;
-        [self.movieRewardAdapter setCallbackStatus:MovieRewardCallbackFetchComplete];
-    }
-}
-
-/**
- Called after a rewarded video has attempted to load but failed in manual mode
- 
- @param error The reason for the error
- */
-- (void)rewardedVideoDidFailToLoadWithError:(NSError *)error {
-    AdapterTraceP(@"error : %@", error);
-    if (self.movieRewardAdapter) {
-        [self.movieRewardAdapter setLastError:error];
-        [self.movieRewardAdapter setCallbackStatus:MovieRewardCallbackFetchFail];
-    }
-}
-
-//Called after a rewarded video has changed its availability.
-//@param available The new rewarded video availability. YES if available //and ready to be shown, NO otherwise.
-- (void) rewardedVideoHasChangedAvailability:(BOOL)available {
-    AdapterTraceP(@"available : %d", available);
-}
-
-// Invoked when the user completed the video and should be rewarded.
-// If using server-to-server callbacks you may ignore this events and wait *for the callback from the ironSource server.
-// @param placementInfo An object that contains the placement's reward name and amount.
-- (void)didReceiveRewardForPlacement:(ISPlacementInfo *)placementInfo {
-    AdapterTraceP(@"placementInfo : %@", placementInfo);
-    if (self.movieRewardAdapter) {
-        [self.movieRewardAdapter setCallbackStatus:MovieRewardCallbackPlayComplete];
+//Called after a rewarded video has attempted to load but failed.
+//@param error The reason for the error
+- (void)rewardedVideoDidFailToLoadWithError:(NSError *)error instanceId:(NSString* )instanceId {
+    AdapterTraceP(@"instance id : %@, error : %@", instanceId, error);
+    ADFmyMovieRewardInterface *adapter = [self.movieRewardAdapters objectForKey:instanceId];
+    if (adapter) {
+        [adapter setLastError:error];
+        [adapter setCallbackStatus:MovieRewardCallbackFetchFail];
     }
 }
 
 //Called after a rewarded video has attempted to show but failed.
 //@param error The reason for the error
-- (void)rewardedVideoDidFailToShowWithError:(NSError *)error {
-    AdapterTraceP(@"error : %@", error);
-    if (self.movieRewardAdapter) {
-        [self.movieRewardAdapter setCallbackStatus:MovieRewardCallbackPlayFail];
+- (void)rewardedVideoDidFailToShowWithError:(NSError *)error instanceId:(NSString *)instanceId {
+    AdapterTraceP(@"instance id : %@, error : %@", instanceId, error);
+    ADFmyMovieRewardInterface *adapter = [self.movieRewardAdapters objectForKey:instanceId];
+    if (adapter) {
+        [adapter setLastError:error];
+        [adapter setCallbackStatus:MovieRewardCallbackPlayFail];
+        adapter.isAdLoaded = false;
     }
 }
 
 //Called after a rewarded video has been opened.
-- (void)rewardedVideoDidOpen {
-    AdapterTrace;
-    if (self.movieRewardAdapter) {
-        [self.movieRewardAdapter setCallbackStatus:MovieRewardCallbackPlayStart];
+- (void)rewardedVideoDidOpen:(NSString *)instanceId {
+    AdapterTraceP(@"instance id : %@", instanceId);
+    ADFmyMovieRewardInterface *adapter = [self.movieRewardAdapters objectForKey:instanceId];
+    if (adapter) {
+        [adapter setCallbackStatus:MovieRewardCallbackPlayStart];
+    }
+}
+
+//Called after a rewarded video has been viewed completely and the user is //eligible for reward.
+- (void)rewardedVideoAdRewarded:(NSString *)instanceId {
+    AdapterTraceP(@"instance id : %@", instanceId);
+    ADFmyMovieRewardInterface *adapter = [self.movieRewardAdapters objectForKey:instanceId];
+    if (adapter) {
+        [adapter setCallbackStatus:MovieRewardCallbackPlayComplete];
     }
 }
 
 //Called after a rewarded video has been dismissed.
-- (void)rewardedVideoDidClose {
-    AdapterTrace;
-    if (self.movieRewardAdapter) {
-        [self.movieRewardAdapter setCallbackStatus:MovieRewardCallbackClose];
-        self.movieRewardAdapter.isAdLoaded = false;
+- (void)rewardedVideoDidClose:(NSString *)instanceId {
+    AdapterTraceP(@"instance id : %@", instanceId);
+    ADFmyMovieRewardInterface *adapter = [self.movieRewardAdapters objectForKey:instanceId];
+    if (adapter) {
+        [adapter setCallbackStatus:MovieRewardCallbackClose];
+        adapter.isAdLoaded = false;
     }
 }
 
 //Invoked when the end user clicked on the RewardedVideo ad
-- (void)didClickRewardedVideo:(ISPlacementInfo *)placementInfo{
-    AdapterTrace;
+- (void)rewardedVideoDidClick:(NSString *)instanceId {
+    AdapterTraceP(@"instance id : %@", instanceId);
 }
 
-// -------------------------------------------------------
-// Optional events - Are not available for all networks
-// -------------------------------------------------------
-
-//Called after a rewarded video has started playing.
-- (void)rewardedVideoDidStart {
-    AdapterTrace;
-}
-
-//Called after a rewarded video has finished playing.
-- (void)rewardedVideoDidEnd {
-    AdapterTrace;
-}
-
-#pragma mark - ISInterstitialDelegate
-// Invoked when Interstitial Ad is ready to be shown after load function was //called.
--(void)interstitialDidLoad {
-    AdapterTrace;
-    if (self.interstitialAdapter) {
-        self.interstitialAdapter.isAdLoaded = true;
-        [self.interstitialAdapter setCallbackStatus:MovieRewardCallbackFetchComplete];
-    }
-}
-// Called if showing the Interstitial for the user has failed.
-// You can learn about the reason by examining the ‘error’ value
--(void)interstitialDidFailToShowWithError:(NSError *)error {
-    AdapterTraceP(@"error : %@", error);
-    if (self.interstitialAdapter) {
-        [self.interstitialAdapter setLastError:error];
-        [self.interstitialAdapter setCallbackStatus:MovieRewardCallbackPlayFail];
-    }
-}
-// Called each time the end user has clicked on the Interstitial ad, for supported networks only
--(void)didClickInterstitial {
-    AdapterTrace;
-}
-// Called each time the Interstitial window is about to close
--(void)interstitialDidClose {
-    AdapterTrace;
-    if (self.interstitialAdapter) {
-        [self.interstitialAdapter setCallbackStatus:MovieRewardCallbackPlayComplete];
-        [self.interstitialAdapter setCallbackStatus:MovieRewardCallbackClose];
-        self.interstitialAdapter.isAdLoaded = false;
-    }
-}
-// Called each time the Interstitial window is about to open
--(void)interstitialDidOpen {
-    AdapterTrace;
-    if (self.interstitialAdapter) {
-        [self.interstitialAdapter setCallbackStatus:MovieRewardCallbackPlayStart];
-    }
-}
-// Invoked when there is no Interstitial Ad available after calling load function.
-// @param error - will contain the failure code and description.
--(void)interstitialDidFailToLoadWithError:(NSError *)error {
-    AdapterTraceP(@"error : %@", error);
-    if (self.interstitialAdapter) {
-        [self.interstitialAdapter setLastError:error];
-        [self.interstitialAdapter setCallbackStatus:MovieRewardCallbackFetchFail];
+#pragma mark - ISDemandOnlyInterstitialDelegate
+/**
+ Called after an interstitial has been loaded
+ */
+- (void)interstitialDidLoad:(NSString *)instanceId {
+    AdapterTraceP(@"instance id : %@", instanceId);
+    ADFmyMovieRewardInterface *adapter = [self.interstitialAdapters objectForKey:instanceId];
+    if (adapter) {
+        adapter.isAdLoaded = true;
+        [adapter setCallbackStatus:MovieRewardCallbackFetchComplete];
     }
 }
 
-// Invoked right before the Interstitial screen is about to open.
-// NOTE - This event is available only for some of the networks.
-// You should NOT treat this event as an interstitial impression, but rather use InterstitialAdOpenedEvent
--(void)interstitialDidShow {
-    AdapterTrace;
+/**
+ Called after an interstitial has attempted to load but failed.
+
+ @param error The reason for the error
+ */
+- (void)interstitialDidFailToLoadWithError:(NSError *)error instanceId:(NSString *)instanceId {
+    AdapterTraceP(@"instance id : %@, error : %@", instanceId, error);
+    ADFmyMovieRewardInterface *adapter = [self.interstitialAdapters objectForKey:instanceId];
+    if (adapter) {
+        if (error) {
+            [adapter setErrorWithMessage:error.localizedDescription code:error.code];
+        }
+        [adapter setCallbackStatus:MovieRewardCallbackPlayFail];
+        adapter.isAdLoaded = false;
+    }
+}
+
+/**
+ Called after an interstitial has been opened.
+ */
+- (void)interstitialDidOpen:(NSString *)instanceId {
+    AdapterTraceP(@"instance id : %@", instanceId);
+    ADFmyMovieRewardInterface *adapter = [self.interstitialAdapters objectForKey:instanceId];
+    if (adapter) {
+        [adapter setCallbackStatus:MovieRewardCallbackPlayStart];
+    }
+}
+
+/**
+  Called after an interstitial has been dismissed.
+ */
+- (void)interstitialDidClose:(NSString *)instanceId {
+    AdapterTraceP(@"instance id : %@", instanceId);
+    ADFmyMovieRewardInterface *adapter = [self.interstitialAdapters objectForKey:instanceId];
+    if (adapter) {
+        [adapter setCallbackStatus:MovieRewardCallbackPlayComplete];
+        [adapter setCallbackStatus:MovieRewardCallbackClose];
+        adapter.isAdLoaded = false;
+    }
+}
+
+/**
+ Called after an interstitial has attempted to show but failed.
+
+ @param error The reason for the error
+ */
+- (void)interstitialDidFailToShowWithError:(NSError *)error instanceId:(NSString *)instanceId {
+    AdapterTraceP(@"instance id : %@, error : %@", instanceId, error);
+    ADFmyMovieRewardInterface *adapter = [self.interstitialAdapters objectForKey:instanceId];
+    if (adapter) {
+        if (error) {
+            [adapter setErrorWithMessage:error.localizedDescription code:error.code];
+        }
+        [adapter setCallbackStatus:MovieRewardCallbackPlayFail];
+        adapter.isAdLoaded = false;
+    }
+}
+
+/**
+ Called after an interstitial has been clicked.
+ */
+- (void)didClickInterstitial:(NSString *)instanceId {
+    AdapterTraceP(@"instance id : %@", instanceId);
 }
 
 #pragma mark - ISBannerDelegate
 - (void)bannerDidLoad:(ISBannerView *)bannerView {
     AdapterTrace;
 
-    if (self.bannerAdapter) {
-        /** Called after a banner ad has been successfully loaded
-         */
+    ADFmyMovieNativeInterface *adapter = [self.bannerAdapters objectForKey:kAdnetwork6110DefaultInstanceId];
+    if (adapter) {
         NativeAdInfo6110 *info = [[NativeAdInfo6110 alloc] initWithVideoUrl:nil
                                                                       title:@""
                                                                 description:@""
                                                                adnetworkKey:@"6110" ];
         info.mediaType = ADFNativeAdType_Image;
         [info setupMediaView:bannerView];
-        [self.bannerAdapter setCustomMediaview:bannerView];
-        self.bannerView = bannerView;
+        [adapter setCustomMediaview:bannerView];
+        ((Banner6110 *)adapter).bannerView = bannerView;
         
-        info.adapter = self.bannerAdapter;
+        info.adapter = adapter;
         info.isCustomComponentSupported = false;
         
-        self.bannerAdapter.adInfo = info;
-        self.bannerAdapter.isAdLoaded = true;
+        adapter.adInfo = info;
+        adapter.isAdLoaded = true;
         
-        [self.bannerAdapter setCallbackStatus:NativeAdCallbackLoadFinish];
+        [adapter setCallbackStatus:NativeAdCallbackLoadFinish];
     }
 }
+
 /**
  Called after a banner has attempted to load an ad but failed.
  
@@ -248,7 +267,15 @@
  */
 - (void)bannerDidFailToLoadWithError:(NSError *)error {
     AdapterTrace;
+    ADFmyMovieNativeInterface *adapter = [self.bannerAdapters objectForKey:kAdnetwork6110DefaultInstanceId];
+    if (adapter) {
+        if (error) {
+            [adapter setErrorWithMessage:error.localizedDescription code:error.code];
+        }
+        [adapter setCallbackStatus:NativeAdCallbackLoadError];
+    }
 }
+    
 /**
  Called after a banner has been clicked.
  */
@@ -260,6 +287,10 @@
  */
 - (void)bannerWillPresentScreen {
     AdapterTrace;
+    ADFmyMovieNativeInterface *adapter = [self.bannerAdapters objectForKey:kAdnetwork6110DefaultInstanceId];
+    if (adapter) {
+        [adapter setCallbackStatus:NativeAdCallbackClick];
+    }
 }
 /**
  Called after a full screen content has been dismissed.

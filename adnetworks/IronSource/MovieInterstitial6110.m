@@ -31,9 +31,8 @@
         // 非同期で行われる場合にはFlag設定を行う
         [self requireToAsyncRequestAd];
         
-        AdnetworkConfigure6110.sharedInstance.interstitialAdapter = self;
-        [IronSource loadInterstitial];
-        
+        [AdnetworkConfigure6110.sharedInstance setInterstitialAdapter:self instanceId:self.instanceId];
+        [IronSource loadISDemandOnlyInterstitial:self.instanceId];
         AdapterLog(@"load interstitial video");
     } @catch (NSException *exception) {
         [self adnetworkExceptionHandling:exception];
@@ -41,15 +40,28 @@
 }
 
 - (void)showAdWithPresentingViewController:(UIViewController *)viewController {
+    [super showAdWithPresentingViewController:viewController];
+    
     @try {
         [self requireToAsyncPlay];
-        
-        AdnetworkConfigure6110.sharedInstance.interstitialAdapter = self;
-        [IronSource showInterstitialWithViewController:viewController placement:self.placement];
+
+        [IronSource showISDemandOnlyInterstitial:viewController instanceId:self.instanceId];
     } @catch (NSException *exception) {
         [self adnetworkExceptionHandling:exception];
         [self setCallbackStatus:MovieRewardCallbackPlayFail];
     }
 }
+
+@end
+
+@implementation MovieInterstitial6111
+
+@end
+
+@implementation MovieInterstitial6112
+
+@end
+
+@implementation MovieInterstitial6113
 
 @end

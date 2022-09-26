@@ -25,7 +25,7 @@
 
 // Adapterのバージョン。最初は1にして、修正がある度＋1にする
 + (NSString *)getAdapterRevisionVersion {
-    return @"1";
+    return @"2";
 }
 
 // getinfoからのParameter設定
@@ -37,9 +37,9 @@
         self.appKey = [NSString stringWithFormat:@"%@", appKey];
     }
     
-    NSString *placement = [data objectForKey:@"placement"];
-    if ([self isString:placement]) {
-        self.placement = [NSString stringWithFormat:@"%@", placement];
+    NSString *instanceId = [data objectForKey:@"instance_id"];
+    if ([self isString:instanceId]) {
+        self.instanceId = [NSString stringWithFormat:@"%@", instanceId];
     }
 }
 
@@ -73,6 +73,10 @@
         return;
     }
     
+    if (!self.instanceId) {
+        return;
+    }
+    
     self.isAdLoaded = false;
     
     // Adnetwork SDKの関数を呼び出す際はTryーCatchでException Handlingを行う
@@ -80,9 +84,8 @@
         // 非同期で行われる場合にはFlag設定を行う
         [self requireToAsyncRequestAd];
         
-        AdnetworkConfigure6110.sharedInstance.movieRewardAdapter = self;
-        [IronSource loadRewardedVideo];
-        
+        [AdnetworkConfigure6110.sharedInstance setMovieRewardAdapter:self instanceId:self.instanceId];
+        [IronSource loadISDemandOnlyRewardedVideo:self.instanceId];
         AdapterLog(@"load rewarded video");
     } @catch (NSException *exception) {
         [self adnetworkExceptionHandling:exception];
@@ -101,11 +104,12 @@
 }
 
 - (void)showAdWithPresentingViewController:(UIViewController *)viewController {
+    [super showAdWithPresentingViewController:viewController];
+    
     @try {
         [self requireToAsyncPlay];
         
-        AdnetworkConfigure6110.sharedInstance.movieRewardAdapter = self;
-        [IronSource showRewardedVideoWithViewController:viewController placement:self.placement];
+        [IronSource showISDemandOnlyRewardedVideo:viewController instanceId:self.instanceId];
     } @catch (NSException *exception) {
         [self adnetworkExceptionHandling:exception];
         [self setCallbackStatus:MovieRewardCallbackPlayFail];
@@ -129,5 +133,17 @@
     [IronSource setConsent:hasUserConsent];
     AdapterLogP(@"Adnetwork 6110, gdprConsent : %@, sdk setting value : %d", self.hasGdprConsent, (int)hasUserConsent);
 }
+
+@end
+
+@implementation MovieReward6111
+
+@end
+
+@implementation MovieReward6112
+
+@end
+
+@implementation MovieReward6113
 
 @end

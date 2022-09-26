@@ -19,7 +19,7 @@
 @implementation MovieInterstitial6019
 
 + (NSString *)getAdapterRevisionVersion {
-    return @"7";
+    return @"8";
 }
 
 -(id)init {
@@ -56,7 +56,7 @@
 }
 
 - (BOOL)isPrepared {
-    return [self.interstitial canPresentFromRootViewController:[self topMostViewController] error:nil];
+    return self.isAdLoaded;
 }
 
 - (void)startAd {
@@ -82,6 +82,7 @@
             NSLog(@"[ADF] Adnetwork 6019, gdprConsent : %@, sdk setting value : %@", self.hasGdprConsent, extras.additionalParameters);
         }
         [self requireToAsyncRequestAd];
+        self.isAdLoaded = false;
         [GADInterstitialAd loadWithAdUnitID:self.unitID
                                     request:request
                           completionHandler:^(GADInterstitialAd * _Nullable interstitialAd, NSError * _Nullable error) {
@@ -127,6 +128,7 @@
 
 - (void)adRequestSccess:(GADInterstitialAd * _Nullable)interstitialAd {
     NSLog(@"%s", __FUNCTION__);
+    self.isAdLoaded = true;
     if ([self isNotNull:interstitialAd]) {
         self.interstitial = interstitialAd;
         self.interstitial.fullScreenContentDelegate = self;
@@ -156,6 +158,7 @@
 
 - (void)ad:(nonnull id<GADFullScreenPresentingAd>)ad didFailToPresentFullScreenContentWithError:(nonnull NSError *)error {
     NSLog(@"%s", __FUNCTION__);
+    self.isAdLoaded = false;
     [self setErrorWithMessage:error.localizedDescription code:error.code];
     [self setCallbackStatus:MovieRewardCallbackPlayFail];
 }
@@ -170,6 +173,7 @@
 
 - (void)adDidDismissFullScreenContent:(nonnull id<GADFullScreenPresentingAd>)ad {
     NSLog(@"%s", __FUNCTION__);
+    self.isAdLoaded = false;
     [self setCallbackStatus:MovieRewardCallbackPlayComplete];
     [self setCallbackStatus:MovieRewardCallbackClose];
 }
