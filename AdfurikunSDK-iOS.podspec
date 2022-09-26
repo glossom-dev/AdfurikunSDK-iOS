@@ -39,13 +39,6 @@ Pod::Spec.new do |s|
     applovin.resource = '**/adnetworks/AppLovin/*.txt'
   end
 
-  s.subspec 'IronSource' do |ironSource|
-    ironSource.dependency 'AdfurikunSDK-iOS/Core'
-    ironSource.dependency 'IronSourceSDK', '7.2.5.0'
-    ironSource.source_files = '**/adnetworks/IronSource/*.{h,m}'
-    ironSource.resource = '**/adnetworks/IronSource/*.txt'
-  end
-
   s.subspec 'FAN' do |fan|
     fan.dependency 'AdfurikunSDK-iOS/Core'
     fan.dependency 'FBAudienceNetwork', '6.9.0'
@@ -62,7 +55,7 @@ Pod::Spec.new do |s|
 
   s.subspec 'ironSource' do |ironSource|
     ironSource.dependency 'AdfurikunSDK-iOS/Core'
-    ironSource.dependency 'IronSourceSDK', '7.2.4.0'
+    ironSource.dependency 'IronSourceSDK', '7.2.5.0'
     ironSource.source_files = '**/adnetworks/IronSource/*.{h,m}'
     ironSource.resource = '**/adnetworks/IronSource/*.txt'
   end
@@ -114,7 +107,6 @@ Pod::Spec.new do |s|
     all.dependency 'AdfurikunSDK-iOS/AdColony'
     all.dependency 'AdfurikunSDK-iOS/AdMob'
     all.dependency 'AdfurikunSDK-iOS/AppLovin'
-    all.dependency 'AdfurikunSDK-iOS/IronSource'
     all.dependency 'AdfurikunSDK-iOS/FAN'
     all.dependency 'AdfurikunSDK-iOS/Five'
     all.dependency 'AdfurikunSDK-iOS/ironSource'
