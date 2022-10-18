@@ -14,6 +14,7 @@
 @property (nonatomic, strong) BURewardedVideoAd *rewardedVideoAd;
 @property (nonatomic, strong) NSString *tiktokAppID;
 @property (nonatomic, strong) NSString *tiktokSlotID;
+@property (nonatomic) BOOL requireToAsyncRequestAd;
 @end
 
 @implementation MovieReward6017
@@ -23,7 +24,7 @@
 }
 
 + (NSString *)getAdapterRevisionVersion {
-    return @"7";
+    return @"7.1";
 }
 
 - (void)setData:(NSDictionary *)data {
@@ -62,7 +63,20 @@
 }
 
 - (void)startAd {
+    NSLog(@"[ADF] Adnetwork 6017 %s", __FUNCTION__);
+    
     if (![self canStartAd]) {
+        return;
+    }
+
+    if (self.requireToAsyncRequestAd) {
+        NSLog(@"[ADF] Adnetwork 6017 %s, requireToAsyncRequestAd is true", __FUNCTION__);
+        return;
+    }
+
+    if (self.rewardedVideoAd && [self isPrepared]) {
+        NSLog(@"[ADF] Adnetwork 6017 %s, already prepared", __FUNCTION__);
+        [self rewardedVideoAdVideoDidLoad:self.rewardedVideoAd];
         return;
     }
 
@@ -73,7 +87,9 @@
     if (self.tiktokSlotID) {
         @try {
             [self requireToAsyncRequestAd];
-            
+            self.requireToAsyncRequestAd = true;
+            NSLog(@"[ADF] Adnetwork 6017 %s reward load", __FUNCTION__);
+
             BURewardedVideoModel *model = [[BURewardedVideoModel alloc] init];
             self.rewardedVideoAd = [[BURewardedVideoAd alloc] initWithSlotID:self.tiktokSlotID rewardedVideoModel:model];
             self.rewardedVideoAd.delegate = self;
@@ -100,7 +116,6 @@
             [self adnetworkExceptionHandling:exception];
             [self setCallbackStatus:MovieRewardCallbackPlayFail];
         }
-        self.isAdLoaded = NO;
     }
 }
 
@@ -128,12 +143,14 @@
         AdapterTraceP(@"error : %@", error);
         [self setErrorWithMessage:error.localizedDescription code:error.code];
     }
+    self.requireToAsyncRequestAd = false;
     [self setCallbackStatus:MovieRewardCallbackFetchFail];
 }
 
 - (void)rewardedVideoAdVideoDidLoad:(BURewardedVideoAd *)rewardedVideoAd {
     AdapterTrace;
     self.isAdLoaded = YES;
+    self.requireToAsyncRequestAd = false;
     [self setCallbackStatus:MovieRewardCallbackFetchComplete];
 }
 
@@ -152,6 +169,7 @@
 
 - (void)rewardedVideoAdDidClose:(BURewardedVideoAd *)rewardedVideoAd {
     AdapterTrace;
+    self.isAdLoaded = NO;
     [self setCallbackStatus:MovieRewardCallbackClose];
 }
 
@@ -164,6 +182,7 @@
     if (error) {
         AdapterTraceP(@"error : %@", error);
         [self setErrorWithMessage:error.localizedDescription code:error.code];
+        self.isAdLoaded = NO;
         [self setCallbackStatus:MovieRewardCallbackPlayFail];
     } else {
         [self setCallbackStatus:MovieRewardCallbackPlayComplete];

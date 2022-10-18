@@ -16,6 +16,7 @@
 @property (nonatomic, strong) BUFullscreenVideoAd *fullscreenVideoAd;
 @property (nonatomic, strong) NSString *tiktokAppID;
 @property (nonatomic, strong) NSString *tiktokSlotID;
+@property (nonatomic) BOOL requireToAsyncRequestAd;
 @end
 
 @implementation MovieInterstitial6017
@@ -25,7 +26,7 @@
 }
 
 + (NSString *)getAdapterRevisionVersion {
-    return @"6";
+    return @"6.1";
 }
 
 -(id)init {
@@ -71,7 +72,20 @@
 }
 
 - (void)startAd {
+    NSLog(@"[ADF] Adnetwork 6017 %s", __FUNCTION__);
+    
     if (![self canStartAd]) {
+        return;
+    }
+
+    if (self.requireToAsyncRequestAd) {
+        NSLog(@"[ADF] Adnetwork 6017 %s, requireToAsyncRequestAd is true", __FUNCTION__);
+        return;
+    }
+
+    if (self.fullscreenVideoAd && [self isPrepared]) {
+        NSLog(@"[ADF] Adnetwork 6017 %s, already prepared", __FUNCTION__);
+        [self fullscreenVideoAdVideoDataDidLoad:self.fullscreenVideoAd];
         return;
     }
 
@@ -82,6 +96,8 @@
     if (self.tiktokSlotID) {
         @try {
             [self requireToAsyncRequestAd];
+            self.requireToAsyncRequestAd = true;
+            NSLog(@"[ADF] Adnetwork 6017 %s interstitial load", __FUNCTION__);
             
             self.fullscreenVideoAd = [[BUFullscreenVideoAd alloc] initWithSlotID:self.tiktokSlotID];
             self.fullscreenVideoAd.delegate = self;
@@ -107,7 +123,6 @@
         [self adnetworkExceptionHandling:exception];
         [self setCallbackStatus:MovieRewardCallbackPlayFail];
     }
-    self.isAdLoaded = NO;
 }
 
 - (BOOL)isClassReference {
@@ -130,12 +145,14 @@
 - (void)fullscreenVideoAd:(BUFullscreenVideoAd *)fullscreenVideoAd didFailWithError:(NSError *_Nullable)error {
     AdapterTraceP(@"error : %@", error);
     [self setErrorWithMessage:error.localizedDescription code:error.code];
+    self.requireToAsyncRequestAd = false;
     [self setCallbackStatus:MovieRewardCallbackFetchFail];
 }
 
 - (void)fullscreenVideoAdVideoDataDidLoad:(BUFullscreenVideoAd *)fullscreenVideoAd {
     AdapterTrace;
     self.isAdLoaded = YES;
+    self.requireToAsyncRequestAd = false;
     [self setCallbackStatus:MovieRewardCallbackFetchComplete];
 }
 
@@ -158,6 +175,7 @@
 
 - (void)fullscreenVideoAdDidClose:(BUFullscreenVideoAd *)fullscreenVideoAd {
     AdapterTrace;
+    self.isAdLoaded = NO;
     [self setCallbackStatus:MovieRewardCallbackClose];
 }
 

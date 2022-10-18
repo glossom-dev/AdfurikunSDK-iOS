@@ -18,6 +18,7 @@
 @property (nonatomic)BOOL testFlg;
 @property (nonatomic)BOOL isReplay;
 @property (nonatomic)BOOL didRetryForNoCache;
+@property (nonatomic) BOOL requireToAsyncRequestAd;
 
 @end
 
@@ -29,7 +30,7 @@
 }
 
 + (NSString *)getAdapterRevisionVersion {
-    return @"8";
+    return @"8.1";
 }
 
 -(id)init {
@@ -105,12 +106,22 @@
  *  広告の読み込みを開始する
  */
 -(void)startAd {
+    NSLog(@"[ADF] Adnetwork 6008 %s", __FUNCTION__);
+    
     if (![self canStartAd]) {
+        return;
+    }
+
+    if (self.requireToAsyncRequestAd) {
+        NSLog(@"[ADF] Adnetwork 6008 %s, requireToAsyncRequestAd is true", __FUNCTION__);
         return;
     }
 
     @try {
         [self requireToAsyncRequestAd];
+        self.requireToAsyncRequestAd = true;
+        NSLog(@"[ADF] Adnetwork 6008 %s interstitial load", __FUNCTION__);
+
         if (self.interstitial) {
             self.interstitial = nil;
         }
@@ -178,12 +189,14 @@
 #pragma mark -  FiveDelegate
 - (void)fiveAdDidLoad:(id<FADAdInterface>)ad {
     NSLog(@"%s", __func__);
+    self.requireToAsyncRequestAd = false;
     [self setCallbackStatus:MovieRewardCallbackFetchComplete];
 }
 
 - (void)fiveAd:(id<FADAdInterface>)ad didFailedToReceiveAdWithError:(FADErrorCode)errorCode {
     NSLog(@"Five SDK %s Errorcode:%ld, slotId : %@", __func__, (long)errorCode, self.fiveSlotId);
     [self setErrorWithMessage:nil code:errorCode];
+    self.requireToAsyncRequestAd = false;
     [self setCallbackStatus:MovieRewardCallbackFetchFail];
 
     if (errorCode == kFADErrorCodeNoAd && self.didRetryForNoCache == false) {

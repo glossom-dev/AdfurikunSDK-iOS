@@ -15,12 +15,13 @@
 @property(nonatomic) NSString *unitID;
 @property(nonatomic) BOOL testFlg;
 @property(nonatomic) BOOL isAdsCompleteShow;
+@property(nonatomic) BOOL requireToAsyncRequestAd;
 @end
 
 @implementation MovieReward6019
 
 + (NSString *)getAdapterRevisionVersion {
-    return @"9";
+    return @"9.1";
 }
 
 -(id)init {
@@ -59,11 +60,18 @@
 }
 
 - (void)startAd {
+    NSLog(@"[ADF] Adnetwork 6019 %s", __FUNCTION__);
+
     if (![self canStartAd]) {
         return;
     }
 
     if (self.unitID == nil) {
+        return;
+    }
+    
+    if (self.requireToAsyncRequestAd) {
+        NSLog(@"[ADF] Adnetwork 6019 %s, requireToAsyncRequestAd is true", __FUNCTION__);
         return;
     }
     
@@ -81,7 +89,10 @@
             NSLog(@"[ADF] Adnetwork 6019, gdprConsent : %@, sdk setting value : %@", self.hasGdprConsent, extras.additionalParameters);
         }
         [self requireToAsyncRequestAd];
+        self.requireToAsyncRequestAd = true;
+        
         self.isAdLoaded = false;
+        NSLog(@"[ADF] Adnetwork 6019 %s reward load", __FUNCTION__);
         [GADRewardedAd loadWithAdUnitID:self.unitID
                                 request:request
                       completionHandler:^(GADRewardedAd * _Nullable rewardedAd, NSError * _Nullable error) {
@@ -133,11 +144,12 @@
 }
 
 - (void)adRequestSccess:(GADRewardedAd * _Nullable)rewardedAd {
-    NSLog(@"%s", __FUNCTION__);
+    NSLog(@"[ADF] Adnetwork 6019 %s", __FUNCTION__);
     self.isAdLoaded = true;
     if ([self isNotNull:rewardedAd]) {
         self.rewardedAd = rewardedAd;
         self.rewardedAd.fullScreenContentDelegate = self;
+        self.requireToAsyncRequestAd = false;
         [self setCallbackStatus:MovieRewardCallbackFetchComplete];
     } else {
         NSString *message = @"rewardedAd is null";
@@ -150,7 +162,8 @@
 }
 
 - (void)adRequestFailure:(NSError *)error {
-    NSLog(@"%s error: %@", __FUNCTION__, error);
+    NSLog(@"[ADF] Adnetwork 6019 %s error: %@", __FUNCTION__, error);
+    self.requireToAsyncRequestAd = false;
     [self setErrorWithMessage:error.localizedDescription code:error.code];
     [self setCallbackStatus:MovieRewardCallbackFetchFail];
 }
@@ -175,7 +188,7 @@
     [self setCallbackStatus:MovieRewardCallbackPlayFail];
 }
 
-- (void)adDidPresentFullScreenContent:(nonnull id<GADFullScreenPresentingAd>)ad {
+- (void)adWillPresentFullScreenContent:(nonnull id<GADFullScreenPresentingAd>)ad {
     NSLog(@"%s", __FUNCTION__);
 }
 

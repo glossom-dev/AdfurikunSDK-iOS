@@ -17,6 +17,7 @@
 @property (nonatomic, strong)NSString* submittedPackageName;
 @property (nonatomic)BOOL testFlg;
 @property (nonatomic)BOOL didRetryForNoCache;
+@property (nonatomic) BOOL requireToAsyncRequestAd;
 
 @end
 
@@ -77,10 +78,17 @@
 }
 
 -(void)startAd {
+    NSLog(@"[ADF] Adnetwork 6008 %s", __FUNCTION__);
+    
     if (![self canStartAd]) {
         return;
     }
     
+    if (self.requireToAsyncRequestAd) {
+        NSLog(@"[ADF] Adnetwork 6008 %s, requireToAsyncRequestAd is true", __FUNCTION__);
+        return;
+    }
+
     if (self.fullscreen) {
         self.fullscreen = nil;
     }
@@ -88,6 +96,9 @@
     if (self.fiveSlotId && self.fiveSlotId.length > 0) {
         @try {
             [self requireToAsyncRequestAd];
+            self.requireToAsyncRequestAd = true;
+            NSLog(@"[ADF] Adnetwork 6008 %s reward load", __FUNCTION__);
+
             self.fullscreen = [[FADVideoReward alloc] initWithSlotId:self.fiveSlotId];
             [self.fullscreen setLoadDelegate:self];
             [self.fullscreen setAdViewEventListener:self];
