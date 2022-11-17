@@ -18,6 +18,7 @@ typedef enum : NSInteger {
     MovieRewardCallbackClose,
     MovieRewardCallbackFetchFail,
     MovieRewardCallbackPlayFail,
+    MovieRewardCallbackClick, // 9998のみ対応
 } MovieRewardCallbackStatus;
 
 @class UIViewController;
@@ -59,5 +60,8 @@ typedef enum : NSInteger {
 
 /** アドネットワーク接続後のイベント(特定のアドネットワーク用) */
 - (void)AdsDidConnect:(ADFmyMovieRewardInterface*)movieReward;
+
+/** 広告がクリックされた(9998のみ対応) */
+- (void)AdsDidClick:(ADFmyMovieRewardInterface*)movieReward;
 
 @end

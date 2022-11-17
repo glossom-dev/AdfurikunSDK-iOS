@@ -22,7 +22,7 @@
 }
 
 + (NSString *)getAdapterRevisionVersion {
-    return @"7";
+    return @"8";
 }
 
 -(void)dealloc {
@@ -218,6 +218,11 @@
         case kUnityShowErrorInternalError:
             reason = @"InternalError";
             break;
+        case kUnityShowErrorTimeout:
+            reason = @"TimeoutError";
+            break;
+        default:
+            reason = @"Unknown";
     }
     [self setErrorWithMessage:reason code:(int)error];
     [self setCallbackStatus:MovieRewardCallbackPlayFail];
@@ -236,9 +241,16 @@
 @end
 
 @implementation MovieReward6030
-
 @end
 
 @implementation MovieReward6031
+@end
 
+@implementation MovieReward6032
+@end
+
+@implementation MovieReward6033
+@end
+
+@implementation MovieReward6034
 @end

@@ -23,12 +23,26 @@ NS_ASSUME_NONNULL_BEGIN
 
 @end
 
-@interface Banner6060 : Banner6019
+@interface BannerAdInfo6019 : ADFNativeAdInfo
 
 @end
 
-@interface BannerAdInfo6019 : ADFNativeAdInfo
+@interface Banner6160 : Banner6019
+@end
 
+@interface Banner6161 : Banner6019
+@end
+
+@interface Banner6162 : Banner6019
+@end
+
+@interface Banner6163 : Banner6019
+@end
+
+@interface Banner6164 : Banner6019
+@end
+
+@interface Banner6060 : Banner6019 // GAM
 @end
 
 NS_ASSUME_NONNULL_END

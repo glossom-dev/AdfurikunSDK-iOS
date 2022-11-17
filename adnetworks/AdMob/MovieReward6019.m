@@ -20,7 +20,7 @@
 @implementation MovieReward6019
 
 + (NSString *)getAdapterRevisionVersion {
-    return @"9";
+    return @"10";
 }
 
 -(id)init {
@@ -194,6 +194,20 @@
 
 @end
 
-@implementation MovieReward6060
+@implementation MovieReward6160
+@end
 
+@implementation MovieReward6161
+@end
+
+@implementation MovieReward6162
+@end
+
+@implementation MovieReward6163
+@end
+
+@implementation MovieReward6164
+@end
+
+@implementation MovieReward6060
 @end

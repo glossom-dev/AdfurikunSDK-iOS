@@ -306,3 +306,17 @@
 
 @end
 
+@implementation MovieReward6170
+@end
+
+@implementation MovieReward6171
+@end
+
+@implementation MovieReward6172
+@end
+
+@implementation MovieReward6173
+@end
+
+@implementation MovieReward6174
+@end

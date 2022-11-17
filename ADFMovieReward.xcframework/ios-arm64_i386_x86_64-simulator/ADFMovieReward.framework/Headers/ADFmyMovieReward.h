@@ -2,7 +2,7 @@
 //  ADFmyMovieReward.h
 //  ADFMovieReword
 //
-//  (3.15.1)
+//  (3.15.2)
 //  Created by tsukui on 2016/05/28.
 //  (c) 2015 ADFULLY Inc.
 //  (ご利用になられる前に、必ずマニュアルにて実装方法をご参照ください。
@@ -117,6 +117,7 @@
 
 #define ADF_FETCH_ERROR_CODE_OUTOFSTOCK 203
 #define ADF_FETCH_ERROR_CODE_NOADNETWORK 400
+#define ADF_FETCH_ERROR_CODE_API_REQUEST_FAILURE 500
 #define ADF_FETCH_ERROR_CODE_ALREADY_LOADING 999
 
 @protocol ADFmyMovieRewardDelegate<NSObject>

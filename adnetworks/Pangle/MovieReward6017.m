@@ -23,7 +23,7 @@
 }
 
 + (NSString *)getAdapterRevisionVersion {
-    return @"7";
+    return @"8";
 }
 
 - (void)setData:(NSDictionary *)data {
@@ -177,15 +177,18 @@
 @end
 
 @implementation MovieReward6090
-
 @end
 
 @implementation MovieReward6091
-
 @end
 
 @implementation MovieReward6092
+@end
 
+@implementation MovieReward6093
+@end
+
+@implementation MovieReward6094
 @end
 
 typedef enum : NSUInteger {

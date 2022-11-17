@@ -18,15 +18,18 @@ typedef void(^completionHandlerType)(void);
 @end
 
 @interface MovieReward6090 : MovieReward6017
-
 @end
 
 @interface MovieReward6091 : MovieReward6017
-
 @end
 
 @interface MovieReward6092 : MovieReward6017
+@end
 
+@interface MovieReward6093 : MovieReward6017
+@end
+
+@interface MovieReward6094 : MovieReward6017
 @end
 
 @interface MovieConfigure6017 : NSObject

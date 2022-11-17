@@ -14,3 +14,18 @@
 }
 
 @end
+
+@implementation MovieInterstitial6170
+@end
+
+@implementation MovieInterstitial6171
+@end
+
+@implementation MovieInterstitial6172
+@end
+
+@implementation MovieInterstitial6173
+@end
+
+@implementation MovieInterstitial6174
+@end

@@ -1,6 +1,6 @@
 Pod::Spec.new do |s|
   s.name            = "AdfurikunSDK-iOS"
-  s.version         = "3.15.1"
+  s.version         = "3.15.2"
   s.summary         = "An iOS SDK for ADFURIKUN Movie Reward Ads"
   s.homepage        = "https://adfurikun.jp/adfurikun/"
   s.license         = { :type => 'Copyright', :text => 'Copyright Glossom Inc. All rights reserved.' }
@@ -27,14 +27,14 @@ Pod::Spec.new do |s|
 
   s.subspec 'AdMob' do |admob|
     admob.dependency 'AdfurikunSDK-iOS/Core'
-    admob.dependency 'Google-Mobile-Ads-SDK', '9.5.0'
+    admob.dependency 'Google-Mobile-Ads-SDK', '9.13.0'
     admob.source_files = '**/adnetworks/AdMob/*.{h,m}'
     admob.resource = '**/adnetworks/AdMob/*.{txt,xib}'
   end
 
   s.subspec 'AppLovin' do |applovin|
     applovin.dependency 'AdfurikunSDK-iOS/Core'
-    applovin.dependency 'AppLovinSDK', '11.4.3'
+    applovin.dependency 'AppLovinSDK', '11.5.4'
     applovin.source_files = '**/adnetworks/AppLovin/*.{h,m}'
     applovin.resource = '**/adnetworks/AppLovin/*.txt'
   end
@@ -62,14 +62,14 @@ Pod::Spec.new do |s|
 
   s.subspec 'Maio' do |maio|
     maio.dependency 'AdfurikunSDK-iOS/Core'
-    maio.dependency 'MaioSDK', '1.6.2'
+    maio.dependency 'MaioSDK', '1.6.3'
     maio.source_files = '**/adnetworks/Maio/*.{h,m}'
     maio.resource = '**/adnetworks/Maio/*.txt'
   end
 
   s.subspec 'NendAd' do |nendad|
     nendad.dependency 'AdfurikunSDK-iOS/Core'
-    nendad.dependency 'NendSDK_iOS', '7.3.0'
+    nendad.dependency 'NendSDK_iOS', '7.4.0'
     nendad.source_files = '**/adnetworks/NendAd/*.{h,m}'
     nendad.resource = '**/adnetworks/NendAd/*.txt'
   end
@@ -83,14 +83,14 @@ Pod::Spec.new do |s|
 
   s.subspec 'Tapjoy' do |tapjoy|
     tapjoy.dependency 'AdfurikunSDK-iOS/Core'
-    tapjoy.dependency 'TapjoySDK', '12.10.0'
+    tapjoy.dependency 'TapjoySDK', '12.11.0'
     tapjoy.source_files = '**/adnetworks/Tapjoy/*.{h,m}'
     tapjoy.resource = '**/adnetworks/Tapjoy/*.txt'
   end
 
   s.subspec 'UnityAds' do |unityads|
     unityads.dependency 'AdfurikunSDK-iOS/Core'
-    unityads.dependency 'UnityAds', '4.2.1'
+    unityads.dependency 'UnityAds', '4.4.1'
     unityads.source_files = '**/adnetworks/UnityAds/*.{h,m}'
     unityads.resource = '**/adnetworks/UnityAds/*.txt'
   end

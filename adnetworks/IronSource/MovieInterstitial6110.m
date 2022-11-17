@@ -13,7 +13,7 @@
 
 // Adapterのバージョン。最初は1にして、修正がある度＋1にする
 + (NSString *)getAdapterRevisionVersion {
-    return @"1";
+    return @"2";
 }
 
 // 広告呼び込みを行う
@@ -55,13 +55,16 @@
 @end
 
 @implementation MovieInterstitial6111
-
 @end
 
 @implementation MovieInterstitial6112
-
 @end
 
 @implementation MovieInterstitial6113
+@end
 
+@implementation MovieInterstitial6114
+@end
+
+@implementation MovieInterstitial6115
 @end

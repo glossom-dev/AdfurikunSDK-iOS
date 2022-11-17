@@ -24,3 +24,18 @@
 + (instancetype)sharedInstance;
 
 @end
+
+@interface MovieReward6170 : MovieReward6005
+@end
+
+@interface MovieReward6171 : MovieReward6005
+@end
+
+@interface MovieReward6172 : MovieReward6005
+@end
+
+@interface MovieReward6173 : MovieReward6005
+@end
+
+@interface MovieReward6174 : MovieReward6005
+@end

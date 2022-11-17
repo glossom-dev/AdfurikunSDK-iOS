@@ -14,8 +14,22 @@ NS_ASSUME_NONNULL_BEGIN
 
 @end
 
-@interface MovieReward6060 : MovieReward6019
+@interface MovieReward6160 : MovieReward6019
+@end
 
+@interface MovieReward6161 : MovieReward6019
+@end
+
+@interface MovieReward6162 : MovieReward6019
+@end
+
+@interface MovieReward6163 : MovieReward6019
+@end
+
+@interface MovieReward6164 : MovieReward6019
+@end
+
+@interface MovieReward6060 : MovieReward6019 // GAM
 @end
 
 NS_ASSUME_NONNULL_END

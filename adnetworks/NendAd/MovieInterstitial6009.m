@@ -25,7 +25,7 @@
 #pragma mark - ADFmyMovieRewardInterface
 
 + (NSString *)getAdapterRevisionVersion {
-    return @"6";
+    return @"7";
 }
 
 -(id)init {
@@ -224,13 +224,16 @@
 @end
 
 @implementation MovieInterstitial6080
-
 @end
 
 @implementation MovieInterstitial6081
-
 @end
 
 @implementation MovieInterstitial6082
+@end
 
+@implementation MovieInterstitial6083
+@end
+
+@implementation MovieInterstitial6084
 @end

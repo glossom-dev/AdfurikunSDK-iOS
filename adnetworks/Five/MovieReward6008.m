@@ -140,13 +140,16 @@
 @end
 
 @implementation MovieReward6070
-
 @end
 
 @implementation MovieReward6071
-
 @end
 
 @implementation MovieReward6072
+@end
 
+@implementation MovieReward6073
+@end
+
+@implementation MovieReward6074
 @end

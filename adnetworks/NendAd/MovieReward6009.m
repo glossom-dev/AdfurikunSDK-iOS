@@ -21,7 +21,7 @@
 @implementation MovieReward6009
 
 + (NSString *)getAdapterRevisionVersion {
-    return @"6";
+    return @"7";
 }
 
 #pragma mark - ADFmyMovieRewardInterface
@@ -192,13 +192,16 @@
 @end
 
 @implementation MovieReward6080
-
 @end
 
 @implementation MovieReward6081
-
 @end
 
 @implementation MovieReward6082
+@end
 
+@implementation MovieReward6083
+@end
+
+@implementation MovieReward6084
 @end

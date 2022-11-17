@@ -170,10 +170,6 @@
 
 @end
 
-@implementation Banner6060
-
-@end
-
 @implementation BannerAdInfo6019
 
 - (void)playMediaView {
@@ -183,4 +179,22 @@
     }
 }
 
+@end
+
+@implementation Banner6160
+@end
+
+@implementation Banner6161
+@end
+
+@implementation Banner6162
+@end
+
+@implementation Banner6163
+@end
+
+@implementation Banner6164
+@end
+
+@implementation Banner6060
 @end

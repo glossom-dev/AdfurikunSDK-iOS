@@ -16,9 +16,16 @@
 @end
 
 @interface MovieReward6030 : MovieReward6001
-
 @end
 
 @interface MovieReward6031 : MovieReward6001
+@end
 
+@interface MovieReward6032 : MovieReward6001
+@end
+
+@interface MovieReward6033 : MovieReward6001
+@end
+
+@interface MovieReward6034 : MovieReward6001
 @end

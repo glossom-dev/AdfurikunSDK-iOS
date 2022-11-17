@@ -24,6 +24,20 @@
 
 @end
 
-@implementation Rectangle6060
+@implementation Rectangle6160
+@end
 
+@implementation Rectangle6161
+@end
+
+@implementation Rectangle6162
+@end
+
+@implementation Rectangle6163
+@end
+
+@implementation Rectangle6164
+@end
+
+@implementation Rectangle6060
 @end

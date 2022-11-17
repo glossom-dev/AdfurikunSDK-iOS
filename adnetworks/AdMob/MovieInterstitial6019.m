@@ -19,7 +19,7 @@
 @implementation MovieInterstitial6019
 
 + (NSString *)getAdapterRevisionVersion {
-    return @"8";
+    return @"9";
 }
 
 -(id)init {
@@ -180,6 +180,20 @@
 
 @end
 
-@implementation MovieInterstitial6060
+@implementation MovieInterstitial6160
+@end
 
+@implementation MovieInterstitial6161
+@end
+
+@implementation MovieInterstitial6162
+@end
+
+@implementation MovieInterstitial6163
+@end
+
+@implementation MovieInterstitial6164
+@end
+
+@implementation MovieInterstitial6060
 @end

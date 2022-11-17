@@ -422,6 +422,20 @@
 
 @end
 
-@implementation MovieNative6060
+@implementation MovieNative6160
+@end
 
+@implementation MovieNative6161
+@end
+
+@implementation MovieNative6162
+@end
+
+@implementation MovieNative6163
+@end
+
+@implementation MovieNative6164
+@end
+
+@implementation MovieNative6060
 @end

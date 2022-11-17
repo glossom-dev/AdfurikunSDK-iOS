@@ -26,15 +26,18 @@ typedef void(^completionHandlerType)(void);
 @end
 
 @interface MovieInterstitial6070 : MovieInterstitial6008
-
 @end
 
 @interface MovieInterstitial6071 : MovieInterstitial6008
-
 @end
 
 @interface MovieInterstitial6072 : MovieInterstitial6008
+@end
 
+@interface MovieInterstitial6073 : MovieInterstitial6008
+@end
+
+@interface MovieInterstitial6074 : MovieInterstitial6008
 @end
 
 NS_ASSUME_NONNULL_END

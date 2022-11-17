@@ -25,7 +25,7 @@
 }
 
 + (NSString *)getAdapterRevisionVersion {
-    return @"6";
+    return @"7";
 }
 
 -(id)init {
@@ -173,13 +173,16 @@
 @end
 
 @implementation MovieInterstitial6090
-
 @end
 
 @implementation MovieInterstitial6091
-
 @end
 
 @implementation MovieInterstitial6092
+@end
 
+@implementation MovieInterstitial6093
+@end
+
+@implementation MovieInterstitial6094
 @end

@@ -29,7 +29,7 @@
 }
 
 + (NSString *)getAdapterRevisionVersion {
-    return @"8";
+    return @"9";
 }
 
 -(id)init {
@@ -329,13 +329,16 @@ typedef enum : NSUInteger {
 @end
 
 @implementation MovieInterstitial6070
-
 @end
 
 @implementation MovieInterstitial6071
-
 @end
 
 @implementation MovieInterstitial6072
+@end
 
+@implementation MovieInterstitial6073
+@end
+
+@implementation MovieInterstitial6074
 @end

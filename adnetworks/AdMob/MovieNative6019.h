@@ -29,7 +29,22 @@ NS_ASSUME_NONNULL_BEGIN
 
 @end
 
-@interface MovieNative6060 : MovieNative6019
+@interface MovieNative6160 : MovieNative6019
+@end
+
+@interface MovieNative6161 : MovieNative6019
+@end
+
+@interface MovieNative6162 : MovieNative6019
+@end
+
+@interface MovieNative6163 : MovieNative6019
+@end
+
+@interface MovieNative6164 : MovieNative6019
+@end
+
+@interface MovieNative6060 : MovieNative6019 // GAM
 
 @end
 

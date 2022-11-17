@@ -12,13 +12,16 @@
 @end
 
 @interface MovieReward6080 : MovieReward6009
-
 @end
 
 @interface MovieReward6081 : MovieReward6009
-
 @end
 
 @interface MovieReward6082 : MovieReward6009
+@end
 
+@interface MovieReward6083 : MovieReward6009
+@end
+
+@interface MovieReward6084 : MovieReward6009
 @end

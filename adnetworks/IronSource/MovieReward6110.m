@@ -25,7 +25,7 @@
 
 // Adapterのバージョン。最初は1にして、修正がある度＋1にする
 + (NSString *)getAdapterRevisionVersion {
-    return @"2";
+    return @"3";
 }
 
 // getinfoからのParameter設定
@@ -137,13 +137,16 @@
 @end
 
 @implementation MovieReward6111
-
 @end
 
 @implementation MovieReward6112
-
 @end
 
 @implementation MovieReward6113
+@end
 
+@implementation MovieReward6114
+@end
+
+@implementation MovieReward6115
 @end

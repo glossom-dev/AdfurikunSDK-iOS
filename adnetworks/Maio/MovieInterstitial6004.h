@@ -13,13 +13,16 @@
 @end
 
 @interface MovieInterstitial6100 : MovieInterstitial6004
-
 @end
 
 @interface MovieInterstitial6101 : MovieInterstitial6004
-
 @end
 
 @interface MovieInterstitial6102 : MovieInterstitial6004
+@end
 
+@interface MovieInterstitial6103 : MovieInterstitial6004
+@end
+
+@interface MovieInterstitial6104 : MovieInterstitial6004
 @end
