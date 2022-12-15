@@ -23,7 +23,7 @@
 }
 
 + (NSString *)getAdapterRevisionVersion {
-    return @"8";
+    return @"9";
 }
 
 - (void)setData:(NSDictionary *)data {
@@ -74,10 +74,12 @@
         @try {
             [self requireToAsyncRequestAd];
             
-            BURewardedVideoModel *model = [[BURewardedVideoModel alloc] init];
-            self.rewardedVideoAd = [[BURewardedVideoAd alloc] initWithSlotID:self.tiktokSlotID rewardedVideoModel:model];
-            self.rewardedVideoAd.delegate = self;
-            [self.rewardedVideoAd loadAdData];
+            dispatch_async(dispatch_get_main_queue(), ^{
+                BURewardedVideoModel *model = [[BURewardedVideoModel alloc] init];
+                self.rewardedVideoAd = [[BURewardedVideoAd alloc] initWithSlotID:self.tiktokSlotID rewardedVideoModel:model];
+                self.rewardedVideoAd.delegate = self;
+                [self.rewardedVideoAd loadAdData];
+            });
         } @catch (NSException *exception) {
             [self adnetworkExceptionHandling:exception];
         }
@@ -95,7 +97,9 @@
         @try {
             [self requireToAsyncPlay];
             
-            [self.rewardedVideoAd showAdFromRootViewController:viewController];
+            dispatch_async(dispatch_get_main_queue(), ^{
+                [self.rewardedVideoAd showAdFromRootViewController:viewController];
+            });
         } @catch (NSException *exception) {
             [self adnetworkExceptionHandling:exception];
             [self setCallbackStatus:MovieRewardCallbackPlayFail];

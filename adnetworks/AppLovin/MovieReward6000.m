@@ -231,8 +231,6 @@
     AdapterTraceP(@"atPlaybackPercent : %@, fullyWatched : %d", percentPlayed, wasFullyWatched);
     if ( wasFullyWatched ) {
         [self setCallbackStatus:MovieRewardCallbackPlayComplete];
-    } else {
-        [self setCallbackStatus:MovieRewardCallbackPlayFail];
     }
 }
 

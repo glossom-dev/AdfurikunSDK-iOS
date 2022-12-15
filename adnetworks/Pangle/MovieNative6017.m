@@ -156,7 +156,7 @@ This method is called when native ad material loaded successfully.
         [info setupMediaView:self.relatedView.videoAdView];
         [self setCustomMediaview:self.relatedView.videoAdView];
         
-        [self.nativeAd registerContainer:self.relatedView.videoAdView withClickableViews:@[]];
+        [self.nativeAd registerContainer:self.relatedView.videoAdView withClickableViews:@[self.relatedView.videoAdView]];
     } else {
         if (adMeta.imageAry.count == 0 || adMeta.imageAry.firstObject.imageURL.length == 0) {
             AdapterLogP(@"metadata is invalid %@", adMeta);
@@ -176,7 +176,7 @@ This method is called when native ad material loaded successfully.
         [info setupMediaView:self.imageView];
         [self setCustomMediaview:self.imageView];
         
-        [self.nativeAd registerContainer:self.imageView withClickableViews:@[]];
+        [self.nativeAd registerContainer:self.imageView withClickableViews:@[self.imageView]];
     }
     info.adapter = self;
     info.isCustomComponentSupported = false;

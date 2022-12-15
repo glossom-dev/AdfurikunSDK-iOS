@@ -182,7 +182,7 @@
         if (error) {
             [adapter setErrorWithMessage:error.localizedDescription code:error.code];
         }
-        [adapter setCallbackStatus:MovieRewardCallbackPlayFail];
+        [adapter setCallbackStatus:MovieRewardCallbackFetchFail];
         adapter.isAdLoaded = false;
     }
 }

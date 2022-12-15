@@ -14,7 +14,6 @@
 @property(nonatomic) GADRewardedAd *rewardedAd;
 @property(nonatomic) NSString *unitID;
 @property(nonatomic) BOOL testFlg;
-@property(nonatomic) BOOL isAdsCompleteShow;
 @end
 
 @implementation MovieReward6019
@@ -41,8 +40,6 @@
     if ([self isNotNull:testFlg] && [testFlg isKindOfClass:[NSNumber class]]) {
         self.testFlg = [testFlg boolValue];
     }
-
-    self.isAdsCompleteShow = NO;
 }
 
 - (void)initAdnetworkIfNeeded {
@@ -112,7 +109,7 @@
             [self requireToAsyncPlay];
             [self.rewardedAd presentFromRootViewController:[self topMostViewController]
                                   userDidEarnRewardHandler:^{
-                [self adCompleteShow];
+                [self setCallbackStatus:MovieRewardCallbackPlayComplete];
             }];
         } @catch (NSException *exception) {
             [self adnetworkExceptionHandling:exception];
@@ -155,16 +152,10 @@
     [self setCallbackStatus:MovieRewardCallbackFetchFail];
 }
 
-- (void)adCompleteShow {
-    self.isAdsCompleteShow = YES;
-    [self setCallbackStatus:MovieRewardCallbackPlayComplete];
-}
-
 #pragma mark - GADFullScreenContentDelegate
 
 - (void)adDidRecordImpression:(nonnull id<GADFullScreenPresentingAd>)ad {
     NSLog(@"%s", __FUNCTION__);
-    self.isAdsCompleteShow = NO;
     [self setCallbackStatus:MovieRewardCallbackPlayStart];
 }
 
@@ -186,9 +177,6 @@
 - (void)adDidDismissFullScreenContent:(nonnull id<GADFullScreenPresentingAd>)ad {
     NSLog(@"%s", __FUNCTION__);
     self.isAdLoaded = false;
-    if (!self.isAdsCompleteShow) {
-        [self setCallbackStatus:MovieRewardCallbackPlayFail];
-    }
     [self setCallbackStatus:MovieRewardCallbackClose];
 }
 

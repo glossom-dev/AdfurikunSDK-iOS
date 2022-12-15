@@ -24,6 +24,19 @@ NS_ASSUME_NONNULL_BEGIN
 
 @end
 
+@interface ADFAdnetworkParam : NSObject
+
+- (instancetype)init NS_UNAVAILABLE;
+- (instancetype)initWithParam:(NSDictionary *)param;
+- (bool)isValid;
+
+-(bool)isString:(NSObject *)object;
+-(bool)isNumber:(NSObject *)object;
+-(bool)isArray:(NSObject *)object;
+-(bool)isDictionary:(NSObject *)object;
+
+@end
+
 @interface ADFmyBaseAdapterInterface : ADFmyAdapterLogger<NSCopying>
 
 @property (nonatomic, weak) NSObject *delegate;

@@ -125,6 +125,12 @@
     }
 }
 
+-(void)setHasUserConsent:(BOOL)hasUserConsent {
+    [super setHasUserConsent:hasUserConsent];
+    [IronSource setConsent:hasUserConsent];
+    AdapterLogP(@"Adnetwork 6110, gdprConsent : %@, sdk setting value : %d", self.hasGdprConsent, (int)hasUserConsent);
+}
+
 /*
  * Adnetwork SDKからのCallbackに合わせてStatusを設定する
  [self setCallbackStatus:CALLBACKSTATUS]

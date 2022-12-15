@@ -1,6 +1,6 @@
 Pod::Spec.new do |s|
   s.name            = "AdfurikunSDK-iOS"
-  s.version         = "3.15.2"
+  s.version         = "3.16.0"
   s.summary         = "An iOS SDK for ADFURIKUN Movie Reward Ads"
   s.homepage        = "https://adfurikun.jp/adfurikun/"
   s.license         = { :type => 'Copyright', :text => 'Copyright Glossom Inc. All rights reserved.' }
@@ -34,7 +34,7 @@ Pod::Spec.new do |s|
 
   s.subspec 'AppLovin' do |applovin|
     applovin.dependency 'AdfurikunSDK-iOS/Core'
-    applovin.dependency 'AppLovinSDK', '11.5.4'
+    applovin.dependency 'AppLovinSDK', '11.6.0'
     applovin.source_files = '**/adnetworks/AppLovin/*.{h,m}'
     applovin.resource = '**/adnetworks/AppLovin/*.txt'
   end
@@ -48,14 +48,14 @@ Pod::Spec.new do |s|
 
   s.subspec 'Five' do |five|
     five.dependency 'AdfurikunSDK-iOS/Core'
-    five.dependency 'FiveAd', '2.4.20220630'
+    five.dependency 'FiveAd', '2.4.20220722'
     five.source_files = '**/adnetworks/Five/*.{h,m}'
     five.resource = '**/adnetworks/Five/*.txt'
   end
 
   s.subspec 'ironSource' do |ironSource|
     ironSource.dependency 'AdfurikunSDK-iOS/Core'
-    ironSource.dependency 'IronSourceSDK', '7.2.5.0'
+    ironSource.dependency 'IronSourceSDK', '7.2.6'
     ironSource.source_files = '**/adnetworks/IronSource/*.{h,m}'
     ironSource.resource = '**/adnetworks/IronSource/*.txt'
   end
@@ -76,14 +76,14 @@ Pod::Spec.new do |s|
 
   s.subspec 'Pangle' do |pangle|
     pangle.dependency 'AdfurikunSDK-iOS/Core'
-    pangle.dependency 'Ads-Global', '4.3.1.9'
+    pangle.dependency 'Ads-Global', '4.7.0.8'
     pangle.source_files = '**/adnetworks/Pangle/*.{h,m}'
     pangle.resource = '**/adnetworks/Pangle/*.txt'
   end
 
   s.subspec 'Tapjoy' do |tapjoy|
     tapjoy.dependency 'AdfurikunSDK-iOS/Core'
-    tapjoy.dependency 'TapjoySDK', '12.11.0'
+    tapjoy.dependency 'TapjoySDK', '12.11.1'
     tapjoy.source_files = '**/adnetworks/Tapjoy/*.{h,m}'
     tapjoy.resource = '**/adnetworks/Tapjoy/*.txt'
   end
@@ -97,9 +97,27 @@ Pod::Spec.new do |s|
 
   s.subspec 'Vungle' do |vungle|
     vungle.dependency 'AdfurikunSDK-iOS/Core'
-    vungle.dependency 'VungleSDK-iOS', '6.11.0'
+    vungle.dependency 'VungleSDK-iOS', '6.12.1'
     vungle.source_files = '**/adnetworks/Vungle/*.{h,m}'
     vungle.resource = '**/adnetworks/Vungle/*.txt'
+  end
+
+  s.subspec 'Mintegral' do |mintegral|
+    mintegral.dependency 'AdfurikunSDK-iOS/Core'
+    mintegral.dependency 'MintegralAdSDK/BidNativeAd', '7.2.4'
+    mintegral.dependency 'MintegralAdSDK/BidNativeAdvancedAd', '7.2.4'
+    mintegral.dependency 'MintegralAdSDK/BidRewardVideoAd', '7.2.4'
+    mintegral.dependency 'MintegralAdSDK/BidNewInterstitialAd', '7.2.4'
+    mintegral.dependency 'MintegralAdSDK/BidBannerAd', '7.2.4'
+    mintegral.source_files = '**/adnetworks/Mintegral/*.{h,m}'
+    mintegral.resource = '**/adnetworks/Mintegral/*.txt'
+  end
+
+  s.subspec 'Zucks' do |zucks|
+    zucks.dependency 'AdfurikunSDK-iOS/Core'
+    zucks.dependency 'ZucksAdNetworkSDK', '4.11.0'
+    zucks.source_files = '**/adnetworks/Zucks/*.{h,m}'
+    zucks.resource = '**/adnetworks/Zucks/*.txt'
   end
   
   s.subspec 'All' do |all|
@@ -116,6 +134,8 @@ Pod::Spec.new do |s|
     all.dependency 'AdfurikunSDK-iOS/Tapjoy'
     all.dependency 'AdfurikunSDK-iOS/UnityAds'
     all.dependency 'AdfurikunSDK-iOS/Vungle'
+    all.dependency 'AdfurikunSDK-iOS/Mintegral'
+    all.dependency 'AdfurikunSDK-iOS/Zucks'
   end
 
 end
