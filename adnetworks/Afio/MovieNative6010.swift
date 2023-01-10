@@ -31,7 +31,7 @@ class MovieNative6010: ADFmyMovieNativeInterface {
         }
     }
 
-    override class func getAdapterRevisionVersion() -> String! {
+    override class func getAdapterRevisionVersion() -> String {
         return "1"
     }
 

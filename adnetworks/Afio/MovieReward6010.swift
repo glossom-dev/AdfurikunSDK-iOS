@@ -19,7 +19,7 @@ class MovieReward6010: ADFmyMovieRewardInterface {
 
     private var didLoad = false
 
-    override class func getAdapterRevisionVersion() -> String! {
+    override class func getAdapterRevisionVersion() -> String {
         return "2"
     }
     
