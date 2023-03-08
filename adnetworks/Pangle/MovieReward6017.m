@@ -9,11 +9,11 @@
 #import "MovieReward6017.h"
 #import <ADFMovieReward/ADFMovieOptions.h>
 #import <BUAdSDK/BUAdSDK.h>
+#import "AdnetworkParam6017.h"
 
 @interface MovieReward6017 ()<BURewardedVideoAdDelegate>
 @property (nonatomic, strong) BURewardedVideoAd *rewardedVideoAd;
-@property (nonatomic, strong) NSString *tiktokAppID;
-@property (nonatomic, strong) NSString *tiktokSlotID;
+@property (nonatomic) AdnetworkParam6017 *adParam;
 @end
 
 @implementation MovieReward6017
@@ -29,14 +29,7 @@
 - (void)setData:(NSDictionary *)data {
     [super setData:data];
     
-    NSString *data_appID = [data objectForKey:@"appid"];
-    if ([self isNotNull:data_appID]) {
-        self.tiktokAppID = [NSString stringWithFormat:@"%@", data_appID];
-    }
-    NSString *data_slotID = [data objectForKey:@"ad_slot_id"];
-    if ([self isNotNull:data_slotID]) {
-        self.tiktokSlotID = [NSString stringWithFormat:@"%@", data_slotID];
-    }
+    self.adParam = [[AdnetworkParam6017 alloc] initWithParam:data];
 }
 
 - (BOOL)isPrepared {
@@ -47,17 +40,18 @@
     if (![self needsToInit]) {
         return;
     }
-
-    if (self.tiktokAppID) {
-        @try {
-            [self requireToAsyncInit];
-            
-            [MovieConfigure6017.sharedInstance configureWithAppId:self.tiktokAppID gdprStatus:self.hasGdprConsent completion:^{
-                [self initCompleteAndRetryStartAdIfNeeded];
-            }];
-        } @catch (NSException *exception) {
-            [self adnetworkExceptionHandling:exception];
-        }
+    if (!self.adParam || ![self.adParam isValid]) {
+        return;
+    }
+    
+    @try {
+        [self requireToAsyncInit];
+        
+        [MovieConfigure6017.sharedInstance configureWithAppId:self.adParam.appID gdprStatus:self.hasGdprConsent completion:^{
+            [self initCompleteAndRetryStartAdIfNeeded];
+        }];
+    } @catch (NSException *exception) {
+        [self adnetworkExceptionHandling:exception];
     }
 }
 
@@ -65,24 +59,25 @@
     if (![self canStartAd]) {
         return;
     }
-
+    if (!self.adParam || ![self.adParam isValid]) {
+        return;
+    }
+    
     self.isAdLoaded = NO;
     if (self.rewardedVideoAd) {
         self.rewardedVideoAd = nil;
     }
-    if (self.tiktokSlotID) {
-        @try {
-            [self requireToAsyncRequestAd];
-            
-            dispatch_async(dispatch_get_main_queue(), ^{
-                BURewardedVideoModel *model = [[BURewardedVideoModel alloc] init];
-                self.rewardedVideoAd = [[BURewardedVideoAd alloc] initWithSlotID:self.tiktokSlotID rewardedVideoModel:model];
-                self.rewardedVideoAd.delegate = self;
-                [self.rewardedVideoAd loadAdData];
-            });
-        } @catch (NSException *exception) {
-            [self adnetworkExceptionHandling:exception];
-        }
+    @try {
+        [self requireToAsyncRequestAd];
+        
+        dispatch_async(dispatch_get_main_queue(), ^{
+            BURewardedVideoModel *model = [[BURewardedVideoModel alloc] init];
+            self.rewardedVideoAd = [[BURewardedVideoAd alloc] initWithSlotID:self.adParam.slotID rewardedVideoModel:model];
+            self.rewardedVideoAd.delegate = self;
+            [self.rewardedVideoAd loadAdData];
+        });
+    } @catch (NSException *exception) {
+        [self adnetworkExceptionHandling:exception];
     }
 }
 

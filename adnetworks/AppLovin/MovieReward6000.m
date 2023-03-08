@@ -80,11 +80,6 @@
             }
             [self initCompleteAndRetryStartAdIfNeeded];
         }];
-        //音出力設定
-        ADFMovieOptions_Sound soundState = [ADFMovieOptions getSoundState];
-        if (ADFMovieOptions_Sound_Default != soundState) {
-            [ALSdk shared].settings.muted = (ADFMovieOptions_Sound_Off == soundState);
-        }
     }
 }
 
@@ -302,6 +297,13 @@ typedef enum : NSUInteger {
             }
         });
     }
+    //音出力設定
+    ADFMovieOptions_Sound soundState = [ADFMovieOptions getSoundState];
+    if (ADFMovieOptions_Sound_Default != soundState) {
+        [ALSdk shared].settings.muted = (ADFMovieOptions_Sound_Off == soundState);
+    }
+    // デバッグ機能設定（Trueにすると端末を裏表に振ると、画面にAppLovinアイコンが表示される）
+    [ALSdk shared].settings.creativeDebuggerEnabled = [ADFMovieOptions getTestMode];
 }
     
 @end

@@ -8,13 +8,14 @@
 
 #import "Banner6017.h"
 #import "MovieReward6017.h"
+#import "AdnetworkParam6017.h"
 
 @interface Banner6017()<BUNativeExpressBannerViewDelegate>
 
-@property (nonatomic) NSString *pangleAppID;
-@property (nonatomic) NSString *pangleSlotID;
 @property (nonatomic) BUNativeExpressBannerView *adView;
 @property (nonatomic) BOOL didInvokeImpression;
+@property (nonatomic) AdnetworkParam6017 *adParam;
+
 @end
 
 @implementation Banner6017
@@ -40,34 +41,28 @@
 - (void)setData:(NSDictionary *)data {
     [super setData:data];
     
-    NSString *appID = [data objectForKey:@"appid"];
-    if ([self isNotNull:appID]) {
-        self.pangleAppID = [NSString stringWithFormat:@"%@", appID];
-    }
-    NSString *slotID = [data objectForKey:@"ad_slot_id"];
-    if ([self isNotNull:slotID]) {
-        self.pangleSlotID = [NSString stringWithFormat:@"%@", slotID];
-    }
+    self.adParam = [[AdnetworkParam6017 alloc] initWithParam:data];
 }
 
 -(void)initAdnetworkIfNeeded {
     if (![self needsToInit]) {
         return;
     }
-
-    AdapterLog(@"Banner6017 initAdnetworkIfNeeded");
-    if (self.pangleAppID) {
-        @try {
-            [self requireToAsyncInit];
-            
-            [MovieConfigure6017.sharedInstance configureWithAppId:self.pangleAppID gdprStatus:self.hasGdprConsent completion:^{
-                [self initCompleteAndRetryStartAdIfNeeded];
-            }];
-        } @catch (NSException *exception) {
-            [self adnetworkExceptionHandling:exception];
-        }
+    if (!self.adParam || ![self.adParam isValid]) {
+        return;
     }
-
+    
+    AdapterLog(@"Banner6017 initAdnetworkIfNeeded");
+    @try {
+        [self requireToAsyncInit];
+        
+        [MovieConfigure6017.sharedInstance configureWithAppId:self.adParam.appID gdprStatus:self.hasGdprConsent completion:^{
+            [self initCompleteAndRetryStartAdIfNeeded];
+        }];
+    } @catch (NSException *exception) {
+        [self adnetworkExceptionHandling:exception];
+    }
+    
     self.adSize = CGSizeMake(320.0, 50.0);
 }
 
@@ -83,8 +78,7 @@
     if (![self canStartAd]) {
         return;
     }
-
-    if (self.pangleSlotID == nil) {
+    if (!self.adParam || ![self.adParam isValid]) {
         return;
     }
     
@@ -105,7 +99,7 @@
     @try {
         [self requireToAsyncRequestAd];
         
-        self.adView = [[BUNativeExpressBannerView alloc] initWithSlotID:self.pangleSlotID
+        self.adView = [[BUNativeExpressBannerView alloc] initWithSlotID:self.adParam.slotID
                                                      rootViewController:topMostVC
                                                                  adSize:self.adSize];
         self.adView.frame = CGRectMake(0.0, 0.0, self.adSize.width, self.adSize.height);

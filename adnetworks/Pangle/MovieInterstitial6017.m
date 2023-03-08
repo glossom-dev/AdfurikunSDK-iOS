@@ -11,11 +11,13 @@
 #import <ADFMovieReward/ADFMovieOptions.h>
 #import <BUAdSDK/BUFullscreenVideoAd.h>
 #import <BUAdSDK/BUAdSDKManager.h>
+#import "AdnetworkParam6017.h"
 
 @interface MovieInterstitial6017 ()<BUFullscreenVideoAdDelegate>
+
 @property (nonatomic, strong) BUFullscreenVideoAd *fullscreenVideoAd;
-@property (nonatomic, strong) NSString *tiktokAppID;
-@property (nonatomic, strong) NSString *tiktokSlotID;
+@property (nonatomic) AdnetworkParam6017 *adParam;
+
 @end
 
 @implementation MovieInterstitial6017
@@ -38,14 +40,7 @@
 - (void)setData:(NSDictionary *)data {
     [super setData:data];
     
-    NSString *data_appID = [data objectForKey:@"appid"];
-    if ([self isNotNull:data_appID]) {
-        self.tiktokAppID = [NSString stringWithFormat:@"%@", data_appID];
-    }
-    NSString *data_slotID = [data objectForKey:@"ad_slot_id"];
-    if ([self isNotNull:data_slotID]) {
-        self.tiktokSlotID = [NSString stringWithFormat:@"%@", data_slotID];
-    }
+    self.adParam = [[AdnetworkParam6017 alloc] initWithParam:data];
 }
 
 - (BOOL)isPrepared {
@@ -56,17 +51,18 @@
     if (![self needsToInit]) {
         return;
     }
+    if (!self.adParam || ![self.adParam isValid]) {
+        return;
+    }
 
-    if (self.tiktokAppID) {
-        @try {
-            [self requireToAsyncInit];
-            
-            [MovieConfigure6017.sharedInstance configureWithAppId:self.tiktokAppID gdprStatus:self.hasGdprConsent completion:^{
-                [self initCompleteAndRetryStartAdIfNeeded];
-            }];
-        } @catch (NSException *exception) {
-            [self adnetworkExceptionHandling:exception];
-        }
+    @try {
+        [self requireToAsyncInit];
+        
+        [MovieConfigure6017.sharedInstance configureWithAppId:self.adParam.appID gdprStatus:self.hasGdprConsent completion:^{
+            [self initCompleteAndRetryStartAdIfNeeded];
+        }];
+    } @catch (NSException *exception) {
+        [self adnetworkExceptionHandling:exception];
     }
 }
 
@@ -74,21 +70,22 @@
     if (![self canStartAd]) {
         return;
     }
+    if (!self.adParam || ![self.adParam isValid]) {
+        return;
+    }
 
     self.isAdLoaded = NO;
     if (self.fullscreenVideoAd) {
         self.fullscreenVideoAd = nil;
     }
-    if (self.tiktokSlotID) {
-        @try {
-            [self requireToAsyncRequestAd];
-            
-            self.fullscreenVideoAd = [[BUFullscreenVideoAd alloc] initWithSlotID:self.tiktokSlotID];
-            self.fullscreenVideoAd.delegate = self;
-            [self.fullscreenVideoAd loadAdData];
-        } @catch (NSException *exception) {
-            [self adnetworkExceptionHandling:exception];
-        }
+    @try {
+        [self requireToAsyncRequestAd];
+        
+        self.fullscreenVideoAd = [[BUFullscreenVideoAd alloc] initWithSlotID:self.adParam.slotID];
+        self.fullscreenVideoAd.delegate = self;
+        [self.fullscreenVideoAd loadAdData];
+    } @catch (NSException *exception) {
+        [self adnetworkExceptionHandling:exception];
     }
 }
 

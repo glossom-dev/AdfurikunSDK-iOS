@@ -36,21 +36,18 @@
 }
 
 // Adnetwork SDKの初期化を行う
-- (void)initAdnetworkIfNeeded {
-    // 一回のみ初期化を行うようなチェックを行う
-    if (![self needsToInit]) {
-        return;
-    }
-    if (!self.adParam || !self.adParam.frameId) {
-        return;
-    }
-    self.rewardedAd = [[ZADNRewardedAd alloc] initWithFrameId:self.adParam.frameId];
-    [self initCompleteAndRetryStartAdIfNeeded];
-}
+//- (void)initAdnetworkIfNeeded {
+//}
 
 // 広告呼び込みを行う
 - (void)startAd {
     AdapterTrace;
+    
+    if (!self.adParam || !self.adParam.frameId) {
+        return;
+    }
+    
+    self.rewardedAd = [[ZADNRewardedAd alloc] initWithFrameId:self.adParam.frameId];
     
     if (!self.rewardedAd) {
         return;
