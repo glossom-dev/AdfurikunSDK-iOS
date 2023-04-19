@@ -1,6 +1,6 @@
 Pod::Spec.new do |s|
   s.name            = "AdfurikunSDK-iOS"
-  s.version         = "3.18.0"
+  s.version         = "3.18.0.1"
   s.summary         = "An iOS SDK for ADFURIKUN Movie Reward Ads"
   s.homepage        = "https://adfurikun.jp/adfurikun/"
   s.license         = { :type => 'Copyright', :text => 'Copyright Glossom Inc. All rights reserved.' }
@@ -62,7 +62,7 @@ Pod::Spec.new do |s|
 
   s.subspec 'Fyber' do |fyber|
     fyber.dependency 'AdfurikunSDK-iOS/Core'
-    fyber.dependency 'Fyber_Marketplace_SDK', '8.2.0'
+    fyber.dependency 'Fyber_Marketplace_SDK', '8.2.1'
     fyber.source_files = '**/adnetworks/Fyber/*.{h,m}'
     fyber.resource = '**/adnetworks/Fyber/*.txt'
   end
