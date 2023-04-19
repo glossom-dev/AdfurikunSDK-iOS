@@ -13,4 +13,19 @@ NS_ASSUME_NONNULL_BEGIN
 
 @end
 
+@interface AppOpenAd6090 : AppOpenAd6017
+@end
+
+@interface AppOpenAd6091 : AppOpenAd6017
+@end
+
+@interface AppOpenAd6092 : AppOpenAd6017
+@end
+
+@interface AppOpenAd6093 : AppOpenAd6017
+@end
+
+@interface AppOpenAd6094 : AppOpenAd6017
+@end
+
 NS_ASSUME_NONNULL_END

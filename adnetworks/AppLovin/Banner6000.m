@@ -21,7 +21,7 @@
 }
 
 + (NSString *)getAdapterRevisionVersion {
-    return @"3";
+    return @"4";
 }
 
 - (BOOL)isClassReference {
@@ -65,8 +65,6 @@
         if (ADFMovieOptions_Sound_Default != soundState) {
             [ALSdk shared].settings.muted = (ADFMovieOptions_Sound_Off == soundState);
         }
-        // デバッグ機能設定（Trueにすると端末を裏表に振ると、画面にAppLovinアイコンが表示される）
-        [ALSdk shared].settings.creativeDebuggerEnabled = [ADFMovieOptions getTestMode];
 
         [self initCompleteAndRetryStartAdIfNeeded];
     }
@@ -79,7 +77,6 @@
 
     [super startAd];
     
-    self.isAdLoaded = NO;
     if (self.adView) {
         @try {
             [self requireToAsyncRequestAd];
@@ -100,7 +97,6 @@
 
 - (void)adService:(ALAdService *)adService didLoadAd:(ALAd *)ad {
     AdapterTrace;
-    self.isAdLoaded = YES;
     if (self.delegate) {
         if ([self.delegate respondsToSelector:@selector(onNativeMovieAdLoadFinish:)]) {
             NativeAdInfo6000 *info = [[NativeAdInfo6000 alloc] initWithVideoUrl:nil
@@ -124,7 +120,6 @@
 
 - (void)adService:(ALAdService *)adService didFailToLoadAdWithError:(int)code {
     AdapterTraceP(@"code : %d", code);
-    self.isAdLoaded = NO;
     if (code) {
         [self setErrorWithMessage:nil code:code];
     }

@@ -23,7 +23,7 @@
 }
 
 + (NSString *)getAdapterRevisionVersion {
-    return @"6";
+    return @"7";
 }
 
 -(void)setData:(NSDictionary *)data {
@@ -74,8 +74,6 @@
         [super startAd];
         
         [self requireToAsyncRequestAd];
-        
-        self.isAdLoaded = false;
         
         if (self.bannerView) {
             self.bannerView = nil;
@@ -136,7 +134,6 @@
 
 -(void)bannerViewDidLoad:(UADSBannerView *)bannerView {
     AdapterTrace;
-    self.isAdLoaded = true;
     NativeAdInfo6001 *info = [[NativeAdInfo6001 alloc] initWithVideoUrl:nil
                                                                   title:@""
                                                             description:@""

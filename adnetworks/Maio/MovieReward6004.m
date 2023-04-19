@@ -28,7 +28,7 @@
 }
 
 + (NSString *)getAdapterRevisionVersion {
-    return @"7";
+    return @"9";
 }
 
 -(id)init {
@@ -63,28 +63,24 @@
     }
 
     AdapterLogP(@"%s maio media id %@, zone id %@", __func__, self.maioMediaId, self.maioZoneId);
-    //広告の読み込みがmediaID単位で行われることにより
-    //startAdより前にisPrepared=trueになって広告が再生されるケースがあるため
-    [[MovieDelegate6004 sharedInstance] setMovieReward:self inZone:self.maioZoneId];
 }
 
 -(BOOL)isPrepared {
     if (!self.delegate) {
-        NSAssert(NO, @"self.delegate must not be nil");
         return NO;
     }
-    BOOL result;
+    
+    BOOL result = false;
     if (self.maioZoneId && self.maioInstance) {
         AdapterLogP(@"maio zone id (%@) has instance %@", self.maioZoneId, self.maioInstance);
         result = [self.maioInstance canShowAtZoneId:self.maioZoneId];
-    } else {
-        result = [Maio canShow];
     }
     AdapterLogP(@"maio zone id (%@) canShow : %d", self.maioZoneId, result);
     return result;
 }
 
 -(void)initAdnetworkIfNeeded {
+    [[MovieDelegate6004 sharedInstance] setMovieReward:self inZone:self.maioZoneId];
     [self initCompleteAndRetryStartAdIfNeeded];
 }
 
@@ -92,6 +88,8 @@
     if (self.maioMediaId == nil) {
         return;
     }
+    
+    [super startAd];
     
     @try {
         [self requireToAsyncRequestAd];
@@ -182,12 +180,12 @@
 - (MaioInstance *)startWithMediaId:(NSString *)mediaId {
     MaioInstance *instance = [self.instances objectForKey:mediaId];
     if (instance) {
-        NSLog(@"[ADF] %s maio %@ has instance", __func__, mediaId);
+        NSLog(@"[ADF] Adnetwork Adapter Log %s maio %@ has instance", __func__, mediaId);
         return instance;
     }
     instance = [Maio startWithNonDefaultMediaId:mediaId delegate:self];
     [self.instances setObject:instance forKey:mediaId];
-    NSLog(@"[ADF] %s maio %@ create instance", __func__, mediaId);
+    NSLog(@"[ADF] Adnetwork Adapter Log %s maio %@ create instance", __func__, mediaId);
     return instance;
 }
 
@@ -197,7 +195,7 @@
  *  全てのゾーンの広告表示準備が完了したら呼ばれます。
  */
 - (void)maioDidInitialize {
-    NSLog(@"[ADF] %s", __func__);
+    NSLog(@"[ADF] Adnetwork Adapter Log %s", __func__);
 }
 
 /**
@@ -207,7 +205,7 @@
  *  @param newValue 変更後のゾーンの状態。YES なら配信可能
  */
 - (void)maioDidChangeCanShow:(NSString *)zoneId newValue:(BOOL)newValue {
-    NSLog(@"[ADF] %s, zone id : %@, %d", __func__, zoneId, newValue);
+    NSLog(@"[ADF] Adnetwork Adapter Log %s, zone id : %@, %d", __func__, zoneId, newValue);
     if (newValue) {
         [self setCallbackStatus:MovieRewardCallbackFetchComplete zone:zoneId];
     }
@@ -220,7 +218,7 @@
  *  @param zoneId  広告が表示されるゾーンの識別子
  */
 - (void)maioWillStartAd:(NSString *)zoneId {
-    NSLog(@"[ADF] %s, zone id : %@", __func__, zoneId);
+    NSLog(@"[ADF] Adnetwork Adapter Log %s, zone id : %@", __func__, zoneId);
     self.closeFlg = NO;
     // WillShow はないので、DidShow で
     [self setCallbackStatus:MovieRewardCallbackPlayStart zone:zoneId];
@@ -236,7 +234,7 @@
  *  @param rewardParam  ゾーンがリワード型に設定されている場合、予め管理画面にて設定してある任意の文字列パラメータが渡されます。それ以外の場合は nil
  */
 - (void)maioDidFinishAd:(NSString *)zoneId playtime:(NSInteger)playtime skipped:(BOOL)skipped rewardParam:(NSString *)rewardParam {
-    NSLog(@"[ADF] %s", __func__);
+    NSLog(@"[ADF] Adnetwork Adapter Log %s, zone id : %@", __func__, zoneId);
     if (!skipped) {
         [self setCallbackStatus:MovieRewardCallbackPlayComplete zone:zoneId];
     }
@@ -248,7 +246,7 @@
  *  @param zoneId  広告を表示したゾーンの識別子
  */
 - (void)maioDidClickAd:(NSString *)zoneId {
-    NSLog(@"[ADF] %s", __func__);
+    NSLog(@"[ADF] Adnetwork Adapter Log %s, zone id : %@", __func__, zoneId);
 }
 
 /**
@@ -261,7 +259,7 @@
         return;
     }
     self.closeFlg = YES;
-    NSLog(@"[ADF] %s", __func__);
+    NSLog(@"[ADF] Adnetwork Adapter Log %s, zone id : %@", __func__, zoneId);
     [self setCallbackStatus:MovieRewardCallbackClose zone:zoneId];
 }
 
@@ -273,7 +271,7 @@
  */
 - (void)maioDidFail:(NSString *)zoneId reason:(MaioFailReason)reason {
     // ログ表示
-    NSLog(@"[ADF] %s : zone id : %@, fail reason : %d", __func__, zoneId, (int)reason);
+    NSLog(@"[ADF] Adnetwork Adapter Log %s : zone id : %@, fail reason : %d", __func__, zoneId, (int)reason);
     NSString *faileMessage;
 
     switch ((int)reason) {
@@ -319,7 +317,7 @@
         [self setCallbackStatus:MovieRewardCallbackPlayFail zone:zoneId];
     }
     
-    NSLog(@"[ADF] Maio SDK Error:%@", faileMessage);
+    NSLog(@"[ADF] Adnetwork Adapter Log Maio SDK Error:%@", faileMessage);
 }
 
 @end

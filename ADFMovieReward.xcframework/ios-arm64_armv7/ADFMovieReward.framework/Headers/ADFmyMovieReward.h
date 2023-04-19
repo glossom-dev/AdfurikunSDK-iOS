@@ -2,7 +2,7 @@
 //  ADFmyMovieReward.h
 //  ADFMovieReword
 //
-//  (3.17.1)
+//  (3.18.0)
 //  Created by tsukui on 2016/05/28.
 //  (c) 2015 ADFULLY Inc.
 //  (ご利用になられる前に、必ずマニュアルにて実装方法をご参照ください。
@@ -11,6 +11,8 @@
 #import <Foundation/Foundation.h>
 #import <UIKit/UIKit.h>
 #import "ADFmyMovieRewardInterface.h"
+
+NS_ASSUME_NONNULL_BEGIN
 
 @protocol ADFmyMovieRewardDelegate;
 
@@ -47,7 +49,7 @@
  @param delegate デリゲート
  @return 動画リワードのインスタンス
  */
-+ (ADFmyMovieReward *)getInstance:(NSString *)appID delegate:(id<ADFmyMovieRewardDelegate>)delegate;
++ (nullable instancetype)getInstance:(NSString *)appID delegate:(id<ADFmyMovieRewardDelegate>)delegate;
 
 /**
  インスタンスの処理
@@ -80,9 +82,9 @@
  *  動画を再生する
  */
 -(void)play;
--(void)playWithCustomParam:(NSDictionary*)param;
--(void)playWithPresentingViewController:(UIViewController *)viewController;
--(void)playWithPresentingViewController:(UIViewController *)viewController customParam:(NSDictionary*)param;
+-(void)playWithCustomParam:(nullable NSDictionary*)param;
+-(void)playWithPresentingViewController:(nullable UIViewController *)viewController;
+-(void)playWithPresentingViewController:(nullable UIViewController *)viewController customParam:(nullable NSDictionary*)param;
 
 -(void)setTrackingId:(NSDictionary*)trackingId;
 
@@ -147,3 +149,5 @@
 - (void)AdsDidHide:(NSString *)appID;
 
 @end
+
+NS_ASSUME_NONNULL_END

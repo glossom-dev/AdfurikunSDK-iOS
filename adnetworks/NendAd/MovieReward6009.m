@@ -21,7 +21,7 @@
 @implementation MovieReward6009
 
 + (NSString *)getAdapterRevisionVersion {
-    return @"7";
+    return @"8";
 }
 
 #pragma mark - ADFmyMovieRewardInterface
@@ -41,7 +41,7 @@
 
 /**< 広告が準備できているか？ */
 -(BOOL)isPrepared {
-    return self.rewardedVideo.isReady;
+    return self.isAdLoaded && self.rewardedVideo.isReady;
 }
 
 -(void)initAdnetworkIfNeeded {
@@ -67,6 +67,7 @@
     }
 
     if (self.rewardedVideo) {
+        [super startAd];
         @try {
             [self requireToAsyncRequestAd];
             

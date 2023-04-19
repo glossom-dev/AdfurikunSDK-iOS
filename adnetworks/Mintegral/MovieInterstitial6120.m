@@ -26,7 +26,7 @@
 
 // Adapterのバージョン。最初は1にして、修正がある度＋1にする
 + (NSString *)getAdapterRevisionVersion {
-    return @"1";
+    return @"2";
 }
 
 // getinfoからのParameter設定
@@ -80,7 +80,7 @@
         return;
     }
     
-    self.isAdLoaded = false;
+    [super startAd];
     
     // Adnetwork SDKの関数を呼び出す際はTryーCatchでException Handlingを行う
     @try {
@@ -114,6 +114,8 @@
 }
 
 - (void)showAdWithPresentingViewController:(UIViewController *)viewController {
+    [super showAdWithPresentingViewController:viewController];
+    
     @try {
         [self requireToAsyncPlay];
         
@@ -158,7 +160,6 @@
 
 - (void)newInterstitialAdLoadSuccess:(MTGNewInterstitialAdManager *_Nonnull)adManager {
     AdapterTrace;
-    self.isAdLoaded = true;
     [self setCallbackStatus:MovieRewardCallbackFetchComplete];
 }
 
@@ -185,7 +186,6 @@
     AdapterTrace;
     [self setErrorWithMessage:error.localizedDescription code:error.code];
     [self setCallbackStatus:MovieRewardCallbackPlayFail];
-    self.isAdLoaded = false;
 }
 
 
@@ -213,7 +213,6 @@
 - (void)newInterstitialAdDidClosed:(MTGNewInterstitialAdManager *_Nonnull)adManager {
     AdapterTrace;
     [self setCallbackStatus:MovieRewardCallbackClose];
-    self.isAdLoaded = false;
 }
 
 /**

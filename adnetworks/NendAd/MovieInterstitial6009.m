@@ -25,7 +25,7 @@
 #pragma mark - ADFmyMovieRewardInterface
 
 + (NSString *)getAdapterRevisionVersion {
-    return @"7";
+    return @"8";
 }
 
 -(id)init {
@@ -51,7 +51,7 @@
 
 /**< 広告が準備できているか？ */
 -(BOOL)isPrepared {
-    return self.interstitialVideo.isReady;
+    return self.isAdLoaded && self.interstitialVideo.isReady;
 }
 
 -(void)initAdnetworkIfNeeded {
@@ -83,6 +83,7 @@
     }
 
     if (self.interstitialVideo) {
+        [super startAd];
         @try {
             [self requireToAsyncRequestAd];
             

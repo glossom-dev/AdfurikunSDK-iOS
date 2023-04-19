@@ -30,7 +30,7 @@
 }
 
 + (NSString *)getAdapterRevisionVersion {
-    return @"4";
+    return @"5";
 }
 
 - (BOOL)isClassReference {
@@ -186,7 +186,6 @@ This method is called when native ad material loaded successfully.
     self.didSendPlayFinishCallback = false;
     
     self.adInfo = info;
-    self.isAdLoaded = true;
 
     [self setCallbackStatus:NativeAdCallbackLoadFinish];
 }

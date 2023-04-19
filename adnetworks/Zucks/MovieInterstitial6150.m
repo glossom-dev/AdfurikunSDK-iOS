@@ -46,7 +46,7 @@
         return;
     }
     
-    self.isAdLoaded = false;
+    [super startAd];
     
     // Adnetwork SDKの関数を呼び出す際はTryーCatchでException Handlingを行う
     @try {
@@ -93,7 +93,6 @@
 
 - (void)fullScreenInterstitialViewDidReceiveAd {
     AdapterTrace;
-    self.isAdLoaded = true;
     [self setCallbackStatus:MovieRewardCallbackFetchComplete];
 }
 
@@ -117,20 +116,17 @@
     AdapterTrace;
     [self setCallbackStatus:MovieRewardCallbackPlayComplete];
     [self setCallbackStatus:MovieRewardCallbackClose];
-    self.isAdLoaded = false;
 }
 
 //表示率設定により表示がキャンセルされた場合に通知されます。
 - (void)fullScreenInterstitialViewCancelDisplayRate {
     AdapterTrace;
-    self.isAdLoaded = false;
     [self setCallbackStatus:MovieRewardCallbackPlayFail];
 }
 
 - (void)fullScreenInterstitialViewDidShowFailAdWithErrorType:
             (ZADNFullScreenInterstitialShowErrorType)errorType {
     AdapterTraceP(@"Request failed with error type: %ld", errorType);
-    self.isAdLoaded = false;
     [self setErrorWithMessage:nil code:errorType];
     [self setCallbackStatus:MovieRewardCallbackPlayFail];
 }

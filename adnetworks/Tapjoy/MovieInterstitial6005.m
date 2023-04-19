@@ -9,10 +9,6 @@
 
 @implementation MovieInterstitial6005
 
--(void)startAd {
-    [super startAd];
-}
-
 @end
 
 @implementation MovieInterstitial6170

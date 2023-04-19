@@ -9,8 +9,4 @@
 
 @implementation MovieInterstitial6006
 
--(void)initAdnetworkIfNeeded {
-    [super initAdnetworkIfNeeded];
-}
-
 @end

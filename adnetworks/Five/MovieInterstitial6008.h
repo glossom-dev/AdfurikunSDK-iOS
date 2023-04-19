@@ -6,22 +6,11 @@
 //
 
 #import <Foundation/Foundation.h>
-#import <FiveAd/FiveAd.h>
-#import <ADFMovieReward/ADFmyMovieRewardInterface.h>
+#import "AdnetworkBase6008.h"
 
 NS_ASSUME_NONNULL_BEGIN
 
-typedef void(^completionHandlerType)(void);
-
-@interface MovieInterstitial6008 : ADFmyMovieRewardInterface
-
-@property (nonatomic)FADNeedGdprNonPersonalizedAdsTreatment gdprStatus;
-
-@end
-@interface MovieConfigure6008 : NSObject
-
-+ (instancetype)sharedInstance;
-- (void)configureWithAppId:(NSString *)fiveAppId isTest:(BOOL)isTest gdprStatus:(FADNeedGdprNonPersonalizedAdsTreatment)gdprStatus completion:(completionHandlerType)completionHandler;
+@interface MovieInterstitial6008 : AdnetworkBase6008
 
 @end
 

@@ -26,7 +26,7 @@
 }
 
 + (NSString *)getAdapterRevisionVersion {
-    return @"4";
+    return @"5";
 }
 
 /**
@@ -80,6 +80,11 @@
             }
             [self initCompleteAndRetryStartAdIfNeeded];
         }];
+        //音出力設定
+        ADFMovieOptions_Sound soundState = [ADFMovieOptions getSoundState];
+        if (ADFMovieOptions_Sound_Default != soundState) {
+            [ALSdk shared].settings.muted = (ADFMovieOptions_Sound_Off == soundState);
+        }
     }
 }
 
@@ -93,6 +98,7 @@
     }
 
     if (self.incentivizedInterstitial) {
+        [super startAd];
         @try {
             [self requireToAsyncRequestAd];
             [self.incentivizedInterstitial preloadAndNotify: self];
@@ -114,7 +120,7 @@
         //表示を消したい場合は、こちらをコメントアウトして下さい。
         AdapterLogP(@"[SEVERE] [Applovin]アプリのバンドルIDが、申請されたもの（%@）と異なります。", self.submittedPackageName);
     }
-    return self.incentivizedInterstitial && self.incentivizedInterstitial.isReadyForDisplay;
+    return self.isAdLoaded && self.incentivizedInterstitial && self.incentivizedInterstitial.isReadyForDisplay;
 }
 
 -(void)showAd
@@ -297,13 +303,6 @@ typedef enum : NSUInteger {
             }
         });
     }
-    //音出力設定
-    ADFMovieOptions_Sound soundState = [ADFMovieOptions getSoundState];
-    if (ADFMovieOptions_Sound_Default != soundState) {
-        [ALSdk shared].settings.muted = (ADFMovieOptions_Sound_Off == soundState);
-    }
-    // デバッグ機能設定（Trueにすると端末を裏表に振ると、画面にAppLovinアイコンが表示される）
-    [ALSdk shared].settings.creativeDebuggerEnabled = [ADFMovieOptions getTestMode];
 }
     
 @end

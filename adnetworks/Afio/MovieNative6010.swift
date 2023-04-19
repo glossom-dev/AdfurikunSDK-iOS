@@ -7,8 +7,8 @@
 //
 
 import Foundation
-import AMoAd
 import ADFMovieReward
+import AMoAd
 
 @objc(MovieNative6010)
 
@@ -33,7 +33,7 @@ class MovieNative6010: ADFmyMovieNativeInterface {
     }
 
     override class func getAdapterRevisionVersion() -> String {
-        return "1"
+        return "2"
     }
 
     override func setData(_ data: [AnyHashable : Any]!) {
@@ -50,7 +50,7 @@ class MovieNative6010: ADFmyMovieNativeInterface {
 
     override func startAd() {
         if let sid = sid {
-            isAdLoaded = false
+            super.startAd()
             AMoAdNativeViewManager.shared.prepareAd(sid: sid, iconPreloading: true, imagePreloading: true)
 
             amoadView?.removeFromSuperview()
@@ -160,7 +160,6 @@ extension MovieNative6010: AMoAdNativeAppDelegate {
                 self.adInfo.setupMediaView(self.adView)
                 self.adInfo.adapter = self
 
-                self.isAdLoaded = true
                 self.isPlayStart = false
                 self.delegate.onNativeMovieAdLoadFinish?(self.adInfo)
             }

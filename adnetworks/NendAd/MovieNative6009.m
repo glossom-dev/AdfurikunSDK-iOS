@@ -16,13 +16,14 @@
 @property (nonatomic) NSInteger nendAdspotId;
 @property (nonatomic) BOOL didInit;
 @property (nonatomic) NADNativeVideoClickAction clickAction;
+@property (nonatomic) BOOL invokePlayStart;
 
 @end
 
 @implementation MovieNative6009
 
 + (NSString *)getAdapterRevisionVersion {
-    return @"4";
+    return @"6";
 }
 
 - (BOOL)isClassReference {
@@ -108,11 +109,11 @@
                     [info setupMediaView:weakSelf.nativeVideoView];
                     
                     weakSelf.adInfo = info;
-                    weakSelf.isAdLoaded = true;
+                    
+                    weakSelf.invokePlayStart = false;
                     
                     [weakSelf setCallbackStatus:NativeAdCallbackLoadFinish];
                 } else {
-                    weakSelf.isAdLoaded = false;
                     AdapterLogP(@"nend NativeAd load error : %@", error.localizedDescription);
                     [weakSelf setErrorWithMessage:error.localizedDescription code:error.code];
                     [self setCallbackStatus:NativeAdCallbackLoadError];
@@ -148,7 +149,10 @@
 #pragma mark - NADNativeVideoViewDelegate
 - (void)nadNativeVideoViewDidStartPlay:(NADNativeVideoView *)videoView {
     AdapterTrace;
-    [self setCallbackStatus:NativeAdCallbackPlayStart];
+    if (!self.invokePlayStart) { // 1回のみPlay Start Callbackを発火する
+        [self setCallbackStatus:NativeAdCallbackPlayStart];
+        self.invokePlayStart = true;
+    }
 }
 
 - (void)nadNativeVideoViewDidStartFullScreenPlaying:(NADNativeVideoView *)videoView {

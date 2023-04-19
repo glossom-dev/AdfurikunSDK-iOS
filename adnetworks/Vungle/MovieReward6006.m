@@ -24,7 +24,7 @@
 }
 
 + (NSString *)getAdapterRevisionVersion {
-    return @"5";
+    return @"6";
 }
 
 - (id)init{
@@ -130,6 +130,7 @@
             return;
         }
         
+        [super startAd];
         [self requireToAsyncRequestAd];
         
         NSError *error = nil;
@@ -147,7 +148,7 @@
     if (!self.delegate) {
         return NO;
     }
-    return [[VungleSDK sharedSDK] isAdCachedForPlacementID:self.placementID];
+    return self.isAdLoaded && [[VungleSDK sharedSDK] isAdCachedForPlacementID:self.placementID];
 }
 
 /**

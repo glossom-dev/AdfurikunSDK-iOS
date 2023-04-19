@@ -6,47 +6,18 @@
 //
 
 #import "MovieReward6008.h"
-#import <FiveAd/FiveAd.h>
 #import <ADFMovieReward/ADFMovieOptions.h>
 
-@interface MovieReward6008()<FADLoadDelegate, FADAdViewEventListener>
+@interface MovieReward6008()
 
 @property (nonatomic) FADVideoReward *fullscreen;
-@property (nonatomic, strong)NSString *fiveAppId;
-@property (nonatomic, strong)NSString *fiveSlotId;
-@property (nonatomic, strong)NSString* submittedPackageName;
-@property (nonatomic)BOOL testFlg;
-@property (nonatomic)BOOL didRetryForNoCache;
 
 @end
 
 @implementation MovieReward6008
 
--(void)setData:(NSDictionary *)data {
-    [super setData:data];
-    
-    NSString *fiveAppId = [data objectForKey:@"app_id"];
-    if ([self isNotNull:fiveAppId]) {
-        self.fiveAppId = [NSString stringWithFormat:@"%@", fiveAppId];
-    }
-    NSString *fiveSlotId = [data objectForKey:@"slot_id"];
-    if ([self isNotNull:fiveSlotId]) {
-        self.fiveSlotId = [NSString stringWithFormat:@"%@", fiveSlotId];
-    }
-    NSString *submittedPackageName = [data objectForKey:@"package_name"];
-    if ([self isNotNull:submittedPackageName]) {
-        self.submittedPackageName = [NSString stringWithFormat:@"%@", submittedPackageName];
-    }
-
-    if (ADFMovieOptions.getTestMode) {
-        self.testFlg = YES;
-    } else {
-        NSNumber *testFlg = [data objectForKey:@"test_flg"];
-        if ([self isNotNull:testFlg] && [testFlg isKindOfClass:[NSNumber class]]) {
-            self.testFlg = [testFlg boolValue];
-        }
-    }
-
++ (NSString *)getAdapterRevisionVersion {
+    return @"1";
 }
 
 -(BOOL)isPrepared {
@@ -54,26 +25,13 @@
     //(バンドルIDが申請済のものと異なると、正常に広告が返却されない可能性があります)
     if(![self.submittedPackageName isEqualToString:[[NSBundle mainBundle] bundleIdentifier]]) {
         //表示を消したい場合は、こちらをコメントアウトして下さい。
-        NSLog(@"[ADF] [SEVERE] [Five]アプリのバンドルIDが、申請されたもの（%@）と異なります。", self.submittedPackageName);
+        AdapterLogP(@"[SEVERE] [Five]アプリのバンドルIDが、申請されたもの（%@）と異なります。", self.submittedPackageName);
     }
     
     if (self.fullscreen) {
-        return self.fullscreen.state == kFADStateLoaded;
+        return self.isAdLoaded && self.fullscreen.state == kFADStateLoaded;
     }
     return NO;
-}
-
--(void)initAdnetworkIfNeeded {
-    if (![self needsToInit]) {
-        return;
-    }
-
-    if (self.fiveAppId && self.fiveSlotId && [self.fiveAppId length] > 0 && [self.fiveSlotId length] > 0) {
-        [self requireToAsyncInit];
-        [MovieConfigure6008.sharedInstance configureWithAppId:self.fiveAppId isTest:self.testFlg gdprStatus:self.gdprStatus completion:^{
-            [self initCompleteAndRetryStartAdIfNeeded];
-        }];
-    }
 }
 
 -(void)startAd {
@@ -85,13 +43,15 @@
         self.fullscreen = nil;
     }
     
+    [super startAd];
+    
     if (self.fiveSlotId && self.fiveSlotId.length > 0) {
         @try {
             [self requireToAsyncRequestAd];
             self.fullscreen = [[FADVideoReward alloc] initWithSlotId:self.fiveSlotId];
             [self.fullscreen setLoadDelegate:self];
             [self.fullscreen setAdViewEventListener:self];
-
+            
             //音出力設定
             ADFMovieOptions_Sound soundState = [ADFMovieOptions getSoundState];
             if (ADFMovieOptions_Sound_On == soundState) {
@@ -131,7 +91,7 @@
     Class clazz = NSClassFromString(@"FADVideoReward");
     if (clazz) {
     } else {
-        NSLog(@"Not found Class: FiveAd");
+        AdapterLog(@"Not found Class: FiveAd");
         return NO;
     }
     return YES;

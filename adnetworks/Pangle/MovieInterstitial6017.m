@@ -27,7 +27,7 @@
 }
 
 + (NSString *)getAdapterRevisionVersion {
-    return @"7";
+    return @"9";
 }
 
 -(id)init {
@@ -70,6 +70,7 @@
     if (![self canStartAd]) {
         return;
     }
+
     if (!self.adParam || ![self.adParam isValid]) {
         return;
     }
@@ -104,7 +105,6 @@
         [self adnetworkExceptionHandling:exception];
         [self setCallbackStatus:MovieRewardCallbackPlayFail];
     }
-    self.isAdLoaded = NO;
 }
 
 - (BOOL)isClassReference {
@@ -132,7 +132,6 @@
 
 - (void)fullscreenVideoAdVideoDataDidLoad:(BUFullscreenVideoAd *)fullscreenVideoAd {
     AdapterTrace;
-    self.isAdLoaded = YES;
     [self setCallbackStatus:MovieRewardCallbackFetchComplete];
 }
 

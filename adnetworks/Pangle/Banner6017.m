@@ -25,7 +25,7 @@
 }
 
 + (NSString *)getAdapterRevisionVersion {
-    return @"4";
+    return @"5";
 }
 
 - (BOOL)isClassReference {
@@ -93,8 +93,6 @@
     if (self.adView) {
         self.adView = nil;
     }
-    
-    self.isAdLoaded = false;
     
     @try {
         [self requireToAsyncRequestAd];
@@ -164,7 +162,6 @@
     info.adapter = self;
     info.isCustomComponentSupported = false;
     self.adInfo = info;
-    self.isAdLoaded = true;
     self.didInvokeImpression = false;
     
     [self setCallbackStatus:NativeAdCallbackLoadFinish];

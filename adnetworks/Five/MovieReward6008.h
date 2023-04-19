@@ -5,10 +5,9 @@
 //
 //
 #import <Foundation/Foundation.h>
-#import "MovieInterstitial6008.h"
+#import "AdnetworkBase6008.h"
 
-
-@interface MovieReward6008 : MovieInterstitial6008
+@interface MovieReward6008 : AdnetworkBase6008
 
 @end
 

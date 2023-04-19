@@ -7,8 +7,8 @@
 //
 
 import Foundation
-import AMoAd
 import ADFMovieReward
+import AMoAd
 
 @objc(MovieReward6010)
 
@@ -46,6 +46,7 @@ class MovieReward6010: ADFmyMovieRewardInterface {
 
     override func startAd() {
         if amoadInterstitialVideo?.isLoaded == false {
+            super.startAd()
             amoadInterstitialVideo?.load()
             didLoad = true
         }

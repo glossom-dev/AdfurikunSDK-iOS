@@ -57,11 +57,9 @@ typedef enum : NSInteger {
 - (void)AdsDidHide:(ADFmyMovieRewardInterface*)movieReward;
 /**< 動画広告再生エラー時のイベント */
 - (void)AdsPlayFailed:(ADFmyMovieRewardInterface*)movieReward;
-
-/** アドネットワーク接続後のイベント(特定のアドネットワーク用) */
-- (void)AdsDidConnect:(ADFmyMovieRewardInterface*)movieReward;
-
 /** 広告がクリックされた(9998のみ対応) */
 - (void)AdsDidClick:(ADFmyMovieRewardInterface*)movieReward;
+/** VCをチェックして広告が閉じられたと判断 */
+- (void)AdsMaybeClosed:(ADFmyMovieRewardInterface*)movieReward;
 
 @end

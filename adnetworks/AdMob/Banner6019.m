@@ -15,7 +15,7 @@
 @implementation Banner6019
 
 + (NSString *)getAdapterRevisionVersion {
-    return @"8";
+    return @"9";
 }
 
 - (void)setData:(NSDictionary *)data {
@@ -46,14 +46,13 @@
 }
 
 - (void)startAdWithOption:(NSDictionary *)option {
-    NSLog(@"%s called", __func__);
+    AdapterTrace;
     if (![self canStartAd]) {
         return;
     }
 
     [super startAd];
 
-    self.isAdLoaded = false;
     self.isBannerViewLoaded = false;
     
     if (self.unitID == nil) {
@@ -72,7 +71,7 @@
         
         GADRequest *request = [GADRequest request];
         if (option) {
-            NSLog(@"custom event option : %@", option);
+            AdapterLogP(@"custom event option : %@", option);
             NSString *label = option[@"label"];
             if (label) {
                 GADCustomEventExtras *extras = [[GADCustomEventExtras alloc] init];
@@ -84,7 +83,7 @@
             GADExtras *extras = [[GADExtras alloc] init];
             extras.additionalParameters = @{@"npa": self.hasGdprConsent.boolValue ? @"1" : @"0"};
             [request registerAdNetworkExtras:extras];
-            NSLog(@"[ADF] Adnetwork 6019, gdprConsent : %@, sdk setting value : %@", self.hasGdprConsent, extras.additionalParameters);
+            AdapterLogP(@"[ADF] Adnetwork 6019, gdprConsent : %@, sdk setting value : %@", self.hasGdprConsent, extras.additionalParameters);
         }
         [self requireToAsyncRequestAd];
         [self.bannerView loadRequest:request];
@@ -96,9 +95,9 @@
 - (BOOL)isClassReference {
     Class clazz = NSClassFromString(@"GADBannerView");
     if (clazz) {
-        NSLog(@"Found Class: GADBannerView");
+        AdapterLog(@"Found Class: GADBannerView");
     } else {
-        NSLog(@"Not found Class: GADBannerView");
+        AdapterLog(@"Not Found Class: GADBannerView");
         return NO;
     }
     return YES;
@@ -118,11 +117,10 @@
 #pragma mark - GADBannerViewDelegate
 
 - (void)bannerViewDidReceiveAd:(GADBannerView *)bannerView {
-    NSLog(@"%s called", __func__);
+    AdapterTrace;
     if (self.isBannerViewLoaded) {
         return;
     }
-    self.isAdLoaded = true;
     self.isBannerViewLoaded = true;
     
     BannerAdInfo6019 *info = [[BannerAdInfo6019 alloc] initWithVideoUrl:nil
@@ -140,7 +138,7 @@
 }
 
 - (void)bannerView:(GADBannerView *)bannerView didFailToReceiveAdWithError:(NSError *)error {
-    NSLog(@"%s error: %@", __FUNCTION__, error);
+    AdapterTraceP(@"error: %@", error);
     if (error) {
         [self setErrorWithMessage:error.localizedDescription code:error.code];
     }
@@ -148,23 +146,23 @@
 }
 
 - (void)bannerViewDidRecordImpression:(GADBannerView *)bannerView {
-    NSLog(@"%s called", __func__);
+    AdapterTrace;
 }
 
 - (void)bannerViewWillPresentScreen:(GADBannerView *)bannerView {
-    NSLog(@"%s called", __func__);
+    AdapterTrace;
 }
 
 - (void)bannerViewWillDismissScreen:(GADBannerView *)bannerView {
-    NSLog(@"%s called", __func__);
+    AdapterTrace;
 }
 
 - (void)bannerViewDidDismissScreen:(GADBannerView *)bannerView {
-    NSLog(@"%s called", __func__);
+    AdapterTrace;
 }
 
 - (void)bannerViewDidRecordClick:(GADBannerView *)bannerView {
-    NSLog(@"%s called", __func__);
+    AdapterTrace;
     [self setCallbackStatus:NativeAdCallbackClick];
 }
 

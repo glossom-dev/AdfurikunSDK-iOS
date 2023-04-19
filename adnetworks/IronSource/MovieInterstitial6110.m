@@ -13,7 +13,7 @@
 
 // Adapterのバージョン。最初は1にして、修正がある度＋1にする
 + (NSString *)getAdapterRevisionVersion {
-    return @"2";
+    return @"3";
 }
 
 // 広告呼び込みを行う
@@ -24,7 +24,7 @@
         return;
     }
     
-    self.isAdLoaded = false;
+    [super startAd];
     
     // Adnetwork SDKの関数を呼び出す際はTryーCatchでException Handlingを行う
     @try {

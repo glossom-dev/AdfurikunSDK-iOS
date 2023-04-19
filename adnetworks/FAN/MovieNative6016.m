@@ -22,7 +22,7 @@
 @implementation MovieNative6016
 
 + (NSString *)getAdapterRevisionVersion {
-    return @"4";
+    return @"5";
 }
 
 - (BOOL)isClassReference {
@@ -213,7 +213,6 @@
         info.adapter = self;
         [info setCustomMediaView:adView];
         self.adInfo = info;
-        self.isAdLoaded = true;
         [self sendOnNativeMovieAdLoadFinish];
     } else {
         [self sendOnNativeMovieAdLoadError:nil];
@@ -287,7 +286,6 @@
         info.adapter = self;
         [info setCustomMediaView:adView];
         self.adInfo = info;
-        self.isAdLoaded = true;
         [self sendOnNativeMovieAdLoadFinish];
     } else {
         [self sendOnNativeMovieAdLoadError:nil];

@@ -26,7 +26,7 @@
 
 // Adapterのバージョン。最初は1にして、修正がある度＋1にする
 + (NSString *)getAdapterRevisionVersion {
-    return @"1";
+    return @"3";
 }
 
 // Adnetwork SDKが設置されているかをチェックする
@@ -101,7 +101,7 @@
         self.adView = nil;
     }
     
-    self.isAdLoaded = false;
+    [super startAd];
     
     // Adnetwork SDKの関数を呼び出す際はTryーCatchでException Handlingを行う
     @try {
@@ -158,13 +158,12 @@
     info.isCustomComponentSupported = false;
     
     self.adInfo = info;
-    self.isAdLoaded = true;
     
     [self setCallbackStatus:NativeAdCallbackLoadFinish];
 }
 
 - (void)adViewLoadFailedWithError:(NSError *)error adView:(MTGBannerAdView *)adView {
-    AdapterTrace;
+    AdapterTraceP(@"error : %@", error);
     [self setErrorWithMessage:error.localizedDescription code:error.code];
     [self setCallbackStatus:NativeAdCallbackLoadError];
 }

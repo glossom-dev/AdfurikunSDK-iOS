@@ -43,7 +43,7 @@ NS_ASSUME_NONNULL_BEGIN
  
   @param timeout 広告準備完了、失敗Callbackが呼ばれるまでのTimeout。1秒から60秒まで設定可能
  */
-- (void)loadWithTimeout:(int)timeout;
+- (void)loadWithTimeout:(float)timeout;
 
 /**
  *  広告が取得済みかどうか

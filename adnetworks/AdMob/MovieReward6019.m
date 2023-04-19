@@ -19,7 +19,7 @@
 @implementation MovieReward6019
 
 + (NSString *)getAdapterRevisionVersion {
-    return @"10";
+    return @"11";
 }
 
 -(id)init {
@@ -69,16 +69,17 @@
         return;
     }
     
+    [super startAd];
+    
     @try {
         GADRequest *request = [GADRequest request];
         if (self.hasGdprConsent) {
             GADExtras *extras = [[GADExtras alloc] init];
             extras.additionalParameters = @{@"npa": self.hasGdprConsent.boolValue ? @"1" : @"0"};
             [request registerAdNetworkExtras:extras];
-            NSLog(@"[ADF] Adnetwork 6019, gdprConsent : %@, sdk setting value : %@", self.hasGdprConsent, extras.additionalParameters);
+            AdapterLogP(@"[ADF] Adnetwork 6019, gdprConsent : %@, sdk setting value : %@", self.hasGdprConsent, extras.additionalParameters);
         }
         [self requireToAsyncRequestAd];
-        self.isAdLoaded = false;
         [GADRewardedAd loadWithAdUnitID:self.unitID
                                 request:request
                       completionHandler:^(GADRewardedAd * _Nullable rewardedAd, NSError * _Nullable error) {
@@ -121,17 +122,16 @@
 - (BOOL)isClassReference {
     Class clazz = NSClassFromString(@"GADRewardedAd");
     if (clazz) {
-        NSLog(@"Found Class: GADRewardedAd");
+        AdapterLog(@"Found Class: GADRewardedAd");
     } else {
-        NSLog(@"Not found Class: GADRewardedAd");
+        AdapterLog(@"Not found Class: GADRewardedAd");
         return NO;
     }
     return YES;
 }
 
 - (void)adRequestSccess:(GADRewardedAd * _Nullable)rewardedAd {
-    NSLog(@"%s", __FUNCTION__);
-    self.isAdLoaded = true;
+    AdapterTrace;
     if ([self isNotNull:rewardedAd]) {
         self.rewardedAd = rewardedAd;
         self.rewardedAd.fullScreenContentDelegate = self;
@@ -147,7 +147,7 @@
 }
 
 - (void)adRequestFailure:(NSError *)error {
-    NSLog(@"%s error: %@", __FUNCTION__, error);
+    AdapterTraceP(@"error: %@", error);
     [self setErrorWithMessage:error.localizedDescription code:error.code];
     [self setCallbackStatus:MovieRewardCallbackFetchFail];
 }
@@ -155,28 +155,26 @@
 #pragma mark - GADFullScreenContentDelegate
 
 - (void)adDidRecordImpression:(nonnull id<GADFullScreenPresentingAd>)ad {
-    NSLog(@"%s", __FUNCTION__);
+    AdapterTrace;
     [self setCallbackStatus:MovieRewardCallbackPlayStart];
 }
 
 - (void)ad:(nonnull id<GADFullScreenPresentingAd>)ad didFailToPresentFullScreenContentWithError:(nonnull NSError *)error {
-    NSLog(@"%s", __FUNCTION__);
-    self.isAdLoaded = false;
+    AdapterTrace;
     [self setErrorWithMessage:error.localizedDescription code:error.code];
     [self setCallbackStatus:MovieRewardCallbackPlayFail];
 }
 
 - (void)adWillPresentFullScreenContent:(nonnull id<GADFullScreenPresentingAd>)ad {
-    NSLog(@"%s", __FUNCTION__);
+    AdapterTrace;
 }
 
 - (void)adWillDismissFullScreenContent:(id<GADFullScreenPresentingAd>)ad {
-    NSLog(@"%s", __FUNCTION__);
+    AdapterTrace;
 }
 
 - (void)adDidDismissFullScreenContent:(nonnull id<GADFullScreenPresentingAd>)ad {
-    NSLog(@"%s", __FUNCTION__);
-    self.isAdLoaded = false;
+    AdapterTrace;
     [self setCallbackStatus:MovieRewardCallbackClose];
 }
 

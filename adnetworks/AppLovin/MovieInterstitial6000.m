@@ -17,7 +17,6 @@
 @property (nonatomic, strong)NSString* zoneIdentifier;
 @property (nonatomic, strong) ALAd *ad;
 @property (nonatomic, strong) ALInterstitialAd *interstitialAd;
-@property (nonatomic) BOOL isAdReady;
 @end
 
 @implementation MovieInterstitial6000
@@ -28,7 +27,7 @@
 }
 
 + (NSString *)getAdapterRevisionVersion {
-    return @"4";
+    return @"6";
 }
 
 -(id)init {
@@ -86,6 +85,11 @@
                 }
             }
         }];
+        //音出力設定
+        ADFMovieOptions_Sound soundState = [ADFMovieOptions getSoundState];
+        if (ADFMovieOptions_Sound_Default != soundState) {
+            [ALSdk shared].settings.muted = (ADFMovieOptions_Sound_Off == soundState);
+        }
     }
 }
 
@@ -96,6 +100,8 @@
     if (![self canStartAd]) {
         return;
     }
+    
+    [super startAd];
 
     @try {
         [self requireToAsyncRequestAd];
@@ -122,14 +128,14 @@
         //表示を消したい場合は、こちらをコメントアウトして下さい。
         AdapterLogP(@"[SEVERE] [Applovin]アプリのバンドルIDが、申請されたもの（%@）と異なります。", self.submittedPackageName);
     }
-    return self.interstitialAd && self.isAdReady;
+    return self.isAdLoaded && self.interstitialAd;
 }
 
 -(void)showAd
 {
     [super showAd];
     
-    if(self.interstitialAd && self.ad && self.isAdReady){
+    if(self.interstitialAd && self.ad && self.isAdLoaded){
         @try {
             [self requireToAsyncPlay];
             [self.interstitialAd showAd:self.ad];
@@ -141,7 +147,6 @@
     else{
         // No interstitial ad is currently available.  Perform failover logic...
         AdapterLog(@"no ads could be shown!");
-        self.isAdReady = NO;
         [self setCallbackStatus:MovieRewardCallbackPlayFail];
     }
 }
@@ -180,7 +185,6 @@
 -(void)adService:(ALAdService *)adService didLoadAd:(ALAd *)ad {
     AdapterTrace;
     self.ad = ad;
-    self.isAdReady = YES;
     [self setCallbackStatus:MovieRewardCallbackFetchComplete];
 }
 
@@ -206,7 +210,6 @@
  */
 -(void) ad:(ALAd *) ad wasHiddenIn: (UIView *)view {
     AdapterTrace;
-    self.isAdReady = NO;
     [self setCallbackStatus:MovieRewardCallbackClose];
 }
 

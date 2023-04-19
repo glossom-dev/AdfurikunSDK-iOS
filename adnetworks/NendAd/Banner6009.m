@@ -19,7 +19,7 @@
 @implementation Banner6009
 
 + (NSString *)getAdapterRevisionVersion {
-    return @"4";
+    return @"5";
 }
 
 - (BOOL)isClassReference {
@@ -76,8 +76,6 @@
         self.adView = nil;
     }
     
-    self.isAdLoaded = false;
-    
     @try {
         [self requireToAsyncRequestAd];
         
@@ -97,7 +95,6 @@
 // 広告ロードが初めて成功した際に通知されます。(任意)
 - (void)nadViewDidFinishLoad:(NADView *)adView {
     AdapterTrace;
-    self.isAdLoaded = true;
     
     for (UIView *subview in adView.subviews) {
         if ([subview isKindOfClass:NSClassFromString(@"NADAdDefaultView")]) {

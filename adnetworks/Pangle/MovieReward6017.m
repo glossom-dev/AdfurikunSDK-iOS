@@ -23,7 +23,7 @@
 }
 
 + (NSString *)getAdapterRevisionVersion {
-    return @"9";
+    return @"11";
 }
 
 - (void)setData:(NSDictionary *)data {
@@ -59,6 +59,7 @@
     if (![self canStartAd]) {
         return;
     }
+
     if (!self.adParam || ![self.adParam isValid]) {
         return;
     }
@@ -99,7 +100,6 @@
             [self adnetworkExceptionHandling:exception];
             [self setCallbackStatus:MovieRewardCallbackPlayFail];
         }
-        self.isAdLoaded = NO;
     }
 }
 
@@ -132,7 +132,6 @@
 
 - (void)rewardedVideoAdVideoDidLoad:(BURewardedVideoAd *)rewardedVideoAd {
     AdapterTrace;
-    self.isAdLoaded = YES;
     [self setCallbackStatus:MovieRewardCallbackFetchComplete];
 }
 

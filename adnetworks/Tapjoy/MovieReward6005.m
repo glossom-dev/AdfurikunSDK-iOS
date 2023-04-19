@@ -27,7 +27,7 @@
 }
 
 + (NSString *)getAdapterRevisionVersion {
-    return @"7";
+    return @"8";
 }
 
 - (id)init {
@@ -91,6 +91,14 @@
             
             [Tapjoy limitedConnect:self.sdkKey];
             [Tapjoy setDebugEnabled:self.test_flg];
+            
+            MovieDelegate6005 *delegate = [MovieDelegate6005 sharedInstance];
+            [delegate setMovieReward:self inZone:self.placement_id];
+            
+            _p = [TJPlacement limitedPlacementWithName:_placement_id mediationAgent:@"adfully" delegate:delegate];
+            _p.videoDelegate = delegate;
+            _p.adapterVersion = @"1.0.1";
+            
             [self initCompleteAndRetryStartAdIfNeeded];
         } @catch (NSException *exception) {
             [self adnetworkExceptionHandling:exception];
@@ -107,7 +115,8 @@
         return;
     }
 
-    if (self.sdkKey && self.placement_id) {
+    if (self.sdkKey && self.placement_id && self.p) {
+        [super startAd];
         @try {
             if (![Tapjoy isLimitedConnected]) {
                 self.isNeedStartAd = YES;
@@ -119,13 +128,6 @@
                 return;
             }
             [self requireToAsyncRequestAd];
-            
-            MovieDelegate6005 *delegate = [MovieDelegate6005 sharedInstance];
-            [delegate setMovieReward:self inZone:self.placement_id];
-            
-            _p = [TJPlacement limitedPlacementWithName:_placement_id mediationAgent:@"adfully" delegate:delegate];
-            _p.videoDelegate = delegate;
-            _p.adapterVersion = @"1.0.1";
             [_p requestContent];
         } @catch (NSException *exception) {
             [self adnetworkExceptionHandling:exception];
@@ -138,7 +140,7 @@
         return NO;
     }
     if ([_p isKindOfClass:[TJPlacement class]]) {
-        return _p.isContentAvailable && _p.isContentReady;
+        return self.isAdLoaded && _p.isContentAvailable && _p.isContentReady;
     }
     return NO;
 }

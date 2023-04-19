@@ -15,7 +15,16 @@ NS_ASSUME_NONNULL_BEGIN
 #define AdapterLog(str) [self printLogWithParam:@"Adnetwork Adapter Log [%s L:%d] %@", __func__, __LINE__, str];
 #define AdapterLogP(fmt, ...) [self printLogWithParam:@"Adnetwork Adapter Log [%s L:%d] %@", __func__, __LINE__, [NSString stringWithFormat:fmt, __VA_ARGS__]];
 
+typedef enum : NSInteger {
+    PreloadingStatusInit,                   // 優先読み込みしない
+    PreloadingStatusPreloading,             // 優先読み込み開始
+    PreloadingStatusPreloadedFetchSuccess,  // 優先読み込みで在庫確保
+    PreloadingStatusPreloadedFetchFailed,   // 優先読み込みでLoad Fail
+    PreloadingStatusStartAd,                // 通常読み込み開始
+} PreloadingStatus;
+
 @class UIViewController;
+@class UIWindow;
 @protocol ADFMovieRewardDelegate;
 
 @interface ADFmyAdapterLogger : NSObject
@@ -62,6 +71,8 @@ NS_ASSUME_NONNULL_BEGIN
 @property (nonatomic) BOOL isTopPriorityLoadingAdnetwork;
 @property (nonatomic) BOOL isOfflineSupportAdnetwork;
 
+@property (nonatomic) PreloadingStatus preloadingStatus; // 優先読み込みのStatus
+
 //ADNW SDKのバージョン情報をSDKから取得できるようにする
 + (NSString *)getSDKVersion;
 + (NSString *)getAdapterVersion;
@@ -83,6 +94,9 @@ NS_ASSUME_NONNULL_BEGIN
 -(void)startAd;
 -(void)startAdWithOption:(nullable NSDictionary *)option;
 
+/** Waterfallの順番でStartAdが呼ばれる前にAdnetworkへのRequestを発生させる。下位Adnetworkで先に読み込みだけ実施する場合使う */
+-(void)preloadForPriority;
+
 /** Errorを設定する */
 -(void)setErrorWithMessage:(nullable NSString *)description code:(NSInteger)code;
 /** 最後のエラーを返す */
@@ -91,6 +105,7 @@ NS_ASSUME_NONNULL_BEGIN
 /** EU居住者がEU 一般データ保護規則（GDPR）に同意をしたのかを設定します。 */
 -(void)setHasUserConsent:(BOOL)hasUserConsent;
 
+-(nullable UIWindow *)getKeyWindow;
 -(UIViewController *)topMostViewController;
 -(BOOL)isNotNull:(id)obj;
 -(void)adnetworkExceptionHandling:(NSException *)exception;

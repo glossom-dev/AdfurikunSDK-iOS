@@ -26,7 +26,7 @@
 
 // Adapterのバージョン。最初は1にして、修正がある度＋1にする
 + (NSString *)getAdapterRevisionVersion {
-    return @"2";
+    return @"3";
 }
 
 // Adnetwork SDKが設置されているかをチェックする
@@ -93,8 +93,6 @@
     }
     
     [super startAd];
-    
-    self.isAdLoaded = false;
 
     if (self.bannerView) {
         [IronSource destroyBanner:self.bannerView];

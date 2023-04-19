@@ -25,7 +25,7 @@
 
 // Adapterのバージョン。最初は1にして、修正がある度＋1にする
 + (NSString *)getAdapterRevisionVersion {
-    return @"1";
+    return @"2";
 }
 
 // getinfoからのParameter設定
@@ -77,7 +77,7 @@
         return;
     }
     
-    self.isAdLoaded = false;
+    [super startAd];
     
     // Adnetwork SDKの関数を呼び出す際はTryーCatchでException Handlingを行う
     @try {
@@ -116,6 +116,8 @@
         [self setCallbackStatus:MovieRewardCallbackPlayFail];
         return;
     }
+    
+    [super showAdWithPresentingViewController:viewController];
 
     @try {
         [self requireToAsyncPlay];
@@ -135,10 +137,10 @@
 - (BOOL)isClassReference {
     Class clazz = NSClassFromString(@"MTGRewardAdManager");
     if (clazz) {
-        NSLog(@"found Class: MTGRewardAdManager");
+        AdapterLog(@"found Class: MTGRewardAdManager");
         return YES;
     } else {
-        NSLog(@"Not found Class: MTGRewardAdManager");
+        AdapterLog(@"Not found Class: MTGRewardAdManager");
         return NO;
     }
 }
@@ -170,7 +172,6 @@ completely
 */
 - (void)onAdLoadSuccess:(nullable NSString *)placementId unitId:(nullable NSString *)unitId {
     AdapterTrace;
-    self.isAdLoaded = true;
     [self setCallbackStatus:MovieRewardCallbackFetchComplete];
 }
 
@@ -221,7 +222,6 @@ completely
     AdapterTrace;
     [self setErrorWithMessage:error.localizedDescription code:error.code];
     [self setCallbackStatus:MovieRewardCallbackPlayFail];
-    self.isAdLoaded = false;
 }
 
 /**
@@ -276,7 +276,6 @@ completely
 - (void)onVideoAdDidClosed:(nullable NSString *)placementId unitId:(nullable NSString *)unitId {
     AdapterTrace;
     [self setCallbackStatus:MovieRewardCallbackClose];
-    self.isAdLoaded = false;
 }
 
 @end

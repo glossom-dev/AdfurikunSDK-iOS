@@ -20,7 +20,7 @@
 @implementation MovieInterstitial6016
 
 + (NSString *)getAdapterRevisionVersion {
-    return @"6";
+    return @"7";
 }
 
 -(id)init {
@@ -65,6 +65,7 @@
     }
 
     if (self.placementId) {
+        [super startAd];
         @try {
             self.interstitialVideoAd = [[FBInterstitialAd alloc] initWithPlacementID:self.placementId];
             self.interstitialVideoAd.delegate = self;

@@ -26,7 +26,7 @@
 
 // Adapterのバージョン。最初は1にして、修正がある度＋1にする
 + (NSString *)getAdapterRevisionVersion {
-    return @"1";
+    return @"2";
 }
 
 // getinfoからのParameter設定
@@ -82,7 +82,7 @@
         return;
     }
     
-    self.isAdLoaded = false;
+    [super startAd];
     
     // Adnetwork SDKの関数を呼び出す際はTryーCatchでException Handlingを行う
     @try {
@@ -180,7 +180,6 @@
     info.isCustomComponentSupported = false;
     
     self.adInfo = info;
-    self.isAdLoaded = true;
     
     [self setCallbackStatus:NativeAdCallbackLoadFinish];
 }
@@ -189,7 +188,7 @@
  This method is called when ad failed to load.
  */
 - (void)nativeAdvancedAdLoadFailed:(MTGNativeAdvancedAd *)nativeAd error:(NSError * __nullable)error {
-    AdapterTrace;
+    AdapterTraceP(@"error : %@", error);
     [self setErrorWithMessage:error.localizedDescription code:error.code];
     [self setCallbackStatus:NativeAdCallbackLoadError];
 }

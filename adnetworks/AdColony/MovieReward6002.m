@@ -27,7 +27,7 @@
 }
 
 + (NSString *)getAdapterRevisionVersion {
-    return @"7";
+    return @"8";
 }
 
 -(id)init {
@@ -72,7 +72,7 @@
 }
 
 -(BOOL)isPrepared {
-    return self.delegate && self.ad && !self.ad.expired;
+    return self.isAdLoaded && self.delegate && self.ad && !self.ad.expired;
 }
 
 -(void)initAdnetworkIfNeeded {
@@ -104,6 +104,9 @@
     if (![self canStartAd]) {
         return;
     }
+    
+    [super startAd];
+    
     @try {
         if (self.adShowZoneId) {
             [self requireToAsyncRequestAd];

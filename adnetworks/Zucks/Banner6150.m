@@ -74,7 +74,6 @@
     
     [super startAd];
 
-    self.isAdLoaded = false;
     self.isStartAd = true;
 
     // Adnetwork SDKの関数を呼び出す際はTryーCatchでException Handlingを行う
@@ -112,7 +111,6 @@
         return;
     }
     self.isStartAd = false;
-    self.isAdLoaded = true;
     
     NativeAdInfo6150 *info = [[NativeAdInfo6150 alloc] initWithVideoUrl:nil
                                                                   title:@""

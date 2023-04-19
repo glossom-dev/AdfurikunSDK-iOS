@@ -22,7 +22,7 @@
 }
 
 + (NSString *)getAdapterRevisionVersion {
-    return @"8";
+    return @"9";
 }
 
 -(void)dealloc {
@@ -77,9 +77,9 @@
         return;
     }
     
+    [super startAd];
+    
     if (UnityAds.isInitialized && self.placementId) {
-        self.isAdLoaded = false;
-        
         [UnityAds load:self.placementId loadDelegate:self];
     }
 }
@@ -98,7 +98,6 @@
         @try {
             [self requireToAsyncPlay];
             
-            self.isAdLoaded = false;
             [UnityAds show:viewController placementId:self.placementId showDelegate:self];
         } @catch (NSException *exception) {
             [self adnetworkExceptionHandling:exception];
@@ -157,7 +156,6 @@
 - (void)unityAdsAdLoaded: (NSString *)placementId {
     AdapterTraceP(@"object : %@, placement Id : %@", self, placementId);
     if ([self.placementId isEqualToString:placementId]) {
-        self.isAdLoaded = true;
         [self sendFetchComplete];
     } else {
         AdapterLogP(@"unityAdsAdLoaded(%@), but placemendId(%@) is not equal to %@", self, placementId, self.placementId);

@@ -36,24 +36,27 @@
 }
 
 // Adnetwork SDKの初期化を行う
-//- (void)initAdnetworkIfNeeded {
-//}
+- (void)initAdnetworkIfNeeded {
+    // 一回のみ初期化を行うようなチェックを行う
+    if (![self needsToInit]) {
+        return;
+    }
+    if (!self.adParam || !self.adParam.frameId) {
+        return;
+    }
+    self.rewardedAd = [[ZADNRewardedAd alloc] initWithFrameId:self.adParam.frameId];
+    [self initCompleteAndRetryStartAdIfNeeded];
+}
 
 // 広告呼び込みを行う
 - (void)startAd {
     AdapterTrace;
     
-    if (!self.adParam || !self.adParam.frameId) {
-        return;
-    }
-    
-    self.rewardedAd = [[ZADNRewardedAd alloc] initWithFrameId:self.adParam.frameId];
-    
     if (!self.rewardedAd) {
         return;
     }
     
-    self.isAdLoaded = false;
+    [super startAd];
     
     // Adnetwork SDKの関数を呼び出す際はTryーCatchでException Handlingを行う
     @try {
@@ -105,7 +108,6 @@
 
 - (void)rewardedAdDidLoad:(ZADNRewardedAd *)rewardedAd {
     AdapterTrace;
-    self.isAdLoaded = true;
     [self setCallbackStatus:MovieRewardCallbackFetchComplete];
 }
 
@@ -136,14 +138,12 @@
 - (void)rewardedAdDidDisappear:(ZADNRewardedAd *)rewardedAd {
     AdapterTrace;
     [self setCallbackStatus:MovieRewardCallbackClose];
-    self.isAdLoaded = false;
 }
 
 - (void)rewardedAd:(ZADNRewardedAd *)rewardedAd didFailToPlayWithError:(NSError *)error {
     AdapterTraceP(@"play failed with error: %@ and suggestion: %@", [error localizedDescription], [error localizedRecoverySuggestion]);
     [self setErrorWithMessage:error.localizedDescription code:error.code];
     [self setCallbackStatus:MovieRewardCallbackPlayFail];
-    self.isAdLoaded = false;
 }
 
 @end

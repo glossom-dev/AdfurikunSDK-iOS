@@ -96,7 +96,6 @@
     AdapterTraceP(@"instance id : %@", instanceId);
     ADFmyMovieRewardInterface *adapter = [self.movieRewardAdapters objectForKey:instanceId];
     if (adapter) {
-        adapter.isAdLoaded = true;
         [adapter setCallbackStatus:MovieRewardCallbackFetchComplete];
     }
 }
@@ -120,7 +119,6 @@
     if (adapter) {
         [adapter setLastError:error];
         [adapter setCallbackStatus:MovieRewardCallbackPlayFail];
-        adapter.isAdLoaded = false;
     }
 }
 
@@ -148,7 +146,6 @@
     ADFmyMovieRewardInterface *adapter = [self.movieRewardAdapters objectForKey:instanceId];
     if (adapter) {
         [adapter setCallbackStatus:MovieRewardCallbackClose];
-        adapter.isAdLoaded = false;
     }
 }
 
@@ -165,7 +162,6 @@
     AdapterTraceP(@"instance id : %@", instanceId);
     ADFmyMovieRewardInterface *adapter = [self.interstitialAdapters objectForKey:instanceId];
     if (adapter) {
-        adapter.isAdLoaded = true;
         [adapter setCallbackStatus:MovieRewardCallbackFetchComplete];
     }
 }
@@ -183,7 +179,6 @@
             [adapter setErrorWithMessage:error.localizedDescription code:error.code];
         }
         [adapter setCallbackStatus:MovieRewardCallbackFetchFail];
-        adapter.isAdLoaded = false;
     }
 }
 
@@ -207,7 +202,6 @@
     if (adapter) {
         [adapter setCallbackStatus:MovieRewardCallbackPlayComplete];
         [adapter setCallbackStatus:MovieRewardCallbackClose];
-        adapter.isAdLoaded = false;
     }
 }
 
@@ -224,7 +218,6 @@
             [adapter setErrorWithMessage:error.localizedDescription code:error.code];
         }
         [adapter setCallbackStatus:MovieRewardCallbackPlayFail];
-        adapter.isAdLoaded = false;
     }
 }
 
@@ -254,7 +247,6 @@
         info.isCustomComponentSupported = false;
         
         adapter.adInfo = info;
-        adapter.isAdLoaded = true;
         
         [adapter setCallbackStatus:NativeAdCallbackLoadFinish];
     }
@@ -281,16 +273,16 @@
  */
 - (void)didClickBanner {
     AdapterTrace;
+    ADFmyMovieNativeInterface *adapter = [self.bannerAdapters objectForKey:kAdnetwork6110DefaultInstanceId];
+    if (adapter) {
+        [adapter setCallbackStatus:NativeAdCallbackClick];
+    }
 }
 /**
  Called when a banner is about to present a full screen content.
  */
 - (void)bannerWillPresentScreen {
     AdapterTrace;
-    ADFmyMovieNativeInterface *adapter = [self.bannerAdapters objectForKey:kAdnetwork6110DefaultInstanceId];
-    if (adapter) {
-        [adapter setCallbackStatus:NativeAdCallbackClick];
-    }
 }
 /**
  Called after a full screen content has been dismissed.

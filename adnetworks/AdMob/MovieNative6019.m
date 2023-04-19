@@ -25,7 +25,7 @@
 @implementation MovieNative6019
 
 + (NSString *)getAdapterRevisionVersion {
-    return @"6";
+    return @"7";
 }
 
 - (void)setData:(NSDictionary *)data {
@@ -68,12 +68,11 @@
 
     [super startAd];
 
-    self.isAdLoaded = false;
     @try {
         if (self.adLoader == nil) {
             GADNativeAdViewAdOptions *adViewOptions = [[GADNativeAdViewAdOptions alloc] init];
             if (option) {
-                NSLog(@"custom event option : %@", option);
+                AdapterLogP(@"custom event option : %@", option);
                 self.adChoicesPlacement = option[@"adChoices_placement"];
             }
             if ([self isNotNull:self.adChoicesPlacement]) {
@@ -100,7 +99,7 @@
             GADExtras *extras = [[GADExtras alloc] init];
             extras.additionalParameters = @{@"npa": self.hasGdprConsent.boolValue ? @"1" : @"0"};
             [request registerAdNetworkExtras:extras];
-            NSLog(@"[ADF] Adnetwork 6019, gdprConsent : %@, sdk setting value : %@", self.hasGdprConsent, extras.additionalParameters);
+            AdapterLogP(@"[ADF] Adnetwork 6019, gdprConsent : %@, sdk setting value : %@", self.hasGdprConsent, extras.additionalParameters);
         }
         [self.adLoader loadRequest:request];
     } @catch (NSException *exception) {
@@ -111,9 +110,9 @@
 - (BOOL)isClassReference {
     Class clazz = NSClassFromString(@"GADAdLoader");
     if (clazz) {
-        NSLog(@"Found Class: GADAdLoader");
+        AdapterLog(@"Found Class: GADAdLoader");
     } else {
-        NSLog(@"Not found Class: GADAdLoader");
+        AdapterLog(@"Not Found Class: GADAdLoader");
         return NO;
     }
     return YES;
@@ -141,8 +140,7 @@
 #pragma mark - GADNativeAdLoaderDelegate
 
 - (void)adLoader:(GADAdLoader *)adLoader didReceiveNativeAd:(GADNativeAd *)nativeAd {
-    NSLog(@"%s called", __func__);
-    self.isAdLoaded = true;
+    AdapterTrace;
     self.sendPlayCallback = false;
     self.sendFinishCallback = false;
 
@@ -170,7 +168,7 @@
 }
 
 - (void)adLoader:(GADAdLoader *)adLoader didFailToReceiveAdWithError:(NSError *)error {
-    NSLog(@"%s error: %@", __FUNCTION__, error);
+    AdapterTraceP(@"error: %@", error);
     if (error) {
         [self setErrorWithMessage:error.localizedDescription code:error.code];
     }
@@ -181,7 +179,7 @@
 
 /// Tells the delegate that the video controller has began or resumed playing a video.
 - (void)videoControllerDidPlayVideo:(nonnull GADVideoController *)videoController {
-    NSLog(@"%s called", __func__);
+    AdapterTrace;
     if (self.sendPlayCallback == false) {
         self.sendPlayCallback = true;
         [self callbackImpression];
@@ -190,12 +188,12 @@
 
 /// Tells the delegate that the video controller has paused video.
 - (void)videoControllerDidPauseVideo:(nonnull GADVideoController *)videoController {
-    NSLog(@"%s called", __func__);
+    AdapterTrace;
 }
 
 /// Tells the delegate that the video controller's video playback has ended.
 - (void)videoControllerDidEndVideoPlayback:(nonnull GADVideoController *)videoController {
-    NSLog(@"%s called", __func__);
+    AdapterTrace;
     if (self.sendFinishCallback == false) {
         self.sendFinishCallback = true;
         [self callbackFinish];
@@ -204,43 +202,43 @@
 
 /// Tells the delegate that the video controller has muted video.
 - (void)videoControllerDidMuteVideo:(nonnull GADVideoController *)videoController {
-    NSLog(@"%s called", __func__);
+    AdapterTrace;
 }
 
 /// Tells the delegate that the video controller has unmuted video.
 - (void)videoControllerDidUnmuteVideo:(nonnull GADVideoController *)videoController {
-    NSLog(@"%s called", __func__);
+    AdapterTrace;
 }
 
 
 #pragma mark - GADNativeAdDelegate
 
 - (void)nativeAdDidRecordImpression:(nonnull GADNativeAd *)nativeAd {
-    NSLog(@"%s called", __func__);
+    AdapterTrace;
     if (self.adInfo.mediaType == ADFNativeAdType_Image) {
         [self callbackRender];
     }
 }
 
 - (void)nativeAdDidRecordClick:(nonnull GADNativeAd *)nativeAd {
-    NSLog(@"%s called", __func__);
+    AdapterTrace;
     [self callbackClick];
 }
 
 - (void)nativeAdWillPresentScreen:(nonnull GADNativeAd *)nativeAd {
-    NSLog(@"%s called", __func__);
+    AdapterTrace;
 }
 
 - (void)nativeAdWillDismissScreen:(nonnull GADNativeAd *)nativeAd {
-    NSLog(@"%s called", __func__);
+    AdapterTrace;
 }
 
 - (void)nativeAdDidDismissScreen:(nonnull GADNativeAd *)nativeAd {
-    NSLog(@"%s called", __func__);
+    AdapterTrace;
 }
 
 - (void)nativeAdIsMuted:(nonnull GADNativeAd *)nativeAd {
-    NSLog(@"%s called", __func__);
+    AdapterTrace;
 }
 
 @end

@@ -21,7 +21,7 @@
 @implementation MovieReward6016
 
 + (NSString *)getAdapterRevisionVersion {
-    return @"5";
+    return @"6";
 }
 
 - (void)setData:(NSDictionary *)data {
@@ -70,6 +70,7 @@
     }
 
     if (self.placementId) {
+        [super startAd];
         @try {
             self.rewardedVideoAd = [[FBRewardedVideoAd alloc] initWithPlacementID:self.placementId];
             self.rewardedVideoAd.delegate = self;

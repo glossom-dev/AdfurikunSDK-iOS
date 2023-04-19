@@ -25,7 +25,7 @@
 }
 
 + (NSString *)getAdapterRevisionVersion {
-    return @"5";
+    return @"6";
 }
 
 - (BOOL)isClassReference {
@@ -109,8 +109,6 @@
     }
     
     [super startAd];
-
-    self.isAdLoaded = false;
     
     UIViewController *vc = [self topMostViewController];
     if (vc && self.adShowZoneId) {
@@ -135,7 +133,6 @@
 // handle new banner
 - (void)adColonyAdViewDidLoad:(AdColonyAdView *)adView {
     AdapterTrace;
-    self.isAdLoaded = true;
     NativeAdInfo6002 *info = [[NativeAdInfo6002 alloc] initWithVideoUrl:nil
                                                                   title:@""
                                                             description:@""

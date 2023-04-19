@@ -26,7 +26,7 @@
 }
 
 + (NSString *)getAdapterRevisionVersion {
-    return @"5";
+    return @"6";
 }
 
 - (BOOL)isClassReference {
@@ -155,7 +155,6 @@
             return;
         }
         
-        self.isAdLoaded = false;
         self.sendCallback = false;
         
         NSError* error;
@@ -198,7 +197,6 @@
     self.adView = [[UIView alloc] initWithFrame:viewSize];
     if ([sdk addAdViewToView:self.adView withOptions:options placementID:self.placementID error:&error]) {
         AdapterLog(@"vungle 6006 addAdViewToView complete");
-        self.isAdLoaded = true;
 
         NativeAdInfo6006 *info = [[NativeAdInfo6006 alloc] initWithVideoUrl:nil
                                                                       title:@""
