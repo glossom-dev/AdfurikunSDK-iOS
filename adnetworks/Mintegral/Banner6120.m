@@ -26,7 +26,7 @@
 
 // Adapterのバージョン。最初は1にして、修正がある度＋1にする
 + (NSString *)getAdapterRevisionVersion {
-    return @"3";
+    return @"4";
 }
 
 // Adnetwork SDKが設置されているかをチェックする
@@ -128,6 +128,12 @@
     [super setHasUserConsent:hasUserConsent];
     [MTGSDK.sharedInstance setConsentStatus:hasUserConsent];
     AdapterLogP(@"Adnetwork 6120, gdprConsent : %@, sdk setting value : %d", self.hasGdprConsent, (int)hasUserConsent);
+}
+
+- (void)isChildDirected:(BOOL)childDirected {
+    [super isChildDirected:childDirected];
+    [MTGSDK.sharedInstance setCoppa:childDirected ? MTGBoolYes : MTGBoolNo];
+    AdapterLogP(@"Adnetwork %@, childDirected : %@, input parameter : %d", self.adnetworkKey, self.childDirected, (int)childDirected);
 }
 
 /*

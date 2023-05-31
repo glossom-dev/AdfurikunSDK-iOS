@@ -27,7 +27,7 @@
 }
 
 + (NSString *)getAdapterRevisionVersion {
-    return @"9";
+    return @"10";
 }
 
 -(id)init {
@@ -58,7 +58,10 @@
     @try {
         [self requireToAsyncInit];
         
-        [MovieConfigure6017.sharedInstance configureWithAppId:self.adParam.appID gdprStatus:self.hasGdprConsent completion:^{
+        [MovieConfigure6017.sharedInstance configureWithAppId:self.adParam.appID
+                                                   gdprStatus:self.hasGdprConsent
+                                                childDirected:self.childDirected
+                                                   completion:^{
             [self initCompleteAndRetryStartAdIfNeeded];
         }];
     } @catch (NSException *exception) {

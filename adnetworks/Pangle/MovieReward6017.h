@@ -35,7 +35,10 @@ typedef void(^completionHandlerType)(void);
 @interface MovieConfigure6017 : NSObject
 
 + (instancetype)sharedInstance;
-- (void)configureWithAppId:(NSString *)appId gdprStatus:(NSNumber * _Nullable)gdprStatus completion:(completionHandlerType)completionHandler;
+- (void)configureWithAppId:(NSString *)appId
+                gdprStatus:(NSNumber * _Nullable)gdprStatus
+             childDirected:(NSNumber * _Nullable)childDirected
+                completion:(completionHandlerType)completionHandler;
 
 @end
 

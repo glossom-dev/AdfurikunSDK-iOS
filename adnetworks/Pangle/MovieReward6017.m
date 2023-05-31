@@ -23,7 +23,7 @@
 }
 
 + (NSString *)getAdapterRevisionVersion {
-    return @"11";
+    return @"12";
 }
 
 - (void)setData:(NSDictionary *)data {
@@ -47,7 +47,10 @@
     @try {
         [self requireToAsyncInit];
         
-        [MovieConfigure6017.sharedInstance configureWithAppId:self.adParam.appID gdprStatus:self.hasGdprConsent completion:^{
+        [MovieConfigure6017.sharedInstance configureWithAppId:self.adParam.appID
+                                                   gdprStatus:self.hasGdprConsent
+                                                childDirected:self.childDirected
+                                                   completion:^{
             [self initCompleteAndRetryStartAdIfNeeded];
         }];
     } @catch (NSException *exception) {
@@ -221,7 +224,10 @@ typedef enum : NSUInteger {
     return self;
 }
 
-- (void)configureWithAppId:(NSString *)appId gdprStatus:(NSNumber *)gdprStatus completion:(completionHandlerType)completionHandler {
+- (void)configureWithAppId:(NSString *)appId
+                gdprStatus:(NSNumber *)gdprStatus
+             childDirected:(NSNumber * _Nullable)childDirected
+                completion:(completionHandlerType)completionHandler {
     if (!appId || !completionHandler) {
         return;
     }
@@ -247,6 +253,10 @@ typedef enum : NSUInteger {
                 if (gdprStatus) {
                     configuration.GDPR = gdprStatus;
                     NSLog(@"[ADF] Adnetwork 6017, gdprConsent : %@, sdk setting value : %@", gdprStatus, configuration.GDPR);
+                }
+                if (childDirected) {
+                    [BUAdSDKManager setCoppa:childDirected.unsignedIntValue];
+                    NSLog(@"[ADF] Adnetwork 6017, childDirected : %@", childDirected);
                 }
                 configuration.territory = BUAdSDKTerritory_NO_CN;
                 configuration.logLevel = BUAdSDKLogLevelNone;

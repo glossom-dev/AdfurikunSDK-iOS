@@ -26,7 +26,7 @@
 
 // Adapterのバージョン。最初は1にして、修正がある度＋1にする
 + (NSString *)getAdapterRevisionVersion {
-    return @"3";
+    return @"4";
 }
 
 // Adnetwork SDKが設置されているかをチェックする
@@ -127,6 +127,12 @@
     [super setHasUserConsent:hasUserConsent];
     [IronSource setConsent:hasUserConsent];
     AdapterLogP(@"Adnetwork 6110, gdprConsent : %@, sdk setting value : %d", self.hasGdprConsent, (int)hasUserConsent);
+}
+
+- (void)isChildDirected:(BOOL)childDirected {
+    [super isChildDirected:childDirected];
+    [IronSource setMetaDataWithKey:@"is_child_directed" value:childDirected ? @"YES": @"NO"];
+    AdapterLogP(@"Adnetwork %@, childDirected : %@, input parameter : %d", self.adnetworkKey, self.childDirected, (int)childDirected);
 }
 
 /*

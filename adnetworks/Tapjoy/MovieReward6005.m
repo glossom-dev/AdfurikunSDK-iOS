@@ -27,7 +27,7 @@
 }
 
 + (NSString *)getAdapterRevisionVersion {
-    return @"8";
+    return @"9";
 }
 
 - (id)init {
@@ -199,6 +199,13 @@
     [privacyPolicy setSubjectToGDPR: YES];
     [privacyPolicy setUserConsent:hasUserConsent ? @"1" : @"0"];
     AdapterLogP(@"Adnetwork 6005, gdprConsent : %@, sdk setting value : %@", self.hasGdprConsent, hasUserConsent ? @"1" : @"0");
+}
+
+- (void)isChildDirected:(BOOL)childDirected {
+    [super isChildDirected:childDirected];
+    TJPrivacyPolicy *privacyPolicy = [Tapjoy getPrivacyPolicy];
+    [privacyPolicy setBelowConsentAge:childDirected];
+    AdapterLogP(@"Adnetwork %@, childDirected : %@, input parameter : %d", self.adnetworkKey, self.childDirected, (int)childDirected);
 }
 
 -(void)dealloc {

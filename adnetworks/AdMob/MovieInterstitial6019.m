@@ -19,7 +19,7 @@
 @implementation MovieInterstitial6019
 
 + (NSString *)getAdapterRevisionVersion {
-    return @"11";
+    return @"12";
 }
 
 -(id)init {
@@ -125,6 +125,12 @@
         return NO;
     }
     return YES;
+}
+
+- (void)isChildDirected:(BOOL)childDirected {
+    [super isChildDirected:childDirected];
+    [GADMobileAds.sharedInstance.requestConfiguration tagForChildDirectedTreatment:childDirected];
+    AdapterLogP(@"Adnetwork %@, childDirected : %@, input parameter : %d", self.adnetworkKey, self.childDirected, (int)childDirected);
 }
 
 - (void)adRequestSccess:(GADInterstitialAd * _Nullable)interstitialAd {

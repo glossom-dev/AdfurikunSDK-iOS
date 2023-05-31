@@ -56,6 +56,14 @@ typedef NS_ENUM(NSInteger, ADFMovieOptionsRegion) {
 + (NSNumber * _Nonnull)getHasUserConsentNumber;
 
 /**
+ * COPPA に基づく子供向けコンテンツとして扱うかを設定
+ *
+ * @param childDirected 子供向けのコンテンツとして扱う場合にはTrueを渡す
+ */
++ (void)isChildDirected:(BOOL)childDirected;
++ (NSNumber * _Nullable)getChildDirected;
+
+/**
  *  広告をClickした時にアプリ内で遷移するか、外部ブラウザで遷移するかを選択する
  *
  *  @param transitInApp (true : アプリ内で遷移、false : 外部ブラウザで遷移)、Defaultはtrue

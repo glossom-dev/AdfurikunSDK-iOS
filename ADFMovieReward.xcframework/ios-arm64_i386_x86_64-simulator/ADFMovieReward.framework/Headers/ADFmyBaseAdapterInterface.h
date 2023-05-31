@@ -65,6 +65,7 @@ typedef enum : NSInteger {
 
 @property (nonatomic, strong) NSError *lastError;
 @property (nonatomic, strong, nullable) NSNumber *hasGdprConsent;
+@property (nonatomic, strong, nullable) NSNumber *childDirected;
 
 @property (nonatomic) NSDate *lastPlayedTime;
 
@@ -104,6 +105,9 @@ typedef enum : NSInteger {
 
 /** EU居住者がEU 一般データ保護規則（GDPR）に同意をしたのかを設定します。 */
 -(void)setHasUserConsent:(BOOL)hasUserConsent;
+
+/** COPPA関連の設定を行う。*/
+- (void)isChildDirected:(BOOL)childDirected;
 
 -(nullable UIWindow *)getKeyWindow;
 -(UIViewController *)topMostViewController;

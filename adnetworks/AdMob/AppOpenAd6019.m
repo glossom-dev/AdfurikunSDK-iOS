@@ -22,7 +22,7 @@
 
 // Adapterのバージョン。最初は1にして、修正がある度＋1にする
 + (NSString *)getAdapterRevisionVersion {
-    return @"1";
+    return @"2";
 }
 
 // getinfoからのParameter設定
@@ -116,6 +116,12 @@
         AdapterLog(@"Not found Class: GADAppOpenAd");
         return NO;
     }
+}
+
+- (void)isChildDirected:(BOOL)childDirected {
+    [super isChildDirected:childDirected];
+    [GADMobileAds.sharedInstance.requestConfiguration tagForChildDirectedTreatment:childDirected];
+    AdapterLogP(@"Adnetwork %@, childDirected : %@, input parameter : %d", self.adnetworkKey, self.childDirected, (int)childDirected);
 }
 
 - (void)adRequestSccess:(GADAppOpenAd * _Nullable)appOpenAd {

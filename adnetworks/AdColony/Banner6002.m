@@ -25,7 +25,7 @@
 }
 
 + (NSString *)getAdapterRevisionVersion {
-    return @"6";
+    return @"7";
 }
 
 - (BOOL)isClassReference {
@@ -82,6 +82,10 @@
             [options setPrivacyFrameworkOfType:ADC_GDPR isRequired:YES];
             [options setPrivacyConsentString:consent forType:ADC_GDPR];
             AdapterLogP(@"Adnetwork 6002, gdprConsent : %@, sdk setting value : %@", self.hasGdprConsent, consent);
+        }
+        if (self.childDirected != nil) {
+            [options setPrivacyFrameworkOfType:ADC_COPPA isRequired:self.childDirected.boolValue];
+            AdapterLogP(@"Adnetwork %@, childDirected : %@", self.adnetworkKey, self.childDirected);
         }
         [self requireToAsyncInit];
         [AdColony configureWithAppID:self.adColonyAppId options:options completion:^(NSArray<AdColonyZone *> * _Nonnull zones) {

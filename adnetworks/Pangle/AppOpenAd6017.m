@@ -26,6 +26,14 @@
 
 @implementation AppOpenAd6017
 
++ (NSString *)getSDKVersion {
+    return BUAdSDKManager.SDKVersion;
+}
+
++ (NSString *)getAdapterRevisionVersion {
+    return @"2";
+}
+
 - (void)setData:(NSDictionary *)data {
     [super setData:data];
     
@@ -54,7 +62,10 @@
     @try {
         [self requireToAsyncInit];
         
-        [MovieConfigure6017.sharedInstance configureWithAppId:self.adParam.appID gdprStatus:self.hasGdprConsent completion:^{
+        [MovieConfigure6017.sharedInstance configureWithAppId:self.adParam.appID
+                                                   gdprStatus:self.hasGdprConsent
+                                                childDirected:self.childDirected
+                                                   completion:^{
             [self initCompleteAndRetryStartAdIfNeeded];
         }];
     } @catch (NSException *exception) {

@@ -29,7 +29,7 @@
 
 // Adapterのバージョン。最初は1にして、修正がある度＋1にする
 + (NSString *)getAdapterRevisionVersion {
-    return @"1";
+    return @"2";
 }
 
 // getinfoからのParameter設定
@@ -70,6 +70,11 @@
                                 completionBlock:^(BOOL success, NSError * _Nullable error) {
             if (success) {
                 [self initCompleteAndRetryStartAdIfNeeded];
+                // COPPA関連設定はSDK初期化後にやるようにマニュアルに書いてる。
+                if (self.childDirected) {
+                    IASDKCore.sharedInstance.coppaApplies = self.childDirected.boolValue ? IACoppaAppliesTypeDenied : IACoppaAppliesTypeGiven;
+                    AdapterLogP(@"Adnetwork %@, childDirected : %@", self.adnetworkKey, self.childDirected);
+                }
             } else {
                 AdapterLogP(@"init error (%@)", error);
             }

@@ -30,7 +30,7 @@
 }
 
 + (NSString *)getAdapterRevisionVersion {
-    return @"5";
+    return @"6";
 }
 
 - (BOOL)isClassReference {
@@ -71,7 +71,10 @@
         @try {
             [self requireToAsyncInit];
             
-            [MovieConfigure6017.sharedInstance configureWithAppId:self.pangleAppID gdprStatus:self.hasGdprConsent completion:^{
+            [MovieConfigure6017.sharedInstance configureWithAppId:self.pangleAppID
+                                                       gdprStatus:self.hasGdprConsent
+                                                    childDirected:self.childDirected
+                                                       completion:^{
                 [self initCompleteAndRetryStartAdIfNeeded];
             }];
         } @catch (NSException *exception) {

@@ -23,7 +23,7 @@
 }
 
 + (NSString *)getAdapterRevisionVersion {
-    return @"7";
+    return @"8";
 }
 
 -(void)setData:(NSDictionary *)data {
@@ -112,6 +112,14 @@
     [gdprConsentMetaData set:@"gdpr.consent" value:hasUserConsent ? @YES : @NO];
     [gdprConsentMetaData commit];
     AdapterLogP(@"Adnetwork 6001, gdprConsent : %@, sdk setting value : %@", self.hasGdprConsent, hasUserConsent ? @YES : @NO);
+}
+
+- (void)isChildDirected:(BOOL)childDirected {
+    [super isChildDirected:childDirected];
+    UADSMetaData *gdprConsentMetaData = [[UADSMetaData alloc] init];
+    [gdprConsentMetaData set:@"user.nonbehavioral" value:childDirected ? @YES : @NO];
+    [gdprConsentMetaData commit];
+    AdapterLogP(@"Adnetwork %@, childDirected : %@, input parameter : %d", self.adnetworkKey, self.childDirected, (int)childDirected);
 }
 
 -(void)dealloc {

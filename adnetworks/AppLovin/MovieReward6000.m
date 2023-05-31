@@ -26,7 +26,7 @@
 }
 
 + (NSString *)getAdapterRevisionVersion {
-    return @"5";
+    return @"6";
 }
 
 /**
@@ -164,6 +164,12 @@
     [super setHasUserConsent:hasUserConsent];
     [ALPrivacySettings setHasUserConsent:hasUserConsent];
     AdapterLogP(@"Adnetwork 6000, gdprConsent : %@, sdk setting value : %d", self.hasGdprConsent, (int)hasUserConsent);
+}
+
+- (void)isChildDirected:(BOOL)childDirected {
+    [super isChildDirected:childDirected];
+    [ALPrivacySettings setIsAgeRestrictedUser:childDirected];
+    AdapterLogP(@"Adnetwork %@, childDirected : %@, input parameter : %d", self.adnetworkKey, self.childDirected, (int)childDirected);
 }
 
 // ------------------------------ -----------------
