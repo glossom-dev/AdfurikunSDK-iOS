@@ -83,7 +83,7 @@ Pod::Spec.new do |s|
 
   s.subspec 'NendAd' do |nendad|
     nendad.dependency 'AdfurikunSDK-iOS/Core'
-    nendad.dependency 'NendSDK_iOS', '8.0.0'
+    nendad.dependency 'NendSDK_iOS', '8.0.1'
     nendad.source_files = '**/adnetworks/NendAd/*.{h,m}'
     nendad.resource = '**/adnetworks/NendAd/*.txt'
   end
