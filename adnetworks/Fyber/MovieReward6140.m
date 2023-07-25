@@ -29,7 +29,11 @@
 
 // Adapterのバージョン。最初は1にして、修正がある度＋1にする
 + (NSString *)getAdapterRevisionVersion {
-    return @"2";
+    return @"3";
+}
+
++ (NSString *)adnetworkClassName {
+    return @"IAFullscreenUnitController";
 }
 
 // getinfoからのParameter設定
@@ -157,18 +161,6 @@
     [super setHasUserConsent:hasUserConsent];
     [IASDKCore.sharedInstance setGDPRConsent:hasUserConsent];
     AdapterLogP(@"Adnetwork 6140, gdprConsent : %@, sdk setting value : %d", self.hasGdprConsent, (int)hasUserConsent);
-}
-
-// Adnetwork SDKが設置されているかをチェックする
-- (BOOL)isClassReference {
-    Class clazz = NSClassFromString(@"IAFullscreenUnitController");
-    if (clazz) {
-        AdapterLog(@"found Class: IAFullscreenUnitController");
-        return YES;
-    } else {
-        AdapterLog(@"Not found Class: IAFullscreenUnitController");
-        return NO;
-    }
 }
 
 /*

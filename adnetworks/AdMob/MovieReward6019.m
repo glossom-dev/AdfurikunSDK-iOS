@@ -19,7 +19,11 @@
 @implementation MovieReward6019
 
 + (NSString *)getAdapterRevisionVersion {
-    return @"12";
+    return @"13";
+}
+
++ (NSString *)adnetworkClassName {
+    return @"GADRewardedAd";
 }
 
 -(id)init {
@@ -117,17 +121,6 @@
             [self setCallbackStatus:MovieRewardCallbackPlayFail];
         }
     }
-}
-
-- (BOOL)isClassReference {
-    Class clazz = NSClassFromString(@"GADRewardedAd");
-    if (clazz) {
-        AdapterLog(@"Found Class: GADRewardedAd");
-    } else {
-        AdapterLog(@"Not found Class: GADRewardedAd");
-        return NO;
-    }
-    return YES;
 }
 
 - (void)isChildDirected:(BOOL)childDirected {

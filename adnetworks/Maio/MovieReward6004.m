@@ -28,7 +28,11 @@
 }
 
 + (NSString *)getAdapterRevisionVersion {
-    return @"9";
+    return @"10";
+}
+
++ (NSString *)adnetworkClassName {
+    return @"Maio";
 }
 
 -(id)init {
@@ -132,16 +136,6 @@
             }
         }
     }
-}
-
--(BOOL)isClassReference {
-    Class clazz = NSClassFromString(@"Maio");
-    if (clazz) {
-    } else {
-        AdapterLog(@"Not found Class: Maio");
-        return NO;
-    }
-    return YES;
 }
 
 -(void)dealloc {

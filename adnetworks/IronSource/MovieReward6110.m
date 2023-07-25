@@ -25,7 +25,11 @@
 
 // Adapterのバージョン。最初は1にして、修正がある度＋1にする
 + (NSString *)getAdapterRevisionVersion {
-    return @"5";
+    return @"6";
+}
+
++ (NSString *)adnetworkClassName {
+    return @"IronSource";
 }
 
 // getinfoからのParameter設定
@@ -113,18 +117,6 @@
     } @catch (NSException *exception) {
         [self adnetworkExceptionHandling:exception];
         [self setCallbackStatus:MovieRewardCallbackPlayFail];
-    }
-}
-
-// Adnetwork SDKが設置されているかをチェックする
-- (BOOL)isClassReference {
-    Class clazz = NSClassFromString(@"IronSource");
-    if (clazz) {
-        AdapterLog(@"found Class: IronSource");
-        return YES;
-    } else {
-        AdapterLog(@"Not found Class: IronSource");
-        return NO;
     }
 }
 

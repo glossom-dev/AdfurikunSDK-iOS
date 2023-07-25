@@ -26,7 +26,11 @@
 
 // Adapterのバージョン。最初は1にして、修正がある度＋1にする
 + (NSString *)getAdapterRevisionVersion {
-    return @"3";
+    return @"4";
+}
+
++ (NSString *)adnetworkClassName {
+    return @"MTGNewInterstitialAdManager";
 }
 
 // getinfoからのParameter設定
@@ -123,18 +127,6 @@
     } @catch (NSException *exception) {
         [self adnetworkExceptionHandling:exception];
         [self setCallbackStatus:MovieRewardCallbackPlayFail];
-    }
-}
-
-// Adnetwork SDKが設置されているかをチェックする
-- (BOOL)isClassReference {
-    Class clazz = NSClassFromString(@"MTGNewInterstitialAdManager");
-    if (clazz) {
-        AdapterLog(@"found Class: MTGNewInterstitialAdManager");
-        return YES;
-    } else {
-        AdapterLog(@"Not found Class: MTGNewInterstitialAdManager");
-        return NO;
     }
 }
 

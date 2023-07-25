@@ -26,19 +26,11 @@
 }
 
 + (NSString *)getAdapterRevisionVersion {
-    return @"6";
+    return @"7";
 }
 
-- (BOOL)isClassReference {
-    Class clazz = NSClassFromString(@"VungleSDK");
-    if (clazz) {
-        AdapterLog(@"Found Class: Vungle");
-    }
-    else {
-        AdapterLog(@"Not found Class: Vungle");
-        return NO;
-    }
-    return YES;
++ (NSString *)adnetworkClassName {
+    return @"VungleSDK";
 }
 
 -(void)setHasUserConsent:(BOOL)hasUserConsent {

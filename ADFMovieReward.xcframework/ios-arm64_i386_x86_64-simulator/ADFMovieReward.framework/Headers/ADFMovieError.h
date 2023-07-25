@@ -51,3 +51,15 @@ typedef NS_ENUM(NSUInteger, ADFMovieErrorCode) {
 - (instancetype)initWithErrorCode:(ADFMovieErrorCode)errorCode appID:(NSString *)appID;
 
 @end
+
+@interface AdnetworkError : NSObject
+
+@property NSString *adnetworkKey;
+
+@property NSInteger errorCode;
+
+@property NSString *errorMessage;
+
+- (instancetype)initWithKey:(NSString *)key code:(NSInteger)errorCode message:(NSString *)errorMessage;
+
+@end

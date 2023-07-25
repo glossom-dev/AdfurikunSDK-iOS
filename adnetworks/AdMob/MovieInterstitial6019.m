@@ -19,7 +19,11 @@
 @implementation MovieInterstitial6019
 
 + (NSString *)getAdapterRevisionVersion {
-    return @"12";
+    return @"13";
+}
+
++ (NSString *)adnetworkClassName {
+    return @"GADInterstitialAd";
 }
 
 -(id)init {
@@ -114,17 +118,6 @@
             [self setCallbackStatus:MovieRewardCallbackPlayFail];
         }
     }
-}
-
-- (BOOL)isClassReference {
-    Class clazz = NSClassFromString(@"GADInterstitialAd");
-    if (clazz) {
-        AdapterLog(@"Found Class: GADInterstitialAd");
-    } else {
-        AdapterLog(@"Not found Class: GADInterstitialAd");
-        return NO;
-    }
-    return YES;
 }
 
 - (void)isChildDirected:(BOOL)childDirected {

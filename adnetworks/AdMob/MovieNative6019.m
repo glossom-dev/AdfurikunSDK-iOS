@@ -25,7 +25,11 @@
 @implementation MovieNative6019
 
 + (NSString *)getAdapterRevisionVersion {
-    return @"8";
+    return @"9";
+}
+
++ (NSString *)adnetworkClassName {
+    return @"GADAdLoader";
 }
 
 - (void)setData:(NSDictionary *)data {
@@ -105,17 +109,6 @@
     } @catch (NSException *exception) {
         [self adnetworkExceptionHandling:exception];
     }
-}
-
-- (BOOL)isClassReference {
-    Class clazz = NSClassFromString(@"GADAdLoader");
-    if (clazz) {
-        AdapterLog(@"Found Class: GADAdLoader");
-    } else {
-        AdapterLog(@"Not Found Class: GADAdLoader");
-        return NO;
-    }
-    return YES;
 }
 
 - (void)isChildDirected:(BOOL)childDirected {

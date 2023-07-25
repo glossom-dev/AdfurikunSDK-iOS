@@ -10,9 +10,9 @@
 #import "MovieReward6017.h"
 #import "AdnetworkParam6017.h"
 
-@interface Banner6017()<BUNativeExpressBannerViewDelegate>
+@interface Banner6017()<PAGBannerAdDelegate>
 
-@property (nonatomic) BUNativeExpressBannerView *adView;
+@property (nonatomic) PAGBannerAd *bannerAd;
 @property (nonatomic) BOOL didInvokeImpression;
 @property (nonatomic) AdnetworkParam6017 *adParam;
 
@@ -21,21 +21,15 @@
 @implementation Banner6017
 
 + (NSString *)getSDKVersion {
-    return BUAdSDKManager.SDKVersion;
+    return PAGSdk.SDKVersion;
 }
 
 + (NSString *)getAdapterRevisionVersion {
-    return @"6";
+    return @"9";
 }
 
-- (BOOL)isClassReference {
-    Class clazz = NSClassFromString(@"BUNativeExpressBannerView");
-    if (clazz) {
-    } else {
-        AdapterLog(@"Not found Class: BUNativeExpressBannerView");
-        return NO;
-    }
-    return YES;
++ (NSString *)adnetworkClassName {
+    return @"PAGBannerAd";
 }
 
 - (void)setData:(NSDictionary *)data {
@@ -59,6 +53,7 @@
         [MovieConfigure6017.sharedInstance configureWithAppId:self.adParam.appID
                                                    gdprStatus:self.hasGdprConsent
                                                 childDirected:self.childDirected
+                                                 appLogoImage:nil
                                                    completion:^{
             [self initCompleteAndRetryStartAdIfNeeded];
         }];
@@ -66,7 +61,7 @@
         [self adnetworkExceptionHandling:exception];
     }
     
-    self.adSize = CGSizeMake(320.0, 50.0);
+    self.adSize = kPAGBannerSize320x50;
 }
 
 - (void)clearStatusIfNeeded {
@@ -93,19 +88,31 @@
     
     [super startAd];
     
-    if (self.adView) {
-        self.adView = nil;
+    if (self.bannerAd) {
+        self.bannerAd = nil;
     }
     
     @try {
         [self requireToAsyncRequestAd];
         
-        self.adView = [[BUNativeExpressBannerView alloc] initWithSlotID:self.adParam.slotID
-                                                     rootViewController:topMostVC
-                                                                 adSize:self.adSize];
-        self.adView.frame = CGRectMake(0.0, 0.0, self.adSize.width, self.adSize.height);
-        self.adView.delegate = self;
-        [self.adView loadAdData];
+        PAGBannerRequest *request = [PAGBannerRequest requestWithBannerSize:self.adSize];
+        
+        [PAGBannerAd loadAdWithSlotID:self.adParam.slotID
+                              request:request
+                    completionHandler:^(PAGBannerAd * _Nullable bannerAd, NSError * _Nullable error) {
+            if (error) {
+                [self setErrorWithMessage:error.localizedDescription code:error.code];
+                [self setCallbackStatus:NativeAdCallbackLoadError];
+                return;
+            } else if (bannerAd == nil) {
+                NSString *errorMsg = @"bannerAd is nil";
+                AdapterTraceP(@"error : %@", errorMsg);
+                [self setErrorWithMessage:errorMsg code:0];
+                [self setCallbackStatus:NativeAdCallbackLoadError];
+                return;
+            }
+            [self loadProcess:bannerAd];
+        }];
     } @catch (NSException *exception) {
         [self adnetworkExceptionHandling:exception];
     }
@@ -115,53 +122,19 @@
     [self startAd];
 }
 
-- (void)nativeExpressBannerAdViewDidLoad:(BUNativeExpressBannerView *)bannerAdView {
-    AdapterTrace;
-    for (UIView *subview in bannerAdView.subviews) {
-        if ([subview isKindOfClass:NSClassFromString(@"BUNativeExpressAdView")]) {
-            [subview setTranslatesAutoresizingMaskIntoConstraints:false];
-            [bannerAdView addConstraints:@[
-                [NSLayoutConstraint constraintWithItem:subview
-                                             attribute:NSLayoutAttributeCenterX
-                                             relatedBy:NSLayoutRelationEqual
-                                                toItem:bannerAdView
-                                             attribute:NSLayoutAttributeCenterX
-                                            multiplier:1.0
-                                              constant:0.0],
-                [NSLayoutConstraint constraintWithItem:subview
-                                             attribute:NSLayoutAttributeCenterY
-                                             relatedBy:NSLayoutRelationEqual
-                                                toItem:bannerAdView
-                                             attribute:NSLayoutAttributeCenterY
-                                            multiplier:1.0
-                                              constant:0.0],
-                [NSLayoutConstraint constraintWithItem:subview
-                                             attribute:NSLayoutAttributeWidth
-                                             relatedBy:NSLayoutRelationEqual
-                                                toItem:nil
-                                             attribute:NSLayoutAttributeWidth
-                                            multiplier:1.0
-                                              constant:self.adSize.width],
-                [NSLayoutConstraint constraintWithItem:subview
-                                             attribute:NSLayoutAttributeHeight
-                                             relatedBy:NSLayoutRelationEqual
-                                                toItem:nil
-                                             attribute:NSLayoutAttributeHeight
-                                            multiplier:1.0
-                                              constant:self.adSize.height],
-            ]];
-            break;
-        }
-    }
-
+- (void)loadProcess:(PAGBannerAd *)bannerAd {
+    self.bannerAd = bannerAd;
+    self.bannerAd.delegate = self;
+    self.bannerAd.rootViewController = [self topMostViewController];
+    
     NativeAdInfo6017 *info = [[NativeAdInfo6017 alloc] initWithVideoUrl:nil
                                                                   title:@""
                                                             description:@""
                                                            adnetworkKey:@"6017"];
     info.mediaType = ADFNativeAdType_Image;
-    [info setupMediaView:self.adView];
-    [self setCustomMediaview:self.adView];
-    
+    [info setupMediaView:self.bannerAd.bannerView];
+    [self setCustomMediaview:self.bannerAd.bannerView];
+
     info.adapter = self;
     info.isCustomComponentSupported = false;
     self.adInfo = info;
@@ -170,45 +143,20 @@
     [self setCallbackStatus:NativeAdCallbackLoadFinish];
 }
 
-- (void)nativeExpressBannerAdView:(BUNativeExpressBannerView *)bannerAdView didLoadFailWithError:(NSError *)error {
-    AdapterTraceP(@"error : %@", error);
-    if (error) {
-        [self setErrorWithMessage:error.localizedDescription code:error.code];
-    }
-    [self setCallbackStatus:NativeAdCallbackLoadError];
-}
+#pragma mark PAGBannerAdDelegate
 
-- (void)nativeExpressBannerAdViewRenderSuccess:(BUNativeExpressBannerView *)bannerAdView {
+- (void)adDidShow:(PAGBannerAd *)ad {
     AdapterTrace;
+    [self setCallbackStatus:NativeAdCallbackRendering];
+    [self startViewabilityCheck];
 }
 
-- (void)nativeExpressBannerAdViewRenderFail:(BUNativeExpressBannerView *)bannerAdView error:(NSError *)error {
-    AdapterTraceP(@"error : %@", error);
-    if (error) {
-        [self setErrorWithMessage:error.localizedDescription code:error.code];
-    }
-    [self setCallbackStatus:NativeAdCallbackPlayFail];
-}
-
-- (void)nativeExpressBannerAdViewWillBecomVisible:(BUNativeExpressBannerView *)bannerAdView {
-    AdapterTrace;
-    if (!self.didInvokeImpression) {
-        [self setCallbackStatus:NativeAdCallbackRendering];
-        [self startViewabilityCheck];
-        self.didInvokeImpression = true;
-    }
-}
-
-- (void)nativeExpressBannerAdViewDidClick:(BUNativeExpressBannerView *)bannerAdView {
+- (void)adDidClick:(PAGBannerAd *)ad {
     AdapterTrace;
     [self setCallbackStatus:NativeAdCallbackClick];
 }
 
-- (void)nativeExpressBannerAdView:(BUNativeExpressBannerView *)bannerAdView dislikeWithReason:(NSArray<BUDislikeWords *> *)filterwords {
-    AdapterTrace;
-}
-
-- (void)nativeExpressBannerAdViewDidCloseOtherController:(BUNativeExpressBannerView *)bannerAdView interactionType:(BUInteractionType)interactionType {
+- (void)adDidDismiss:(PAGBannerAd *)ad {
     AdapterTrace;
 }
 
@@ -216,4 +164,19 @@
 
 @implementation NativeAdInfo6017
 
+@end
+
+@implementation Banner6090
+@end
+
+@implementation Banner6091
+@end
+
+@implementation Banner6092
+@end
+
+@implementation Banner6093
+@end
+
+@implementation Banner6094
 @end

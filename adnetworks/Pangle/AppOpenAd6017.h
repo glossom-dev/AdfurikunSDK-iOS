@@ -5,11 +5,11 @@
 //  Copyright © 2023 Glossom, Inc. All rights reserved.
 //
 
-#import <ADFMovieReward/ADFmyMovieRewardInterface.h>
+#import <ADFMovieReward/ADFmyAppOpenAdAdapterInterface.h>
 
 NS_ASSUME_NONNULL_BEGIN
 
-@interface AppOpenAd6017 : ADFmyMovieRewardInterface
+@interface AppOpenAd6017 : ADFmyAppOpenAdAdapterInterface
 
 @end
 

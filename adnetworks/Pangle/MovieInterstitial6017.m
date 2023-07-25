@@ -9,13 +9,12 @@
 #import "MovieInterstitial6017.h"
 #import "MovieReward6017.h"
 #import <ADFMovieReward/ADFMovieOptions.h>
-#import <BUAdSDK/BUFullscreenVideoAd.h>
-#import <BUAdSDK/BUAdSDKManager.h>
+#import <PAGAdSDK/PAGAdSDK.h>
 #import "AdnetworkParam6017.h"
 
-@interface MovieInterstitial6017 ()<BUFullscreenVideoAdDelegate>
+@interface MovieInterstitial6017 ()<PAGLInterstitialAdDelegate>
 
-@property (nonatomic, strong) BUFullscreenVideoAd *fullscreenVideoAd;
+@property (nonatomic, strong) PAGLInterstitialAd *fullscreenVideoAd;
 @property (nonatomic) AdnetworkParam6017 *adParam;
 
 @end
@@ -23,11 +22,15 @@
 @implementation MovieInterstitial6017
 
 + (NSString *)getSDKVersion {
-    return BUAdSDKManager.SDKVersion;
+    return PAGSdk.SDKVersion;
 }
 
 + (NSString *)getAdapterRevisionVersion {
-    return @"10";
+    return @"13";
+}
+
++ (NSString *)adnetworkClassName {
+    return @"PAGLInterstitialAd";
 }
 
 -(id)init {
@@ -61,6 +64,7 @@
         [MovieConfigure6017.sharedInstance configureWithAppId:self.adParam.appID
                                                    gdprStatus:self.hasGdprConsent
                                                 childDirected:self.childDirected
+                                                 appLogoImage:nil
                                                    completion:^{
             [self initCompleteAndRetryStartAdIfNeeded];
         }];
@@ -85,9 +89,29 @@
     @try {
         [self requireToAsyncRequestAd];
         
-        self.fullscreenVideoAd = [[BUFullscreenVideoAd alloc] initWithSlotID:self.adParam.slotID];
-        self.fullscreenVideoAd.delegate = self;
-        [self.fullscreenVideoAd loadAdData];
+        PAGInterstitialRequest *request = [PAGInterstitialRequest request];
+        [PAGLInterstitialAd loadAdWithSlotID:self.adParam.slotID
+                                     request:request
+                           completionHandler:^(PAGLInterstitialAd * _Nullable interstitialAd, NSError * _Nullable error) {
+            // Load Fail
+            if (error) {
+                AdapterTraceP(@"error : %@", error);
+                [self setErrorWithMessage:error.localizedDescription code:error.code];
+                [self setCallbackStatus:MovieRewardCallbackFetchFail];
+                return;
+            } else if (interstitialAd == nil) {
+                NSString *errorMsg = @"interstitialAd is nil";
+                AdapterTraceP(@"error : %@", errorMsg);
+                [self setErrorWithMessage:errorMsg code:0];
+                [self setCallbackStatus:MovieRewardCallbackFetchFail];
+                return;
+            }
+            // Load Success
+            AdapterTrace;
+            self.fullscreenVideoAd = interstitialAd;
+            self.fullscreenVideoAd.delegate = self;
+            [self setCallbackStatus:MovieRewardCallbackFetchComplete];
+         }];
     } @catch (NSException *exception) {
         [self adnetworkExceptionHandling:exception];
     }
@@ -103,70 +127,28 @@
     @try {
         [self requireToAsyncPlay];
         
-        [self.fullscreenVideoAd showAdFromRootViewController:viewController];
+        [self.fullscreenVideoAd presentFromRootViewController:viewController];
     } @catch (NSException *exception) {
         [self adnetworkExceptionHandling:exception];
         [self setCallbackStatus:MovieRewardCallbackPlayFail];
     }
 }
 
-- (BOOL)isClassReference {
-    Class clazz = NSClassFromString(@"BUFullscreenVideoAd");
-    if (clazz) {
-        AdapterLog(@"found Class: BUFullscreenVideoAd");
-        return YES;
-    } else {
-        AdapterLog(@"Not found Class: BUFullscreenVideoAd");
-        return NO;
-    }
-}
+#pragma PAGLInterstitialAdDelegate
 
-#pragma BUFullscreenVideoAdDelegate
-
-- (void)fullscreenVideoMaterialMetaAdDidLoad:(BUFullscreenVideoAd *)fullscreenVideoAd {
-    AdapterTrace;
-}
-
-- (void)fullscreenVideoAd:(BUFullscreenVideoAd *)fullscreenVideoAd didFailWithError:(NSError *_Nullable)error {
-    AdapterTraceP(@"error : %@", error);
-    [self setErrorWithMessage:error.localizedDescription code:error.code];
-    [self setCallbackStatus:MovieRewardCallbackFetchFail];
-}
-
-- (void)fullscreenVideoAdVideoDataDidLoad:(BUFullscreenVideoAd *)fullscreenVideoAd {
-    AdapterTrace;
-    [self setCallbackStatus:MovieRewardCallbackFetchComplete];
-}
-
-- (void)fullscreenVideoAdWillVisible:(BUFullscreenVideoAd *)fullscreenVideoAd {
-    AdapterTrace;
-}
-
-- (void)fullscreenVideoAdDidVisible:(BUFullscreenVideoAd *)fullscreenVideoAd {
+- (void)adDidShow:(PAGLInterstitialAd *)ad{
     AdapterTrace;
     [self setCallbackStatus:MovieRewardCallbackPlayStart];
 }
 
-- (void)fullscreenVideoAdDidClick:(BUFullscreenVideoAd *)fullscreenVideoAd {
+- (void)adDidClick:(PAGLInterstitialAd *)ad{
     AdapterTrace;
 }
 
-- (void)fullscreenVideoAdWillClose:(BUFullscreenVideoAd *)fullscreenVideoAd {
-    AdapterTrace;
-}
-
-- (void)fullscreenVideoAdDidClose:(BUFullscreenVideoAd *)fullscreenVideoAd {
-    AdapterTrace;
-    [self setCallbackStatus:MovieRewardCallbackClose];
-}
-
-- (void)fullscreenVideoAdDidPlayFinish:(BUFullscreenVideoAd *)fullscreenVideoAd didFailWithError:(NSError *_Nullable)error {
+- (void)adDidDismiss:(PAGLInterstitialAd *)ad{
     AdapterTrace;
     [self setCallbackStatus:MovieRewardCallbackPlayComplete];
-}
-
-- (void)fullscreenVideoAdDidClickSkip:(BUFullscreenVideoAd *)fullscreenVideoAd {
-    AdapterTrace;
+    [self setCallbackStatus:MovieRewardCallbackClose];
 }
 
 @end

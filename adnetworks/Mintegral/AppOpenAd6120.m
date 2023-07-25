@@ -13,7 +13,7 @@
 
 @property (nonatomic) AdnetworkParam6120 *adParam;
 @property (nonatomic) MTGSplashAD *splashAd;
-
+@property (nonatomic) UIView *logoView;
 @end
 
 @implementation AppOpenAd6120
@@ -26,7 +26,11 @@
 
 // Adapterのバージョン。最初は1にして、修正がある度＋1にする
 + (NSString *)getAdapterRevisionVersion {
-    return @"2";
+    return @"3";
+}
+
++ (NSString *)adnetworkClassName {
+    return @"MTGSplashAD";
 }
 
 // getinfoからのParameter設定
@@ -88,11 +92,20 @@
         if (self.splashAd) {
             self.splashAd = nil;
         }
-        
-        self.splashAd = [[MTGSplashAD alloc] initWithPlacementID:self.adParam.placementId
-                                                          unitID:self.adParam.unitId
-                                                       countdown:5
-                                                       allowSkip:true];
+        if (self.logoImage) {
+            self.splashAd = [[MTGSplashAD alloc] initWithPlacementID:self.adParam.placementId
+                                                              unitID:self.adParam.unitId
+                                                           countdown:5
+                                                           allowSkip:true
+                                                      customViewSize:self.logoImage.size
+                                                preferredOrientation:0];
+            self.logoView = [[UIImageView alloc] initWithImage:self.logoImage];
+        } else {
+            self.splashAd = [[MTGSplashAD alloc] initWithPlacementID:self.adParam.placementId
+                                                              unitID:self.adParam.unitId
+                                                           countdown:5
+                                                           allowSkip:true];
+        }
         self.splashAd.delegate = self;
         [self.splashAd preload];
     } @catch (NSException *exception) {
@@ -127,23 +140,10 @@
     
     @try {
         [self requireToAsyncPlay];
-        
-        [self.splashAd showInKeyWindow:window customView:nil];
+        [self.splashAd showInKeyWindow:window customView:self.logoView];
     } @catch (NSException *exception) {
         [self adnetworkExceptionHandling:exception];
         [self setCallbackStatus:MovieRewardCallbackPlayFail];
-    }
-}
-
-// Adnetwork SDKが設置されているかをチェックする
-- (BOOL)isClassReference {
-    Class clazz = NSClassFromString(@"MTGSplashAD");
-    if (clazz) {
-        AdapterLog(@"found Class: MTGSplashAD");
-        return YES;
-    } else {
-        AdapterLog(@"Not found Class: MTGSplashAD");
-        return NO;
     }
 }
 

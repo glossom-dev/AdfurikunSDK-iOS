@@ -25,7 +25,11 @@
 #pragma mark - ADFmyMovieRewardInterface
 
 + (NSString *)getAdapterRevisionVersion {
-    return @"8";
+    return @"9";
+}
+
++ (NSString *)adnetworkClassName {
+    return @"NADInterstitialVideo";
 }
 
 -(id)init {
@@ -132,22 +136,6 @@
             [self setCallbackStatus:MovieRewardCallbackPlayFail];
         }
     }
-}
-
-/**< SDKが読み込まれているかどうか？ */
--(BOOL)isClassReference {
-    // Nend:iOS 8.1以上が動作保障対象となります。それ以外のOSおよび端末では正常に動作しない場合があります。
-    if (NSFoundationVersionNumber < NSFoundationVersionNumber_iOS_8_1) {
-        return NO;
-    }
-    
-    Class clazz = NSClassFromString(@"NADInterstitialVideo");
-    if (clazz) {
-    } else {
-        AdapterLog(@"Not found Class: NendAd");
-        return NO;
-    }
-    return YES;
 }
 
 -(void)dealloc{

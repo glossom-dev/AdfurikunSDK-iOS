@@ -13,7 +13,22 @@
 -(void)initAdnetworkIfNeeded {
     [super initAdnetworkIfNeeded];
  
-    self.adSize = CGSizeMake(300.0, 250.0);
+    self.adSize = kPAGBannerSize300x250;
 }
 
+@end
+
+@implementation Rectangle6090
+@end
+
+@implementation Rectangle6091
+@end
+
+@implementation Rectangle6092
+@end
+
+@implementation Rectangle6093
+@end
+
+@implementation Rectangle6094
 @end

@@ -26,7 +26,11 @@
 
 // Adapterのバージョン。最初は1にして、修正がある度＋1にする
 + (NSString *)getAdapterRevisionVersion {
-    return @"3";
+    return @"4";
+}
+
++ (NSString *)adnetworkClassName {
+    return @"MTGNativeAdvancedAd";
 }
 
 // getinfoからのParameter設定
@@ -131,18 +135,6 @@
 
 - (void)startAdWithOption:(NSDictionary *)option {
     [self startAd];
-}
-
-// Adnetwork SDKが設置されているかをチェックする
-- (BOOL)isClassReference {
-    Class clazz = NSClassFromString(@"MTGNativeAdvancedAd");
-    if (clazz) {
-        AdapterLog(@"found Class: MTGNativeAdvancedAd");
-        return YES;
-    } else {
-        AdapterLog(@"Not found Class: MTGNativeAdvancedAd");
-        return NO;
-    }
 }
 
 -(void)setHasUserConsent:(BOOL)hasUserConsent {

@@ -8,22 +8,26 @@
 
 #import "MovieReward6017.h"
 #import <ADFMovieReward/ADFMovieOptions.h>
-#import <BUAdSDK/BUAdSDK.h>
+#import <PAGAdSDK/PAGAdSDK.h>
 #import "AdnetworkParam6017.h"
 
-@interface MovieReward6017 ()<BURewardedVideoAdDelegate>
-@property (nonatomic, strong) BURewardedVideoAd *rewardedVideoAd;
+@interface MovieReward6017 ()<PAGRewardedAdDelegate>
+@property (nonatomic, strong) PAGRewardedAd *rewardedVideoAd;
 @property (nonatomic) AdnetworkParam6017 *adParam;
 @end
 
 @implementation MovieReward6017
 
 + (NSString *)getSDKVersion {
-    return BUAdSDKManager.SDKVersion;
+    return PAGSdk.SDKVersion;
 }
 
 + (NSString *)getAdapterRevisionVersion {
-    return @"12";
+    return @"15";
+}
+
++ (NSString *)adnetworkClassName {
+    return @"PAGRewardedAd";
 }
 
 - (void)setData:(NSDictionary *)data {
@@ -50,6 +54,7 @@
         [MovieConfigure6017.sharedInstance configureWithAppId:self.adParam.appID
                                                    gdprStatus:self.hasGdprConsent
                                                 childDirected:self.childDirected
+                                                 appLogoImage:nil
                                                    completion:^{
             [self initCompleteAndRetryStartAdIfNeeded];
         }];
@@ -75,10 +80,30 @@
         [self requireToAsyncRequestAd];
         
         dispatch_async(dispatch_get_main_queue(), ^{
-            BURewardedVideoModel *model = [[BURewardedVideoModel alloc] init];
-            self.rewardedVideoAd = [[BURewardedVideoAd alloc] initWithSlotID:self.adParam.slotID rewardedVideoModel:model];
-            self.rewardedVideoAd.delegate = self;
-            [self.rewardedVideoAd loadAdData];
+            PAGRewardedRequest *request = [PAGRewardedRequest request];
+            [PAGRewardedAd loadAdWithSlotID:self.adParam.slotID
+                                    request:request
+                          completionHandler:^(PAGRewardedAd * _Nullable rewardedAd, NSError * _Nullable error) {
+                // Load Fail
+                if (error) {
+                    AdapterTraceP(@"error : %@", error);
+                    [self setErrorWithMessage:error.localizedDescription code:error.code];
+                    [self setCallbackStatus:MovieRewardCallbackFetchFail];
+                    return;
+                } else if (rewardedAd == nil) {
+                    NSString *errorMsg = @"rewardedAd is nil";
+                    AdapterTraceP(@"error : %@", errorMsg);
+                    [self setErrorWithMessage:errorMsg code:0];
+                    [self setCallbackStatus:MovieRewardCallbackFetchFail];
+                    return;
+                }
+
+                // Load Success
+                AdapterTrace;
+                self.rewardedVideoAd = rewardedAd;
+                self.rewardedVideoAd.delegate = self;
+                [self setCallbackStatus:MovieRewardCallbackFetchComplete];
+            }];
         });
     } @catch (NSException *exception) {
         [self adnetworkExceptionHandling:exception];
@@ -97,7 +122,7 @@
             [self requireToAsyncPlay];
             
             dispatch_async(dispatch_get_main_queue(), ^{
-                [self.rewardedVideoAd showAdFromRootViewController:viewController];
+                [self.rewardedVideoAd presentFromRootViewController:viewController];
             });
         } @catch (NSException *exception) {
             [self adnetworkExceptionHandling:exception];
@@ -106,73 +131,34 @@
     }
 }
 
-- (BOOL)isClassReference {
-    Class clazz = NSClassFromString(@"BURewardedVideoAd");
-    if (clazz) {
-        AdapterLog(@"found Class: BURewardedVideoAd");
-        return YES;
-    } else {
-        AdapterLog(@"Not found Class: BURewardedVideoAd");
-        return NO;
-    }
-}
+#pragma mark - PAGRewardedAdDelegate
 
-#pragma mark - BURewardedVideoAdDelegate
-
-- (void)rewardedVideoAdDidLoad:(BURewardedVideoAd *)rewardedVideoAd {
-    AdapterTrace;
-}
-
-
-- (void)rewardedVideoAd:(BURewardedVideoAd *)rewardedVideoAd didFailWithError:(NSError *_Nullable)error {
-    AdapterTrace;
-    if (error) {
-        AdapterTraceP(@"error : %@", error);
-        [self setErrorWithMessage:error.localizedDescription code:error.code];
-    }
-    [self setCallbackStatus:MovieRewardCallbackFetchFail];
-}
-
-- (void)rewardedVideoAdVideoDidLoad:(BURewardedVideoAd *)rewardedVideoAd {
-    AdapterTrace;
-    [self setCallbackStatus:MovieRewardCallbackFetchComplete];
-}
-
-- (void)rewardedVideoAdWillVisible:(BURewardedVideoAd *)rewardedVideoAd {
-    AdapterTrace;
-}
-
-- (void)rewardedVideoAdDidVisible:(BURewardedVideoAd *)rewardedVideoAd {
+- (void)adDidShow:(PAGRewardedAd *)ad {
     AdapterTrace;
     [self setCallbackStatus:MovieRewardCallbackPlayStart];
 }
 
-- (void)rewardedVideoAdWillClose:(BURewardedVideoAd *)rewardedVideoAd {
+- (void)adDidClick:(PAGRewardedAd *)ad {
     AdapterTrace;
 }
 
-- (void)rewardedVideoAdDidClose:(BURewardedVideoAd *)rewardedVideoAd {
+- (void)adDidDismiss:(PAGRewardedAd *)ad {
     AdapterTrace;
     [self setCallbackStatus:MovieRewardCallbackClose];
 }
 
-- (void)rewardedVideoAdDidClick:(BURewardedVideoAd *)rewardedVideoAd {
-    AdapterTrace;
+- (void)rewardedAd:(PAGRewardedAd *)rewardedAd userDidEarnReward:(PAGRewardModel *)rewardModel {
+    AdapterTraceP(@"reward earned! rewardName:%@ rewardMount:%ld",rewardModel.rewardName,(long)rewardModel.rewardAmount);
+    [self setCallbackStatus:MovieRewardCallbackPlayComplete];
 }
 
-- (void)rewardedVideoAdDidPlayFinish:(BURewardedVideoAd *)rewardedVideoAd didFailWithError:(NSError *_Nullable)error {
-    AdapterTrace;
+- (void)rewardedAd:(PAGRewardedAd *)rewardedAd userEarnRewardFailWithError:(NSError *)error {
+    AdapterTraceP(@"reward earned failed. Error:%@",error);
     if (error) {
         AdapterTraceP(@"error : %@", error);
         [self setErrorWithMessage:error.localizedDescription code:error.code];
         [self setCallbackStatus:MovieRewardCallbackPlayFail];
-    } else {
-        [self setCallbackStatus:MovieRewardCallbackPlayComplete];
     }
-}
-
-- (void)rewardedVideoAdDidClickSkip:(BURewardedVideoAd *)rewardedVideoAd {
-    AdapterTrace;
 }
 
 @end
@@ -227,6 +213,7 @@ typedef enum : NSUInteger {
 - (void)configureWithAppId:(NSString *)appId
                 gdprStatus:(NSNumber *)gdprStatus
              childDirected:(NSNumber * _Nullable)childDirected
+              appLogoImage:(UIImage * _Nullable)logoImage
                 completion:(completionHandlerType)completionHandler {
     if (!appId || !completionHandler) {
         return;
@@ -248,21 +235,21 @@ typedef enum : NSUInteger {
         
         dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(0.1 * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
             @try {
-
-                BUAdSDKConfiguration *configuration = [BUAdSDKConfiguration configuration];
+                PAGConfig *configuration = [PAGConfig shareConfig];
                 if (gdprStatus) {
-                    configuration.GDPR = gdprStatus;
-                    NSLog(@"[ADF] Adnetwork 6017, gdprConsent : %@, sdk setting value : %@", gdprStatus, configuration.GDPR);
+                    configuration.GDPRConsent = gdprStatus.boolValue ? PAGGDPRConsentTypeConsent : PAGGDPRConsentTypeNoConsent;
+                    NSLog(@"[ADF] Adnetwork 6017, gdprConsent : %@, sdk setting value : %d", gdprStatus, (int)configuration.GDPRConsent);
                 }
                 if (childDirected) {
-                    [BUAdSDKManager setCoppa:childDirected.unsignedIntValue];
-                    NSLog(@"[ADF] Adnetwork 6017, childDirected : %@", childDirected);
+                    configuration.childDirected = childDirected.boolValue ? PAGChildDirectedTypeChild : PAGChildDirectedTypeNonChild;
+                    NSLog(@"[ADF] Adnetwork 6017, childDirected : %@, sdk setting value : %d", childDirected, (int)configuration.childDirected);
                 }
-                configuration.territory = BUAdSDKTerritory_NO_CN;
-                configuration.logLevel = BUAdSDKLogLevelNone;
-                //configuration.logLevel = BUAdSDKLogLevelDebug;
+                configuration.debugLog = false;
                 configuration.appID = appId;
-                [BUAdSDKManager startWithAsyncCompletionHandler:^(BOOL success, NSError *error) {
+                if (logoImage) {
+                    configuration.appLogoImage = logoImage;
+                }
+                [PAGSdk startWithConfig:configuration completionHandler:^(BOOL success, NSError * _Nonnull error) {
                     if (success) {
                         self.initStatus = initializeComplete;
 

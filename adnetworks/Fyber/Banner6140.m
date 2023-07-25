@@ -29,7 +29,11 @@
 
 // Adapterのバージョン。最初は1にして、修正がある度＋1にする
 + (NSString *)getAdapterRevisionVersion {
-    return @"2";
+    return @"3";
+}
+
++ (NSString *)adnetworkClassName {
+    return @"IAMRAIDContentController";
 }
 
 // getinfoからのParameter設定
@@ -164,18 +168,6 @@
     [super setHasUserConsent:hasUserConsent];
     [IASDKCore.sharedInstance setGDPRConsent:hasUserConsent];
     AdapterLogP(@"Adnetwork 6140, gdprConsent : %@, sdk setting value : %d", self.hasGdprConsent, (int)hasUserConsent);
-}
-
-// Adnetwork SDKが設置されているかをチェックする
-- (BOOL)isClassReference {
-    Class clazz = NSClassFromString(@"IAMRAIDContentController");
-    if (clazz) {
-        AdapterLog(@"found Class: IAMRAIDContentController");
-        return YES;
-    } else {
-        AdapterLog(@"Not found Class: IAMRAIDContentController");
-        return NO;
-    }
 }
 
 - (void)dispose {

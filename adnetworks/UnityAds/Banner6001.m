@@ -23,7 +23,11 @@
 }
 
 + (NSString *)getAdapterRevisionVersion {
-    return @"8";
+    return @"9";
+}
+
++ (NSString *)adnetworkClassName {
+    return @"UADSBannerView";
 }
 
 -(void)setData:(NSDictionary *)data {
@@ -88,21 +92,6 @@
         }
     } @catch (NSException *exception) {
         [self adnetworkExceptionHandling:exception];
-    }
-}
-
-/**
- * 対象のクラスがあるかどうか？
- */
--(BOOL)isClassReference {
-    Class clazz = NSClassFromString(@"UADSBannerView");
-    if (clazz) {
-        AdapterLog(@"found Class: UADSBannerView");
-        return YES;
-    }
-    else {
-        AdapterLog(@"Not found Class: UADSBannerView");
-        return NO;
     }
 }
 

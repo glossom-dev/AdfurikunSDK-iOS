@@ -26,19 +26,11 @@
 
 // Adapterのバージョン。最初は1にして、修正がある度＋1にする
 + (NSString *)getAdapterRevisionVersion {
-    return @"4";
+    return @"5";
 }
 
-// Adnetwork SDKが設置されているかをチェックする
-- (BOOL)isClassReference {
-    Class clazz = NSClassFromString(@"MTGBannerAdView");
-    if (clazz) {
-        AdapterLog(@"found Class: MTGBannerAdView");
-        return YES;
-    } else {
-        AdapterLog(@"Not found Class: MTGBannerAdView");
-        return NO;
-    }
++ (NSString *)adnetworkClassName {
+    return @"MTGBannerAdView";
 }
 
 // getinfoからのParameter設定

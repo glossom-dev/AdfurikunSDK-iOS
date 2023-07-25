@@ -12,8 +12,12 @@
 #import <Tapjoy/Tapjoy.h>
 #import <Tapjoy/TJPlacement.h>
 
+NS_ASSUME_NONNULL_BEGIN
+
+typedef void(^completionHandlerType)(void);
+
 @interface MovieReward6005 : ADFmyMovieRewardInterface
-@property (nonatomic, strong)TJPlacement* p;
+@property (nonatomic)TJPlacement* p;
 
 @end
 
@@ -22,6 +26,15 @@
  */
 @interface MovieDelegate6005 : ADFmyMovieDelegateBase<TJPlacementDelegate, TJPlacementVideoDelegate>
 + (instancetype)sharedInstance;
+
+@end
+
+@interface MovieConfigure6005 : NSObject
+
++ (instancetype)sharedInstance;
+- (void)configureWithAppId:(NSString *)sdkKey
+                  testFlag:(bool)testFlag
+                completion:(completionHandlerType)completionHandler;
 
 @end
 
@@ -39,3 +52,5 @@
 
 @interface MovieReward6174 : MovieReward6005
 @end
+
+NS_ASSUME_NONNULL_END

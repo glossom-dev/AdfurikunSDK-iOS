@@ -26,7 +26,11 @@
 }
 
 + (NSString *)getAdapterRevisionVersion {
-    return @"6";
+    return @"7";
+}
+
++ (NSString *)adnetworkClassName {
+    return @"ALSdk";
 }
 
 /**
@@ -144,20 +148,6 @@
 -(void)showAdWithPresentingViewController:(UIViewController *)viewController
 {
     [self showAd];
-}
-
-/**
- * 対象のクラスがあるかどうか？
- */
--(BOOL)isClassReference
-{
-    Class clazz = NSClassFromString(@"ALSdk");
-    if (clazz) {
-    } else {
-        AdapterLog(@"Not found Class: ALSdk");
-        return NO;
-    }
-    return YES;
 }
 
 -(void)setHasUserConsent:(BOOL)hasUserConsent {

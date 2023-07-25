@@ -107,7 +107,8 @@ NS_ASSUME_NONNULL_BEGIN
  @param error エラーの情報を格納したオブジェクト
  @param appID 対象の広告枠ID
  */
-- (void)onNativeAdLoadError:(ADFMovieError *)error appID:(NSString *)appID;
+- (void)onNativeAdLoadError:(ADFMovieError *)error appID:(NSString *)appID __deprecated_msg("Please use 'onNativeAdLoadError:error:adnetworkError:' instead");
+- (void)onNativeAdLoadError:(ADFMovieError *)error appID:(NSString *)appID adnetworkError:(NSArray<AdnetworkError *> *)adnetworkError;
 @end
 
 NS_ASSUME_NONNULL_END

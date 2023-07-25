@@ -22,7 +22,11 @@
 }
 
 + (NSString *)getAdapterRevisionVersion {
-    return @"10";
+    return @"11";
+}
+
++ (NSString *)adnetworkClassName {
+    return @"UnityAds";
 }
 
 -(void)dealloc {
@@ -107,22 +111,6 @@
         AdapterLog(@"Error encountered playing ad : could not fetch topmost viewcontroller");
         [self setErrorWithMessage:@"Error encountered playing ad : could not fetch topmost viewcontroller" code:0];
         [self setCallbackStatus:MovieRewardCallbackPlayFail];
-    }
-}
-
-
-/**
- * 対象のクラスがあるかどうか？
- */
--(BOOL)isClassReference {
-    Class clazz = NSClassFromString(@"UnityAds");
-    if (clazz) {
-        AdapterLog(@"found Class: UnityAds");
-        return YES;
-    }
-    else {
-        AdapterLog(@"Not found Class: UnityAds");
-        return NO;
     }
 }
 

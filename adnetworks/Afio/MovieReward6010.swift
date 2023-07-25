@@ -7,8 +7,8 @@
 //
 
 import Foundation
-import ADFMovieReward
 import AMoAd
+import ADFMovieReward
 
 @objc(MovieReward6010)
 
@@ -21,10 +21,10 @@ class MovieReward6010: ADFmyMovieRewardInterface {
     private var didLoad = false
 
     override class func getAdapterRevisionVersion() -> String {
-        return "2"
+        return "3"
     }
     
-    override func setData(_ data: [AnyHashable : Any]!) {
+    override func setData(_ data: [AnyHashable : Any]) {
         super.setData(data)
 
         if let sid = data["sid"] as? String {
@@ -39,12 +39,20 @@ class MovieReward6010: ADFmyMovieRewardInterface {
         guard amoadInterstitialVideo == nil, let sid = sid else {
             return
         }
+        guard needsToInit() == true else {
+            return
+        }
+        
         amoadInterstitialVideo = AMoAdInterstitialVideo.shared(sid: sid, tag: tag)
         amoadInterstitialVideo?.delegate = self
         setCancellable()
+        initCompleteAndRetryStartAdIfNeeded()
     }
 
     override func startAd() {
+        guard canStartAd() else {
+            return
+        }
         if amoadInterstitialVideo?.isLoaded == false {
             super.startAd()
             amoadInterstitialVideo?.load()
@@ -85,7 +93,7 @@ class MovieReward6010: ADFmyMovieRewardInterface {
 
 extension MovieReward6010: AMoAdInterstitialVideoDelegate {
     func amoadInterstitialVideoDidLoadAd(amoadInterstitialVideo: AMoAdInterstitialVideo, result: AMoAdResult) {
-        print("MovieReward6010: amoadInterstitialVideoDidLoadAd")
+        print("MovieReward6010: amoadInterstitialVideoDidLoadAd, result : \(result)")
         if result == .success {
             print("AMoAdResultSuccess")
             setCallbackStatus(MovieRewardCallbackFetchComplete)

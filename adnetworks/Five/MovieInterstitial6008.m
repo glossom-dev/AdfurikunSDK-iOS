@@ -17,7 +17,11 @@
 @implementation MovieInterstitial6008
 
 + (NSString *)getAdapterRevisionVersion {
-    return @"11";
+    return @"12";
+}
+
++ (NSString *)adnetworkClassName {
+    return @"FADInterstitial";
 }
 
 -(BOOL)isPrepared {
@@ -90,20 +94,6 @@
 
 -(void)showAdWithPresentingViewController:(UIViewController *)viewController {
     [self showAd];
-}
-
-/**
- * 対象のクラスがあるかどうか？
- *
- */
--(BOOL)isClassReference {
-    Class clazz = NSClassFromString(@"FADInterstitial");
-    if (clazz) {
-    } else {
-        AdapterLog(@"Not found Class: FiveAd");
-        return NO;
-    }
-    return YES;
 }
 
 -(void)dealloc {

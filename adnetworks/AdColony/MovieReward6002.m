@@ -27,7 +27,11 @@
 }
 
 + (NSString *)getAdapterRevisionVersion {
-    return @"9";
+    return @"10";
+}
+
++ (NSString *)adnetworkClassName {
+    return @"AdColony";
 }
 
 -(id)init {
@@ -160,19 +164,6 @@
             [self setCallbackStatus:MovieRewardCallbackPlayFail];
         }
     }
-}
-
-/**
- * 対象のクラスがあるかどうか？
- */
--(BOOL)isClassReference {
-    Class clazz = NSClassFromString(@"AdColony");
-    if (clazz) {
-    } else {
-        AdapterLog(@"Not found Class: AdColony");
-        return NO;
-    }
-    return YES;
 }
 
 -(void)dealloc {

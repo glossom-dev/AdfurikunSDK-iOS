@@ -8,56 +8,40 @@
 
 #import "MovieNative6017.h"
 #import "MovieReward6017.h"
+#import "AdnetworkParam6017.h"
 
 #pragma mark MovieNative6017
 
 @interface MovieNative6017()
 
-@property (nonatomic) BUNativeAd *nativeAd;
-@property (nonatomic) BUNativeAdRelatedView *relatedView;
+@property (nonatomic) PAGLNativeAd *nativeAd;
+@property (nonatomic) PAGLNativeAdRelatedView *relatedView;
 @property (nonatomic) UIImageView *imageView;
-@property (nonatomic) NSString *pangleAppID;
-@property (nonatomic) NSString *pangleSlotID;
 @property (nonatomic) BOOL didSendPlayStartCallback;
 @property (nonatomic) BOOL didSendPlayFinishCallback;
+@property (nonatomic) AdnetworkParam6017 *adParam;
 
 @end
 
 @implementation MovieNative6017
 
 + (NSString *)getSDKVersion {
-    return BUAdSDKManager.SDKVersion;
+    return PAGSdk.SDKVersion;
 }
 
 + (NSString *)getAdapterRevisionVersion {
-    return @"6";
+    return @"9";
 }
 
-- (BOOL)isClassReference {
-    Class clazz = NSClassFromString(@"BUNativeAd");
-    if (clazz) {
-        AdapterLog(@"found Class: BUNativeAd");
-        return YES;
-    }
-    else {
-        AdapterLog(@"Not found Class: BUNativeAd");
-        return NO;
-    }
-    return YES;
++ (NSString *)adnetworkClassName {
+    return @"PAGLNativeAd";
 }
 
 // getinfoから取得したデータを内部変数に保存する
 - (void)setData:(NSDictionary *)data {
     [super setData:data];
     
-    NSString *appID = [data objectForKey:@"appid"];
-    if ([self isNotNull:appID]) {
-        self.pangleAppID = [NSString stringWithFormat:@"%@", appID];
-    }
-    NSString *slotID = [data objectForKey:@"ad_slot_id"];
-    if ([self isNotNull:slotID]) {
-        self.pangleSlotID = [NSString stringWithFormat:@"%@", slotID];
-    }
+    self.adParam = [[AdnetworkParam6017 alloc] initWithParam:data];
 }
 
 // SDKの初期化ロジックを入れる。ただし、Instance化を毎回する必要がある場合にはこちらではなくてSstartAdで行うこと
@@ -65,21 +49,23 @@
     if (![self needsToInit]) {
         return;
     }
+    if (!self.adParam || ![self.adParam isValid]) {
+        return;
+    }
 
     AdapterLog(@"MovieNatve6017 initAdnetworkIfNeeded");
-    if (self.pangleAppID) {
-        @try {
-            [self requireToAsyncInit];
-            
-            [MovieConfigure6017.sharedInstance configureWithAppId:self.pangleAppID
-                                                       gdprStatus:self.hasGdprConsent
-                                                    childDirected:self.childDirected
-                                                       completion:^{
-                [self initCompleteAndRetryStartAdIfNeeded];
-            }];
-        } @catch (NSException *exception) {
-            [self adnetworkExceptionHandling:exception];
-        }
+    @try {
+        [self requireToAsyncInit];
+        
+        [MovieConfigure6017.sharedInstance configureWithAppId:self.adParam.appID
+                                                   gdprStatus:self.hasGdprConsent
+                                                childDirected:self.childDirected
+                                                 appLogoImage:nil
+                                                   completion:^{
+            [self initCompleteAndRetryStartAdIfNeeded];
+        }];
+    } @catch (NSException *exception) {
+        [self adnetworkExceptionHandling:exception];
     }
 }
 
@@ -96,9 +82,10 @@
         return;
     }
 
-    if (self.pangleAppID == nil || self.pangleSlotID == nil) {
+    if (!self.adParam || ![self.adParam isValid]) {
         return;
     }
+
     AdapterTrace;
     
     if (self.nativeAd) {
@@ -110,20 +97,27 @@
     @try {
         [self requireToAsyncRequestAd];
         
-        self.nativeAd = [BUNativeAd new];
-        BUAdSlot *slot = [[BUAdSlot alloc] init];
-        BUSize *imgSize = [BUSize sizeBy:BUProposalSize_Feed690_388];
-        //BUSize *imgSize = [BUSize sizeBy:BUProposalSize_Banner600_90];
-        slot.ID = self.pangleSlotID;
-        slot.AdType = BUAdSlotAdTypeFeed;
-        slot.position = BUAdSlotPositionFeed;
-        slot.imgSize = imgSize;
-        self.nativeAd.adslot = slot;
-        
-        self.nativeAd.rootViewController = [self topMostViewController];
-        self.nativeAd.delegate = self;
-        
-        [self.nativeAd loadAdData];
+        PAGNativeRequest *request = PAGNativeRequest.request;
+        [PAGLNativeAd loadAdWithSlotID:self.adParam.slotID
+                                   request:request
+                         completionHandler:^(PAGLNativeAd * _Nullable nativeAd, NSError * _Nullable error) {
+            // load fail
+            if (error) {
+                [self setErrorWithMessage:error.localizedDescription code:error.code];
+                [self setCallbackStatus:NativeAdCallbackLoadError];
+                return;
+            } else if (nativeAd == nil) {
+                NSString *errorMsg = @"nativeAd is nil";
+                AdapterTraceP(@"error : %@", errorMsg);
+                [self setErrorWithMessage:errorMsg code:0];
+                [self setCallbackStatus:NativeAdCallbackLoadError];
+                return;
+            }
+
+            // load success
+            [self setupNativeAdData:nativeAd];
+            [self setCallbackStatus:NativeAdCallbackLoadFinish];
+        }];
     } @catch (NSException *exception) {
         [self adnetworkExceptionHandling:exception];
     }
@@ -133,156 +127,47 @@
     [self startAd];
 }
 
-#pragma mark BUNativeAdDelegate
-
-/**
-This method is called when native ad material loaded successfully.
-*/
-- (void)nativeAdDidLoad:(BUNativeAd *)nativeAd {
-    AdapterTraceP(@"nativeAd : %@", nativeAd);
-    BUMaterialMeta *adMeta = nativeAd.data;
+- (void)setupNativeAdData:(PAGLNativeAd *)nativeAd {
+    self.nativeAd = nativeAd;
+    self.nativeAd.delegate = self;
+    self.nativeAd.rootViewController = [self topMostViewController];
+    
+    PAGLMaterialMeta *adMeta = nativeAd.data;
     MovieNativeAdInfo6017 *info = [[MovieNativeAdInfo6017 alloc] initWithVideoUrl:nil
                                                                             title:adMeta.AdTitle
                                                                       description:adMeta.AdDescription
                                                                      adnetworkKey:@"6017"];
-    if (adMeta.imageMode == BUFeedVideoAdModeImage ||
-        adMeta.imageMode == BUFeedVideoAdModePortrait ||
-        adMeta.imageMode == BUFeedADModeSquareVideo) {
-        if (self.relatedView) {
-            self.relatedView = nil;
-        }
-        
-        info.mediaType = ADFNativeAdType_Movie;
-        self.relatedView = [[BUNativeAdRelatedView alloc] init];
-        [self.relatedView refreshData:nativeAd];
-        self.relatedView.videoAdView.delegate = self;
-        [info setupMediaView:self.relatedView.videoAdView];
-        [self setCustomMediaview:self.relatedView.videoAdView];
-        
-        [self.nativeAd registerContainer:self.relatedView.videoAdView withClickableViews:@[self.relatedView.videoAdView]];
-    } else {
-        if (adMeta.imageAry.count == 0 || adMeta.imageAry.firstObject.imageURL.length == 0) {
-            AdapterLogP(@"metadata is invalid %@", adMeta);
-            [self sendLoadError:nil];
-            return;
-        }
-
-        if (self.imageView) {
-            self.imageView = nil;
-        }
-        
-        info.mediaType = ADFNativeAdType_Image;
-        BUImage *buImage = adMeta.imageAry.firstObject;
-        UIImage *image = [UIImage imageWithData:[NSData dataWithContentsOfURL:[NSURL URLWithString:buImage.imageURL]]];
-        self.imageView = [[UIImageView alloc] initWithImage:image];
-        self.imageView.contentMode = UIViewContentModeScaleAspectFit;
-        [info setupMediaView:self.imageView];
-        [self setCustomMediaview:self.imageView];
-        
-        [self.nativeAd registerContainer:self.imageView withClickableViews:@[self.imageView]];
+    info.mediaType = (adMeta.mediaType == PAGLNativeMediaTypeVideo) ? ADFNativeAdType_Movie : ADFNativeAdType_Image;
+    if (self.relatedView) {
+        self.relatedView = nil;
     }
+    self.relatedView = [PAGLNativeAdRelatedView new];
+    [self.relatedView refreshWithNativeAd:nativeAd];
+    [info setupMediaView:self.relatedView.mediaView];
+    [self setCustomMediaview:self.relatedView.mediaView];
+    [nativeAd registerContainer:info.mediaView withClickableViews:@[self.relatedView.mediaView]];
     info.adapter = self;
     info.isCustomComponentSupported = false;
-    self.nativeAd = nativeAd;
     
     self.didSendPlayStartCallback = false;
     self.didSendPlayFinishCallback = false;
     
     self.adInfo = info;
-
-    [self setCallbackStatus:NativeAdCallbackLoadFinish];
 }
 
-- (void)sendLoadError:(NSError *)error {
-    AdapterLogP(@"error : %@", error);
-    if (error) {
-        [self setErrorWithMessage:error.localizedDescription code:error.code];
-    }
-    [self setCallbackStatus:NativeAdCallbackLoadError];
-}
+#pragma mark PAGLNativeAdDelegate
 
-- (void)sendRendering {
-    [self setCallbackStatus:NativeAdCallbackRendering];
-}
-
-- (void)sendPlayStart {
-    if (self.didSendPlayStartCallback) {
-        return;;
-    }
-    self.didSendPlayStartCallback = true;
-    [self setCallbackStatus:NativeAdCallbackPlayStart];
-}
-
-/**
-This method is called when native ad materia failed to load.
-@param error : the reason of error
-*/
-- (void)nativeAd:(BUNativeAd *)nativeAd didFailWithError:(NSError *_Nullable)error {
-    AdapterTraceP(@"error : %@", error);
-    [self sendLoadError:error];
-}
-
-/**
-This method is called when native ad slot has been shown.
-*/
-- (void)nativeAdDidBecomeVisible:(BUNativeAd *)nativeAd {
+- (void)adDidShow:(PAGLNativeAd *)ad {
     AdapterTrace;
-    if (self.adInfo.mediaType == ADFNativeAdType_Image) {
-        [self sendRendering];
-        [self startViewabilityCheck];
-    }
 }
 
-/**
-This method is called when native ad is clicked.
-*/
-- (void)nativeAdDidClick:(BUNativeAd *)nativeAd withView:(UIView *_Nullable)view {
+- (void)adDidClick:(PAGLNativeAd *)ad {
     AdapterTrace;
     [self setCallbackStatus:NativeAdCallbackClick];
 }
 
-/**
-This method is called when the user clicked dislike reasons.
-Only used for dislikeButton in BUNativeAdRelatedView.h
-@param filterWords : reasons for dislike
-*/
-- (void)nativeAd:(BUNativeAd *)nativeAd dislikeWithReason:(NSArray<BUDislikeWords *> *)filterWords {
+- (void)adDidDismiss:(PAGLNativeAd *)ad {
     AdapterTrace;
-}
-
-#pragma mark BUVideoAdViewDelegate
-
-/**
-This method is called when videoadview failed to play.
-@param error : the reason of error
-*/
-- (void)videoAdView:(BUVideoAdView *)videoAdView didLoadFailWithError:(NSError *_Nullable)error {
-    AdapterTraceP(@"error : %@", error);
-    [self setCallbackStatus:NativeAdCallbackPlayFail];
-}
-
-/**
-This method is called when videoadview playback status changed.
-@param playerState : player state after changed
-*/
-- (void)videoAdView:(BUVideoAdView *)videoAdView stateDidChanged:(BUPlayerPlayState)playerState {
-    AdapterTraceP(@"state : %d", (int)playerState);
-    if (playerState == BUPlayerStatePlaying) {
-        [self sendPlayStart];
-    }
-}
-
-/**
-This method is called when videoadview end of play.
-*/
-- (void)playerDidPlayFinish:(BUVideoAdView *)videoAdView {
-    AdapterTrace;
-    if (self.didSendPlayFinishCallback) {
-        return;;
-    }
-    self.didSendPlayFinishCallback = true;
-
-    [self setCallbackStatus:NativeAdCallbackPlayFinish];
 }
 
 @end
@@ -293,18 +178,25 @@ This method is called when videoadview end of play.
 
 - (void)playMediaView {
     NSLog(@"[ADF] %s", __func__);
+    if (self.adapter) {
+        [self.adapter setCallbackStatus:NativeAdCallbackRendering];
+        [self.adapter startViewabilityCheck];
+    }
 }
 
 @end
 
 @implementation MovieNative6090
-
 @end
 
 @implementation MovieNative6091
-
 @end
 
 @implementation MovieNative6092
+@end
 
+@implementation MovieNative6093
+@end
+
+@implementation MovieNative6094
 @end

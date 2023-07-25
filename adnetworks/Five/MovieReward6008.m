@@ -17,7 +17,11 @@
 @implementation MovieReward6008
 
 + (NSString *)getAdapterRevisionVersion {
-    return @"1";
+    return @"2";
+}
+
++ (NSString *)adnetworkClassName {
+    return @"FADVideoReward";
 }
 
 -(BOOL)isPrepared {
@@ -85,16 +89,6 @@
 
 -(void)showAdWithPresentingViewController:(UIViewController *)viewController {
     [self showAd];
-}
-
--(BOOL)isClassReference {
-    Class clazz = NSClassFromString(@"FADVideoReward");
-    if (clazz) {
-    } else {
-        AdapterLog(@"Not found Class: FiveAd");
-        return NO;
-    }
-    return YES;
 }
 
 @end

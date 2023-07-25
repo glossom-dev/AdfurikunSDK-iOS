@@ -11,7 +11,7 @@
 
 NS_ASSUME_NONNULL_BEGIN
 
-@interface AppOpenAd6019 : ADFmyMovieRewardInterface <GADFullScreenContentDelegate>
+@interface AppOpenAd6019 : ADFmyAppOpenAdAdapterInterface <GADFullScreenContentDelegate>
 
 @end
 

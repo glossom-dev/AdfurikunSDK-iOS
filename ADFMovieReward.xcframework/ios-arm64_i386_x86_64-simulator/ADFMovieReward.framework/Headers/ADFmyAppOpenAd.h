@@ -7,6 +7,7 @@
 
 #import <Foundation/Foundation.h>
 #import <UIKit/UIKit.h>
+#import "ADFMovieError.h"
 
 NS_ASSUME_NONNULL_BEGIN
 
@@ -27,6 +28,9 @@ NS_ASSUME_NONNULL_BEGIN
  */
 + (void)initializeWithAppID:(NSString *)appID;
 + (void)initializeWithAppID:(NSString *)appID option:(NSDictionary*)option;
+
++ (void)initializeWithAppID:(NSString *)appID appLogoImage:(UIImage * __nullable)image;
++ (void)initializeWithAppID:(NSString *)appID appLogoImage:(UIImage * __nullable)image option:(NSDictionary*)option;
 
 /**
  インスタンスを取得
@@ -69,13 +73,15 @@ NS_ASSUME_NONNULL_BEGIN
 /**< 広告の取得成功 */
 - (void)AdsFetchCompleted:(NSString *)appID;
 /**< 広告の取得失敗 */
-- (void)AdsFetchFailed:(NSString *)appID error:(NSError *)error;
+- (void)AdsFetchFailed:(NSString *)appID error:(NSError *)error __deprecated_msg("Please use 'AdsFetchFailed:error:adnetworkError:' instead");
+- (void)AdsFetchFailed:(NSString *)appID error:(NSError *)error adnetworkError:(NSArray<AdnetworkError *> *)adnetworkError;
 /**< 広告の表示開始 */
 - (void)AdsDidShow:(NSString *)appID adNetworkKey:(NSString *)adNetworkKey;
 /**< 広告を閉じた */
 - (void)AdsDidHide:(NSString *)appID;
 /**< 広告の表示失敗 */
-- (void)AdsPlayFailed:(NSString *)appID;
+- (void)AdsPlayFailed:(NSString *)appID __deprecated_msg("Please use 'AdsPlayFailed:adnetworkError:' instead");
+- (void)AdsPlayFailed:(NSString *)appID adnetworkError:(AdnetworkError *)adnetworkError;
 
 @end
 

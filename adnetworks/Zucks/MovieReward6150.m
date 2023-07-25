@@ -19,7 +19,11 @@
 
 // Adapterのバージョン。最初は1にして、修正がある度＋1にする
 + (NSString *)getAdapterRevisionVersion {
-    return @"1";
+    return @"2";
+}
+
++ (NSString *)adnetworkClassName {
+    return @"ZADNRewardedAd";
 }
 
 // getinfoからのParameter設定
@@ -89,18 +93,6 @@
     } @catch (NSException *exception) {
         [self adnetworkExceptionHandling:exception];
         [self setCallbackStatus:MovieRewardCallbackPlayFail];
-    }
-}
-
-// Adnetwork SDKが設置されているかをチェックする
-- (BOOL)isClassReference {
-    Class clazz = NSClassFromString(@"ZADNRewardedAd");
-    if (clazz) {
-        AdapterLog(@"found Class: Zucks");
-        return YES;
-    } else {
-        AdapterLog(@"Not found Class: Zucks");
-        return NO;
     }
 }
 

@@ -23,6 +23,10 @@
     return @"7";
 }
 
++ (NSString *)adnetworkClassName {
+    return @"FBInterstitialAd";
+}
+
 -(id)init {
     self = [super init];
     if (self) {
@@ -75,20 +79,6 @@
             [self adnetworkExceptionHandling:exception];
         }
     }
-}
-
--(BOOL)isClassReference {
-    if (NSFoundationVersionNumber < NSFoundationVersionNumber_iOS_9_0) {
-        return NO;
-    }
-
-    Class clazz = NSClassFromString(@"FBInterstitialAd");
-    if (clazz) {
-    } else {
-        NSLog(@"Not found Class: FBInterstitialAd");
-        return NO;
-    }
-    return YES;
 }
 
 - (BOOL)isPrepared {

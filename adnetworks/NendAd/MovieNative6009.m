@@ -23,22 +23,11 @@
 @implementation MovieNative6009
 
 + (NSString *)getAdapterRevisionVersion {
-    return @"6";
+    return @"7";
 }
 
-- (BOOL)isClassReference {
-    // Nend:iOS 8.1以上が動作保障対象となります。それ以外のOSおよび端末では正常に動作しない場合があります。
-    if (NSFoundationVersionNumber < NSFoundationVersionNumber_iOS_8_1) {
-        return NO;
-    }
-
-    Class clazz = NSClassFromString(@"NADNativeVideoLoader");
-    if (clazz) {
-    } else {
-        AdapterLog(@"Not found Class: NendAd");
-        return NO;
-    }
-    return YES;
++ (NSString *)adnetworkClassName {
+    return @"NADNativeVideoLoader";
 }
 
 - (void)setData:(NSDictionary *)data {

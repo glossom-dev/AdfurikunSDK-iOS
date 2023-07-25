@@ -12,7 +12,7 @@
 
 NS_ASSUME_NONNULL_BEGIN
 
-@interface AppOpenAd6120 : ADFmyMovieRewardInterface <MTGSplashADDelegate>
+@interface AppOpenAd6120 : ADFmyAppOpenAdAdapterInterface <MTGSplashADDelegate>
 
 @end
 

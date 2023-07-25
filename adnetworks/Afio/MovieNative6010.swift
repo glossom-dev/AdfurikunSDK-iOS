@@ -7,8 +7,8 @@
 //
 
 import Foundation
-import ADFMovieReward
 import AMoAd
+import ADFMovieReward
 
 @objc(MovieNative6010)
 
@@ -33,10 +33,10 @@ class MovieNative6010: ADFmyMovieNativeInterface {
     }
 
     override class func getAdapterRevisionVersion() -> String {
-        return "2"
+        return "3"
     }
 
-    override func setData(_ data: [AnyHashable : Any]!) {
+    override func setData(_ data: [AnyHashable : Any]) {
         print("MovieNative6010: setData")
         super.setData(data)
 
@@ -48,7 +48,19 @@ class MovieNative6010: ADFmyMovieNativeInterface {
         }
     }
 
+    override func initAdnetworkIfNeeded() {
+        guard needsToInit() == true else {
+            return
+        }
+        initCompleteAndRetryStartAdIfNeeded()
+    }
+
     override func startAd() {
+        guard canStartAd() else {
+            return
+        }
+        super.startAd()
+
         if let sid = sid {
             super.startAd()
             AMoAdNativeViewManager.shared.prepareAd(sid: sid, iconPreloading: true, imagePreloading: true)
@@ -130,18 +142,18 @@ extension MovieNative6010: AMoAdNativeVideoAppDelegate {
         print("MovieNative6010: amoadNativeVideoDidStart")
         if isPlayStart == false {
             isPlayStart = true // Pause -> Resumeになる場合でもPlay Startが呼ばれるのでFlagでチェックする
-            adInfo.mediaView?.adapterInnerDelegate?.onADFMediaViewPlayStart?()
+            setCallbackStatus(NativeAdCallbackPlayStart)
         }
     }
 
     func amoadNativeVideoDidComplete(view amoadNativeMainVideoView: UIView) {
         print("MovieNative6010: amoadNativeVideoDidComplete")
-        adInfo.mediaView?.adapterInnerDelegate?.onADFMediaViewPlayFinish?()
+        setCallbackStatus(NativeAdCallbackPlayFinish)
     }
 
     func amoadNativeVideoDidFailToPlay(view amoadNativeMainVideoView: UIView) {
         print("MovieNative6010: amoadNativeVideoDidFailToPlay")
-        adInfo.mediaView?.adapterInnerDelegate?.onADFMediaViewPlayFail?()
+        setCallbackStatus(NativeAdCallbackPlayFail)
     }
 }
 
@@ -161,7 +173,7 @@ extension MovieNative6010: AMoAdNativeAppDelegate {
                 self.adInfo.adapter = self
 
                 self.isPlayStart = false
-                self.delegate.onNativeMovieAdLoadFinish?(self.adInfo)
+                setCallbackStatus(NativeAdCallbackLoadFinish)
             }
         }
     }
@@ -176,7 +188,7 @@ extension MovieNative6010: AMoAdNativeAppDelegate {
 
     func amoadNativeDidClick(sid: String, tag: String, view: UIView) {
         print("MovieNative6010: amoadNativeDidClick")
-        adInfo.mediaView?.adapterInnerDelegate?.onADFMediaViewClick?()
+        setCallbackStatus(NativeAdCallbackClick)
     }
 }
 

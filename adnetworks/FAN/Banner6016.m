@@ -16,7 +16,11 @@
 @implementation Banner6016
 
 + (NSString *)getAdapterRevisionVersion {
-    return @"3";
+    return @"4";
+}
+
++ (NSString *)adnetworkClassName {
+    return @"FBAdView";
 }
 
 -(void)setData:(NSDictionary *)data {
@@ -53,21 +57,6 @@
         } @catch (NSException *exception) {
             [self adnetworkExceptionHandling:exception];
         }
-    }
-}
-
-/**
- * 対象のクラスがあるかどうか？
- */
--(BOOL)isClassReference {
-    NSLog(@"Banner6016 isClassReference");
-    Class clazz = NSClassFromString(@"FBAdView");
-    if (clazz) {
-        NSLog(@"found Class: FBAdView");
-        return YES;
-    } else {
-        NSLog(@"Not found Class: FBAdView");
-        return NO;
     }
 }
 

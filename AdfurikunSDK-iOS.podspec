@@ -1,6 +1,6 @@
 Pod::Spec.new do |s|
   s.name            = "AdfurikunSDK-iOS"
-  s.version         = "3.18.1.1"
+  s.version         = "3.19.0"
   s.summary         = "An iOS SDK for ADFURIKUN Movie Reward Ads"
   s.homepage        = "https://adfurikun.jp/adfurikun/"
   s.license         = { :type => 'Copyright', :text => 'Copyright Glossom Inc. All rights reserved.' }
@@ -34,14 +34,14 @@ Pod::Spec.new do |s|
 
   s.subspec 'Afio' do |afio|
     afio.dependency 'AdfurikunSDK-iOS/Core'
-    afio.dependency 'AMoAd', '<=6.1.14'
+    afio.dependency 'AMoAd'
     afio.source_files = '**/adnetworks/Afio/*.swift'
     afio.resource = '**/adnetworks/Afio/*.txt'
   end
 
   s.subspec 'AppLovin' do |applovin|
     applovin.dependency 'AdfurikunSDK-iOS/Core'
-    applovin.dependency 'AppLovinSDK', '11.8.2'
+    applovin.dependency 'AppLovinSDK', '11.10.1'
     applovin.source_files = '**/adnetworks/AppLovin/*.{h,m}'
     applovin.resource = '**/adnetworks/AppLovin/*.txt'
   end
@@ -55,21 +55,21 @@ Pod::Spec.new do |s|
 
   s.subspec 'Five' do |five|
     five.dependency 'AdfurikunSDK-iOS/Core'
-    five.dependency 'FiveAd', '2.6.20230215'
+    five.dependency 'FiveAd', '2.6.20230609'
     five.source_files = '**/adnetworks/Five/*.{h,m}'
     five.resource = '**/adnetworks/Five/*.txt'
   end
 
   s.subspec 'Fyber' do |fyber|
     fyber.dependency 'AdfurikunSDK-iOS/Core'
-    fyber.dependency 'Fyber_Marketplace_SDK', '8.2.1'
+    fyber.dependency 'Fyber_Marketplace_SDK', '8.2.2'
     fyber.source_files = '**/adnetworks/Fyber/*.{h,m}'
     fyber.resource = '**/adnetworks/Fyber/*.txt'
   end
 
   s.subspec 'ironSource' do |ironSource|
     ironSource.dependency 'AdfurikunSDK-iOS/Core'
-    ironSource.dependency 'IronSourceSDK', '7.2.6'
+    ironSource.dependency 'IronSourceSDK', '7.3.1'
     ironSource.source_files = '**/adnetworks/IronSource/*.{h,m}'
     ironSource.resource = '**/adnetworks/IronSource/*.txt'
   end
@@ -90,21 +90,21 @@ Pod::Spec.new do |s|
 
   s.subspec 'Pangle' do |pangle|
     pangle.dependency 'AdfurikunSDK-iOS/Core'
-    pangle.dependency 'Ads-Global', '4.8.1.2'
+    pangle.dependency 'Ads-Global', '5.1.1.0'
     pangle.source_files = '**/adnetworks/Pangle/*.{h,m}'
     pangle.resource = '**/adnetworks/Pangle/*.txt'
   end
 
   s.subspec 'Tapjoy' do |tapjoy|
     tapjoy.dependency 'AdfurikunSDK-iOS/Core'
-    tapjoy.dependency 'TapjoySDK', '12.11.1'
+    tapjoy.dependency 'TapjoySDK', '13.0.1'
     tapjoy.source_files = '**/adnetworks/Tapjoy/*.{h,m}'
     tapjoy.resource = '**/adnetworks/Tapjoy/*.txt'
   end
 
   s.subspec 'UnityAds' do |unityads|
     unityads.dependency 'AdfurikunSDK-iOS/Core'
-    unityads.dependency 'UnityAds', '4.6.1'
+    unityads.dependency 'UnityAds', '4.8.0'
     unityads.source_files = '**/adnetworks/UnityAds/*.{h,m}'
     unityads.resource = '**/adnetworks/UnityAds/*.txt'
   end
@@ -118,12 +118,12 @@ Pod::Spec.new do |s|
 
   s.subspec 'Mintegral' do |mintegral|
     mintegral.dependency 'AdfurikunSDK-iOS/Core'
-    mintegral.dependency 'MintegralAdSDK/BidNativeAd', '7.3.4'
-    mintegral.dependency 'MintegralAdSDK/BidNativeAdvancedAd', '7.3.4'
-    mintegral.dependency 'MintegralAdSDK/BidRewardVideoAd', '7.3.4'
-    mintegral.dependency 'MintegralAdSDK/BidNewInterstitialAd', '7.3.4'
-    mintegral.dependency 'MintegralAdSDK/BidBannerAd', '7.3.4'
-    mintegral.dependency 'MintegralAdSDK/BidSplashAd', '7.3.4'
+    mintegral.dependency 'MintegralAdSDK/BidNativeAd', '7.3.9'
+    mintegral.dependency 'MintegralAdSDK/BidNativeAdvancedAd', '7.3.9'
+    mintegral.dependency 'MintegralAdSDK/BidRewardVideoAd', '7.3.9'
+    mintegral.dependency 'MintegralAdSDK/BidNewInterstitialAd', '7.3.9'
+    mintegral.dependency 'MintegralAdSDK/BidBannerAd', '7.3.9'
+    mintegral.dependency 'MintegralAdSDK/BidSplashAd', '7.3.9'
     mintegral.source_files = '**/adnetworks/Mintegral/*.{h,m}'
     mintegral.resource = '**/adnetworks/Mintegral/*.txt'
   end
@@ -140,7 +140,6 @@ Pod::Spec.new do |s|
     all.dependency 'AdfurikunSDK-iOS/AdColony'
     all.dependency 'AdfurikunSDK-iOS/AdMob'
     all.dependency 'AdfurikunSDK-iOS/AppLovin'
-    all.dependency 'AdfurikunSDK-iOS/FAN'
     all.dependency 'AdfurikunSDK-iOS/Five'
     all.dependency 'AdfurikunSDK-iOS/Fyber'
     all.dependency 'AdfurikunSDK-iOS/ironSource'

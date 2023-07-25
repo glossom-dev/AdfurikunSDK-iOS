@@ -18,7 +18,11 @@
 
 // Adapterのバージョン。最初は1にして、修正がある度＋1にする
 + (NSString *)getAdapterRevisionVersion {
-    return @"1";
+    return @"2";
+}
+
++ (NSString *)adnetworkClassName {
+    return @"ZADNFullScreenInterstitialView";
 }
 
 // getinfoからのParameter設定
@@ -75,18 +79,6 @@
 
 - (void)showAdWithPresentingViewController:(UIViewController *)viewController {
     [self showAd];
-}
-
-// Adnetwork SDKが設置されているかをチェックする
-- (BOOL)isClassReference {
-    Class clazz = NSClassFromString(@"ZADNFullScreenInterstitialView");
-    if (clazz) {
-        AdapterLog(@"found Class: Zucks");
-        return YES;
-    } else {
-        AdapterLog(@"Not found Class: Zucks");
-        return NO;
-    }
 }
 
 #pragma mark - ZADNFullScreenInterstitialViewDelegate methods

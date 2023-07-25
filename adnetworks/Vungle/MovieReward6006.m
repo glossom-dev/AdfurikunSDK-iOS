@@ -24,7 +24,11 @@
 }
 
 + (NSString *)getAdapterRevisionVersion {
-    return @"6";
+    return @"7";
+}
+
++ (NSString *)adnetworkClassName {
+    return @"VungleSDK";
 }
 
 - (id)init{
@@ -201,22 +205,6 @@
         [self setErrorWithMessage:error.localizedDescription code:error.code];
         [self setCallbackStatus:MovieRewardCallbackPlayFail];
     }
-}
-
-/**
- * 対象のクラスがあるかどうか？
- */
--(BOOL)isClassReference
-{
-    Class clazz = NSClassFromString(@"VungleSDK");
-    if (clazz) {
-        AdapterLog(@"Found Class: Vungle");
-    }
-    else {
-        AdapterLog(@"Not found Class: Vungle");
-        return NO;
-    }
-    return YES;
 }
 
 -(void)setHasUserConsent:(BOOL)hasUserConsent {

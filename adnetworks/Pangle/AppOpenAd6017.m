@@ -6,15 +6,15 @@
 //
 
 #import "AppOpenAd6017.h"
-#import <BUAdSDK/BUAdSDK.h>
+#import <PAGAdSDK/PAGAdSDK.h>
 #import "MovieReward6017.h"
 #import "AdnetworkParam6017.h"
 
 #define kLoadTimeoutDefault 3
 
-@interface AppOpenAd6017 ()<BUAppOpenAdDelegate>
+@interface AppOpenAd6017 ()<PAGLAppOpenAdDelegate>
 
-@property (nonatomic, strong) BUAppOpenAd *openAd;
+@property (nonatomic, strong) PAGLAppOpenAd *openAd;
 @property (nonatomic) AdnetworkParam6017 *adParam;
 
 // ロードタイムアウト秒数
@@ -27,28 +27,21 @@
 @implementation AppOpenAd6017
 
 + (NSString *)getSDKVersion {
-    return BUAdSDKManager.SDKVersion;
+    return PAGSdk.SDKVersion;
 }
 
 + (NSString *)getAdapterRevisionVersion {
-    return @"2";
+    return @"6";
+}
+
++ (NSString *)adnetworkClassName {
+    return @"PAGLAppOpenAd";
 }
 
 - (void)setData:(NSDictionary *)data {
     [super setData:data];
     
     self.adParam = [[AdnetworkParam6017 alloc] initWithParam:data];
-}
-
-- (BOOL)isClassReference {
-    Class clazz = NSClassFromString(@"BUAppOpenAd");
-    if (clazz) {
-        AdapterLog(@"found Class: BUAppOpenAd");
-        return YES;
-    } else {
-        AdapterLog(@"Not found Class: BUAppOpenAd");
-        return NO;
-    }
 }
 
 - (void)initAdnetworkIfNeeded {
@@ -65,6 +58,7 @@
         [MovieConfigure6017.sharedInstance configureWithAppId:self.adParam.appID
                                                    gdprStatus:self.hasGdprConsent
                                                 childDirected:self.childDirected
+                                                 appLogoImage:self.logoImage
                                                    completion:^{
             [self initCompleteAndRetryStartAdIfNeeded];
         }];
@@ -103,12 +97,10 @@
             self.timeout = kLoadTimeoutDefault;
         }
         
-        BUAdSlot *slot = [[BUAdSlot alloc] init];
-        slot.ID = self.adParam.slotID;
-        slot.AdType = BUAdSlotAdTypeSplash;
-        
-        self.openAd = [[BUAppOpenAd alloc] initWithSlot:slot];
-        [self.openAd loadOpenAdWithTimeout:self.timeout completionHandler:^(BUAppOpenAd * _Nullable appOpenAd, NSError * _Nullable error) {
+        PAGAppOpenRequest *request = [PAGAppOpenRequest request];
+        [PAGLAppOpenAd loadAdWithSlotID:self.adParam.slotID
+                                request:request
+                      completionHandler:^(PAGLAppOpenAd * _Nullable appOpenAd, NSError * _Nullable error) {
             if (error) {
                 AdapterTraceP(@"error : %@", error);
                 [self setErrorWithMessage:error.localizedDescription code:error.code];
@@ -132,7 +124,7 @@
 }
 
 - (void)showAd {
-    [self.openAd presentFromRootViewController:[self topMostViewController]];
+    [self showAdWithPresentingViewController:[self topMostViewController]];
 }
 
 - (void)showAdWithPresentingViewController:(UIViewController *)viewController {
@@ -160,29 +152,19 @@
     }
 }
 
-#pragma BUAppOpenAdDelegate
+#pragma mark PAGLAppOpenAdDelegate
 
-/// The ad has been presented.
-/// @param appOpenAd The BUAppOpenAd instance.
-- (void)didPresentForAppOpenAd:(BUAppOpenAd *)appOpenAd {
+- (void)adDidShow:(PAGLAppOpenAd *)ad {
+    AdapterTrace;
     [self setCallbackStatus:MovieRewardCallbackPlayStart];
 }
 
-/// The ad was clicked.
-/// @param appOpenAd The BUAppOpenAd instance.
-- (void)didClickForAppOpenAd:(BUAppOpenAd *)appOpenAd {
-    
+- (void)adDidClick:(PAGLAppOpenAd *)ad {
+    AdapterTrace;
 }
 
-/// The ad was skipped.
-/// @param appOpenAd The BUAppOpenAd instance.
-- (void)didClickSkipForAppOpenAd:(BUAppOpenAd *)appOpenAd {
-    [self sendAdClose];
-}
-
-/// The ad countdown is over.
-/// @param appOpenAd The BUAppOpenAd instance.
-- (void)countdownToZeroForAppOpenAd:(BUAppOpenAd *)appOpenAd {
+- (void)adDidDismiss:(PAGLAppOpenAd *)ad {
+    AdapterTrace;
     [self setCallbackStatus:MovieRewardCallbackPlayComplete];
     [self sendAdClose];
 }

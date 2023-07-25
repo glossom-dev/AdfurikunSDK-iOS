@@ -15,7 +15,11 @@
 @implementation Banner6019
 
 + (NSString *)getAdapterRevisionVersion {
-    return @"10";
+    return @"11";
+}
+
++ (NSString *)adnetworkClassName {
+    return @"GADBannerView";
 }
 
 - (void)setData:(NSDictionary *)data {
@@ -90,17 +94,6 @@
     } @catch (NSException *exception) {
         [self adnetworkExceptionHandling:exception];
     }
-}
-
-- (BOOL)isClassReference {
-    Class clazz = NSClassFromString(@"GADBannerView");
-    if (clazz) {
-        AdapterLog(@"Found Class: GADBannerView");
-    } else {
-        AdapterLog(@"Not Found Class: GADBannerView");
-        return NO;
-    }
-    return YES;
 }
 
 - (void)isChildDirected:(BOOL)childDirected {

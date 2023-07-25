@@ -7,6 +7,7 @@
 //
 
 #import <Foundation/Foundation.h>
+#import <UIKit/UIKit.h>
 #import <ADFMovieReward/ADFmyMovieRewardInterface.h>
 
 NS_ASSUME_NONNULL_BEGIN
@@ -38,6 +39,7 @@ typedef void(^completionHandlerType)(void);
 - (void)configureWithAppId:(NSString *)appId
                 gdprStatus:(NSNumber * _Nullable)gdprStatus
              childDirected:(NSNumber * _Nullable)childDirected
+              appLogoImage:(UIImage * _Nullable)logoImage
                 completion:(completionHandlerType)completionHandler;
 
 @end

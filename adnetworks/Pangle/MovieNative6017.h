@@ -7,11 +7,11 @@
 //
 
 #import <ADFMovieReward/ADFMovieReward.h>
-#import <BUAdSDK/BUAdSDK.h>
+#import <PAGAdSDK/PAGAdSDK.h>
 
 NS_ASSUME_NONNULL_BEGIN
 
-@interface MovieNative6017 : ADFmyMovieNativeInterface <BUNativeAdDelegate, BUVideoAdViewDelegate>
+@interface MovieNative6017 : ADFmyMovieNativeInterface <PAGLNativeAdDelegate>
 
 @end
 
@@ -20,15 +20,18 @@ NS_ASSUME_NONNULL_BEGIN
 @end
 
 @interface MovieNative6090 : MovieNative6017
-
 @end
 
 @interface MovieNative6091 : MovieNative6017
-
 @end
 
 @interface MovieNative6092 : MovieNative6017
+@end
 
+@interface MovieNative6093 : MovieNative6017
+@end
+
+@interface MovieNative6094 : MovieNative6017
 @end
 
 NS_ASSUME_NONNULL_END

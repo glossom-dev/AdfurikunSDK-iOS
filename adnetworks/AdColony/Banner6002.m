@@ -25,17 +25,11 @@
 }
 
 + (NSString *)getAdapterRevisionVersion {
-    return @"7";
+    return @"8";
 }
 
-- (BOOL)isClassReference {
-    Class clazz = NSClassFromString(@"AdColonyAdView");
-    if (clazz) {
-    } else {
-        AdapterLog(@"Not found Class: AdColonyAdView");
-        return NO;
-    }
-    return YES;
++ (NSString *)adnetworkClassName {
+    return @"AdColonyAdView";
 }
 
 - (void)dispose {

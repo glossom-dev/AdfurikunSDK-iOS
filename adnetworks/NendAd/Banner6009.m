@@ -19,17 +19,11 @@
 @implementation Banner6009
 
 + (NSString *)getAdapterRevisionVersion {
-    return @"5";
+    return @"6";
 }
 
-- (BOOL)isClassReference {
-    Class clazz = NSClassFromString(@"NADView");
-    if (clazz) {
-    } else {
-        AdapterLog(@"Not found Class: NADView");
-        return NO;
-    }
-    return YES;
++ (NSString *)adnetworkClassName {
+    return @"NADView";
 }
 
 - (void)dispose {

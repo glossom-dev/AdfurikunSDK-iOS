@@ -21,17 +21,11 @@
 }
 
 + (NSString *)getAdapterRevisionVersion {
-    return @"5";
+    return @"6";
 }
 
-- (BOOL)isClassReference {
-    Class clazz = NSClassFromString(@"ALAdView");
-    if (clazz) {
-    } else {
-        AdapterLog(@"Not found Class: ALAdView");
-        return NO;
-    }
-    return YES;
++ (NSString *)adnetworkClassName {
+    return @"ALAdView";
 }
 
 - (void)setData:(NSDictionary *)data {

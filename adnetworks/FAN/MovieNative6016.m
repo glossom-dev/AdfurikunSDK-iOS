@@ -22,23 +22,11 @@
 @implementation MovieNative6016
 
 + (NSString *)getAdapterRevisionVersion {
-    return @"5";
+    return @"6";
 }
 
-- (BOOL)isClassReference {
-    Class clazz = NSClassFromString(@"FBNativeAd");
-    if (clazz) {
-    } else {
-        NSLog(@"MovieNative6016: Not found Class: FBNativeAd");
-        return NO;
-    }
-    clazz = NSClassFromString(@"FBNativeBannerAd");
-    if (clazz) {
-    } else {
-        NSLog(@"Rectangle6016: Not found Class: FBNativeBannerAd");
-        return NO;
-    }
-    return YES;
++ (NSString *)adnetworkClassName {
+    return @"FBNativeAd";
 }
 
 - (void)setData:(NSDictionary *)data {

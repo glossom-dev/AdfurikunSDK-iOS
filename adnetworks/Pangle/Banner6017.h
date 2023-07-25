@@ -7,16 +7,31 @@
 //
 
 #import <ADFMovieReward/ADFMovieReward.h>
-#import <BUAdSDK/BUAdSDK.h>
+#import <PAGAdSDK/PAGAdSDK.h>
 
 NS_ASSUME_NONNULL_BEGIN
 
 @interface Banner6017 : ADFmyMovieNativeInterface
-@property (nonatomic) CGSize adSize;
+@property (nonatomic) PAGBannerAdSize adSize;
 @end
 
 @interface NativeAdInfo6017 : ADFNativeAdInfo
 
+@end
+
+@interface Banner6090 : Banner6017
+@end
+
+@interface Banner6091 : Banner6017
+@end
+
+@interface Banner6092 : Banner6017
+@end
+
+@interface Banner6093 : Banner6017
+@end
+
+@interface Banner6094 : Banner6017
 @end
 
 NS_ASSUME_NONNULL_END

@@ -11,11 +11,10 @@
 #import <Tapjoy/Tapjoy.h>
 
 @interface MovieReward6005()
+
 @property (nonatomic, assign)BOOL test_flg;
 @property (nonatomic, strong)NSString* placement_id;
 @property (nonatomic, strong)NSString* sdkKey;
-@property (nonatomic) BOOL isNeedStartAd;
-@property (nonatomic) BOOL isConnectionFail;
 
 @end
 
@@ -27,15 +26,17 @@
 }
 
 + (NSString *)getAdapterRevisionVersion {
-    return @"9";
+    return @"11";
+}
+
++ (NSString *)adnetworkClassName {
+    return @"Tapjoy";
 }
 
 - (id)init {
     self = [super init];
     if (self) {
         _p = nil;
-        _isNeedStartAd = NO;
-        _isConnectionFail = NO;
     }
     return self;
 }
@@ -44,7 +45,6 @@
     MovieReward6005 *newSelf = [super copyWithZone:zone];
     if (newSelf) {
         newSelf.p = self.p;
-        newSelf.isNeedStartAd = self.isNeedStartAd;
     }
     return newSelf;
 }
@@ -76,34 +76,15 @@
 }
 
 -(void)initAdnetworkIfNeeded {
-    static dispatch_once_t onceToken;
-    dispatch_once(&onceToken, ^{
-        @try {
-            //Set up success and failure notifications
-            [[NSNotificationCenter defaultCenter] addObserver:self
-                                                     selector:@selector(tjcConnectSuccess:)
-                                                         name:TJC_LIMITED_CONNECT_SUCCESS
-                                                       object:nil];
-            [[NSNotificationCenter defaultCenter] addObserver:self
-                                                     selector:@selector(tjcConnectFail:)
-                                                         name:TJC_LIMITED_CONNECT_FAILED
-                                                       object:nil];
-            
-            [Tapjoy limitedConnect:self.sdkKey];
-            [Tapjoy setDebugEnabled:self.test_flg];
-            
-            MovieDelegate6005 *delegate = [MovieDelegate6005 sharedInstance];
-            [delegate setMovieReward:self inZone:self.placement_id];
-            
-            _p = [TJPlacement limitedPlacementWithName:_placement_id mediationAgent:@"adfully" delegate:delegate];
-            _p.videoDelegate = delegate;
-            _p.adapterVersion = @"1.0.1";
-            
+    @try {
+        [MovieConfigure6005.sharedInstance configureWithAppId:self.sdkKey
+            testFlag:self.test_flg
+            completion:^{
             [self initCompleteAndRetryStartAdIfNeeded];
-        } @catch (NSException *exception) {
-            [self adnetworkExceptionHandling:exception];
-        }
-    });
+        }];
+    } @catch (NSException *exception) {
+        [self adnetworkExceptionHandling:exception];
+    }
     AdapterLog(@"initAdnetworkIfNeeded end");
 }
 
@@ -115,18 +96,18 @@
         return;
     }
 
-    if (self.sdkKey && self.placement_id && self.p) {
+    if (self.sdkKey && self.placement_id) {
         [super startAd];
         @try {
-            if (![Tapjoy isLimitedConnected]) {
-                self.isNeedStartAd = YES;
-                
-                if (self.isConnectionFail) {
-                    [Tapjoy limitedConnect:self.sdkKey];
-                }
-                
-                return;
+            if (self.p == nil) {
+                // Delegate処理もSelfでできそうだが一旦今のままにする
+                MovieDelegate6005 *delegate = [MovieDelegate6005 sharedInstance];
+                [delegate setMovieReward:self inZone:self.placement_id];
+                self.p = [TJPlacement limitedPlacementWithName:_placement_id mediationAgent:@"adfully" delegate:delegate];
+                self.p.videoDelegate = delegate;
+                self.p.adapterVersion = @"1.0.1";
             }
+            
             [self requireToAsyncRequestAd];
             [_p requestContent];
         } @catch (NSException *exception) {
@@ -178,21 +159,6 @@
     }
 }
 
-/**
- * 対象のクラスがあるかどうか？
- */
--(BOOL)isClassReference {
-    Class clazz = NSClassFromString(@"Tapjoy");
-    if (clazz) {
-        AdapterLog(@"found Class: Tapjoy");
-    }
-    else {
-        AdapterLog(@"Not found Class: Tapjoy");
-        return NO;
-    }
-    return YES;
-}
-
 -(void)setHasUserConsent:(BOOL)hasUserConsent {
     [super setHasUserConsent:hasUserConsent];
     TJPrivacyPolicy *privacyPolicy = [Tapjoy getPrivacyPolicy];
@@ -215,23 +181,9 @@
     [[NSNotificationCenter defaultCenter] removeObserver:self];
 }
 
-//-----------------AppDelegate内の処理を移動--------------------------------------
--(void)tjcConnectSuccess:(NSNotification*)notifyObj {
-    AdapterTrace;
-    if (self.isNeedStartAd) {
-        [self startAd];
-    }
-    self.isConnectionFail = NO;
-}
-
-- (void)tjcConnectFail:(NSNotification*)notifyObj {
-    AdapterTrace;
-    self.isConnectionFail = YES;
-}
-
 @end
 
-
+// Delegate処理
 @interface MovieDelegate6005()
 @end
 
@@ -314,6 +266,95 @@
 }
 
 @end
+
+// Tapjoy SDK初期化処理Class
+typedef enum : NSUInteger {
+    initializeNotYet,
+    initializing,
+    initializeComplete,
+} TapjoyInitializeStatus;
+
+@interface MovieConfigure6005()
+
+@property (nonatomic) TapjoyInitializeStatus initStatus;
+@property (nonatomic) NSMutableArray <completionHandlerType> *handlers;
+
+@end
+
+@implementation MovieConfigure6005
++ (instancetype)sharedInstance {
+    static MovieConfigure6005 *sharedInstance = nil;
+    static dispatch_once_t onceToken;
+    dispatch_once(&onceToken, ^{
+        sharedInstance = [self new];
+    });
+    return sharedInstance;
+}
+
+- (instancetype)init {
+    self = [super init];
+    if (self) {
+        self.initStatus = initializeNotYet;
+        self.handlers = [NSMutableArray new];
+    }
+    return self;
+}
+
+- (void)configureWithAppId:(NSString *)sdkKey
+                  testFlag:(bool)testFlag
+                completion:(completionHandlerType)completionHandler {
+    if (!sdkKey || !completionHandler) {
+        return;
+    }
+    
+    if (self.initStatus == initializeComplete) {
+        completionHandler();
+        return;
+    }
+    
+    if (self.initStatus == initializing) {
+        [self.handlers addObject:completionHandler];
+        return;
+    }
+    
+    if (self.initStatus == initializeNotYet) {
+        self.initStatus = initializing;
+        [self.handlers addObject:completionHandler];
+        
+        dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(0.1 * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
+            @try {
+                //Set up success and failure notifications
+                [[NSNotificationCenter defaultCenter] addObserver:self
+                                                         selector:@selector(tjcConnectSuccess:)
+                                                             name:TJC_LIMITED_CONNECT_SUCCESS
+                                                           object:nil];
+                [[NSNotificationCenter defaultCenter] addObserver:self
+                                                         selector:@selector(tjcConnectFail:)
+                                                             name:TJC_LIMITED_CONNECT_FAILED
+                                                           object:nil];
+                
+                [Tapjoy setDebugEnabled:testFlag];
+                [Tapjoy limitedConnect:sdkKey];
+            } @catch (NSException *exception) {
+                NSLog(@"[ADF] adnetwork exception : %@", exception);
+            }
+        });
+    }
+}
+
+//-----------------AppDelegate内の処理を移動--------------------------------------
+-(void)tjcConnectSuccess:(NSNotification*)notifyObj {
+    self.initStatus = initializeComplete;
+    for (completionHandlerType handler in self.handlers) {
+        handler();
+    }
+}
+
+- (void)tjcConnectFail:(NSNotification*)notifyObj {
+}
+
+@end
+
 
 @implementation MovieReward6170
 @end
