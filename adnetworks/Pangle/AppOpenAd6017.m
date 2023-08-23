@@ -31,7 +31,7 @@
 }
 
 + (NSString *)getAdapterRevisionVersion {
-    return @"6";
+    return @"7";
 }
 
 + (NSString *)adnetworkClassName {
@@ -72,10 +72,16 @@
 }
 
 - (void)startAdWithOption:(NSDictionary *)option {
+    AdapterTrace;
     if (![self canStartAd]) {
         return;
     }
     if (!self.adParam || ![self.adParam isValid]) {
+        return;
+    }
+    
+    if (self.isAdLoaded) {
+        AdapterLog(@"Ad is already loaded");
         return;
     }
 
@@ -101,6 +107,11 @@
         [PAGLAppOpenAd loadAdWithSlotID:self.adParam.slotID
                                 request:request
                       completionHandler:^(PAGLAppOpenAd * _Nullable appOpenAd, NSError * _Nullable error) {
+            AdapterLogP(@"Ad load is completed : %@", appOpenAd);
+            if (self.isAdLoaded) {
+                AdapterLog(@"Ad is already loaded");
+                return;
+            }
             if (error) {
                 AdapterTraceP(@"error : %@", error);
                 [self setErrorWithMessage:error.localizedDescription code:error.code];
