@@ -11,15 +11,30 @@
 
 NS_ASSUME_NONNULL_BEGIN
 
-@interface Banner6110 : ADFmyMovieNativeInterface
+@interface Banner6110 : ADFmyMovieNativeInterface <ISDemandOnlyBannerDelegate>
 
 @property (nonatomic) ISBannerSize *bannerSize;
-@property (nonatomic, nullable) ISBannerView *bannerView;
+@property (nonatomic, nullable) ISDemandOnlyBannerView *bannerView;
 
 @end
 
 @interface NativeAdInfo6110 : ADFNativeAdInfo
 
+@end
+
+@interface Banner6111 : Banner6110
+@end
+
+@interface Banner6112 : Banner6110
+@end
+
+@interface Banner6113 : Banner6110
+@end
+
+@interface Banner6114 : Banner6110
+@end
+
+@interface Banner6115 : Banner6110
 @end
 
 NS_ASSUME_NONNULL_END

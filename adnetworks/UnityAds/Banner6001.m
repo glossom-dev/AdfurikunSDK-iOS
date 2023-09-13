@@ -146,6 +146,12 @@
     [self setCallbackStatus:NativeAdCallbackLoadFinish];
 }
 
+-(void)bannerViewDidShow:(UADSBannerView *)bannerView {
+    AdapterTrace;
+    [self setCallbackStatus:NativeAdCallbackRendering];
+    [self startViewabilityCheck];
+}
+
 -(void)bannerViewDidClick:(UADSBannerView *)bannerView {
     AdapterTrace;
     [self setCallbackStatus:NativeAdCallbackClick];
@@ -167,12 +173,6 @@
 
 
 @implementation NativeAdInfo6001
-
--(void)playMediaView {
-    if (self.adapter) {
-        [self.adapter setCallbackStatus:NativeAdCallbackRendering];
-    }
-}
 
 @end
 

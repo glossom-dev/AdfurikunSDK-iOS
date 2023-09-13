@@ -41,8 +41,11 @@
     if ([self isString:appKey]) {
         self.appKey = [NSString stringWithFormat:@"%@", appKey];
     }
-    
-    self.instanceId = kAdnetwork6110DefaultInstanceId;
+
+    NSString *instanceId = [data objectForKey:@"instance_id"];
+    if ([self isString:instanceId]) {
+        self.instanceId = [NSString stringWithFormat:@"%@", instanceId];
+    }
 }
 
 // 広告準備有無を返す
@@ -65,10 +68,10 @@
         return;
     }
     
-    self.bannerSize = ISBannerSize_SMART;
-    [IronSource initWithAppKey:self.appKey];
-    [self initCompleteAndRetryStartAdIfNeeded];
+    self.bannerSize = ISBannerSize_BANNER;
     [AdnetworkConfigure6110.sharedInstance initIronSource:self.appKey completion:^{
+        [self initCompleteAndRetryStartAdIfNeeded];
+        [IronSource setISDemandOnlyBannerDelegate:self forInstanceId:self.instanceId];
     }];
 }
 
@@ -87,7 +90,6 @@
     [super startAd];
 
     if (self.bannerView) {
-        [IronSource destroyBanner:self.bannerView];
         self.bannerView = nil;
     }
     
@@ -96,8 +98,9 @@
         // 非同期で行われる場合にはFlag設定を行う
         [self requireToAsyncRequestAd];
 
-        [AdnetworkConfigure6110.sharedInstance setBannerAdapter:self instanceId:kAdnetwork6110DefaultInstanceId];
-        [IronSource loadBannerWithViewController:topVC size:self.bannerSize];
+        [IronSource loadISDemandOnlyBannerWithInstanceId:self.instanceId
+                                          viewController:topVC
+                                                    size:self.bannerSize];
     } @catch (NSException *exception) {
         [self adnetworkExceptionHandling:exception];
     }
@@ -110,9 +113,9 @@
 - (void)dispose {
     AdapterTrace;
     if (self.bannerView) {
-        [IronSource destroyBanner:self.bannerView];
         self.bannerView = nil;
     }
+    [IronSource destroyISDemandOnlyBannerWithInstanceId:self.instanceId];
 }
 
 -(void)setHasUserConsent:(BOOL)hasUserConsent {
@@ -140,15 +143,92 @@
  NativeAdCallbackClick：広告クリック
  */
 
+/**
+ Called after a banner ad has been successfully loaded
+ @param bannerView The view that contains the ad.
+ @param instanceId The demand only instance id to be used to display the banner.
+ */
+- (void)bannerDidLoad:(ISDemandOnlyBannerView *)bannerView instanceId:(NSString *)instanceId {
+    AdapterTrace;
+    NativeAdInfo6110 *info = [[NativeAdInfo6110 alloc] initWithVideoUrl:nil
+                                                                  title:@""
+                                                            description:@""
+                                                           adnetworkKey:self.adnetworkKey];
+    info.mediaType = ADFNativeAdType_Image;
+    [info setupMediaView:bannerView];
+    [self setCustomMediaview:bannerView];
+    self.bannerView = bannerView;
+    
+    info.adapter = self;
+    info.isCustomComponentSupported = false;
+    
+    self.adInfo = info;
+    
+    [self setCallbackStatus:NativeAdCallbackLoadFinish];
+}
+
+/**
+ Called after a banner has attempted to load an ad but failed.
+ @param error The reason for the error
+ @param instanceId The demand only instance id that fail to load.
+ */
+- (void)bannerDidFailToLoadWithError:(NSError *)error instanceId:(NSString *)instanceId {
+    AdapterTraceP(@"error : %@", error);
+    [self setErrorWithMessage:error.localizedDescription code:error.code];
+    [self setCallbackStatus:NativeAdCallbackLoadError];
+}
+
+/**
+ Called when a banner was shown
+ @param instanceId The demand only instance id which did show.
+
+ */
+- (void)bannerDidShow:(NSString *)instanceId {
+    AdapterTrace;
+    [self setCallbackStatus:NativeAdCallbackRendering];
+    [self startViewabilityCheck];
+}
+
+/**
+ Called after a banner has been clicked.
+ @param instanceId The demand only instance id which clicked.
+
+ */
+- (void)didClickBanner:(NSString *)instanceId {
+    AdapterTrace;
+    [self setCallbackStatus:NativeAdCallbackClick];
+}
+
+
+/**
+ Called when a user would be taken out of the application context.
+ @param instanceId The demand only instance id that taken out of the application.
+
+ */
+- (void)bannerWillLeaveApplication:(NSString *)instanceId {
+    AdapterTrace;
+}
+
 @end
 
 @implementation NativeAdInfo6110
 
 - (void)playMediaView {
-    if (self.adapter) {
-        [self.adapter setCallbackStatus:NativeAdCallbackRendering];
-        [self.adapter startViewabilityCheck];
-    }
 }
 
+@end
+
+@implementation Banner6111
+@end
+
+@implementation Banner6112
+@end
+
+@implementation Banner6113
+@end
+
+@implementation Banner6114
+@end
+
+@implementation Banner6115
 @end

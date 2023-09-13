@@ -8,7 +8,6 @@
 
 import Foundation
 import AMoAd
-import ADFMovieReward
 
 @objc(MovieNative6010)
 
@@ -173,7 +172,7 @@ extension MovieNative6010: AMoAdNativeAppDelegate {
                 self.adInfo.adapter = self
 
                 self.isPlayStart = false
-                setCallbackStatus(NativeAdCallbackLoadFinish)
+                self.setCallbackStatus(NativeAdCallbackLoadFinish)
             }
         }
     }

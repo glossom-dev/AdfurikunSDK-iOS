@@ -17,3 +17,18 @@
 }
 
 @end
+
+@implementation Rectangle6111
+@end
+
+@implementation Rectangle6112
+@end
+
+@implementation Rectangle6113
+@end
+
+@implementation Rectangle6114
+@end
+
+@implementation Rectangle6115
+@end

@@ -1,6 +1,6 @@
 Pod::Spec.new do |s|
   s.name            = "AdfurikunSDK-iOS"
-  s.version         = "3.19.0.2"
+  s.version         = "3.19.1"
   s.summary         = "An iOS SDK for ADFURIKUN Movie Reward Ads"
   s.homepage        = "https://adfurikun.jp/adfurikun/"
   s.license         = { :type => 'Copyright', :text => 'Copyright Glossom Inc. All rights reserved.' }
@@ -34,7 +34,7 @@ Pod::Spec.new do |s|
 
   s.subspec 'Afio' do |afio|
     afio.dependency 'AdfurikunSDK-iOS/Core'
-    afio.dependency 'AMoAd'
+    afio.dependency 'AMoAd', '6.1.16'
     afio.source_files = '**/adnetworks/Afio/*.swift'
     afio.resource = '**/adnetworks/Afio/*.txt'
   end
@@ -95,13 +95,6 @@ Pod::Spec.new do |s|
     pangle.resource = '**/adnetworks/Pangle/*.txt'
   end
 
-  s.subspec 'Tapjoy' do |tapjoy|
-    tapjoy.dependency 'AdfurikunSDK-iOS/Core'
-    tapjoy.dependency 'TapjoySDK', '13.0.1'
-    tapjoy.source_files = '**/adnetworks/Tapjoy/*.{h,m}'
-    tapjoy.resource = '**/adnetworks/Tapjoy/*.txt'
-  end
-
   s.subspec 'UnityAds' do |unityads|
     unityads.dependency 'AdfurikunSDK-iOS/Core'
     unityads.dependency 'UnityAds', '4.8.0'
@@ -139,6 +132,7 @@ Pod::Spec.new do |s|
     all.dependency 'AdfurikunSDK-iOS/Core'
     all.dependency 'AdfurikunSDK-iOS/AdColony'
     all.dependency 'AdfurikunSDK-iOS/AdMob'
+    all.dependency 'AdfurikunSDK-iOS/Afio'
     all.dependency 'AdfurikunSDK-iOS/AppLovin'
     all.dependency 'AdfurikunSDK-iOS/Five'
     all.dependency 'AdfurikunSDK-iOS/Fyber'
@@ -146,7 +140,6 @@ Pod::Spec.new do |s|
     all.dependency 'AdfurikunSDK-iOS/Maio'
     all.dependency 'AdfurikunSDK-iOS/NendAd'
     all.dependency 'AdfurikunSDK-iOS/Pangle'
-    all.dependency 'AdfurikunSDK-iOS/Tapjoy'
     all.dependency 'AdfurikunSDK-iOS/UnityAds'
     all.dependency 'AdfurikunSDK-iOS/Vungle'
     all.dependency 'AdfurikunSDK-iOS/Mintegral'

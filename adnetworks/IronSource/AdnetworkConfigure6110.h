@@ -14,9 +14,7 @@ NS_ASSUME_NONNULL_BEGIN
 
 typedef void(^completionHandlerType)(void);
 
-#define kAdnetwork6110DefaultInstanceId     @"0"
-
-@interface AdnetworkConfigure6110 : ADFmyAdapterLogger<ISDemandOnlyRewardedVideoDelegate, ISDemandOnlyInterstitialDelegate, ISBannerDelegate>
+@interface AdnetworkConfigure6110 : ADFmyAdapterLogger<ISDemandOnlyRewardedVideoDelegate, ISDemandOnlyInterstitialDelegate>
 
 + (instancetype)sharedInstance;
 - (void)initIronSource:(NSString *)appKey completion:(completionHandlerType)completionHandler;
@@ -26,9 +24,6 @@ typedef void(^completionHandlerType)(void);
 
 - (void)setInterstitialAdapter:(ADFmyMovieRewardInterface *)adapter instanceId:(NSString *)instanceId;
 - (void)removeInterstitialAdapterWithInstanceId:(NSString *)instanceId;
-
-- (void)setBannerAdapter:(ADFmyMovieNativeInterface *)adapter instanceId:(NSString *)instanceId;
-- (void)removeBannerAdapterWithInstanceId:(NSString *)instanceId;
 
 @end
 

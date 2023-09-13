@@ -14,7 +14,6 @@
 @property (nonatomic) bool isInitialized;
 @property (nonatomic) NSMutableDictionary <NSString *, ADFmyMovieRewardInterface*> *movieRewardAdapters;
 @property (nonatomic) NSMutableDictionary <NSString *, ADFmyMovieRewardInterface*> *interstitialAdapters;
-@property (nonatomic) NSMutableDictionary <NSString *, ADFmyMovieNativeInterface*> *bannerAdapters;
 
 @end
 
@@ -35,7 +34,6 @@
         self.isInitialized = false;
         self.movieRewardAdapters = [NSMutableDictionary new];
         self.interstitialAdapters = [NSMutableDictionary new];
-        self.bannerAdapters = [NSMutableDictionary new];
     }
     return self;
 }
@@ -49,7 +47,6 @@
     @try {
         [IronSource setISDemandOnlyRewardedVideoDelegate:self];
         [IronSource setISDemandOnlyInterstitialDelegate:self];
-        [IronSource setBannerDelegate:self];
         
         [IronSource initISDemandOnly:appKey adUnits:@[IS_REWARDED_VIDEO, IS_INTERSTITIAL, IS_BANNER]];
         
@@ -80,15 +77,6 @@
 - (void)removeInterstitialAdapterWithInstanceId:(NSString *)instanceId {
     [self.interstitialAdapters removeObjectForKey:instanceId];
 }
-
-- (void)setBannerAdapter:(ADFmyMovieNativeInterface *)adapter instanceId:(NSString *)instanceId {
-    [self.bannerAdapters setObject:adapter forKey:instanceId];
-}
-
-- (void)removeBannerAdapterWithInstanceId:(NSString *)instanceId {
-    [self.bannerAdapters removeObjectForKey:instanceId];
-}
-
 
 #pragma mark - ISDemandOnlyRewardedVideoDelegate
 //Called after a rewarded video has been requested and load succeed.
@@ -226,75 +214,6 @@
  */
 - (void)didClickInterstitial:(NSString *)instanceId {
     AdapterTraceP(@"instance id : %@", instanceId);
-}
-
-#pragma mark - ISBannerDelegate
-- (void)bannerDidLoad:(ISBannerView *)bannerView {
-    AdapterTrace;
-
-    ADFmyMovieNativeInterface *adapter = [self.bannerAdapters objectForKey:kAdnetwork6110DefaultInstanceId];
-    if (adapter) {
-        NativeAdInfo6110 *info = [[NativeAdInfo6110 alloc] initWithVideoUrl:nil
-                                                                      title:@""
-                                                                description:@""
-                                                               adnetworkKey:@"6110" ];
-        info.mediaType = ADFNativeAdType_Image;
-        [info setupMediaView:bannerView];
-        [adapter setCustomMediaview:bannerView];
-        ((Banner6110 *)adapter).bannerView = bannerView;
-        
-        info.adapter = adapter;
-        info.isCustomComponentSupported = false;
-        
-        adapter.adInfo = info;
-        
-        [adapter setCallbackStatus:NativeAdCallbackLoadFinish];
-    }
-}
-
-/**
- Called after a banner has attempted to load an ad but failed.
- 
- @param error The reason for the error
- */
-- (void)bannerDidFailToLoadWithError:(NSError *)error {
-    AdapterTrace;
-    ADFmyMovieNativeInterface *adapter = [self.bannerAdapters objectForKey:kAdnetwork6110DefaultInstanceId];
-    if (adapter) {
-        if (error) {
-            [adapter setErrorWithMessage:error.localizedDescription code:error.code];
-        }
-        [adapter setCallbackStatus:NativeAdCallbackLoadError];
-    }
-}
-    
-/**
- Called after a banner has been clicked.
- */
-- (void)didClickBanner {
-    AdapterTrace;
-    ADFmyMovieNativeInterface *adapter = [self.bannerAdapters objectForKey:kAdnetwork6110DefaultInstanceId];
-    if (adapter) {
-        [adapter setCallbackStatus:NativeAdCallbackClick];
-    }
-}
-/**
- Called when a banner is about to present a full screen content.
- */
-- (void)bannerWillPresentScreen {
-    AdapterTrace;
-}
-/**
- Called after a full screen content has been dismissed.
- */
-- (void)bannerDidDismissScreen {
-    AdapterTrace;
-}
-/**
- Called when a user would be taken out of the application context.
- */
-- (void)bannerWillLeaveApplication {
-    AdapterTrace;
 }
 
 @end
