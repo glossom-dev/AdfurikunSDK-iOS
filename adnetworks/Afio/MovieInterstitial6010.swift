@@ -7,6 +7,7 @@
 //
 
 import Foundation
+import ADFMovieReward
 
 @objc(MovieInterstitial6010)
 
