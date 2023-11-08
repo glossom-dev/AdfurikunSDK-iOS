@@ -1,6 +1,6 @@
 Pod::Spec.new do |s|
   s.name            = "AdfurikunSDK-iOS"
-  s.version         = "3.12.0"
+  s.version         = "3.12.1"
   s.summary         = "An iOS SDK for ADFURIKUN Movie Reward Ads"
   s.homepage        = "https://adfurikun.jp/adfurikun/"
   s.license         = { :type => 'Copyright', :text => 'Copyright Glossom Inc. All rights reserved.' }
@@ -95,13 +95,6 @@ Pod::Spec.new do |s|
     vungle.resource = '**/adnetworks/Vungle/*.txt'
   end
   
-  s.subspec 'MoPub' do |mopub|
-    mopub.dependency 'AdfurikunSDK-iOS/Core'
-    mopub.dependency 'mopub-ios-sdk', '5.16.2'
-    mopub.source_files = '**/adnetworks/MoPub/*.{h,m}'
-    mopub.resource = '**/adnetworks/MoPub/*.{txt,xib}'
-  end
-
   s.subspec 'All' do |all|
     all.dependency 'AdfurikunSDK-iOS/Core'
     all.dependency 'AdfurikunSDK-iOS/AdColony'
@@ -115,7 +108,6 @@ Pod::Spec.new do |s|
     all.dependency 'AdfurikunSDK-iOS/Tapjoy'
     all.dependency 'AdfurikunSDK-iOS/UnityAds'
     all.dependency 'AdfurikunSDK-iOS/Vungle'
-    all.dependency 'AdfurikunSDK-iOS/MoPub'
   end
 
 end
