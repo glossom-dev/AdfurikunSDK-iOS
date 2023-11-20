@@ -26,11 +26,15 @@
 }
 
 + (NSString *)getAdapterRevisionVersion {
-    return @"7";
+    return @"8";
 }
 
 + (NSString *)adnetworkClassName {
     return @"VungleSDK";
+}
+
++ (NSString *)adnetworkName {
+    return @"Vungle";
 }
 
 -(void)setHasUserConsent:(BOOL)hasUserConsent {

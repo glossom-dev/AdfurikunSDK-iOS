@@ -19,11 +19,15 @@
 @implementation MovieInterstitial6019
 
 + (NSString *)getAdapterRevisionVersion {
-    return @"13";
+    return @"14";
 }
 
 + (NSString *)adnetworkClassName {
     return @"GADInterstitialAd";
+}
+
++ (NSString *)adnetworkName {
+    return @"AdMob";
 }
 
 -(id)init {
@@ -193,4 +197,9 @@
 @end
 
 @implementation MovieInterstitial6060
+
++ (NSString *)adnetworkName {
+    return @"Google Ad Manager";
+}
+
 @end

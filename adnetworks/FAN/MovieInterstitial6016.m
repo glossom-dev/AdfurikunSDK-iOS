@@ -20,11 +20,15 @@
 @implementation MovieInterstitial6016
 
 + (NSString *)getAdapterRevisionVersion {
-    return @"7";
+    return @"8";
 }
 
 + (NSString *)adnetworkClassName {
     return @"FBInterstitialAd";
+}
+
++ (NSString *)adnetworkName {
+    return @"Facebook Audience Network";
 }
 
 -(id)init {

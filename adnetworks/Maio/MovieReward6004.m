@@ -28,11 +28,15 @@
 }
 
 + (NSString *)getAdapterRevisionVersion {
-    return @"10";
+    return @"11";
 }
 
 + (NSString *)adnetworkClassName {
     return @"Maio";
+}
+
++ (NSString *)adnetworkName {
+    return @"maio";
 }
 
 -(id)init {

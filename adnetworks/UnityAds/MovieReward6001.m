@@ -22,11 +22,15 @@
 }
 
 + (NSString *)getAdapterRevisionVersion {
-    return @"11";
+    return @"12";
 }
 
 + (NSString *)adnetworkClassName {
     return @"UnityAds";
+}
+
++ (NSString *)adnetworkName {
+    return @"Unity Ads";
 }
 
 -(void)dealloc {

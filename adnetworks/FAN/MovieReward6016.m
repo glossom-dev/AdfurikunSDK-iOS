@@ -21,11 +21,15 @@
 @implementation MovieReward6016
 
 + (NSString *)getAdapterRevisionVersion {
-    return @"7";
+    return @"8";
 }
 
 + (NSString *)adnetworkClassName {
     return @"FBRewardedVideoAd";
+}
+
++ (NSString *)adnetworkName {
+    return @"Facebook Audience Network";
 }
 
 - (void)setData:(NSDictionary *)data {

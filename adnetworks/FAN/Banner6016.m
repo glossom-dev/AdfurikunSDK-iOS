@@ -16,11 +16,15 @@
 @implementation Banner6016
 
 + (NSString *)getAdapterRevisionVersion {
-    return @"4";
+    return @"5";
 }
 
 + (NSString *)adnetworkClassName {
     return @"FBAdView";
+}
+
++ (NSString *)adnetworkName {
+    return @"Facebook Audience Network";
 }
 
 -(void)setData:(NSDictionary *)data {

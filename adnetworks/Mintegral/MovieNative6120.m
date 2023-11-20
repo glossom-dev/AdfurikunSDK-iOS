@@ -26,11 +26,15 @@
 
 // Adapterのバージョン。最初は1にして、修正がある度＋1にする
 + (NSString *)getAdapterRevisionVersion {
-    return @"4";
+    return @"5";
 }
 
 + (NSString *)adnetworkClassName {
     return @"MTGNativeAdvancedAd";
+}
+
++ (NSString *)adnetworkName {
+    return @"Mintegral";
 }
 
 // getinfoからのParameter設定

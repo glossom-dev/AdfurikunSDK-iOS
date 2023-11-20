@@ -25,11 +25,15 @@
 @implementation MovieNative6019
 
 + (NSString *)getAdapterRevisionVersion {
-    return @"9";
+    return @"10";
 }
 
 + (NSString *)adnetworkClassName {
     return @"GADAdLoader";
+}
+
++ (NSString *)adnetworkName {
+    return @"AdMob";
 }
 
 - (void)setData:(NSDictionary *)data {
@@ -435,4 +439,9 @@
 @end
 
 @implementation MovieNative6060
+
++ (NSString *)adnetworkName {
+    return @"Google Ad Manager";
+}
+
 @end

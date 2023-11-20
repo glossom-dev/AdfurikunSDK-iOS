@@ -23,11 +23,15 @@
 }
 
 + (NSString *)getAdapterRevisionVersion {
-    return @"15";
+    return @"16";
 }
 
 + (NSString *)adnetworkClassName {
     return @"PAGRewardedAd";
+}
+
++ (NSString *)adnetworkName {
+    return @"Pangle";
 }
 
 - (void)setData:(NSDictionary *)data {

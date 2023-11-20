@@ -21,11 +21,15 @@
 @implementation MovieReward6009
 
 + (NSString *)getAdapterRevisionVersion {
-    return @"9";
+    return @"10";
 }
 
 + (NSString *)adnetworkClassName {
     return @"NADRewardedVideo";
+}
+
++ (NSString *)adnetworkName {
+    return @"nend";
 }
 
 #pragma mark - ADFmyMovieRewardInterface

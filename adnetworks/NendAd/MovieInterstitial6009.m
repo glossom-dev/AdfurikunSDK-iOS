@@ -25,11 +25,15 @@
 #pragma mark - ADFmyMovieRewardInterface
 
 + (NSString *)getAdapterRevisionVersion {
-    return @"9";
+    return @"10";
 }
 
 + (NSString *)adnetworkClassName {
     return @"NADInterstitialVideo";
+}
+
++ (NSString *)adnetworkName {
+    return @"nend";
 }
 
 -(id)init {

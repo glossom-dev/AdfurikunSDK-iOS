@@ -82,6 +82,9 @@ typedef enum : NSInteger {
 // Adnetworkを実装する際に使うClass名、Adnetwork SDKが入ってるかをチェックする目的
 + (NSString *)adnetworkClassName;
 
+// Adnetwork名を返す
++ (NSString *)adnetworkName;
+
 /**< SDKが読み込まれているかどうか？ */
 -(BOOL)isClassReference;
 

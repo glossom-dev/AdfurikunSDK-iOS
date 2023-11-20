@@ -19,11 +19,15 @@
 
 // Adapterのバージョン。最初は1にして、修正がある度＋1にする
 + (NSString *)getAdapterRevisionVersion {
-    return @"2";
+    return @"3";
 }
 
 + (NSString *)adnetworkClassName {
     return @"ZADNRewardedAd";
+}
+
++ (NSString *)adnetworkName {
+    return @"Zucks";
 }
 
 // getinfoからのParameter設定

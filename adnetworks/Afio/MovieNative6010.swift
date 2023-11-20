@@ -8,7 +8,6 @@
 
 import Foundation
 import AMoAd
-import ADFMovieReward
 
 @objc(MovieNative6010)
 
@@ -33,9 +32,17 @@ class MovieNative6010: ADFmyMovieNativeInterface {
     }
 
     override class func getAdapterRevisionVersion() -> String {
-        return "3"
+        return "4"
     }
 
+    override class func adnetworkClassName() -> String {
+        return "AMoAdNativeViewManager"
+    }
+    
+    override class func adnetworkName() -> String {
+        return "Afio"
+    }
+    
     override func setData(_ data: [AnyHashable : Any]) {
         print("MovieNative6010: setData")
         super.setData(data)

@@ -15,11 +15,15 @@
 @implementation Banner6019
 
 + (NSString *)getAdapterRevisionVersion {
-    return @"11";
+    return @"12";
 }
 
 + (NSString *)adnetworkClassName {
     return @"GADBannerView";
+}
+
++ (NSString *)adnetworkName {
+    return @"AdMob";
 }
 
 - (void)setData:(NSDictionary *)data {
@@ -194,4 +198,9 @@
 @end
 
 @implementation Banner6060
+
++ (NSString *)adnetworkName {
+    return @"Google Ad Manager";
+}
+
 @end

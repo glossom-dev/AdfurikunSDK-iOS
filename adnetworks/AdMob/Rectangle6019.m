@@ -40,4 +40,9 @@
 @end
 
 @implementation Rectangle6060
+
++ (NSString *)adnetworkName {
+    return @"Google Ad Manager";
+}
+
 @end

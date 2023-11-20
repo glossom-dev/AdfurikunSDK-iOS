@@ -65,11 +65,11 @@
     self.delegate = self.closure(self, nil);
 }
 
-- (void)AdsFetchFailed:(NSString *)appID error:(NSError *)error {
+- (void)AdsFetchFailed:(NSString *)appID error:(NSError *)error adnetworkError:(NSArray<AdnetworkError *> *)adnetworkError {
     self.closure(nil, error);
 }
 
-- (void)AdsDidShow:(NSString *)appID adNetworkKey:(NSString *)adNetworkKey {
+- (void)AdsDidShow:(NSString *)appID adnetworkKey:(NSString *)adnetworkKey {
     NSLog(@"%s", __FUNCTION__);
     [self.delegate willPresentFullScreenView];
     [self.delegate reportImpression];

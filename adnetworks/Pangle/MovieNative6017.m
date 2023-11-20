@@ -30,11 +30,15 @@
 }
 
 + (NSString *)getAdapterRevisionVersion {
-    return @"9";
+    return @"10";
 }
 
 + (NSString *)adnetworkClassName {
     return @"PAGLNativeAd";
+}
+
++ (NSString *)adnetworkName {
+    return @"Pangle";
 }
 
 // getinfoから取得したデータを内部変数に保存する

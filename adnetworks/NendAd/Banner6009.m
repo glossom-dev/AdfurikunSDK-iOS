@@ -19,11 +19,15 @@
 @implementation Banner6009
 
 + (NSString *)getAdapterRevisionVersion {
-    return @"6";
+    return @"7";
 }
 
 + (NSString *)adnetworkClassName {
     return @"NADView";
+}
+
++ (NSString *)adnetworkName {
+    return @"nend";
 }
 
 - (void)dispose {

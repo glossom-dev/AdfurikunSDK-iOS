@@ -27,10 +27,14 @@
 }
 
 + (NSString *)getAdapterRevisionVersion {
-    return @"10";
+    return @"11";
 }
 
 + (NSString *)adnetworkClassName {
+    return @"AdColony";
+}
+
++ (NSString *)adnetworkName {
     return @"AdColony";
 }
 

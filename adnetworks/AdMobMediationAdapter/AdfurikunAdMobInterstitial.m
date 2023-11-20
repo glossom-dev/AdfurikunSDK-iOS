@@ -26,12 +26,12 @@
     [self.delegate customEventInterstitialDidReceiveAd:self];
 }
 
-- (void)AdsFetchFailed:(NSString *)appID error:(NSError *)error {
+- (void)AdsFetchFailed:(NSString *)appID error:(NSError *)error adnetworkError:(NSArray<AdnetworkError *> *)adnetworkError {
     NSLog(@"%s", __FUNCTION__);
     [self.delegate customEventInterstitial:self didFailAd:error];
 }
 
-- (void)AdsDidShow:(NSString *)appID adNetworkKey:(NSString *)adNetworkKey {
+- (void)AdsDidShow:(NSString *)appID adnetworkKey:(NSString *)adnetworkKey {
     NSLog(@"%s", __FUNCTION__);
     [self.delegate customEventInterstitialWillPresent:self];
 }

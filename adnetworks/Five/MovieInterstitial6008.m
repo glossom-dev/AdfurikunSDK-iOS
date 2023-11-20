@@ -17,11 +17,15 @@
 @implementation MovieInterstitial6008
 
 + (NSString *)getAdapterRevisionVersion {
-    return @"12";
+    return @"13";
 }
 
 + (NSString *)adnetworkClassName {
     return @"FADInterstitial";
+}
+
++ (NSString *)adnetworkName {
+    return @"LINE Ads Platform";
 }
 
 -(BOOL)isPrepared {
