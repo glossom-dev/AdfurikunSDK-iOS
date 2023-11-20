@@ -8,6 +8,7 @@
 
 import Foundation
 import AMoAd
+import ADFMovieReward
 
 @objc(MovieReward6010)
 
