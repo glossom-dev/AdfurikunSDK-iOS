@@ -69,12 +69,12 @@
     [self.maxDelegate didLoadRewardedAd];
 }
 
-- (void)AdsFetchFailed:(NSString *)appID error:(NSError *)error {
+- (void)AdsFetchFailed:(NSString *)appID error:(NSError *)error adnetworkError:(NSArray<AdnetworkError *> *)adnetworkError {
     NSLog(@"%s , error: %@", __FUNCTION__, error.localizedDescription);
     [self.maxDelegate didFailToLoadRewardedAdWithError:MAAdapterError.noFill];
 }
 
-- (void)AdsDidShow:(NSString *)appID adNetworkKey:(NSString *)adNetworkKey {
+- (void)AdsDidShow:(NSString *)appID adnetworkKey:(NSString *)adnetworkKey {
     NSLog(@"%s", __FUNCTION__);
     [self.maxDelegate didDisplayRewardedAd];
     [self.maxDelegate didStartRewardedAdVideo];
@@ -91,7 +91,7 @@
     [self.maxDelegate didHideRewardedAd];
 }
 
-- (void)AdsPlayFailed:(NSString *)appID {
+- (void)AdsPlayFailed:(NSString *)appID adnetworkError:(AdnetworkError *)adnetworkError {
     NSLog(@"%s", __FUNCTION__);
     [self.maxDelegate didFailToDisplayRewardedAdWithError:MAAdapterError.internalError];
 }

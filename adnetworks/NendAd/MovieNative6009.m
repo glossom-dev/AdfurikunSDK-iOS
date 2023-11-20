@@ -23,11 +23,15 @@
 @implementation MovieNative6009
 
 + (NSString *)getAdapterRevisionVersion {
-    return @"7";
+    return @"8";
 }
 
 + (NSString *)adnetworkClassName {
     return @"NADNativeVideoLoader";
+}
+
++ (NSString *)adnetworkName {
+    return @"nend";
 }
 
 - (void)setData:(NSDictionary *)data {

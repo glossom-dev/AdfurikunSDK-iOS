@@ -23,11 +23,15 @@
 }
 
 + (NSString *)getAdapterRevisionVersion {
-    return @"9";
+    return @"10";
 }
 
 + (NSString *)adnetworkClassName {
     return @"UADSBannerView";
+}
+
++ (NSString *)adnetworkName {
+    return @"Unity Ads";
 }
 
 -(void)setData:(NSDictionary *)data {

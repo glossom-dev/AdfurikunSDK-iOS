@@ -27,11 +27,15 @@
 }
 
 + (NSString *)getAdapterRevisionVersion {
-    return @"8";
+    return @"9";
 }
 
 + (NSString *)adnetworkClassName {
     return @"ALSdk";
+}
+
++ (NSString *)adnetworkName {
+    return @"AppLovin";
 }
 
 -(id)init {

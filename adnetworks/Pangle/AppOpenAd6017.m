@@ -31,11 +31,15 @@
 }
 
 + (NSString *)getAdapterRevisionVersion {
-    return @"7";
+    return @"8";
 }
 
 + (NSString *)adnetworkClassName {
     return @"PAGLAppOpenAd";
+}
+
++ (NSString *)adnetworkName {
+    return @"Pangle";
 }
 
 - (void)setData:(NSDictionary *)data {

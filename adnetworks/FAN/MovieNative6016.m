@@ -22,11 +22,15 @@
 @implementation MovieNative6016
 
 + (NSString *)getAdapterRevisionVersion {
-    return @"6";
+    return @"7";
 }
 
 + (NSString *)adnetworkClassName {
     return @"FBNativeAd";
+}
+
++ (NSString *)adnetworkName {
+    return @"Facebook Audience Network";
 }
 
 - (void)setData:(NSDictionary *)data {

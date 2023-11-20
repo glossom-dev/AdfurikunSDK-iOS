@@ -22,11 +22,15 @@
 
 // Adapterのバージョン。最初は1にして、修正がある度＋1にする
 + (NSString *)getAdapterRevisionVersion {
-    return @"3";
+    return @"4";
 }
 
 + (NSString *)adnetworkClassName {
     return @"GADAppOpenAd";
+}
+
++ (NSString *)adnetworkName {
+    return @"AdMob";
 }
 
 // getinfoからのParameter設定

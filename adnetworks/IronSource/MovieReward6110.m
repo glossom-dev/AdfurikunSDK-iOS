@@ -25,11 +25,15 @@
 
 // Adapterのバージョン。最初は1にして、修正がある度＋1にする
 + (NSString *)getAdapterRevisionVersion {
-    return @"6";
+    return @"7";
 }
 
 + (NSString *)adnetworkClassName {
     return @"IronSource";
+}
+
++ (NSString *)adnetworkName {
+    return @"ironSource";
 }
 
 // getinfoからのParameter設定

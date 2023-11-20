@@ -26,11 +26,15 @@
 }
 
 + (NSString *)getAdapterRevisionVersion {
-    return @"13";
+    return @"14";
 }
 
 + (NSString *)adnetworkClassName {
     return @"PAGLInterstitialAd";
+}
+
++ (NSString *)adnetworkName {
+    return @"Pangle";
 }
 
 -(id)init {

@@ -17,11 +17,15 @@
 @implementation MovieReward6008
 
 + (NSString *)getAdapterRevisionVersion {
-    return @"2";
+    return @"3";
 }
 
 + (NSString *)adnetworkClassName {
     return @"FADVideoReward";
+}
+
++ (NSString *)adnetworkName {
+    return @"LINE Ads Platform";
 }
 
 -(BOOL)isPrepared {

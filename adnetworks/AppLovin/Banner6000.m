@@ -21,11 +21,15 @@
 }
 
 + (NSString *)getAdapterRevisionVersion {
-    return @"6";
+    return @"7";
 }
 
 + (NSString *)adnetworkClassName {
     return @"ALAdView";
+}
+
++ (NSString *)adnetworkName {
+    return @"AppLovin";
 }
 
 - (void)setData:(NSDictionary *)data {
