@@ -42,7 +42,7 @@ typedef NS_ENUM(NSUInteger, ADFMovieErrorCode) {
 /**
  エラーが発生した広告枠ID
  */
-@property (nonatomic, readonly, copy) NSString *appID;
+@property (nonatomic, readonly, copy) NSString *appId;
 /**
  エラーメッセージ
  */

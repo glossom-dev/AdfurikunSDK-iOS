@@ -93,11 +93,6 @@
                 }
             }
         }];
-        //音出力設定
-        ADFMovieOptions_Sound soundState = [ADFMovieOptions getSoundState];
-        if (ADFMovieOptions_Sound_Default != soundState) {
-            [ALSdk shared].settings.muted = (ADFMovieOptions_Sound_Off == soundState);
-        }
     }
 }
 

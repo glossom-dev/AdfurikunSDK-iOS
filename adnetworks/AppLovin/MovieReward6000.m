@@ -88,11 +88,6 @@
             }
             [self initCompleteAndRetryStartAdIfNeeded];
         }];
-        //音出力設定
-        ADFMovieOptions_Sound soundState = [ADFMovieOptions getSoundState];
-        if (ADFMovieOptions_Sound_Default != soundState) {
-            [ALSdk shared].settings.muted = (ADFMovieOptions_Sound_Off == soundState);
-        }
     }
 }
 
@@ -291,6 +286,14 @@ typedef enum : NSUInteger {
         
         dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(0.1 * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
             @try {
+                //音出力設定
+                ADFMovieOptions_Sound soundState = [ADFMovieOptions getSoundState];
+                if (ADFMovieOptions_Sound_Default != soundState) {
+                    [ALSdk shared].settings.muted = (ADFMovieOptions_Sound_Off == soundState);
+                }
+                // デバッグ機能設定（Trueにすると端末を裏表に振ると、画面にAppLovinアイコンが表示される）
+                [ALSdk shared].settings.creativeDebuggerEnabled = [ADFMovieOptions getTestMode];
+                
                 [ALSdk initializeSdkWithCompletionHandler:^(ALSdkConfiguration * _Nonnull configuration) {
                     self.initStatus = initializeComplete;
                     

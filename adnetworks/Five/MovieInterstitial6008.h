@@ -10,7 +10,7 @@
 
 NS_ASSUME_NONNULL_BEGIN
 
-@interface MovieInterstitial6008 : AdnetworkBase6008
+@interface MovieInterstitial6008 : AdnetworkBase6008 <FADInterstitialEventListener>
 
 @end
 

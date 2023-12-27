@@ -47,28 +47,21 @@
 - (void)clearStatusIfNeeded {
 }
 
-// Adnetwork SDKの初期化を行う
-- (void)initAdnetworkIfNeeded {
-    if (![self needsToInit]) {
-        return;
-    }
-    if (!self.adParam || !self.adParam.frameId) {
-        return;
-    }
-    self.bannerSize = [self adViewSize];
-    self.bannerView = [[ZADNBannerView alloc] initWithFrame:self.bannerSize frameId:self.adParam.frameId];
-    [self initCompleteAndRetryStartAdIfNeeded];
-}
-
 // 広告呼び込みを行う
 - (void)startAd {
     AdapterTrace;
-    
-    if (!self.bannerView) {
+
+    if (!self.adParam || !self.adParam.frameId) {
         return;
     }
-    
+
     [super startAd];
+
+    if (self.bannerView) {
+        self.bannerView = nil;
+    }
+    self.bannerSize = [self adViewSize];
+    self.bannerView = [[ZADNBannerView alloc] initWithFrame:self.bannerSize frameId:self.adParam.frameId];
 
     self.isStartAd = true;
 

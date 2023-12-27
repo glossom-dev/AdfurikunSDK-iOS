@@ -7,7 +7,7 @@
 #import <Foundation/Foundation.h>
 #import "AdnetworkBase6008.h"
 
-@interface MovieReward6008 : AdnetworkBase6008
+@interface MovieReward6008 : AdnetworkBase6008 <FADVideoRewardEventListener>
 
 @end
 

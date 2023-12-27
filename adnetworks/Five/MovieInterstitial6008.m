@@ -17,7 +17,7 @@
 @implementation MovieInterstitial6008
 
 + (NSString *)getAdapterRevisionVersion {
-    return @"13";
+    return @"14";
 }
 
 + (NSString *)adnetworkClassName {
@@ -60,7 +60,7 @@
         [self requireToAsyncRequestAd];
         self.interstitial = [[FADInterstitial alloc] initWithSlotId:self.fiveSlotId];
         [self.interstitial setLoadDelegate:self];
-        [self.interstitial setAdViewEventListener:self];
+        [self.interstitial setEventListener:self];
         //音出力設定
         ADFMovieOptions_Sound soundState = [ADFMovieOptions getSoundState];
         if (ADFMovieOptions_Sound_On == soundState) {
@@ -101,6 +101,51 @@
 }
 
 -(void)dealloc {
+}
+
+#pragma mark FADInterstitialEventListener
+- (void)fiveInterstitialAd:(nonnull FADInterstitial*)ad didFailedToShowAdWithError:(FADErrorCode) errorCode {
+    // エラー時の処理
+    AdapterTrace;
+    AdapterLogP(@"errorCode: %ld, slotId: %@", (long)errorCode, self.fiveSlotId);
+    [self setErrorWithMessage:nil code:errorCode];
+    [self setCallbackStatus:MovieRewardCallbackPlayFail];
+}
+
+- (void)fiveInterstitialAdDidImpression:(nonnull FADInterstitial*)ad {
+    // インプレッション時の処理
+    AdapterTrace;
+    [self setCallbackStatus:MovieRewardCallbackPlayStart];
+}
+
+- (void)fiveInterstitialAdDidClick:(nonnull FADInterstitial*)ad {
+    // クリック時の処理
+    AdapterTrace;
+}
+
+- (void)fiveInterstitialAdFullScreenDidOpen:(nonnull FADInterstitial*)ad {
+    // 【新規】フルスクリーン広告ビューオープン時の処理
+    AdapterTrace;
+}
+- (void)fiveInterstitialAdFullScreenDidClose:(nonnull FADInterstitial*)ad {
+    // フルスクリーン広告ビュークローズ時の処理
+    AdapterTrace;
+    [self setCallbackStatus:MovieRewardCallbackClose];
+}
+
+- (void)fiveInterstitialAdDidPlay:(nonnull FADInterstitial*)ad {
+    // 再生開始時の処理（動画広告のみ）
+    AdapterTrace;
+}
+
+- (void)fiveInterstitialAdDidPause:(nonnull FADInterstitial*)ad {
+    // 一時停止時の処理（動画広告のみ）
+    AdapterTrace;
+}
+
+- (void)fiveInterstitialAdDidViewThrough:(nonnull FADInterstitial*)ad {
+    // 再生完了時の処理（動画広告のみ）
+    [self setCallbackStatus:MovieRewardCallbackPlayComplete];
 }
 
 @end

@@ -10,7 +10,7 @@ NS_ASSUME_NONNULL_BEGIN
 
 typedef void(^completionHandlerType)(void);
 
-@interface AdnetworkBase6008 : ADFmyMovieRewardInterface<FADLoadDelegate, FADAdViewEventListener>
+@interface AdnetworkBase6008 : ADFmyMovieRewardInterface<FADLoadDelegate>
 
 @property (nonatomic)NSString *fiveAppId;
 @property (nonatomic)NSString *fiveSlotId;

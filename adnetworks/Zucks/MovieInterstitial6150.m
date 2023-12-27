@@ -42,10 +42,6 @@
     return self.isAdLoaded;
 }
 
-//// Adnetwork SDKの初期化を行う
-//- (void)initAdnetworkIfNeeded {
-//}
-
 // 広告呼び込みを行う
 - (void)startAd {
     AdapterTrace;

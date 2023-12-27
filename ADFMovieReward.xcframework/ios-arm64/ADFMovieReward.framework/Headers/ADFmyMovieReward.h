@@ -2,7 +2,7 @@
 //  ADFmyMovieReward.h
 //  ADFMovieReword
 //
-//  (3.19.3.1)
+//  (3.20.0)
 //  Created by tsukui on 2016/05/28.
 //  (c) 2015 ADFULLY Inc.
 //  (ご利用になられる前に、必ずマニュアルにて実装方法をご参照ください。
@@ -68,9 +68,9 @@ NS_ASSUME_NONNULL_BEGIN
  *  動画ローディングを開始する。
  *  広告表示準備のためには必ず呼び出してください。load関数を呼び出さないと広告準備ができなくて再生ができなくなります。
  
-  @param timeout 広告準備完了、失敗Callbackが呼ばれるまでのTimeout。1秒から60秒まで設定可能
+  @param timeout 広告準備完了、失敗Callbackが呼ばれるまでのTimeout。0.1秒から60秒まで設定可能
  */
--(void)loadWithTimeout:(int)timeout;
+-(void)loadWithTimeout:(float)timeout;
 
 /**
  *  動画が準備完了しているか？

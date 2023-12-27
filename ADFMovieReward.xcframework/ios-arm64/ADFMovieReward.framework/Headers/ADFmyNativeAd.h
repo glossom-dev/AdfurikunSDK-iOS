@@ -79,7 +79,7 @@ NS_ASSUME_NONNULL_BEGIN
 - (void)loadAndNotifyTo:(id<ADFmyNativeAdDelegate> _Nullable)delegate customParam:(NSDictionary * _Nullable)param;
 - (void)loadAndNotifyTo:(id<ADFmyNativeAdDelegate>)delegate customParam:(NSDictionary *)param optiton:(NSDictionary *)option;
 
-- (void)setLoadingTimeout:(int)timeout;
+- (void)setLoadingTimeout:(float)timeout;
 
 -(void)setTrackingId:(NSDictionary*)trackingId;
 

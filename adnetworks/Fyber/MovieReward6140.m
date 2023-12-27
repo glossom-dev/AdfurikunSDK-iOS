@@ -29,7 +29,7 @@
 
 // Adapterのバージョン。最初は1にして、修正がある度＋1にする
 + (NSString *)getAdapterRevisionVersion {
-    return @"4";
+    return @"5";
 }
 
 + (NSString *)adnetworkClassName {
@@ -104,6 +104,12 @@
     }
     
     [super startAd];
+    
+    //音出力設定
+    ADFMovieOptions_Sound soundState = [ADFMovieOptions getSoundState];
+    if (ADFMovieOptions_Sound_Default != soundState) {
+        IASDKCore.sharedInstance.muteAudio = (ADFMovieOptions_Sound_Off == soundState);
+    }
     
     // Adnetwork SDKの関数を呼び出す際はTryーCatchでException Handlingを行う
     @try {

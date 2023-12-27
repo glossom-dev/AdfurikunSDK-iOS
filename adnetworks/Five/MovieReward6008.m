@@ -11,13 +11,14 @@
 @interface MovieReward6008()
 
 @property (nonatomic) FADVideoReward *fullscreen;
+@property (nonatomic) bool invokeFinishCallback;
 
 @end
 
 @implementation MovieReward6008
 
 + (NSString *)getAdapterRevisionVersion {
-    return @"3";
+    return @"4";
 }
 
 + (NSString *)adnetworkClassName {
@@ -58,7 +59,7 @@
             [self requireToAsyncRequestAd];
             self.fullscreen = [[FADVideoReward alloc] initWithSlotId:self.fiveSlotId];
             [self.fullscreen setLoadDelegate:self];
-            [self.fullscreen setAdViewEventListener:self];
+            [self.fullscreen setEventListener:self];
             
             //音出力設定
             ADFMovieOptions_Sound soundState = [ADFMovieOptions getSoundState];
@@ -80,6 +81,7 @@
     if (self.fullscreen) {
         @try {
             [self requireToAsyncPlay];
+            self.invokeFinishCallback = false;
             BOOL res = [self.fullscreen show];
             if (!res) {
                 [self setCallbackStatus:MovieRewardCallbackPlayFail];
@@ -93,6 +95,64 @@
 
 -(void)showAdWithPresentingViewController:(UIViewController *)viewController {
     [self showAd];
+}
+
+#pragma mark FADVideoRewardEventListener
+- (void)fiveVideoRewardAd:(nonnull FADVideoReward*)ad didFailedToShowAdWithError:(FADErrorCode) errorCode {
+    // エラー時の処理
+    AdapterLogP(@"errorCode: %ld, slotId: %@", (long)errorCode, self.fiveSlotId);
+    [self setErrorWithMessage:nil code:errorCode];
+    [self setCallbackStatus:MovieRewardCallbackPlayFail];
+}
+
+- (void)fiveVideoRewardAdDidReward:(nonnull FADVideoReward*)ad {
+    // 【新規】リワード付与の処理
+    AdapterTrace;
+    if (!self.invokeFinishCallback) {
+        // 静止画の場合fiveVideoRewardAdDidViewThroughが発生しないため、Reward CallbackでFinishも発生させる
+        [self setCallbackStatus:MovieRewardCallbackPlayComplete];
+        self.invokeFinishCallback = true;
+    }
+    [self setCallbackStatus:MovieRewardCallbackClose];
+}
+
+- (void)fiveVideoRewardAdDidImpression:(nonnull FADVideoReward*)ad {
+    // インプレッション時の処理
+    AdapterTrace;
+    [self setCallbackStatus:MovieRewardCallbackPlayStart];
+}
+
+- (void)fiveVideoRewardAdDidClick:(nonnull FADVideoReward*)ad {
+    // クリック時の処理
+    AdapterTrace;
+}
+
+- (void)fiveVideoRewardAdFullScreenDidOpen:(nonnull FADVideoReward*)ad {
+    // 【新規】フルスクリーン広告ビューオープン時の処理
+    AdapterTrace;
+}
+
+- (void)fiveVideoRewardAdFullScreenDidClose:(nonnull FADVideoReward*)ad {
+    // フルスクリーン広告ビュークローズ時の処理
+    AdapterTrace;
+}
+
+- (void)fiveVideoRewardAdDidPlay:(nonnull FADVideoReward*)ad {
+    // 再生開始時の処理（動画広告のみ）
+    AdapterTrace;
+}
+
+- (void)fiveVideoRewardAdDidPause:(nonnull FADVideoReward*)ad {
+    // 一時停止時の処理（動画広告のみ）
+    AdapterTrace;
+}
+
+- (void)fiveVideoRewardAdDidViewThrough:(nonnull FADVideoReward*)ad {
+    // 再生完了時の処理（動画広告のみ）
+    AdapterTrace;
+    
+    [self setCallbackStatus:MovieRewardCallbackPlayComplete];
+    self.invokeFinishCallback = true; // finish callback発火済み
 }
 
 @end
