@@ -1,6 +1,6 @@
 Pod::Spec.new do |s|
   s.name            = "AdfurikunSDK-iOS"
-  s.version         = "3.19.3.1"
+  s.version         = "3.19.3.3"
   s.summary         = "An iOS SDK for ADFURIKUN Movie Reward Ads"
   s.homepage        = "https://adfurikun.jp/adfurikun/"
   s.license         = { :type => 'Copyright', :text => 'Copyright Glossom Inc. All rights reserved.' }
@@ -9,6 +9,7 @@ Pod::Spec.new do |s|
   s.source          = { :git => "https://github.com/glossom-dev/AdfurikunSDK-iOS", :tag => "#{s.version}" }
   s.default_subspec = 'All'
   s.static_framework = true
+  s.swift_version = '5.0'
   s.xcconfig = { "VALID_ARCHS": "armv7 armv7s x86_64 arm64" }
   
   s.subspec 'Core' do |core|
@@ -34,7 +35,7 @@ Pod::Spec.new do |s|
 
   s.subspec 'Afio' do |afio|
     afio.dependency 'AdfurikunSDK-iOS/Core'
-    afio.dependency 'AMoAd', '6.1.16'
+    afio.dependency 'AMoAd', '<=6.1.16'
     afio.source_files = '**/adnetworks/Afio/*.swift'
     afio.resource = '**/adnetworks/Afio/*.txt'
   end
