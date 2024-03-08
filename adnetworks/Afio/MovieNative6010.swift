@@ -37,7 +37,7 @@ class MovieNative6010: ADFmyMovieNativeInterface {
     }
 
     override class func adnetworkClassName() -> String {
-        return "AMoAdNativeViewManager"
+        return "AMoAd.AMoAdNativeViewManager"
     }
     
     override class func adnetworkName() -> String {

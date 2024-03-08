@@ -13,7 +13,7 @@
 -(void)initAdnetworkIfNeeded {
     [super initAdnetworkIfNeeded];
 
-    self.isBannerSize = false;
+    self.bannerSize = BannerSizeMrec;
 }
 
 @end

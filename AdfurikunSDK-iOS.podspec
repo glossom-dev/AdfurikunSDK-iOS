@@ -1,11 +1,11 @@
 Pod::Spec.new do |s|
   s.name            = "AdfurikunSDK-iOS"
-  s.version         = "3.20.1"
+  s.version         = "3.21.0"
   s.summary         = "An iOS SDK for ADFURIKUN Movie Reward Ads"
   s.homepage        = "https://adfurikun.jp/adfurikun/"
   s.license         = { :type => 'Copyright', :text => 'Copyright Glossom Inc. All rights reserved.' }
   s.author          = "Glossom Inc."
-  s.platform        = :ios, "11.0"
+  s.platform        = :ios, "12.0"
   s.source          = { :git => "https://github.com/glossom-dev/AdfurikunSDK-iOS", :tag => "#{s.version}" }
   s.default_subspec = 'All'
   s.static_framework = true
@@ -19,23 +19,16 @@ Pod::Spec.new do |s|
     core.pod_target_xcconfig = { 'OTHER_LDFLAGS' => ['-ObjC', '-fobjc-arc'] }
   end
 
-  s.subspec 'AdColony' do |adcolony|
-    adcolony.dependency 'AdfurikunSDK-iOS/Core'
-    adcolony.dependency 'AdColony', '4.9.0'
-    adcolony.source_files = '**/adnetworks/AdColony/*.{h,m}'
-    adcolony.resource = '**/adnetworks/AdColony/*.txt'
-  end
-
   s.subspec 'AdMob' do |admob|
     admob.dependency 'AdfurikunSDK-iOS/Core'
-    admob.dependency 'Google-Mobile-Ads-SDK'
+    admob.dependency 'Google-Mobile-Ads-SDK', '~> 10'
     admob.source_files = '**/adnetworks/AdMob/*.{h,m}'
     admob.resource = '**/adnetworks/AdMob/*.{txt,xib}'
   end
 
   s.subspec 'Afio' do |afio|
     afio.dependency 'AdfurikunSDK-iOS/Core'
-    afio.dependency 'AMoAd', '<=6.1.17'
+    afio.dependency 'AMoAd', '<=6.1.21'
     afio.source_files = '**/adnetworks/Afio/*.swift'
     afio.resource = '**/adnetworks/Afio/*.txt'
   end
@@ -56,7 +49,7 @@ Pod::Spec.new do |s|
 
   s.subspec 'Five' do |five|
     five.dependency 'AdfurikunSDK-iOS/Core'
-    five.dependency 'FiveAd', '2.7.20231115'
+    five.dependency 'FiveAd', '2.7.20240214'
     five.source_files = '**/adnetworks/Five/*.{h,m}'
     five.resource = '**/adnetworks/Five/*.txt'
   end
@@ -77,7 +70,7 @@ Pod::Spec.new do |s|
 
   s.subspec 'Maio' do |maio|
     maio.dependency 'AdfurikunSDK-iOS/Core'
-    maio.dependency 'MaioSDK', '1.6.3'
+    maio.dependency 'MaioSDK-v2', '2.1.3'
     maio.source_files = '**/adnetworks/Maio/*.{h,m}'
     maio.resource = '**/adnetworks/Maio/*.txt'
   end
@@ -91,7 +84,7 @@ Pod::Spec.new do |s|
 
   s.subspec 'Pangle' do |pangle|
     pangle.dependency 'AdfurikunSDK-iOS/Core'
-    pangle.dependency 'Ads-Global', '5.5.0.6'
+    pangle.dependency 'Ads-Global', '5.7.0.8'
     pangle.source_files = '**/adnetworks/Pangle/*.{h,m}'
     pangle.resource = '**/adnetworks/Pangle/*.txt'
   end
@@ -105,19 +98,19 @@ Pod::Spec.new do |s|
 
   s.subspec 'Vungle' do |vungle|
     vungle.dependency 'AdfurikunSDK-iOS/Core'
-    vungle.dependency 'VungleSDK-iOS', '6.12.3'
+    vungle.dependency 'VungleAds', '7.2.2'
     vungle.source_files = '**/adnetworks/Vungle/*.{h,m}'
     vungle.resource = '**/adnetworks/Vungle/*.txt'
   end
 
   s.subspec 'Mintegral' do |mintegral|
     mintegral.dependency 'AdfurikunSDK-iOS/Core'
-    mintegral.dependency 'MintegralAdSDK/BidNativeAd', '7.5.1'
-    mintegral.dependency 'MintegralAdSDK/BidNativeAdvancedAd', '7.5.1'
-    mintegral.dependency 'MintegralAdSDK/BidRewardVideoAd', '7.5.1'
-    mintegral.dependency 'MintegralAdSDK/BidNewInterstitialAd', '7.5.1'
-    mintegral.dependency 'MintegralAdSDK/BidBannerAd', '7.5.1'
-    mintegral.dependency 'MintegralAdSDK/BidSplashAd', '7.5.1'
+    mintegral.dependency 'MintegralAdSDK/BidNativeAd', '7.5.4'
+    mintegral.dependency 'MintegralAdSDK/BidNativeAdvancedAd', '7.5.4'
+    mintegral.dependency 'MintegralAdSDK/BidRewardVideoAd', '7.5.4'
+    mintegral.dependency 'MintegralAdSDK/BidNewInterstitialAd', '7.5.4'
+    mintegral.dependency 'MintegralAdSDK/BidBannerAd', '7.5.4'
+    mintegral.dependency 'MintegralAdSDK/BidSplashAd', '7.5.4'
     mintegral.source_files = '**/adnetworks/Mintegral/*.{h,m}'
     mintegral.resource = '**/adnetworks/Mintegral/*.txt'
   end
@@ -131,7 +124,6 @@ Pod::Spec.new do |s|
   
   s.subspec 'All' do |all|
     all.dependency 'AdfurikunSDK-iOS/Core'
-    all.dependency 'AdfurikunSDK-iOS/AdColony'
     all.dependency 'AdfurikunSDK-iOS/AdMob'
     all.dependency 'AdfurikunSDK-iOS/Afio'
     all.dependency 'AdfurikunSDK-iOS/AppLovin'

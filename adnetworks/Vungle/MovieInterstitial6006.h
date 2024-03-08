@@ -5,8 +5,11 @@
 //
 //
 
-#import "MovieReward6006.h"
+#import <Foundation/Foundation.h>
+#import <ADFMovieReward/ADFmyMovieRewardInterface.h>
 
-@interface MovieInterstitial6006 : MovieReward6006
+#import <VungleAdsSDK/VungleAdsSDK.h>
+
+@interface MovieInterstitial6006 : ADFmyMovieRewardInterface <VungleInterstitialDelegate>
 
 @end

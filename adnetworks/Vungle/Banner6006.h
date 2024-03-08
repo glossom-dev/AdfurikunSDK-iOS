@@ -7,18 +7,13 @@
 //
 
 #import <ADFMovieReward/ADFMovieReward.h>
-#import <VungleSDK/VungleSDK.h>
+#import <VungleAdsSDK/VungleAdsSDK.h>
 
 NS_ASSUME_NONNULL_BEGIN
 
-@interface Banner6006 : ADFmyMovieNativeInterface
+@interface Banner6006 : ADFmyMovieNativeInterface <VungleBannerDelegate>
 
-@property (nonatomic) BOOL isNeedToStartAd;
-@property (nonatomic) BOOL isBannerSize;
-
--(void)loadCompleted;
--(void)loadFailed;
--(void)adClicked;
+@property (nonatomic) BannerSize bannerSize;
 
 @end
 

@@ -13,7 +13,7 @@
 #import <Maio/Maio.h>
 
 
-@interface MovieReward6004 : ADFmyMovieRewardInterface
+@interface MovieReward6004 : ADFmyMovieRewardInterface<MaioRewardedLoadCallback, MaioRewardedShowCallback>
 
 @end
 
@@ -30,14 +30,4 @@
 @end
 
 @interface MovieReward6104 : MovieReward6004
-@end
-
-/**
- *  Maio用のDelegateクラス
- */
-@interface MovieDelegate6004 : ADFmyMovieDelegateBase<MaioDelegate>
-@property (nonatomic) BOOL closeFlg;
-+ (instancetype)sharedInstance;
-- (MaioInstance *)startWithMediaId:(NSString *)mediaId;
-
 @end

@@ -8,7 +8,7 @@
 
 #import "MovieReward6004.h"
 
-@interface MovieInterstitial6004 : MovieReward6004
+@interface MovieInterstitial6004 : ADFmyMovieRewardInterface<MaioInterstitialLoadCallback, MaioInterstitialShowCallback>
 
 @end
 

@@ -25,7 +25,7 @@ class MovieReward6010: ADFmyMovieRewardInterface {
     }
     
     override class func adnetworkClassName() -> String {
-        return "AMoAdInterstitialVideo"
+        return "AMoAd.AMoAdInterstitialVideo"
     }
     
     override class func adnetworkName() -> String {
