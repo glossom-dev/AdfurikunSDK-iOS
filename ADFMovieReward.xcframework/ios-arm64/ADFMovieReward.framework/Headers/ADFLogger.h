@@ -14,8 +14,9 @@ typedef NS_ENUM(NSInteger, ADFLogLevel) {
     ADFLogLevelInfo = 3,
     ADFLogLevelWarning = 4,
     ADFLogLevelError = 5,
-    ADFLogLevelSevere = 6,
-    ADFLogLevelNone = 7
+    ADFLogLevelInterface = 6,
+    ADFLogLevelSevere = 7,
+    ADFLogLevelNone = 8
 };
 
 @interface ADFLogger : NSObject

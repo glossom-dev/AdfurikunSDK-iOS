@@ -18,7 +18,7 @@
 @implementation MovieReward6008
 
 + (NSString *)getAdapterRevisionVersion {
-    return @"4";
+    return @"5";
 }
 
 + (NSString *)adnetworkClassName {
@@ -170,4 +170,19 @@
 @end
 
 @implementation MovieReward6074
+@end
+
+@implementation MovieReward6075
+@end
+
+@implementation MovieReward6076
+@end
+
+@implementation MovieReward6077
+@end
+
+@implementation MovieReward6078
+@end
+
+@implementation MovieReward6079
 @end

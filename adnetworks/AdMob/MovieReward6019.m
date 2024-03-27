@@ -19,7 +19,7 @@
 @implementation MovieReward6019
 
 + (NSString *)getAdapterRevisionVersion {
-    return @"14";
+    return @"15";
 }
 
 + (NSString *)adnetworkClassName {
@@ -129,7 +129,7 @@
 
 - (void)isChildDirected:(BOOL)childDirected {
     [super isChildDirected:childDirected];
-    [GADMobileAds.sharedInstance.requestConfiguration tagForChildDirectedTreatment:childDirected];
+    GADMobileAds.sharedInstance.requestConfiguration.tagForChildDirectedTreatment = [NSNumber numberWithBool:childDirected];
     AdapterLogP(@"Adnetwork %@, childDirected : %@, input parameter : %d", self.adnetworkKey, self.childDirected, (int)childDirected);
 }
 

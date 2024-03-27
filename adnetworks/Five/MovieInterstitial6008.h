@@ -29,4 +29,19 @@ NS_ASSUME_NONNULL_BEGIN
 @interface MovieInterstitial6074 : MovieInterstitial6008
 @end
 
+@interface MovieInterstitial6075 : MovieInterstitial6008
+@end
+
+@interface MovieInterstitial6076 : MovieInterstitial6008
+@end
+
+@interface MovieInterstitial6077 : MovieInterstitial6008
+@end
+
+@interface MovieInterstitial6078 : MovieInterstitial6008
+@end
+
+@interface MovieInterstitial6079 : MovieInterstitial6008
+@end
+
 NS_ASSUME_NONNULL_END

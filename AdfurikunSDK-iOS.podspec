@@ -1,6 +1,6 @@
 Pod::Spec.new do |s|
   s.name            = "AdfurikunSDK-iOS"
-  s.version         = "3.21.0"
+  s.version         = "3.21.1"
   s.summary         = "An iOS SDK for ADFURIKUN Movie Reward Ads"
   s.homepage        = "https://adfurikun.jp/adfurikun/"
   s.license         = { :type => 'Copyright', :text => 'Copyright Glossom Inc. All rights reserved.' }
@@ -22,7 +22,7 @@ Pod::Spec.new do |s|
 
   s.subspec 'AdMob' do |admob|
     admob.dependency 'AdfurikunSDK-iOS/Core'
-    admob.dependency 'Google-Mobile-Ads-SDK', '~> 10'
+    admob.dependency 'Google-Mobile-Ads-SDK', '>=11.2.0'
     admob.source_files = '**/adnetworks/AdMob/*.{h,m}'
     admob.resource = '**/adnetworks/AdMob/*.{txt,xib}'
   end
@@ -57,30 +57,23 @@ Pod::Spec.new do |s|
 
   s.subspec 'Fyber' do |fyber|
     fyber.dependency 'AdfurikunSDK-iOS/Core'
-    fyber.dependency 'Fyber_Marketplace_SDK', '8.2.4'
+    fyber.dependency 'Fyber_Marketplace_SDK', '8.2.7'
     fyber.source_files = '**/adnetworks/Fyber/*.{h,m}'
     fyber.resource = '**/adnetworks/Fyber/*.txt'
   end
 
   s.subspec 'ironSource' do |ironSource|
     ironSource.dependency 'AdfurikunSDK-iOS/Core'
-    ironSource.dependency 'IronSourceSDK', '7.5.1'
+    ironSource.dependency 'IronSourceSDK', '7.9.1'
     ironSource.source_files = '**/adnetworks/IronSource/*.{h,m}'
     ironSource.resource = '**/adnetworks/IronSource/*.txt'
   end
 
   s.subspec 'Maio' do |maio|
     maio.dependency 'AdfurikunSDK-iOS/Core'
-    maio.dependency 'MaioSDK-v2', '2.1.3'
+    maio.dependency 'MaioSDK-v2', '2.1.4'
     maio.source_files = '**/adnetworks/Maio/*.{h,m}'
     maio.resource = '**/adnetworks/Maio/*.txt'
-  end
-
-  s.subspec 'NendAd' do |nendad|
-    nendad.dependency 'AdfurikunSDK-iOS/Core'
-    nendad.dependency 'NendSDK_iOS', '8.2.0'
-    nendad.source_files = '**/adnetworks/NendAd/*.{h,m}'
-    nendad.resource = '**/adnetworks/NendAd/*.txt'
   end
 
   s.subspec 'Pangle' do |pangle|
@@ -92,7 +85,7 @@ Pod::Spec.new do |s|
 
   s.subspec 'UnityAds' do |unityads|
     unityads.dependency 'AdfurikunSDK-iOS/Core'
-    unityads.dependency 'UnityAds', '4.9.2'
+    unityads.dependency 'UnityAds', '4.10.0'
     unityads.source_files = '**/adnetworks/UnityAds/*.{h,m}'
     unityads.resource = '**/adnetworks/UnityAds/*.txt'
   end
@@ -116,13 +109,6 @@ Pod::Spec.new do |s|
     mintegral.resource = '**/adnetworks/Mintegral/*.txt'
   end
 
-  s.subspec 'Zucks' do |zucks|
-    zucks.dependency 'AdfurikunSDK-iOS/Core'
-    zucks.dependency 'ZucksAdNetworkSDK', '4.11.0'
-    zucks.source_files = '**/adnetworks/Zucks/*.{h,m}'
-    zucks.resource = '**/adnetworks/Zucks/*.txt'
-  end
-  
   s.subspec 'All' do |all|
     all.dependency 'AdfurikunSDK-iOS/Core'
     all.dependency 'AdfurikunSDK-iOS/AdMob'
@@ -132,12 +118,10 @@ Pod::Spec.new do |s|
     all.dependency 'AdfurikunSDK-iOS/Fyber'
     all.dependency 'AdfurikunSDK-iOS/ironSource'
     all.dependency 'AdfurikunSDK-iOS/Maio'
-    all.dependency 'AdfurikunSDK-iOS/NendAd'
     all.dependency 'AdfurikunSDK-iOS/Pangle'
     all.dependency 'AdfurikunSDK-iOS/UnityAds'
     all.dependency 'AdfurikunSDK-iOS/Vungle'
     all.dependency 'AdfurikunSDK-iOS/Mintegral'
-    all.dependency 'AdfurikunSDK-iOS/Zucks'
   end
 
 end
