@@ -17,7 +17,7 @@
 @implementation MovieInterstitial6008
 
 + (NSString *)getAdapterRevisionVersion {
-    return @"14";
+    return @"15";
 }
 
 + (NSString *)adnetworkClassName {
@@ -163,4 +163,19 @@
 @end
 
 @implementation MovieInterstitial6074
+@end
+
+@implementation MovieInterstitial6075
+@end
+
+@implementation MovieInterstitial6076
+@end
+
+@implementation MovieInterstitial6077
+@end
+
+@implementation MovieInterstitial6078
+@end
+
+@implementation MovieInterstitial6079
 @end

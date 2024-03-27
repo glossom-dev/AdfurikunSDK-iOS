@@ -22,7 +22,7 @@
 
 // Adapterのバージョン。最初は1にして、修正がある度＋1にする
 + (NSString *)getAdapterRevisionVersion {
-    return @"4";
+    return @"5";
 }
 
 + (NSString *)adnetworkClassName {
@@ -77,7 +77,6 @@
         self.appOpenAd = nil;
         [GADAppOpenAd loadWithAdUnitID:self.unitID
                                request:[GADRequest request]
-                           orientation:UIInterfaceOrientationPortrait
                      completionHandler:^(GADAppOpenAd *_Nullable appOpenAd, NSError *_Nullable error) {
             if (error) {
                 [self adRequestFailure:error];
@@ -116,7 +115,7 @@
 
 - (void)isChildDirected:(BOOL)childDirected {
     [super isChildDirected:childDirected];
-    [GADMobileAds.sharedInstance.requestConfiguration tagForChildDirectedTreatment:childDirected];
+    GADMobileAds.sharedInstance.requestConfiguration.tagForChildDirectedTreatment = [NSNumber numberWithBool:childDirected];
     AdapterLogP(@"Adnetwork %@, childDirected : %@, input parameter : %d", self.adnetworkKey, self.childDirected, (int)childDirected);
 }
 

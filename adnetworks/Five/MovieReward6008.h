@@ -25,3 +25,18 @@
 
 @interface MovieReward6074 : MovieReward6008
 @end
+
+@interface MovieReward6075 : MovieReward6008
+@end
+
+@interface MovieReward6076 : MovieReward6008
+@end
+
+@interface MovieReward6077 : MovieReward6008
+@end
+
+@interface MovieReward6078 : MovieReward6008
+@end
+
+@interface MovieReward6079 : MovieReward6008
+@end

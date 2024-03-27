@@ -15,7 +15,7 @@
 @implementation Banner6019
 
 + (NSString *)getAdapterRevisionVersion {
-    return @"12";
+    return @"13";
 }
 
 + (NSString *)adnetworkClassName {
@@ -102,7 +102,7 @@
 
 - (void)isChildDirected:(BOOL)childDirected {
     [super isChildDirected:childDirected];
-    [GADMobileAds.sharedInstance.requestConfiguration tagForChildDirectedTreatment:childDirected];
+    GADMobileAds.sharedInstance.requestConfiguration.tagForChildDirectedTreatment = [NSNumber numberWithBool:childDirected];
     AdapterLogP(@"Adnetwork %@, childDirected : %@, input parameter : %d", self.adnetworkKey, self.childDirected, (int)childDirected);
 }
 

@@ -11,7 +11,9 @@
 
 NS_ASSUME_NONNULL_BEGIN
 
-@interface MovieInterstitial6110 : MovieReward6110
+@interface MovieInterstitial6110 : ADFmyMovieRewardInterface
+
+@property (nonatomic) NSString *instanceId;
 
 @end
 
