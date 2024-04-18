@@ -1,6 +1,6 @@
 Pod::Spec.new do |s|
   s.name            = "AdfurikunSDK-iOS"
-  s.version         = "3.21.1"
+  s.version         = "3.21.2"
   s.summary         = "An iOS SDK for ADFURIKUN Movie Reward Ads"
   s.homepage        = "https://adfurikun.jp/adfurikun/"
   s.license         = { :type => 'Copyright', :text => 'Copyright Glossom Inc. All rights reserved.' }
@@ -36,7 +36,7 @@ Pod::Spec.new do |s|
 
   s.subspec 'AppLovin' do |applovin|
     applovin.dependency 'AdfurikunSDK-iOS/Core'
-    applovin.dependency 'AppLovinSDK', '12.1.0'
+    applovin.dependency 'AppLovinSDK', '12.4.1'
     applovin.source_files = '**/adnetworks/AppLovin/*.{h,m}'
     applovin.resource = '**/adnetworks/AppLovin/*.txt'
   end
@@ -50,7 +50,7 @@ Pod::Spec.new do |s|
 
   s.subspec 'Five' do |five|
     five.dependency 'AdfurikunSDK-iOS/Core'
-    five.dependency 'FiveAd', '2.7.20240214'
+    five.dependency 'FiveAd', '2.7.20240411'
     five.source_files = '**/adnetworks/Five/*.{h,m}'
     five.resource = '**/adnetworks/Five/*.txt'
   end
@@ -92,19 +92,19 @@ Pod::Spec.new do |s|
 
   s.subspec 'Vungle' do |vungle|
     vungle.dependency 'AdfurikunSDK-iOS/Core'
-    vungle.dependency 'VungleAds', '7.2.2'
+    vungle.dependency 'VungleAds', '7.3.1'
     vungle.source_files = '**/adnetworks/Vungle/*.{h,m}'
     vungle.resource = '**/adnetworks/Vungle/*.txt'
   end
 
   s.subspec 'Mintegral' do |mintegral|
     mintegral.dependency 'AdfurikunSDK-iOS/Core'
-    mintegral.dependency 'MintegralAdSDK/BidNativeAd', '7.5.4'
-    mintegral.dependency 'MintegralAdSDK/BidNativeAdvancedAd', '7.5.4'
-    mintegral.dependency 'MintegralAdSDK/BidRewardVideoAd', '7.5.4'
-    mintegral.dependency 'MintegralAdSDK/BidNewInterstitialAd', '7.5.4'
-    mintegral.dependency 'MintegralAdSDK/BidBannerAd', '7.5.4'
-    mintegral.dependency 'MintegralAdSDK/BidSplashAd', '7.5.4'
+    mintegral.dependency 'MintegralAdSDK/BidNativeAd', '7.6.1'
+    mintegral.dependency 'MintegralAdSDK/BidNativeAdvancedAd', '7.6.1'
+    mintegral.dependency 'MintegralAdSDK/BidRewardVideoAd', '7.6.1'
+    mintegral.dependency 'MintegralAdSDK/BidNewInterstitialAd', '7.6.1'
+    mintegral.dependency 'MintegralAdSDK/BidBannerAd', '7.6.1'
+    mintegral.dependency 'MintegralAdSDK/BidSplashAd', '7.6.1'
     mintegral.source_files = '**/adnetworks/Mintegral/*.{h,m}'
     mintegral.resource = '**/adnetworks/Mintegral/*.txt'
   end

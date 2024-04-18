@@ -10,7 +10,7 @@
 @implementation AdnetworkBase6008
 
 + (NSString *)getSDKVersion {
-    return FADSettings.version;
+    return FADSettings.semanticVersion;
 }
 
 -(id)init {

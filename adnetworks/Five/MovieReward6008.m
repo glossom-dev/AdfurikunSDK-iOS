@@ -18,7 +18,7 @@
 @implementation MovieReward6008
 
 + (NSString *)getAdapterRevisionVersion {
-    return @"5";
+    return @"6";
 }
 
 + (NSString *)adnetworkClassName {
@@ -76,25 +76,28 @@
 }
 
 -(void)showAd {
-    [super showAd];
+    UIViewController *vc = [self topMostViewController];
+    if (vc) {
+        [self showAdWithPresentingViewController:vc];
+    } else {
+        AdapterLog(@"top most viewcontroller is nil");
+        [self setCallbackStatus:MovieRewardCallbackPlayFail];
+    }
+}
+
+-(void)showAdWithPresentingViewController:(UIViewController *)viewController {
+    [super showAdWithPresentingViewController:viewController];
     
     if (self.fullscreen) {
         @try {
             [self requireToAsyncPlay];
             self.invokeFinishCallback = false;
-            BOOL res = [self.fullscreen show];
-            if (!res) {
-                [self setCallbackStatus:MovieRewardCallbackPlayFail];
-            }
+            [self.fullscreen showWithViewController:viewController];
         } @catch (NSException *exception) {
             [self adnetworkExceptionHandling:exception];
             [self setCallbackStatus:MovieRewardCallbackPlayFail];
         }
     }
-}
-
--(void)showAdWithPresentingViewController:(UIViewController *)viewController {
-    [self showAd];
 }
 
 #pragma mark FADVideoRewardEventListener

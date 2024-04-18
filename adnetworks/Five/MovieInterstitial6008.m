@@ -17,7 +17,7 @@
 @implementation MovieInterstitial6008
 
 + (NSString *)getAdapterRevisionVersion {
-    return @"15";
+    return @"16";
 }
 
 + (NSString *)adnetworkClassName {
@@ -80,24 +80,28 @@
  *  広告の表示を行う
  */
 -(void)showAd {
-    [super showAd];
+    UIViewController *vc = [self topMostViewController];
+    if (vc) {
+        [self showAdWithPresentingViewController:vc];
+    } else {
+        AdapterLog(@"top most viewcontroller is nil");
+        [self setCallbackStatus:MovieRewardCallbackPlayFail];
+    }
+
+}
+
+-(void)showAdWithPresentingViewController:(UIViewController *)viewController {
+    [super showAdWithPresentingViewController:viewController];
     
     if (self.interstitial) {
         @try {
             [self requireToAsyncPlay];
-            BOOL res = [self.interstitial show];
-            if (!res) {
-                [self setCallbackStatus:MovieRewardCallbackPlayFail];
-            }
+            [self.interstitial showWithViewController:viewController];
         } @catch (NSException *exception) {
             [self adnetworkExceptionHandling:exception];
             [self setCallbackStatus:MovieRewardCallbackPlayFail];
         }
     }
-}
-
--(void)showAdWithPresentingViewController:(UIViewController *)viewController {
-    [self showAd];
 }
 
 -(void)dealloc {

@@ -26,7 +26,7 @@
 }
 
 + (NSString *)getAdapterRevisionVersion {
-    return @"8";
+    return @"9";
 }
 
 + (NSString *)adnetworkClassName {
@@ -49,10 +49,6 @@
         self.appLovinSdkKey = [NSString stringWithFormat:@"%@", appLovinSdkKey];
     }
     
-    NSDictionary* infoDict = [[NSBundle mainBundle] infoDictionary];
-    if ( ![infoDict objectForKey:@"AppLovinSdkKey"] ) {
-        [infoDict setValue:self.appLovinSdkKey forKey:@"AppLovinSdkKey"];
-    }
     //申請されたパッケージ名を受け取り
     NSString *submittedPackageName = [data objectForKey:@"package_name"];
     if ([self isNotNull:submittedPackageName]) {
@@ -72,13 +68,13 @@
 
     if (self.appLovinSdkKey) {
         [self requireToAsyncInit];
-        [[MovieConfigure6000 sharedInstance] configureWithCompletion:^{
+        [[MovieConfigure6000 sharedInstance] configure:self.appLovinSdkKey completion:^{
             if (!self.incentivizedInterstitial) {
                 @try {
                     if (self.zoneIdentifier && ![self.zoneIdentifier isEqual: [NSNull null]] && [self.zoneIdentifier length] != 0) {
-                        self.incentivizedInterstitial = [[ALIncentivizedInterstitialAd alloc] initWithZoneIdentifier:self.zoneIdentifier sdk:[ALSdk sharedWithKey:self.appLovinSdkKey]];
+                        self.incentivizedInterstitial = [[ALIncentivizedInterstitialAd alloc] initWithZoneIdentifier:self.zoneIdentifier];
                     } else {
-                        self.incentivizedInterstitial = [[ALIncentivizedInterstitialAd alloc] initWithSdk:[ALSdk sharedWithKey:self.appLovinSdkKey]];
+                        self.incentivizedInterstitial = [[ALIncentivizedInterstitialAd alloc] initWithSdk:[ALSdk shared]];
                     }
                 } @catch (NSException *exception) {
                     [self adnetworkExceptionHandling:exception];
@@ -265,7 +261,7 @@ typedef enum : NSUInteger {
     return self;
 }
 
-- (void)configureWithCompletion:(void (^)(void))completionHandler {
+- (void)configure:(NSString *)sdkKey completion:(void (^)(void))completionHandler {
     if (!completionHandler) {
         return;
     }
@@ -294,7 +290,12 @@ typedef enum : NSUInteger {
                 // デバッグ機能設定（Trueにすると端末を裏表に振ると、画面にAppLovinアイコンが表示される）
                 [ALSdk shared].settings.creativeDebuggerEnabled = [ADFMovieOptions getTestMode];
                 
-                [ALSdk initializeSdkWithCompletionHandler:^(ALSdkConfiguration * _Nonnull configuration) {
+                ALSdkInitializationConfiguration *initConfig = [ALSdkInitializationConfiguration configurationWithSdkKey:sdkKey
+                                                                                                            builderBlock:^(ALSdkInitializationConfigurationBuilder *builder) {
+                    builder.mediationProvider = ALMediationProviderMAX;
+                }];
+                
+                [[ALSdk shared] initializeWithConfiguration:initConfig completionHandler:^(ALSdkConfiguration *sdkConfig) {
                     self.initStatus = initializeComplete;
                     
                     for (completionHandlerType handler in self.handlers) {

@@ -27,7 +27,7 @@
 }
 
 + (NSString *)getAdapterRevisionVersion {
-    return @"9";
+    return @"10";
 }
 
 + (NSString *)adnetworkClassName {
@@ -80,10 +80,10 @@
 
     if (self.appLovinSdkKey) {
         [self requireToAsyncInit];
-        [[MovieConfigure6000 sharedInstance] configureWithCompletion:^{
+        [[MovieConfigure6000 sharedInstance] configure:self.appLovinSdkKey completion:^{
             if (!self.interstitialAd) {
                 @try {
-                    self.interstitialAd = [[ALInterstitialAd alloc] initWithSdk: [ALSdk sharedWithKey:self.appLovinSdkKey]];
+                    self.interstitialAd = [[ALInterstitialAd alloc] initWithSdk: [ALSdk shared]];
                     self.interstitialAd.adDisplayDelegate = self;
                     self.interstitialAd.adLoadDelegate = self;
                     self.interstitialAd.adVideoPlaybackDelegate = self;
@@ -109,9 +109,9 @@
     @try {
         [self requireToAsyncRequestAd];
         if ([self isNotNull:_appLovinSdkKey] && [self isNotNull:self.zoneIdentifier] && [self.zoneIdentifier length] != 0) {
-            [[ALSdk sharedWithKey:self.appLovinSdkKey].adService loadNextAdForZoneIdentifier:self.zoneIdentifier andNotify:self];
+            [[ALSdk shared].adService loadNextAdForZoneIdentifier:self.zoneIdentifier andNotify:self];
         } else {
-            [[ALSdk sharedWithKey:self.appLovinSdkKey].adService loadNextAd:ALAdSize.interstitial andNotify:self];
+            [[ALSdk shared].adService loadNextAd:ALAdSize.interstitial andNotify:self];
         }
     } @catch (NSException *exception) {
         [self adnetworkExceptionHandling:exception];

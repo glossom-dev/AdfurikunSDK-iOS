@@ -21,7 +21,7 @@
 }
 
 + (NSString *)getAdapterRevisionVersion {
-    return @"7";
+    return @"8";
 }
 
 + (NSString *)adnetworkClassName {
@@ -48,7 +48,7 @@
 -(void)initAdnetworkIfNeeded {
     if (!self.adView && self.appLovinSdkKey && self.zoneIdentifier) {
         @try {
-            self.adView = [[ALAdView alloc] initWithSdk:[ALSdk sharedWithKey:self.appLovinSdkKey]
+            self.adView = [[ALAdView alloc] initWithSdk:[ALSdk shared]
                                                    size:ALAdSize.banner
                                          zoneIdentifier:self.zoneIdentifier];
         } @catch (NSException *exception) {
