@@ -7,116 +7,130 @@
 //
 
 #import "AppOpenAd6019.h"
+#import "AdnetworkConfigure6019.h"
+#import "AdnetworkParam6019.h"
 
 @interface AppOpenAd6019()
 
 @property (nonatomic) GADAppOpenAd* appOpenAd;
 
-@property (nonatomic) NSString *unitID;
-@property (nonatomic) BOOL testFlg;
-
 @end
 
 @implementation AppOpenAd6019
 
-
-// Adapterのバージョン。最初は1にして、修正がある度＋1にする
+// adapterファイルのRevision番号を返す。実装が変わる度Incrementする
 + (NSString *)getAdapterRevisionVersion {
-    return @"5";
+    return @"6";
 }
 
+// Adnetwork実装時に使うClass名。SDKが導入されているかで使う
 + (NSString *)adnetworkClassName {
     return @"GADAppOpenAd";
 }
 
+// ADFで定義しているAdnetwork名。
 + (NSString *)adnetworkName {
-    return @"AdMob";
+    return [AdnetworkConfigure6019 adnetworkName];
 }
 
-// getinfoからのParameter設定
+// Instance Variableを初期化する。また、必要な場合Configureを生成する
+-(id)init {
+    self = [super init];
+    if (self) {
+        self.configure = [AdnetworkConfigure6019 sharedInstance];
+    }
+    return self;
+}
+
+// Adnetwork Parameterを指定するAdnetworkParam Objectを生成する。
 - (void)setData:(NSDictionary *)data {
     [super setData:data];
     
-    NSString* admobId = [data objectForKey:@"ad_unit_id"];
-    if ([self isNotNull:admobId]) {
-        self.unitID = [[NSString alloc] initWithFormat:@"%@", admobId];
-    }
-    NSNumber *testFlg = [data objectForKey:@"test_flg"];
-    if ([self isNotNull:testFlg] && [testFlg isKindOfClass:[NSNumber class]]) {
-        self.testFlg = [testFlg boolValue];
-    }
+    self.adParam = [[AdnetworkParam6019 alloc] initWithParam:data];
+    self.configure.param = self.adParam; // Parameterを設定する
 }
 
-// 広告準備有無を返す
-- (BOOL)isPrepared {
-    // ロジックに合わせて修正する
-    return self.isAdLoaded;
-}
-
-// Adnetwork SDKの初期化を行う
-- (void)initAdnetworkIfNeeded {
-    if (self.testFlg) {
-        //GADMobileAds.sharedInstance.requestConfiguration.testDeviceIdentifiers = @[@"コンソールに出力されたデバイスIDを入力してください。"]; //詳細　https://developers.google.com/admob/ios/test-ads?hl=ja
-    }
-    [self initCompleteAndRetryStartAdIfNeeded];
-}
-
-// 広告呼び込みを行う
-- (void)startAd {
-    if (![self canStartAd]) {
-        return;
-    }
-
-    if (self.unitID == nil) {
-        return;
+// Adnetwork SDKを初期化する
+- (bool)initAdnetworkIfNeeded {
+    if (![super initAdnetworkIfNeeded]) { // 初期化済みかParameterが設定されてないとそのままReturnする
+        return false;
     }
     
-    [super startAd];
+    // SDK初期化はConfigureを使う
+    __weak typeof(self) weakSelf = self;
+    [self.configure initAdnetworkSDKWithCompletionHander:^(_Bool result) {
+        __strong typeof(self) strongSelf = weakSelf;
+        if (!strongSelf) return;
+        // 初期化完了後の実装が必要な場合こちらに追加する
+        [strongSelf initCompleteAndRetryStartAdIfNeeded];
+    }];
+    [self.configure soundControl];
+    return true;
+}
+
+// 広告読み込みを開始する
+- (bool)startAd {
+    if (![super startAd]) { // 読み込みが可能な状態かをチェックする
+        return false;
+    }
     
     @try {
+        GADRequest *request = [GADRequest request];
+        [(AdnetworkConfigure6019 *)self.configure setHasGdprConsent:self.hasGdprConsent request:request];
+        [self requireToAsyncRequestAd];
         self.appOpenAd = nil;
-        [GADAppOpenAd loadWithAdUnitID:self.unitID
-                               request:[GADRequest request]
+        __weak typeof(self) weakSelf = self;
+        [GADAppOpenAd loadWithAdUnitID:((AdnetworkParam6019 *)self.adParam).unitID
+                               request:request
                      completionHandler:^(GADAppOpenAd *_Nullable appOpenAd, NSError *_Nullable error) {
+            __strong typeof(self) strongSelf = weakSelf;
+            if (!strongSelf) return;
             if (error) {
-                [self adRequestFailure:error];
+                [strongSelf adRequestFailure:error];
             } else {
-                [self adRequestSccess:appOpenAd];
+                [strongSelf adRequestSccess:appOpenAd];
             }
         }];
     } @catch (NSException *exception) {
         [self adnetworkExceptionHandling:exception];
     }
+    return true;
 }
 
-// 広告再生関数
-// showAdWithPresentingViewController と両方を必ず実装する
+// 在庫取得有無を返す
+- (BOOL)isPrepared {
+    return self.isAdLoaded;
+}
+
+// 広告再生
 - (void)showAd {
-    [self showAdWithPresentingViewController:[self topMostViewController]];
+    UIViewController *topVC = [self topMostViewController];
+    if (topVC) {
+        [self showAdWithPresentingViewController:topVC];
+    } else {
+        [self setCallbackStatus:MovieRewardCallbackPlayFail];
+    }
 }
 
 - (void)showAdWithPresentingViewController:(UIViewController *)viewController {
     [super showAdWithPresentingViewController:viewController];
-
+    
     if (!self.appOpenAd) {
         [self setCallbackStatus:MovieRewardCallbackPlayFail];
         return;
     }
-    
-    @try {
-        [self requireToAsyncPlay];
-        
-        [self.appOpenAd presentFromRootViewController:viewController];
-    } @catch (NSException *exception) {
-        [self adnetworkExceptionHandling:exception];
+
+    if ([self isPrepared]) {
+        @try {
+            [self requireToAsyncPlay];
+            [self.appOpenAd presentFromRootViewController:viewController];
+        } @catch (NSException *exception) {
+            [self adnetworkExceptionHandling:exception];
+            [self setCallbackStatus:MovieRewardCallbackPlayFail];
+        }
+    } else {
         [self setCallbackStatus:MovieRewardCallbackPlayFail];
     }
-}
-
-- (void)isChildDirected:(BOOL)childDirected {
-    [super isChildDirected:childDirected];
-    GADMobileAds.sharedInstance.requestConfiguration.tagForChildDirectedTreatment = [NSNumber numberWithBool:childDirected];
-    AdapterLogP(@"Adnetwork %@, childDirected : %@, input parameter : %d", self.adnetworkKey, self.childDirected, (int)childDirected);
 }
 
 - (void)adRequestSccess:(GADAppOpenAd * _Nullable)appOpenAd {
@@ -137,7 +151,7 @@
 
 - (void)adRequestFailure:(NSError *)error {
     AdapterTraceP(@"error: %@", error);
-    [self setErrorWithMessage:error.localizedDescription code:error.code];
+    [self setError:error];
     [self setCallbackStatus:MovieRewardCallbackFetchFail];
 }
 

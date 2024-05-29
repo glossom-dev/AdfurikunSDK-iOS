@@ -7,6 +7,9 @@
 //
 
 #import "Banner6019.h"
+#import "AdnetworkConfigure6019.h"
+#import "AdnetworkParam6019.h"
+
 #import <WebKit/WebKit.h>
 
 #import <ADFMovieReward/ADFMovieOptions.h>
@@ -14,66 +17,72 @@
 
 @implementation Banner6019
 
+// adapterファイルのRevision番号を返す。実装が変わる度Incrementする
 + (NSString *)getAdapterRevisionVersion {
-    return @"13";
+    return @"14";
 }
 
+// Adnetwork実装時に使うClass名。SDKが導入されているかで使う
 + (NSString *)adnetworkClassName {
     return @"GADBannerView";
 }
 
+// ADFで定義しているAdnetwork名。
 + (NSString *)adnetworkName {
-    return @"AdMob";
+    return [AdnetworkConfigure6019 adnetworkName];
 }
 
+// Instance Variableを初期化する。また、必要な場合Configureを生成する
+-(id)init {
+    self = [super init];
+    if (self) {
+        self.configure = [AdnetworkConfigure6019 sharedInstance];
+    }
+    return self;
+}
+
+// Adnetwork Parameterを指定するAdnetworkParam Objectを生成する。
 - (void)setData:(NSDictionary *)data {
-    [[GADMobileAds sharedInstance] startWithCompletionHandler:nil];
     [super setData:data];
     
-    NSString* admobId = [data objectForKey:@"ad_unit_id"];
-    if ([self isNotNull:admobId]) {
-        self.unitID = [[NSString alloc] initWithFormat:@"%@", admobId];
-    }
-    NSNumber *testFlg = [data objectForKey:@"test_flg"];
-    if ([self isNotNull:testFlg] && [testFlg isKindOfClass:[NSNumber class]]) {
-        self.testFlg = [testFlg boolValue];
-    }
+    self.adParam = [[AdnetworkParam6019 alloc] initWithParam:data];
+    self.configure.param = self.adParam; // Parameterを設定する
 }
 
-- (void)initAdnetworkIfNeeded {
-    if (self.testFlg) {
-        // GADMobileAds.sharedInstance.requestConfiguration.testDeviceIdentifiers = @[@"コンソールに出力されたデバイスIDを入力してください。"];
-        //詳細　https://developers.google.com/admob/ios/test-ads?hl=ja
-    }
-    [self initCompleteAndRetryStartAdIfNeeded];
+// Adnetwork SDKを初期化する
+- (bool)initAdnetworkIfNeeded {
     self.adSize = GADAdSizeBanner;
-}
-
-- (void)startAd {
-    [self startAdWithOption:nil];
-}
-
-- (void)startAdWithOption:(NSDictionary *)option {
-    AdapterTrace;
-    if (![self canStartAd]) {
-        return;
-    }
-
-    [super startAd];
-
-    self.isBannerViewLoaded = false;
     
-    if (self.unitID == nil) {
-        return;
+    if (![super initAdnetworkIfNeeded]) { // 初期化済みかParameterが設定されてないとそのままReturnする
+        return false;
     }
+    
+    // SDK初期化はConfigureを使う
+    __weak typeof(self) weakSelf = self;
+    [self.configure initAdnetworkSDKWithCompletionHander:^(_Bool result) {
+        __strong typeof(self) strongSelf = weakSelf;
+        if (!strongSelf) return;
+        // 初期化完了後の実装が必要な場合こちらに追加する
+        [strongSelf initCompleteAndRetryStartAdIfNeeded];
+    }];
+    return true;
+}
 
+// 広告読み込みを開始する
+- (bool)startAd {
+    return [self startAdWithOption:nil];
+}
+
+- (bool)startAdWithOption:(NSDictionary *)option {
     if (self.bannerView) {
         [self.bannerView removeFromSuperview];
         self.bannerView = nil;
     }
     @try {
+        self.isBannerViewLoaded = false;
+        
         self.bannerView = [[GADBannerView alloc] initWithAdSize:self.adSize];
-        self.bannerView.adUnitID = self.unitID;
+        self.bannerView.adUnitID = ((AdnetworkParam6019 *)self.adParam).unitID;
         self.bannerView.rootViewController = [self topMostViewController];
         self.bannerView.delegate = self;
         
@@ -87,23 +96,23 @@
                 [request registerAdNetworkExtras:extras];
             }
         }
-        if (self.hasGdprConsent) {
-            GADExtras *extras = [[GADExtras alloc] init];
-            extras.additionalParameters = @{@"npa": self.hasGdprConsent.boolValue ? @"1" : @"0"};
-            [request registerAdNetworkExtras:extras];
-            AdapterLogP(@"[ADF] Adnetwork 6019, gdprConsent : %@, sdk setting value : %@", self.hasGdprConsent, extras.additionalParameters);
-        }
+        [(AdnetworkConfigure6019 *)self.configure setHasGdprConsent:self.hasGdprConsent request:request];
         [self requireToAsyncRequestAd];
         [self.bannerView loadRequest:request];
     } @catch (NSException *exception) {
         [self adnetworkExceptionHandling:exception];
     }
+    return true;
 }
 
-- (void)isChildDirected:(BOOL)childDirected {
-    [super isChildDirected:childDirected];
-    GADMobileAds.sharedInstance.requestConfiguration.tagForChildDirectedTreatment = [NSNumber numberWithBool:childDirected];
-    AdapterLogP(@"Adnetwork %@, childDirected : %@, input parameter : %d", self.adnetworkKey, self.childDirected, (int)childDirected);
+// 在庫取得有無を返す
+- (BOOL)isPrepared {
+    return self.isAdLoaded;
+}
+
+// 後処理を実装
+- (void)dispose {
+    [super dispose];
 }
 
 - (void)callbackClick {
@@ -129,7 +138,7 @@
     BannerAdInfo6019 *info = [[BannerAdInfo6019 alloc] initWithVideoUrl:nil
                                                                   title:@""
                                                             description:@""
-                                                           adnetworkKey:@"6019"];
+                                                           adnetworkKey:self.adnetworkKey];
     info.mediaType = ADFNativeAdType_Image;
     info.adapter = self;
     [info setupMediaView:self.bannerView];
@@ -142,9 +151,7 @@
 
 - (void)bannerView:(GADBannerView *)bannerView didFailToReceiveAdWithError:(NSError *)error {
     AdapterTraceP(@"error: %@", error);
-    if (error) {
-        [self setErrorWithMessage:error.localizedDescription code:error.code];
-    }
+    [self setError:error];
     [self setCallbackStatus:NativeAdCallbackLoadError];
 }
 

@@ -7,98 +7,84 @@
 //
 
 #import "MovieNative6120.h"
+#import "AdnetworkConfigure6120.h"
 #import "AdnetworkParam6120.h"
 
 @interface MovieNative6120()
 
-@property (nonatomic) AdnetworkParam6120 *adParam;
 @property (nonatomic) MTGNativeAdvancedAd *adManager;
 
 @end
 
 @implementation MovieNative6120
 
-// SDKからバージョンを取得して返す
-// APIがなければ削除
-+ (NSString *)getSDKVersion {
-    return MTGSDK.sdkVersion;
-}
-
-// Adapterのバージョン。最初は1にして、修正がある度＋1にする
+// adapterファイルのRevision番号を返す。実装が変わる度Incrementする
 + (NSString *)getAdapterRevisionVersion {
-    return @"5";
+    return @"7";
 }
 
+// Adnetwork実装時に使うClass名。SDKが導入されているかで使う
 + (NSString *)adnetworkClassName {
     return @"MTGNativeAdvancedAd";
 }
 
+// ADFで定義しているAdnetwork名。
 + (NSString *)adnetworkName {
-    return @"Mintegral";
+    return [AdnetworkConfigure6120 adnetworkName];
 }
 
-// getinfoからのParameter設定
++ (NSString *)getSDKVersion {
+    return [AdnetworkConfigure6120 getSDKVersion];
+}
+
+// Instance Variableを初期化する。また、必要な場合Configureを生成する
+-(id)init {
+    self = [super init];
+    if (self) {
+        self.configure = [AdnetworkConfigure6120 sharedInstance];
+    }
+    return self;
+}
+
+// Adnetwork Parameterを指定するAdnetworkParam Objectを生成する。
 - (void)setData:(NSDictionary *)data {
     [super setData:data];
     
     self.adParam = [[AdnetworkParam6120 alloc] initWithParam:data];
+    self.configure.param = self.adParam; // Parameterを設定する
 }
 
-// 広告準備有無を返す
-- (BOOL)isPrepared {
-    // ロジックに合わせて修正する
-    return self.isAdLoaded;
-}
-
-// startAdが呼ばれるたびにStatus初期化が必要な場合こちらで実装する
-- (void)clearStatusIfNeeded {
-}
-
-// Adnetwork SDKの初期化を行う
-- (void)initAdnetworkIfNeeded {
-    // 一回のみ初期化を行うようなチェックを行う
-    if (![self needsToInit]) {
-        return;
+// Adnetwork SDKを初期化する
+- (bool)initAdnetworkIfNeeded {
+    if (![super initAdnetworkIfNeeded]) { // 初期化済みかParameterが設定されてないとそのままReturnする
+        return false;
     }
     
-    if (!self.adParam || ![self.adParam isValid]) {
-        return;
+    // SDK初期化はConfigureを使う
+    __weak typeof(self) weakSelf = self;
+    [self.configure initAdnetworkSDKWithCompletionHander:^(_Bool result) {
+        __strong typeof(self) strongSelf = weakSelf;
+        if (!strongSelf) return;
+        // 初期化完了後の実装が必要な場合こちらに追加する
+        [strongSelf initCompleteAndRetryStartAdIfNeeded];
+    }];
+    return true;
+}
+
+// 広告読み込みを開始する
+- (bool)startAd {
+    if (![super startAd]) { // 読み込みが可能な状態かをチェックする
+        return false;
     }
     
-    // Adnetwork SDKの関数を呼び出す際はTryーCatchでException Handlingを行う
     @try {
-        // 非同期で初期化が行われる場合にはFlag設定を行う
-        [self requireToAsyncInit]; // 要らない場合には消す
-        
-        [MTGSDK.sharedInstance setAppID:self.adParam.appId ApiKey:self.adParam.appKey];
-        
-        // 初期化が完了するとこの関数を呼び出す
-        [self initCompleteAndRetryStartAdIfNeeded]; // 適切なタイミングに移動する
-    } @catch (NSException *exception) {
-        [self adnetworkExceptionHandling:exception];
-    }
-}
-
-// 広告呼び込みを行う
-- (void)startAd {
-    // 初期化が完了しているかをチェック
-    if (![self canStartAd]) {
-        return;
-    }
-    
-    if (!self.adParam || ![self.adParam isValid]) {
-        return;
-    }
-    
-    [super startAd];
-    
-    // Adnetwork SDKの関数を呼び出す際はTryーCatchでException Handlingを行う
-    @try {
-        // 非同期で行われる場合にはFlag設定を行う
         [self requireToAsyncRequestAd];
         
-        self.adManager = [[MTGNativeAdvancedAd alloc] initWithPlacementID:self.adParam.placementId
-                                                                   unitID:self.adParam.unitId
+        NSString *placementId = ((AdnetworkParam6120 *)self.adParam).placementId;
+        NSString *unitId = ((AdnetworkParam6120 *)self.adParam).unitId;
+
+        self.adManager = [[MTGNativeAdvancedAd alloc] initWithPlacementID:placementId
+                                                                   unitID:unitId
                                                                    adSize:CGSizeMake(320.0, 180.0)
                                                        rootViewController:nil];
         self.adManager.mute = true;
@@ -131,30 +117,28 @@
  */
         
         [self.adManager loadAd];
-        
     } @catch (NSException *exception) {
         [self adnetworkExceptionHandling:exception];
     }
+    return true;
 }
 
-- (void)startAdWithOption:(NSDictionary *)option {
-    [self startAd];
+- (bool)startAdWithOption:(NSDictionary *)option {
+    return [self startAd];
 }
 
--(void)setHasUserConsent:(BOOL)hasUserConsent {
-    [super setHasUserConsent:hasUserConsent];
-    [MTGSDK.sharedInstance setConsentStatus:hasUserConsent];
-    AdapterLogP(@"Adnetwork 6120, gdprConsent : %@, sdk setting value : %d", self.hasGdprConsent, (int)hasUserConsent);
+// 在庫取得有無を返す
+- (BOOL)isPrepared {
+    return self.isAdLoaded;
 }
 
-- (void)isChildDirected:(BOOL)childDirected {
-    [super isChildDirected:childDirected];
-    [MTGSDK.sharedInstance setCoppa:childDirected ? MTGBoolYes : MTGBoolNo];
-    AdapterLogP(@"Adnetwork %@, childDirected : %@, input parameter : %d", self.adnetworkKey, self.childDirected, (int)childDirected);
+// startAd前の後処理
+- (void)clearStatusIfNeeded {
 }
 
+// 後処理を実装
 - (void)dispose {
-    
+    [super dispose];
 }
 
 /*
@@ -175,10 +159,12 @@
  */
 - (void)nativeAdvancedAdLoadSuccess:(MTGNativeAdvancedAd *)nativeAd {
     AdapterTrace;
+    self.creativeId = nativeAd.creativeId;
+    
     NativeAdInfo6120 *info = [[NativeAdInfo6120 alloc] initWithVideoUrl:nil
                                                                   title:@""
                                                             description:@""
-                                                           adnetworkKey:@"6120" ];
+                                                           adnetworkKey:self.adnetworkKey ];
     info.mediaType = ADFNativeAdType_Movie;
     UIView *adView = [nativeAd fetchAdView];
     [info setupMediaView:adView];

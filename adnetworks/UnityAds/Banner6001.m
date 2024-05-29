@@ -6,129 +6,109 @@
 //  Copyright © 2019 Sungil Kim. All rights reserved.
 //
 #import <UnityAds/UnityAds.h>
-#import <ADFMovieReward/ADFMovieOptions.h>
 #import "Banner6001.h"
+#import "AdnetworkConfigure6001.h"
+#import "AdnetworkParameter6001.h"
 
-@interface Banner6001 () <UnityAdsInitializationDelegate, UADSBannerViewDelegate>
-@property (nonatomic, assign) BOOL testFlg;
-@property (nonatomic, strong) NSString *gameId;
-@property (nonatomic, strong) NSString *placementId;
+@interface Banner6001 () <UADSBannerViewDelegate>
 @property (nonatomic, strong) UADSBannerView *bannerView;
 @end
 
 @implementation Banner6001
 
-+ (NSString *)getSDKVersion {
-    return UnityServices.getVersion;
-}
-
+// adapterファイルのRevision番号を返す。実装が変わる度Incrementする
 + (NSString *)getAdapterRevisionVersion {
-    return @"10";
+    return @"11";
 }
 
+// Adnetwork実装時に使うClass名。SDKが導入されているかで使う
 + (NSString *)adnetworkClassName {
     return @"UADSBannerView";
 }
 
+// ADFで定義しているAdnetwork名。
 + (NSString *)adnetworkName {
-    return @"Unity Ads";
+    return [AdnetworkConfigure6001 adnetworkName];
 }
 
--(void)setData:(NSDictionary *)data {
++ (NSString *)getSDKVersion {
+    return [AdnetworkConfigure6001 getSDKVersion];
+}
+
+// Instance Variableを初期化する。また、必要な場合Configureを生成する
+-(id)init {
+    self = [super init];
+    if (self) {
+        self.configure = [AdnetworkConfigure6001 sharedInstance];
+    }
+    return self;
+}
+
+// Adnetwork Parameterを指定するAdnetworkParam Objectを生成する。
+- (void)setData:(NSDictionary *)data {
     [super setData:data];
     
-    if (ADFMovieOptions.getTestMode) {
-        self.testFlg = YES;
-    } else {
-        NSNumber *testFlg = [data objectForKey:@"test_flg"];
-        if ([self isNotNull:testFlg] && [testFlg isKindOfClass:[NSNumber class]]) {
-            self.testFlg = [testFlg boolValue];
-        }
-    }
-
-    NSString *dataGameId = [data objectForKey:@"game_id"];
-    if ([self isNotNull:dataGameId]) {
-        self.gameId = [NSString stringWithFormat:@"%@", dataGameId];
-    }
-    NSString *dataPlacementId = [data objectForKey:@"placement_id"];
-    if ([self isNotNull:dataPlacementId]) {
-        self.placementId = [NSString stringWithFormat:@"%@",dataPlacementId];
-    }
+    self.adParam = [[AdnetworkParameter6001 alloc] initWithParam:data];
+    self.configure.param = self.adParam; // Parameterを設定する
 }
 
--(void)initAdnetworkIfNeeded {
-    if (self.gameId) {
-        if (!UnityAds.isInitialized) {
-            @try {
-                [UnityAds initialize:self.gameId testMode:self.testFlg initializationDelegate:self];
-            } @catch (NSException *exception) {
-                [self adnetworkExceptionHandling:exception];
-            }
-        } else {
-            [self initCompleteAndRetryStartAdIfNeeded];
-        }
+// Adnetwork SDKを初期化する
+- (bool)initAdnetworkIfNeeded {
+    if (![super initAdnetworkIfNeeded]) { // 初期化済みかParameterが設定されてないとそのままReturnする
+        return false;
     }
+    
+    // SDK初期化はConfigureを使う
+    __weak typeof(self) weakSelf = self;
+    [self.configure initAdnetworkSDKWithCompletionHander:^(_Bool result) {
+        __strong typeof(self) strongSelf = weakSelf;
+        if (!strongSelf) return;
+        // 初期化完了後の実装が必要な場合こちらに追加する
+        [strongSelf initCompleteAndRetryStartAdIfNeeded];
+    }];
+    return true;
 }
 
-/**
- *  広告の読み込みを開始する
- */
--(void)startAd {
-    if (![self canStartAd]) {
-        return;
+// 広告読み込みを開始する
+- (bool)startAd {
+    if (![super startAd]) { // 読み込みが可能な状態かをチェックする
+        return false;
     }
-
+    
     @try {
-        [super startAd];
-        
         [self requireToAsyncRequestAd];
-        
         if (self.bannerView) {
             self.bannerView = nil;
         }
-        if (self.placementId) {
-            self.bannerView = [[UADSBannerView alloc] initWithPlacementId:self.placementId size:CGSizeMake(320.0, 50.0)];
-        }
-        
-        if (self.bannerView) {
-            self.bannerView.delegate = self;
-            [self.bannerView load];
-        }
+        self.bannerView = [[UADSBannerView alloc] initWithPlacementId:((AdnetworkParameter6001 *)self.adParam).placementId size:CGSizeMake(320.0, 50.0)];
+        self.bannerView.delegate = self;
+        [self.bannerView load];
     } @catch (NSException *exception) {
         [self adnetworkExceptionHandling:exception];
     }
+    return true;
 }
 
--(void)setHasUserConsent:(BOOL)hasUserConsent {
-    [super setHasUserConsent:hasUserConsent];
-    UADSMetaData *gdprConsentMetaData = [[UADSMetaData alloc] init];
-    [gdprConsentMetaData set:@"gdpr.consent" value:hasUserConsent ? @YES : @NO];
-    [gdprConsentMetaData commit];
-    AdapterLogP(@"Adnetwork 6001, gdprConsent : %@, sdk setting value : %@", self.hasGdprConsent, hasUserConsent ? @YES : @NO);
+- (bool)startAdWithOption:(NSDictionary *)option {
+    return [self startAd];
 }
 
-- (void)isChildDirected:(BOOL)childDirected {
-    [super isChildDirected:childDirected];
-    UADSMetaData *gdprConsentMetaData = [[UADSMetaData alloc] init];
-    [gdprConsentMetaData set:@"user.nonbehavioral" value:childDirected ? @YES : @NO];
-    [gdprConsentMetaData commit];
-    AdapterLogP(@"Adnetwork %@, childDirected : %@, input parameter : %d", self.adnetworkKey, self.childDirected, (int)childDirected);
+// 在庫取得有無を返す
+- (BOOL)isPrepared {
+    return self.isAdLoaded;
+}
+
+// startAd前の後処理
+- (void)clearStatusIfNeeded {
+}
+
+// 後処理を実装
+- (void)dispose {
+    [super dispose];
 }
 
 -(void)dealloc {
-    _gameId = nil;
-    _placementId = nil;
     _bannerView = nil;
-}
-
-#pragma mark: UnityAdsInitializationDelegate
-- (void)initializationComplete {
-    AdapterTrace;
-    [self initCompleteAndRetryStartAdIfNeeded];
-}
-
-- (void)initializationFailed: (UnityAdsInitializationError)error withMessage: (NSString *)message {
-    AdapterTraceP(@"%s called, error message : %@", __func__, message);
 }
 
 #pragma mark - UADSBannerViewDelegate
@@ -138,7 +118,7 @@
     NativeAdInfo6001 *info = [[NativeAdInfo6001 alloc] initWithVideoUrl:nil
                                                                   title:@""
                                                             description:@""
-                                                           adnetworkKey:@"6001"];
+                                                           adnetworkKey:self.adnetworkKey];
     info.mediaType = ADFNativeAdType_Image;
 
     info.adapter = self;

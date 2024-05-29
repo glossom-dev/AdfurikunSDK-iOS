@@ -11,7 +11,7 @@
 
 #import <UnityAds/UnityAds.h>
 
-@interface MovieReward6001 : ADFmyMovieRewardInterface<UnityAdsInitializationDelegate, UnityAdsLoadDelegate, UnityAdsShowDelegate>
+@interface MovieReward6001 : ADFmyMovieRewardInterface<UnityAdsLoadDelegate, UnityAdsShowDelegate>
 
 @end
 

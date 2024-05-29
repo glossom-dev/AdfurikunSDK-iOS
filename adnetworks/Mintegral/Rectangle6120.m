@@ -10,9 +10,12 @@
 
 @implementation Rectangle6120
 
-- (void)initAdnetworkIfNeeded {
-    [super initAdnetworkIfNeeded];
-    self.adSize = MTGMediumRectangularBanner300x250;
+- (id)init {
+    self = [super init];
+    if (self) {
+        self.adSize = MTGMediumRectangularBanner300x250;
+    }
+    return self;
 }
 
 @end

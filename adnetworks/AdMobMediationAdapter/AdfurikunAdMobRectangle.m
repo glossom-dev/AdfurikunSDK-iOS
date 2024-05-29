@@ -8,17 +8,9 @@
 
 @implementation AdfurikunAdMobRectangle
 
-- (void)loadBannerForAdConfiguration:(GADMediationBannerAdConfiguration *)adConfiguration
-                   completionHandler:(GADMediationBannerLoadCompletionHandler)completionHandler {
-    self.closure = completionHandler;
-    NSString *adUnit = adConfiguration.credentials.settings[@"parameter"];
-    if (adUnit) {
-        [ADFmyRectangle initializeWithAppID:adUnit];
-        self.bannerAd = [ADFmyRectangle getInstance:adUnit];
-        [self.bannerAd loadAndNotifyTo:self];
-        self.bannerSize = CGRectMake(0, 0, 300, 250);
-    }
+- (ADFmyBanner *)createADFBanner:(NSString *)appId {
+    self.bannerSize = CGRectMake(0, 0, 300, 250);
+    return [ADFmyRectangle getInstance:appId];
 }
-
 
 @end

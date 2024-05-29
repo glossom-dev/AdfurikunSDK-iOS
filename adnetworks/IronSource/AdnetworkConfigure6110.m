@@ -7,11 +7,11 @@
 //
 
 #import "AdnetworkConfigure6110.h"
-#import "Banner6110.h"
+#import "AdnetworkParam6110.h"
+//#import "Banner6110.h"
 
 @interface AdnetworkConfigure6110 ()
 
-@property (nonatomic) bool isInitialized;
 @property (nonatomic) NSMutableDictionary <NSString *, ADFmyMovieRewardInterface*> *movieRewardAdapters;
 @property (nonatomic) NSMutableDictionary <NSString *, ADFmyMovieRewardInterface*> *interstitialAdapters;
 
@@ -19,47 +19,59 @@
 
 @implementation AdnetworkConfigure6110
 
+// Adnetwork SDK Version
++ (NSString *)getSDKVersion {
+    return [IronSource sdkVersion];
+}
+
+// Adnetwork名
++ (NSString *)adnetworkName {
+    return @"ironSource";
+}
+
 + (instancetype)sharedInstance {
     static AdnetworkConfigure6110 *sharedInstance = nil;
     static dispatch_once_t onceToken;
     dispatch_once(&onceToken, ^{
-        sharedInstance = [[AdnetworkConfigure6110 alloc] init];
+        sharedInstance = [self new];
     });
     return sharedInstance;
+}
+
+// GDPR関連設定実装
+- (void)setHasUserConsent:(BOOL)hasUserConsent {
+    AdapterTraceP(@"hasUserConsent: %d", (int)hasUserConsent);
+    [IronSource setConsent:hasUserConsent];
+}
+
+// COPPA関連設定実装
+- (void)isChildDirected:(BOOL)childDirected {
+    AdapterTraceP(@"childDirected: %d", (int)childDirected);
+    [IronSource setMetaDataWithKey:@"is_child_directed" value:childDirected ? @"YES": @"NO"];
+}
+
+// Adnetwork SDK初期化ロジック実装
+// 初期化成功：initSuccess()呼び出し
+// 初期化失敗：initFail()呼び出し
+- (void)initAdnetworkSDK {
+    [IronSource setISDemandOnlyRewardedVideoDelegate:self];
+    [IronSource setISDemandOnlyInterstitialDelegate:self];
+    
+    [IronSource initISDemandOnly:((AdnetworkParam6110 *)self.param).appKey adUnits:@[IS_REWARDED_VIDEO, IS_INTERSTITIAL, IS_BANNER]];
+    
+    NSString *mediationString = [NSString stringWithFormat:@"Adfurikun1SDK%@", [ADFMovieOptions version]];
+    AdapterLogP(@"mediation string : %@", mediationString);
+    [IronSource setMediationType:mediationString];
+    [self initSuccess];
 }
 
 - (instancetype)init {
     self = [super init];
     if (self) {
-        self.isInitialized = false;
         self.movieRewardAdapters = [NSMutableDictionary new];
         self.interstitialAdapters = [NSMutableDictionary new];
     }
     return self;
-}
-
-- (void)initIronSource:(NSString *)appKey completion:(completionHandlerType)completionHandler {
-    if (self.isInitialized) {
-        completionHandler();
-        return;
-    }
-    
-    @try {
-        [IronSource setISDemandOnlyRewardedVideoDelegate:self];
-        [IronSource setISDemandOnlyInterstitialDelegate:self];
-        
-        [IronSource initISDemandOnly:appKey adUnits:@[IS_REWARDED_VIDEO, IS_INTERSTITIAL, IS_BANNER]];
-        
-        NSString *mediationString = [NSString stringWithFormat:@"Adfurikun%@SDK%@", [Banner6110 getAdapterRevisionVersion], [ADFMovieOptions version]];
-        AdapterLogP(@"mediation string : %@", mediationString);
-        [IronSource setMediationType:mediationString];
-        
-        self.isInitialized = true;
-        completionHandler();
-        
-    } @catch (NSException *exception) {
-        AdapterLogP(@"[ADF] adnetwork exception : %@", exception);
-    }
 }
 
 - (void)setMovieRewardAdapter:(ADFmyMovieRewardInterface *)adapter instanceId:(NSString *)instanceId {

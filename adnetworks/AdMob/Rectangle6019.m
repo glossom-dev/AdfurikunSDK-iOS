@@ -13,13 +13,10 @@
 
 @implementation Rectangle6019
 
-- (void)initAdnetworkIfNeeded {
-    if (self.testFlg) {
-        // GADMobileAds.sharedInstance.requestConfiguration.testDeviceIdentifiers = @[@"コンソールに出力されたデバイスIDを入力してください。"];
-        //詳細　https://developers.google.com/admob/ios/test-ads?hl=ja
-    }
+- (bool)initAdnetworkIfNeeded {
+    bool result = [super initAdnetworkIfNeeded];
     self.adSize = GADAdSizeMediumRectangle;
-    [self initCompleteAndRetryStartAdIfNeeded];
+    return result;
 }
 
 @end
@@ -40,9 +37,5 @@
 @end
 
 @implementation Rectangle6060
-
-+ (NSString *)adnetworkName {
-    return @"Google Ad Manager";
-}
 
 @end

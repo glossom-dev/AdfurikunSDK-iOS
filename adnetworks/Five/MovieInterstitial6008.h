@@ -6,11 +6,12 @@
 //
 
 #import <Foundation/Foundation.h>
-#import "AdnetworkBase6008.h"
+#import <ADFMovieReward/ADFmyMovieRewardInterface.h>
+#import <FiveAd/FiveAd.h>
 
 NS_ASSUME_NONNULL_BEGIN
 
-@interface MovieInterstitial6008 : AdnetworkBase6008 <FADInterstitialEventListener>
+@interface MovieInterstitial6008 : ADFmyMovieRewardInterface <FADLoadDelegate, FADInterstitialEventListener>
 
 @end
 

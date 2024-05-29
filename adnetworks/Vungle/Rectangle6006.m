@@ -10,10 +10,12 @@
 
 @implementation Rectangle6006
 
--(void)initAdnetworkIfNeeded {
-    [super initAdnetworkIfNeeded];
-
-    self.bannerSize = BannerSizeMrec;
+- (id)init {
+    self = [super init];
+    if (self) {
+        self.bannerSize = BannerSizeMrec;
+    }
+    return self;
 }
 
 @end

@@ -5,12 +5,13 @@
 //
 
 #import "AdfurikunAdMobBanner.h"
+#include <stdatomic.h>
 #import <ADFMovieReward/ADFMovieOptions.h>
 
 @interface AdfurikunAdMobBanner ()
-
+@property(nonatomic, weak, nullable) id<GADMediationBannerAdEventDelegate> adEventDelegate;
+@property(nonatomic) GADMediationBannerLoadCompletionHandler loadCompletionHandler;
 @property(nonatomic) ADFNativeAdInfo *adInfo;
-
 @end
 
 @implementation AdfurikunAdMobBanner
@@ -34,7 +35,7 @@
 }
 
 + (GADVersionNumber)adapterVersion {
-    NSString *versionString = @"1.0.0";
+    NSString *versionString = @"1.0.1";
     NSArray *versionComponents = [versionString componentsSeparatedByString:@"."];
     GADVersionNumber version = {0};
     if (versionComponents.count == 3) {
@@ -51,14 +52,37 @@
 
 - (void)loadBannerForAdConfiguration:(GADMediationBannerAdConfiguration *)adConfiguration
                    completionHandler:(GADMediationBannerLoadCompletionHandler)completionHandler {
-    self.closure = completionHandler;
-    NSString *adUnit = adConfiguration.credentials.settings[@"parameter"];
-    if (adUnit) {
-        [ADFmyBanner initializeWithAppID:adUnit];
-        self.bannerAd = [ADFmyBanner getInstance:adUnit];
+    __block atomic_flag completionHandlerCalled = ATOMIC_FLAG_INIT;
+    __block GADMediationBannerLoadCompletionHandler originalCompletionHandler = [completionHandler copy];
+    
+    self.loadCompletionHandler = ^id<GADMediationBannerAdEventDelegate>(_Nullable id<GADMediationBannerAd> ad, NSError *_Nullable error) {
+        // Only allow completion handler to be called once.
+        if (atomic_flag_test_and_set(&completionHandlerCalled)) {
+            return nil;
+        }
+        
+        id<GADMediationBannerAdEventDelegate> delegate = nil;
+        if (originalCompletionHandler) {
+            // Call original handler and hold on to its return value.
+            delegate = originalCompletionHandler(ad, error);
+        }
+        
+        // Release reference to handler. Objects retained by the handler will also
+        // be released.
+        originalCompletionHandler = nil;
+        
+        return delegate;
+    };
+    NSString *appId = adConfiguration.credentials.settings[@"parameter"];
+    if (appId) {
+        self.bannerAd = [self createADFBanner:appId];
         [self.bannerAd loadAndNotifyTo:self];
-        self.bannerSize = CGRectMake(0, 0, 320, 50);
     }
+}
+
+- (ADFmyBanner *)createADFBanner:(NSString *)appId {
+    self.bannerSize = CGRectMake(0, 0, 320, 50);
+    return [ADFmyBanner getInstance:appId];
 }
 
 - (BOOL)handlesUserClicks {
@@ -70,21 +94,23 @@
 }
 
 - (void)onNativeAdLoadFinish:(nonnull ADFNativeAdInfo *)info appID:(nonnull NSString *)appID {
-    if (self.closure && info.mediaView) {
+    if (self.loadCompletionHandler && info.mediaView) {
         self.adInfo = info;
         self.adInfo.mediaView.frame = self.bannerSize;
         self.adInfo.mediaView.mediaViewDelegate = self;
-        self.delegate = self.closure(self, nil);
+        [self.adInfo playMediaView];
+        self.adEventDelegate = self.loadCompletionHandler(self, nil);
+        [self.adInfo playMediaView];
     }
 }
 
-- (void)onNativeAdLoadError:(ADFMovieError *)error appID:(NSString *)appID {
-    if (self.closure) {
+- (void)onNativeAdLoadError:(ADFMovieError *)error appID:(NSString *)appID adnetworkError:(NSArray<AdnetworkError *> *)adnetworkError {
+    if (self.loadCompletionHandler) {
         NSDictionary *userInfo = @{
             NSLocalizedDescriptionKey: error.errorMessage
         };
         NSError *err = [[NSError alloc] initWithDomain:@"jp.glossom.adfurikun.error" code:error.errorCode userInfo:userInfo];
-        self.closure(nil, err);
+        self.adEventDelegate = self.loadCompletionHandler(nil, err);
     }
 }
 
@@ -92,24 +118,30 @@
     return self.adInfo.mediaView;
 }
 
-- (void)presentFromViewController:(nonnull UIViewController *)viewController {
-    [self.adInfo playMediaView];
-}
-
 # pragma ADFMediaViewDelegate
 
 - (void)onADFMediaViewPlayStart {
     NSLog(@"%s", __FUNCTION__);
+    if (self.adEventDelegate && [self.adEventDelegate respondsToSelector:@selector(reportImpression)]) {
+        [self.adEventDelegate reportImpression];
+    }
 }
 
 - (void)onADFMediaViewPlayFail {
     NSLog(@"%s", __FUNCTION__);
+    if (self.adEventDelegate && [self.adEventDelegate respondsToSelector:@selector(didFailToPresentWithError:)]) {
+        NSError *error = [NSError errorWithDomain:@"jp.glossom.adfurikun.error"
+                                             code:0
+                                         userInfo:@{NSLocalizedDescriptionKey: @"",
+                                                    NSLocalizedRecoverySuggestionErrorKey: @""}];
+        [self.adEventDelegate didFailToPresentWithError:error];
+    }
 }
 
 - (void)onADFMediaViewClick {
     NSLog(@"%s", __FUNCTION__);
-    if (self.delegate && [self.delegate respondsToSelector:@selector(reportClick)]) {
-        [self.delegate reportClick];
+    if (self.adEventDelegate && [self.adEventDelegate respondsToSelector:@selector(reportClick)]) {
+        [self.adEventDelegate reportClick];
     }
 }
 

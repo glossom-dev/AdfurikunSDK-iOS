@@ -7,95 +7,102 @@
 //
 
 #import "MovieNative6019.h"
+#import "AdnetworkConfigure6019.h"
+#import "AdnetworkParam6019.h"
 
 #import <ADFMovieReward/ADFMovieOptions.h>
 #import <GoogleMobileAds/GoogleMobileAds.h>
 
 @interface MovieNative6019 ()<GADNativeAdLoaderDelegate, GADNativeAdDelegate, GADVideoControllerDelegate>
 
-@property (nonatomic, nullable) NSString *unitID;
-@property (nonatomic, nullable) NSString *adChoicesPlacement;
 @property (nonatomic) GADAdLoader *adLoader;
-@property (nonatomic) BOOL testFlg;
-@property (nonatomic) BOOL sendPlayCallback;
-@property (nonatomic) BOOL sendFinishCallback;
 
 @end
 
 @implementation MovieNative6019
 
+// adapterファイルのRevision番号を返す。実装が変わる度Incrementする
 + (NSString *)getAdapterRevisionVersion {
-    return @"11";
+    return @"12";
 }
 
+// Adnetwork実装時に使うClass名。SDKが導入されているかで使う
 + (NSString *)adnetworkClassName {
     return @"GADAdLoader";
 }
 
+// ADFで定義しているAdnetwork名。
 + (NSString *)adnetworkName {
-    return @"AdMob";
+    return [AdnetworkConfigure6019 adnetworkName];
 }
 
+// Instance Variableを初期化する。また、必要な場合Configureを生成する
+-(id)init {
+    self = [super init];
+    if (self) {
+        self.configure = [AdnetworkConfigure6019 sharedInstance];
+    }
+    return self;
+}
+
+// Adnetwork Parameterを指定するAdnetworkParam Objectを生成する。
 - (void)setData:(NSDictionary *)data {
     [super setData:data];
     
-    NSString* admobId = [data objectForKey:@"ad_unit_id"];
-    if ([self isNotNull:admobId]) {
-        self.unitID = [[NSString alloc] initWithFormat:@"%@", admobId];
-    }
-    NSNumber *testFlg = [data objectForKey:@"test_flg"];
-    if ([self isNotNull:testFlg] && [testFlg isKindOfClass:[NSNumber class]]) {
-        self.testFlg = [testFlg boolValue];
-    }
-    NSString* adChoicesPlacement = [data objectForKey:@"adChoices_placement"];
-    if ([self isNotNull:adChoicesPlacement]) {
-        self.adChoicesPlacement = [[NSString alloc] initWithFormat:@"%@", adChoicesPlacement];
-    }
+    self.adParam = [[AdnetworkParam6019 alloc] initWithParam:data];
+    self.configure.param = self.adParam; // Parameterを設定する
 }
 
-- (void)initAdnetworkIfNeeded {
-    if (self.testFlg) {
-        // GADMobileAds.sharedInstance.requestConfiguration.testDeviceIdentifiers = @[@"コンソールに出力されたデバイスIDを入力してください。"];
-        //詳細　https://developers.google.com/admob/ios/test-ads?hl=ja
+// Adnetwork SDKを初期化する
+- (bool)initAdnetworkIfNeeded {
+    if (![super initAdnetworkIfNeeded]) { // 初期化済みかParameterが設定されてないとそのままReturnする
+        return false;
     }
-    [self initCompleteAndRetryStartAdIfNeeded];
+    
+    // SDK初期化はConfigureを使う
+    __weak typeof(self) weakSelf = self;
+    [self.configure initAdnetworkSDKWithCompletionHander:^(_Bool result) {
+        // 初期化完了後の実装が必要な場合こちらに追加する
+        __strong typeof(self) strongSelf = weakSelf;
+        if (!strongSelf) return;
+        [strongSelf initCompleteAndRetryStartAdIfNeeded];
+    }];
+    return true;
 }
 
-- (void)startAd {
-    [self startAdWithOption:nil];
+// 広告読み込みを開始する
+- (bool)startAd {
+    return [self startAdWithOption:nil];
 }
 
-- (void)startAdWithOption:(NSDictionary *)option {
-    if (![self canStartAd]) {
-        return;
+- (bool)startAdWithOption:(NSDictionary *)option {
+    if (![super startAd]) { // 読み込みが可能な状態かをチェックする
+        return false;
     }
-
-    if (self.unitID == nil) {
-        return;
-    }
-
-    [super startAd];
-
+    
     @try {
+        [self requireToAsyncRequestAd];
+        
         if (self.adLoader == nil) {
             GADNativeAdViewAdOptions *adViewOptions = [[GADNativeAdViewAdOptions alloc] init];
-            if (option) {
+            if (option && option[@"adChoices_placement"]) {
                 AdapterLogP(@"custom event option : %@", option);
-                self.adChoicesPlacement = option[@"adChoices_placement"];
+                ((AdnetworkParam6019 *)self.adParam).adChoicesPlacement = option[@"adChoices_placement"];
             }
-            if ([self isNotNull:self.adChoicesPlacement]) {
-                if ([self.adChoicesPlacement isEqualToString:@"top_right"]) {
+            NSString *placement = ((AdnetworkParam6019 *)self.adParam).adChoicesPlacement;
+            if ([self isNotNull:placement]) {
+                if ([placement isEqualToString:@"top_right"]) {
                     adViewOptions.preferredAdChoicesPosition = GADAdChoicesPositionTopRightCorner;
-                } else if ([self.adChoicesPlacement isEqualToString:@"top_left"]) {
+                } else if ([placement isEqualToString:@"top_left"]) {
                     adViewOptions.preferredAdChoicesPosition = GADAdChoicesPositionTopLeftCorner;
-                } else if ([self.adChoicesPlacement isEqualToString:@"bottom_right"]) {
+                } else if ([placement isEqualToString:@"bottom_right"]) {
                     adViewOptions.preferredAdChoicesPosition = GADAdChoicesPositionBottomRightCorner;
-                } else if ([self.adChoicesPlacement isEqualToString:@"bottom_left"]) {
+                } else if ([placement isEqualToString:@"bottom_left"]) {
                     adViewOptions.preferredAdChoicesPosition = GADAdChoicesPositionBottomLeftCorner;
                 }
             }
             //AdMobのDefaultは右上
-            self.adLoader = [[GADAdLoader alloc] initWithAdUnitID:self.unitID
+            self.adLoader = [[GADAdLoader alloc] initWithAdUnitID:((AdnetworkParam6019 *)self.adParam).unitID
                                                rootViewController:nil
                                                           adTypes:@[GADAdLoaderAdTypeNative]
                                                           options:@[adViewOptions]];
@@ -103,22 +110,22 @@
         }
         [self requireToAsyncRequestAd];
         GADRequest *request = [GADRequest request];
-        if (self.hasGdprConsent) {
-            GADExtras *extras = [[GADExtras alloc] init];
-            extras.additionalParameters = @{@"npa": self.hasGdprConsent.boolValue ? @"1" : @"0"};
-            [request registerAdNetworkExtras:extras];
-            AdapterLogP(@"[ADF] Adnetwork 6019, gdprConsent : %@, sdk setting value : %@", self.hasGdprConsent, extras.additionalParameters);
-        }
+        [(AdnetworkConfigure6019 *)self.configure setHasGdprConsent:self.hasGdprConsent request:request];
         [self.adLoader loadRequest:request];
     } @catch (NSException *exception) {
         [self adnetworkExceptionHandling:exception];
     }
+    return true;
 }
 
-- (void)isChildDirected:(BOOL)childDirected {
-    [super isChildDirected:childDirected];
-    GADMobileAds.sharedInstance.requestConfiguration.tagForChildDirectedTreatment = [NSNumber numberWithBool:childDirected];
-    AdapterLogP(@"Adnetwork %@, childDirected : %@, input parameter : %d", self.adnetworkKey, self.childDirected, (int)childDirected);
+// 在庫取得有無を返す
+- (BOOL)isPrepared {
+    return self.isAdLoaded;
+}
+
+// 後処理を実装
+- (void)dispose {
+    [super dispose];
 }
 
 - (void)callbackRender {
@@ -144,8 +151,6 @@
 
 - (void)adLoader:(GADAdLoader *)adLoader didReceiveNativeAd:(GADNativeAd *)nativeAd {
     AdapterTrace;
-    self.sendPlayCallback = false;
-    self.sendFinishCallback = false;
 
     MovieNativeAdView6019 *nativeAdView = [[MovieNativeAdView6019 alloc] initWithFrame:CGRectZero];
     nativeAd.mediaContent.videoController.delegate = self;
@@ -155,8 +160,7 @@
     MovieNativeAdInfo6019 *info = [[MovieNativeAdInfo6019 alloc] initWithVideoUrl:nil
                                                                             title:@""
                                                                       description:@""
-                                                                     adnetworkKey:@"6019"];
-
+                                                                     adnetworkKey:self.adnetworkKey];
 
     info.mediaType = [nativeAdView isVideoContents] ? ADFNativeAdType_Movie : ADFNativeAdType_Image;
     info.isCustomComponentSupported = true;
@@ -172,9 +176,7 @@
 
 - (void)adLoader:(GADAdLoader *)adLoader didFailToReceiveAdWithError:(NSError *)error {
     AdapterTraceP(@"error: %@", error);
-    if (error) {
-        [self setErrorWithMessage:error.localizedDescription code:error.code];
-    }
+    [self setError:error];
     [self setCallbackStatus:NativeAdCallbackLoadError];
 }
 
@@ -183,10 +185,7 @@
 /// Tells the delegate that the video controller has began or resumed playing a video.
 - (void)videoControllerDidPlayVideo:(nonnull GADVideoController *)videoController {
     AdapterTrace;
-    if (self.sendPlayCallback == false) {
-        self.sendPlayCallback = true;
-        [self callbackImpression];
-    }
+    [self callbackImpression];
 }
 
 /// Tells the delegate that the video controller has paused video.
@@ -197,10 +196,7 @@
 /// Tells the delegate that the video controller's video playback has ended.
 - (void)videoControllerDidEndVideoPlayback:(nonnull GADVideoController *)videoController {
     AdapterTrace;
-    if (self.sendFinishCallback == false) {
-        self.sendFinishCallback = true;
-        [self callbackFinish];
-    }
+    [self callbackFinish];
 }
 
 /// Tells the delegate that the video controller has muted video.

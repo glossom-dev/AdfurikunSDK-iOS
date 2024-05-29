@@ -7,11 +7,10 @@
 //
 
 #import "MovieReward6140.h"
+#import "AdnetworkConfigure6140.h"
 #import "AdnetworkParam6140.h"
 
 @interface MovieReward6140()
-
-@property (nonatomic) AdnetworkParam6140 *adParam;
 
 @property (nonatomic, strong) IAAdSpot *adSpot;
 @property (nonatomic, strong) IAFullscreenUnitController *unitController;
@@ -21,104 +20,73 @@
 
 @implementation MovieReward6140
 
-// SDKからバージョンを取得して返す
-// APIがなければ削除
-+ (NSString *)getSDKVersion {
-    return [IASDKCore.sharedInstance version];
-}
-
-// Adapterのバージョン。最初は1にして、修正がある度＋1にする
+// adapterファイルのRevision番号を返す。実装が変わる度Incrementする
 + (NSString *)getAdapterRevisionVersion {
-    return @"5";
+    return @"6";
 }
 
+// Adnetwork実装時に使うClass名。SDKが導入されているかで使う
 + (NSString *)adnetworkClassName {
     return @"IAFullscreenUnitController";
 }
 
+// ADFで定義しているAdnetwork名。
 + (NSString *)adnetworkName {
-    return @"Fyber";
+    return [AdnetworkConfigure6140 adnetworkName];
 }
 
-// getinfoからのParameter設定
++ (NSString *)getSDKVersion {
+    return [AdnetworkConfigure6140 getSDKVersion];
+}
+
+// Instance Variableを初期化する。また、必要な場合Configureを生成する
+-(id)init {
+    self = [super init];
+    if (self) {
+        self.configure = [AdnetworkConfigure6140 sharedInstance];
+    }
+    return self;
+}
+
+// Adnetwork Parameterを指定するAdnetworkParam Objectを生成する。
 - (void)setData:(NSDictionary *)data {
     [super setData:data];
     
     self.adParam = [[AdnetworkParam6140 alloc] initWithParam:data];
+    self.configure.param = self.adParam; // Parameterを設定する
 }
 
-// 広告準備有無を返す
-- (BOOL)isPrepared {
-    // ロジックに合わせて修正する
-    return self.isAdLoaded;
+// Adnetwork SDKを初期化する
+- (bool)initAdnetworkIfNeeded {
+    if (![super initAdnetworkIfNeeded]) { // 初期化済みかParameterが設定されてないとそのままReturnする
+        return false;
+    }
+    
+    // SDK初期化はConfigureを使う
+    __weak typeof(self) weakSelf = self;
+    [self.configure initAdnetworkSDKWithCompletionHander:^(_Bool result) {
+        __strong typeof(self) strongSelf = weakSelf;
+        if (!strongSelf) return;
+        // 初期化完了後の実装が必要な場合こちらに追加する
+        [strongSelf initCompleteAndRetryStartAdIfNeeded];
+    }];
+    return true;
 }
 
-// Adnetwork SDKの初期化を行う
-- (void)initAdnetworkIfNeeded {
-    // 一回のみ初期化を行うようなチェックを行う
-    if (![self needsToInit]) {
-        return;
+// 広告読み込みを開始する
+- (bool)startAd {
+    if (![super startAd]) { // 読み込みが可能な状態かをチェックする
+        return false;
     }
-    
-    if (self.adParam == nil || ![self.adParam isValid]) {
-        return;
-    }
-    
-    if (IASDKCore.sharedInstance.isInitialised) {
-        [self initCompleteAndRetryStartAdIfNeeded];
-        return;
-    }
-    
-    // Adnetwork SDKの関数を呼び出す際はTryーCatchでException Handlingを行う
-    @try {
-        // 非同期で初期化が行われる場合にはFlag設定を行う
-        [self requireToAsyncInit]; // 要らない場合には消す
         
-        [IASDKCore.sharedInstance initWithAppID:self.adParam.appId
-                                completionBlock:^(BOOL success, NSError * _Nullable error) {
-            if (success) {
-                [self initCompleteAndRetryStartAdIfNeeded];
-                // COPPA関連設定はSDK初期化後にやるようにマニュアルに書いてる。
-                if (self.childDirected) {
-                    IASDKCore.sharedInstance.coppaApplies = self.childDirected.boolValue ? IACoppaAppliesTypeDenied : IACoppaAppliesTypeGiven;
-                    AdapterLogP(@"Adnetwork %@, childDirected : %@", self.adnetworkKey, self.childDirected);
-                }
-            } else {
-                AdapterLogP(@"init error (%@)", error);
-            }
-        } completionQueue:nil];
-    } @catch (NSException *exception) {
-        [self adnetworkExceptionHandling:exception];
-    }
-}
-
-// 広告呼び込みを行う
-- (void)startAd {
-    // 初期化が完了しているかをチェック
-    if (![self canStartAd]) {
-        return;
-    }
+    [self.configure soundControl];
     
-    if (self.adParam == nil || ![self.adParam isValid]) {
-        return;
-    }
-    
-    [super startAd];
-    
-    //音出力設定
-    ADFMovieOptions_Sound soundState = [ADFMovieOptions getSoundState];
-    if (ADFMovieOptions_Sound_Default != soundState) {
-        IASDKCore.sharedInstance.muteAudio = (ADFMovieOptions_Sound_Off == soundState);
-    }
-    
-    // Adnetwork SDKの関数を呼び出す際はTryーCatchでException Handlingを行う
     @try {
-        // 非同期で行われる場合にはFlag設定を行う
         [self requireToAsyncRequestAd];
-
+        
         if (self.adSpot == nil) {
             IAAdRequest *request = [IAAdRequest build:^(id<IAAdRequestBuilder>  _Nonnull builder) {
-                builder.spotID = self.adParam.placementId;
+                builder.spotID = ((AdnetworkParam6140 *)self.adParam).placementId;
             }];
             self.videoContentController = [IAVideoContentController build:^(id<IAVideoContentControllerBuilder>  _Nonnull builder) {
                 builder.videoContentDelegate = self;
@@ -136,29 +104,44 @@
         __weak typeof(self) weakSelf = self;
         [self.adSpot fetchAdWithCompletion:^(IAAdSpot * _Nullable adSpot, IAAdModel * _Nullable adModel, NSError * _Nullable error) {
             AdapterLogP(@"error : %@", error);
+            __strong typeof(self) strongSelf = weakSelf;
+            if (!strongSelf) return;
             if (error) {
-                [weakSelf setErrorWithMessage:error.localizedDescription code:error.code];
-                [weakSelf setCallbackStatus:MovieRewardCallbackFetchFail];
+                [strongSelf setErrorWithMessage:error.localizedDescription code:error.code];
+                [strongSelf setCallbackStatus:MovieRewardCallbackFetchFail];
                 return;
             }
-            [weakSelf setCallbackStatus:MovieRewardCallbackFetchComplete];
+            [strongSelf setCallbackStatus:MovieRewardCallbackFetchComplete];
         }];
     } @catch (NSException *exception) {
         [self adnetworkExceptionHandling:exception];
     }
+    return true;
 }
 
-// 広告再生関数
-// showAdWithPresentingViewController と両方を必ず実装する
+// 在庫取得有無を返す
+- (BOOL)isPrepared {
+    return self.isAdLoaded;
+}
+
+// 広告再生
 - (void)showAd {
     [super showAd];
     
-    @try {
-        [self requireToAsyncPlay];
+    if (!self.unitController) {
+        [self setCallbackStatus:MovieRewardCallbackPlayFail];
+        return;
+    }
 
-        [self.unitController showAdAnimated:true completion:nil];
-    } @catch (NSException *exception) {
-        [self adnetworkExceptionHandling:exception];
+    if ([self isPrepared]) {
+        @try {
+            [self requireToAsyncPlay];
+            [self.unitController showAdAnimated:true completion:nil];
+        } @catch (NSException *exception) {
+            [self adnetworkExceptionHandling:exception];
+            [self setCallbackStatus:MovieRewardCallbackPlayFail];
+        }
+    } else {
         [self setCallbackStatus:MovieRewardCallbackPlayFail];
     }
 }
@@ -167,10 +150,8 @@
     [self showAd];
 }
 
--(void)setHasUserConsent:(BOOL)hasUserConsent {
-    [super setHasUserConsent:hasUserConsent];
-    [IASDKCore.sharedInstance setGDPRConsent:hasUserConsent];
-    AdapterLogP(@"Adnetwork 6140, gdprConsent : %@, sdk setting value : %d", self.hasGdprConsent, (int)hasUserConsent);
+- (NSString *)getPlayingAdCreativeId {
+    return [AdnetworkConfigure6140.sharedInstance creativeId];
 }
 
 /*

@@ -10,7 +10,7 @@
 
 NS_ASSUME_NONNULL_BEGIN
 
-@interface AdfurikunAdMobReward : NSObject <GADMediationAdapter>
+@interface AdfurikunAdMobReward : NSObject <GADMediationAdapter, GADMediationRewardedAd, ADFmyMovieRewardDelegate>
 @property (nonatomic) ADFmyMovieReward *movieReward;
 @end
 

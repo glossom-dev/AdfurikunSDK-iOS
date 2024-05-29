@@ -17,11 +17,12 @@ class MovieReward6010: ADFmyMovieRewardInterface {
     
     private var sid: String?
     private var tag: String = ""
-
+    private var sourceAppId: String?
+    
     private var didLoad = false
 
     override class func getAdapterRevisionVersion() -> String {
-        return "4"
+        return "5"
     }
     
     override class func adnetworkClassName() -> String {
@@ -41,31 +42,45 @@ class MovieReward6010: ADFmyMovieRewardInterface {
         if let tag = data["tag"] as? String {
             self.tag = tag
         }
+        if let app_id = data["app_id"] as? String, app_id.count > 0 {
+            self.sourceAppId = app_id
+        }
+        self.adParam = ADFAdnetworkParam.init(param: [:])
     }
 
-    override func initAdnetworkIfNeeded() {
+    override func initAdnetworkIfNeeded() -> Bool {
         guard amoadInterstitialVideo == nil, let sid = sid else {
-            return
+            return false
         }
         guard needsToInit() == true else {
-            return
+            return false
         }
-        
+
+        if ADFMovieOptions.getTestMode() {
+            AMoAdLogger.logLevel = .info
+        }
+
+        if let sourceAppId = sourceAppId {
+            print("MovieReward6010: set source app id: \(sourceAppId)")
+            AMoAdSKAdSetting.shared.setSourceAppId(sourceAppId: sourceAppId)
+        }
+
         amoadInterstitialVideo = AMoAdInterstitialVideo.shared(sid: sid, tag: tag)
         amoadInterstitialVideo?.delegate = self
         setCancellable()
         initCompleteAndRetryStartAdIfNeeded()
+        return true
     }
 
-    override func startAd() {
-        guard canStartAd() else {
-            return
+    override func startAd() -> Bool {
+        guard super.startAd() else {
+            return false
         }
         if amoadInterstitialVideo?.isLoaded == false {
-            super.startAd()
             amoadInterstitialVideo?.load()
             didLoad = true
         }
+        return true
     }
 
     override func isPrepared() -> Bool {
@@ -103,7 +118,7 @@ extension MovieReward6010: AMoAdInterstitialVideoDelegate {
     func amoadInterstitialVideoDidLoadAd(amoadInterstitialVideo: AMoAdInterstitialVideo, result: AMoAdResult) {
         print("MovieReward6010: amoadInterstitialVideoDidLoadAd, result : \(result)")
         if result == .success {
-            print("AMoAdResultSuccess")
+            print("MovieReward6010: AMoAdResultSuccess")
             setCallbackStatus(MovieRewardCallbackFetchComplete)
         } else {
             setCallbackStatus(MovieRewardCallbackFetchFail)
@@ -138,4 +153,24 @@ extension MovieReward6010: AMoAdInterstitialVideoDelegate {
     func amoadInterstitialVideoDidClickAd(amoadInterstitialVideo: AMoAdInterstitialVideo) {
         print("MovieReward6010: amoadInterstitialVideoDidClickAd")
     }
+}
+
+@objc(MovieReward6180)
+class MovieReward6180: MovieReward6010 {
+}
+
+@objc(MovieReward6181)
+class MovieReward6181: MovieReward6010 {
+}
+
+@objc(MovieReward6182)
+class MovieReward6182: MovieReward6010 {
+}
+
+@objc(MovieReward6183)
+class MovieReward6183: MovieReward6010 {
+}
+
+@objc(MovieReward6184)
+class MovieReward6184: MovieReward6010 {
 }

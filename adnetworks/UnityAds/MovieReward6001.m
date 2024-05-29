@@ -6,107 +6,102 @@
 //
 #import <UIKit/UIKit.h>
 #import "MovieReward6001.h"
-#import <ADFMovieReward/ADFMovieOptions.h>
-
-@interface MovieReward6001()
-@property (nonatomic, strong) NSString *gameId;
-@property (nonatomic, strong) NSString *placementId;
-@property (nonatomic) BOOL testFlg;
-@end
+#import "AdnetworkConfigure6001.h"
+#import "AdnetworkParameter6001.h"
 
 @implementation MovieReward6001
 
-//課題：ANDW SDKのバージョン情報をSDKから取得できるようにする
-+ (NSString *)getSDKVersion {
-    return UnityAds.getVersion;
-}
-
+// adapterファイルのRevision番号を返す。実装が変わる度Incrementする
 + (NSString *)getAdapterRevisionVersion {
-    return @"12";
+    return @"13";
 }
 
+// Adnetwork実装時に使うClass名。SDKが導入されているかで使う
 + (NSString *)adnetworkClassName {
     return @"UnityAds";
 }
 
+// ADFで定義しているAdnetwork名。
 + (NSString *)adnetworkName {
-    return @"Unity Ads";
+    return [AdnetworkConfigure6001 adnetworkName];
 }
 
--(void)dealloc {
-    _gameId = nil;
-    _placementId = nil;
++ (NSString *)getSDKVersion {
+    return [AdnetworkConfigure6001 getSDKVersion];
 }
 
-/**
- *  データの設定
- */
--(void)setData:(NSDictionary *)data {
+// Instance Variableを初期化する。また、必要な場合Configureを生成する
+-(id)init {
+    self = [super init];
+    if (self) {
+        self.configure = [AdnetworkConfigure6001 sharedInstance];
+    }
+    return self;
+}
+
+// Adnetwork Parameterを指定するAdnetworkParam Objectを生成する。
+- (void)setData:(NSDictionary *)data {
     [super setData:data];
     
-    if (ADFMovieOptions.getTestMode) {
-        self.testFlg = YES;
+    self.adParam = [[AdnetworkParameter6001 alloc] initWithParam:data];
+    self.configure.param = self.adParam; // Parameterを設定する
+}
+
+// Adnetwork SDKを初期化する
+- (bool)initAdnetworkIfNeeded {
+    if (![super initAdnetworkIfNeeded]) { // 初期化済みかParameterが設定されてないとそのままReturnする
+        return false;
+    }
+    
+    // SDK初期化はConfigureを使う
+    __weak typeof(self) weakSelf = self;
+    [self.configure initAdnetworkSDKWithCompletionHander:^(_Bool result) {
+        __strong typeof(self) strongSelf = weakSelf;
+        if (!strongSelf) return;
+        // 初期化完了後の実装が必要な場合こちらに追加する
+        [strongSelf initCompleteAndRetryStartAdIfNeeded];
+    }];
+    return true;
+}
+
+// 広告読み込みを開始する
+- (bool)startAd {
+    if (![super startAd]) { // 読み込みが可能な状態かをチェックする
+        return false;
+    }
+    
+    @try {
+        [self requireToAsyncRequestAd];
+        [UnityAds load:((AdnetworkParameter6001 *)self.adParam).placementId loadDelegate:self];
+    } @catch (NSException *exception) {
+        [self adnetworkExceptionHandling:exception];
+    }
+    return true;
+}
+
+// 在庫取得有無を返す
+- (BOOL)isPrepared {
+    return self.isAdLoaded;
+}
+
+// 広告再生
+- (void)showAd {
+    UIViewController *topVC = [self topMostViewController];
+    if (topVC) {
+        [self showAdWithPresentingViewController:topVC];
     } else {
-        NSNumber *testFlg = [data objectForKey:@"test_flg"];
-        if ([self isNotNull:testFlg] && [testFlg isKindOfClass:[NSNumber class]]) {
-            self.testFlg = [testFlg boolValue];
-        }
-    }
-
-    NSString *dataGameId = [data objectForKey:@"game_id"];
-    if ([self isNotNull:dataGameId]) {
-        self.gameId = [NSString stringWithFormat:@"%@", dataGameId];
-    }
-    NSString *dataPlacementId = [data objectForKey:@"placement_id"];
-    if ([self isNotNull:dataPlacementId]) {
-        self.placementId = [NSString stringWithFormat:@"%@",dataPlacementId];
+        [self setCallbackStatus:MovieRewardCallbackPlayFail];
     }
 }
 
--(void)initAdnetworkIfNeeded {
-    if (self.gameId && self.placementId) {
-        if (!UnityAds.isInitialized) {
-            @try {
-                [UnityAds initialize:self.gameId testMode:self.testFlg initializationDelegate:self];
-            } @catch (NSException *exception) {
-                [self adnetworkExceptionHandling:exception];
-            }
-        } else {
-            [self initCompleteAndRetryStartAdIfNeeded];
-        }
-    }
-}
-
-/**
- *  広告の読み込みを開始する
- */
--(void)startAd {
-    if (![self canStartAd]) {
-        return;
-    }
-    
-    [super startAd];
-    
-    if (UnityAds.isInitialized && self.placementId) {
-        [UnityAds load:self.placementId loadDelegate:self];
-    }
-}
-
-/**
- *  広告の表示を行う
- */
--(void)showAd {
-    [self showAdWithPresentingViewController:[self topMostViewController]];
-}
-
--(void)showAdWithPresentingViewController:(UIViewController *)viewController {
+- (void)showAdWithPresentingViewController:(UIViewController *)viewController {
     [super showAdWithPresentingViewController:viewController];
     
     if (viewController != nil && self.isPrepared) {
         @try {
             [self requireToAsyncPlay];
             
-            [UnityAds show:viewController placementId:self.placementId showDelegate:self];
+            [UnityAds show:viewController placementId:((AdnetworkParameter6001 *)self.adParam).placementId showDelegate:self];
         } @catch (NSException *exception) {
             [self adnetworkExceptionHandling:exception];
             [self setCallbackStatus:MovieRewardCallbackPlayFail];
@@ -118,22 +113,6 @@
     }
 }
 
--(void)setHasUserConsent:(BOOL)hasUserConsent {
-    [super setHasUserConsent:hasUserConsent];
-    UADSMetaData *gdprConsentMetaData = [[UADSMetaData alloc] init];
-    [gdprConsentMetaData set:@"gdpr.consent" value:hasUserConsent ? @YES : @NO];
-    [gdprConsentMetaData commit];
-    AdapterLogP(@"Adnetwork 6001, gdprConsent : %@, sdk setting value : %@", self.hasGdprConsent, hasUserConsent ? @YES : @NO);
-}
-
-- (void)isChildDirected:(BOOL)childDirected {
-    [super isChildDirected:childDirected];
-    UADSMetaData *gdprConsentMetaData = [[UADSMetaData alloc] init];
-    [gdprConsentMetaData set:@"user.nonbehavioral" value:childDirected ? @YES : @NO];
-    [gdprConsentMetaData commit];
-    AdapterLogP(@"Adnetwork %@, childDirected : %@, input parameter : %d", self.adnetworkKey, self.childDirected, (int)childDirected);
-}
-
 -(void)sendFetchComplete {
     [self setCallbackStatus:MovieRewardCallbackFetchComplete];
 }
@@ -142,23 +121,13 @@
     [self setCallbackStatus:MovieRewardCallbackFetchFail];
 }
 
-#pragma mark: UnityAdsInitializationDelegate
-- (void)initializationComplete {
-    AdapterTrace;
-    [self initCompleteAndRetryStartAdIfNeeded];
-}
-
-- (void)initializationFailed: (UnityAdsInitializationError)error withMessage: (NSString *)message {
-    AdapterTraceP(@"error message : %@", message);
-}
-
 #pragma mark: UnityAdsLoadDelegate
 - (void)unityAdsAdLoaded: (NSString *)placementId {
     AdapterTraceP(@"object : %@, placement Id : %@", self, placementId);
-    if ([self.placementId isEqualToString:placementId]) {
+    if ([((AdnetworkParameter6001 *)self.adParam).placementId isEqualToString:placementId]) {
         [self sendFetchComplete];
     } else {
-        AdapterLogP(@"unityAdsAdLoaded(%@), but placemendId(%@) is not equal to %@", self, placementId, self.placementId);
+        AdapterLogP(@"unityAdsAdLoaded(%@), but placemendId(%@) is not equal to %@", self, placementId, ((AdnetworkParameter6001 *)self.adParam).placementId);
     }
 }
 

@@ -10,10 +10,12 @@
 
 @implementation Rectangle6017
 
--(void)initAdnetworkIfNeeded {
-    [super initAdnetworkIfNeeded];
- 
-    self.adSize = kPAGBannerSize300x250;
+- (id)init {
+    self = [super init];
+    if (self) {
+        self.adSize = kPAGBannerSize300x250;
+    }
+    return self;
 }
 
 @end

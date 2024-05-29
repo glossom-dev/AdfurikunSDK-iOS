@@ -10,10 +10,12 @@
 
 @implementation Rectangle6110
 
-- (void)initAdnetworkIfNeeded {
-    [super initAdnetworkIfNeeded];
-    
-    self.bannerSize = ISBannerSize_RECTANGLE;
+-(id)init {
+    self = [super init];
+    if (self) {
+        self.bannerSize = ISBannerSize_RECTANGLE;
+    }
+    return self;
 }
 
 @end
