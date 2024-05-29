@@ -7,19 +7,22 @@
 //
 
 #import "MovieReward6019.h"
+#import "AdnetworkConfigure6019.h"
+#import "AdnetworkParam6019.h"
+
 #import <ADFMovieReward/ADFMovieOptions.h>
 #import <GoogleMobileAds/GoogleMobileAds.h>
 
 @interface MovieReward6019 ()<GADFullScreenContentDelegate>
-@property(nonatomic) GADRewardedAd *rewardedAd;
-@property(nonatomic) NSString *unitID;
-@property(nonatomic) BOOL testFlg;
+
+@property (nonatomic) GADRewardedAd *rewardedAd;
+
 @end
 
 @implementation MovieReward6019
 
 + (NSString *)getAdapterRevisionVersion {
-    return @"15";
+    return @"16";
 }
 
 + (NSString *)adnetworkClassName {
@@ -27,12 +30,13 @@
 }
 
 + (NSString *)adnetworkName {
-    return @"AdMob";
+    return [AdnetworkConfigure6019 adnetworkName];
 }
 
 -(id)init {
     self = [super init];
     if (self) {
+        self.configure = [AdnetworkConfigure6019 sharedInstance];
     }
     return self;
 }
@@ -40,55 +44,41 @@
 - (void)setData:(NSDictionary *)data {
     [super setData:data];
     
-    NSString* admobId = [data objectForKey:@"ad_unit_id"];
-    if ([self isNotNull:admobId]) {
-        self.unitID = [[NSString alloc] initWithFormat:@"%@", admobId];
-    }
-    NSNumber *testFlg = [data objectForKey:@"test_flg"];
-    if ([self isNotNull:testFlg] && [testFlg isKindOfClass:[NSNumber class]]) {
-        self.testFlg = [testFlg boolValue];
-    }
+    self.adParam = [[AdnetworkParam6019 alloc] initWithParam:data];
+    self.configure.param = self.adParam;
 }
 
-- (void)initAdnetworkIfNeeded {
-    if (self.testFlg) {
-        //GADMobileAds.sharedInstance.requestConfiguration.testDeviceIdentifiers = @[@"コンソールに出力されたデバイスIDを入力してください。"]; //詳細　https://developers.google.com/admob/ios/test-ads?hl=ja
+- (bool)initAdnetworkIfNeeded {
+    if (![super initAdnetworkIfNeeded]) {
+        return false;
     }
-    ADFMovieOptions_Sound soundState = [ADFMovieOptions getSoundState];
-    if (ADFMovieOptions_Sound_On == soundState) {
-        GADMobileAds.sharedInstance.applicationMuted = NO;
-    } else if (ADFMovieOptions_Sound_Off == soundState) {
-        GADMobileAds.sharedInstance.applicationMuted = YES;
-    }
-    [self initCompleteAndRetryStartAdIfNeeded];
+
+    __weak typeof(self) weakSelf = self;
+    [self.configure initAdnetworkSDKWithCompletionHander:^(_Bool result) {
+        __strong typeof(self) strongSelf = weakSelf;
+        if (!strongSelf) return;
+        [self initCompleteAndRetryStartAdIfNeeded];
+    }];
+    [self.configure soundControl];
+    return true;
 }
 
-- (void)startAd {
-    if (![self canStartAd]) {
-        return;
-    }
-
-    if (self.unitID == nil) {
-        return;
+- (bool)startAd {
+    if (![super startAd]) {
+        return false;
     }
     
     if ([self isPrepared]) {
         [self adRequestSccess:self.rewardedAd];
-        return;
+        return true;
     }
-    
-    [super startAd];
     
     @try {
         GADRequest *request = [GADRequest request];
-        if (self.hasGdprConsent) {
-            GADExtras *extras = [[GADExtras alloc] init];
-            extras.additionalParameters = @{@"npa": self.hasGdprConsent.boolValue ? @"1" : @"0"};
-            [request registerAdNetworkExtras:extras];
-            AdapterLogP(@"[ADF] Adnetwork 6019, gdprConsent : %@, sdk setting value : %@", self.hasGdprConsent, extras.additionalParameters);
-        }
+        [(AdnetworkConfigure6019 *)self.configure setHasGdprConsent:self.hasGdprConsent request:request];
+
         [self requireToAsyncRequestAd];
-        [GADRewardedAd loadWithAdUnitID:self.unitID
+        [GADRewardedAd loadWithAdUnitID:((AdnetworkParam6019 *)(self.adParam)).unitID
                                 request:request
                       completionHandler:^(GADRewardedAd * _Nullable rewardedAd, NSError * _Nullable error) {
             if (error) {
@@ -100,6 +90,7 @@
     } @catch (NSException *exception) {
         [self adnetworkExceptionHandling:exception];
     }
+    return true;
 }
 
 - (BOOL)isPrepared {
@@ -113,24 +104,28 @@
 - (void)showAdWithPresentingViewController:(UIViewController *)viewController {
     [super showAdWithPresentingViewController:viewController];
 
+    if (!self.rewardedAd) {
+        [self setCallbackStatus:MovieRewardCallbackPlayFail];
+        return;
+    }
+
     if ([self isPrepared]) {
         @try {
             [self requireToAsyncPlay];
+            __weak typeof(self) weakSelf = self;
             [self.rewardedAd presentFromRootViewController:[self topMostViewController]
                                   userDidEarnRewardHandler:^{
-                [self setCallbackStatus:MovieRewardCallbackPlayComplete];
+                __strong typeof(self) strongSelf = weakSelf;
+                if (!strongSelf) return;
+                [strongSelf setCallbackStatus:MovieRewardCallbackPlayComplete];
             }];
         } @catch (NSException *exception) {
             [self adnetworkExceptionHandling:exception];
             [self setCallbackStatus:MovieRewardCallbackPlayFail];
         }
+    } else {
+        [self setCallbackStatus:MovieRewardCallbackPlayFail];
     }
-}
-
-- (void)isChildDirected:(BOOL)childDirected {
-    [super isChildDirected:childDirected];
-    GADMobileAds.sharedInstance.requestConfiguration.tagForChildDirectedTreatment = [NSNumber numberWithBool:childDirected];
-    AdapterLogP(@"Adnetwork %@, childDirected : %@, input parameter : %d", self.adnetworkKey, self.childDirected, (int)childDirected);
 }
 
 - (void)adRequestSccess:(GADRewardedAd * _Nullable)rewardedAd {
@@ -151,7 +146,7 @@
 
 - (void)adRequestFailure:(NSError *)error {
     AdapterTraceP(@"error: %@", error);
-    [self setErrorWithMessage:error.localizedDescription code:error.code];
+    [self setError:error];
     [self setCallbackStatus:MovieRewardCallbackFetchFail];
 }
 

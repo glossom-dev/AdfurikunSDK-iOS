@@ -7,133 +7,149 @@
 //
 
 #import "MovieInterstitial6017.h"
-#import "MovieReward6017.h"
-#import <ADFMovieReward/ADFMovieOptions.h>
-#import <PAGAdSDK/PAGAdSDK.h>
+#import "AdnetworkConfigure6017.h"
 #import "AdnetworkParam6017.h"
+
+#import <PAGAdSDK/PAGAdSDK.h>
 
 @interface MovieInterstitial6017 ()<PAGLInterstitialAdDelegate>
 
 @property (nonatomic, strong) PAGLInterstitialAd *fullscreenVideoAd;
-@property (nonatomic) AdnetworkParam6017 *adParam;
 
 @end
 
 @implementation MovieInterstitial6017
 
-+ (NSString *)getSDKVersion {
-    return PAGSdk.SDKVersion;
-}
-
+// adapterファイルのRevision番号を返す。実装が変わる度Incrementする
 + (NSString *)getAdapterRevisionVersion {
-    return @"14";
+    return @"15";
 }
 
+// Adnetwork実装時に使うClass名。SDKが導入されているかで使う
 + (NSString *)adnetworkClassName {
     return @"PAGLInterstitialAd";
 }
 
+// ADFで定義しているAdnetwork名。
 + (NSString *)adnetworkName {
-    return @"Pangle";
+    return [AdnetworkConfigure6017 adnetworkName];
 }
 
++ (NSString *)getSDKVersion {
+    return [AdnetworkConfigure6017 getSDKVersion];
+}
+
+// Instance Variableを初期化する。また、必要な場合Configureを生成する
 -(id)init {
     self = [super init];
     if (self) {
+        self.configure = [AdnetworkConfigure6017 sharedInstance];
     }
     return self;
 }
 
+// Adnetwork Parameterを指定するAdnetworkParam Objectを生成する。
 - (void)setData:(NSDictionary *)data {
     [super setData:data];
     
     self.adParam = [[AdnetworkParam6017 alloc] initWithParam:data];
+    self.configure.param = self.adParam; // Parameterを設定する
 }
 
-- (BOOL)isPrepared {
-    return self.isAdLoaded;
+// Adnetwork SDKを初期化する
+- (bool)initAdnetworkIfNeeded {
+    if (![super initAdnetworkIfNeeded]) { // 初期化済みかParameterが設定されてないとそのままReturnする
+        return false;
+    }
+    
+    // SDK初期化はConfigureを使う
+    __weak typeof(self) weakSelf = self;
+    [self.configure initAdnetworkSDKWithCompletionHander:^(_Bool result) {
+        __strong typeof(self) strongSelf = weakSelf;
+        if (!strongSelf) return;
+        // 初期化完了後の実装が必要な場合こちらに追加する
+        [strongSelf initCompleteAndRetryStartAdIfNeeded];
+    }];
+    return true;
 }
 
-- (void)initAdnetworkIfNeeded {
-    if (![self needsToInit]) {
-        return;
+// 広告読み込みを開始する
+- (bool)startAd {
+    if (![super startAd]) { // 読み込みが可能な状態かをチェックする
+        return false;
     }
-    if (!self.adParam || ![self.adParam isValid]) {
-        return;
-    }
-
-    @try {
-        [self requireToAsyncInit];
-        
-        [MovieConfigure6017.sharedInstance configureWithAppId:self.adParam.appID
-                                                   gdprStatus:self.hasGdprConsent
-                                                childDirected:self.childDirected
-                                                 appLogoImage:nil
-                                                   completion:^{
-            [self initCompleteAndRetryStartAdIfNeeded];
-        }];
-    } @catch (NSException *exception) {
-        [self adnetworkExceptionHandling:exception];
-    }
-}
-
-- (void)startAd {
-    if (![self canStartAd]) {
-        return;
-    }
-
-    if (!self.adParam || ![self.adParam isValid]) {
-        return;
-    }
-
-    self.isAdLoaded = NO;
+    
     if (self.fullscreenVideoAd) {
         self.fullscreenVideoAd = nil;
     }
+
     @try {
         [self requireToAsyncRequestAd];
-        
         PAGInterstitialRequest *request = [PAGInterstitialRequest request];
-        [PAGLInterstitialAd loadAdWithSlotID:self.adParam.slotID
+        __weak typeof(self) weakSelf = self;
+        [PAGLInterstitialAd loadAdWithSlotID:((AdnetworkParam6017 *)self.adParam).slotID
                                      request:request
                            completionHandler:^(PAGLInterstitialAd * _Nullable interstitialAd, NSError * _Nullable error) {
+            __strong typeof(self) strongSelf = weakSelf;
+            if (!strongSelf) return;
             // Load Fail
             if (error) {
                 AdapterTraceP(@"error : %@", error);
-                [self setErrorWithMessage:error.localizedDescription code:error.code];
-                [self setCallbackStatus:MovieRewardCallbackFetchFail];
+                [strongSelf setErrorWithMessage:error.localizedDescription code:error.code];
+                [strongSelf setCallbackStatus:MovieRewardCallbackFetchFail];
                 return;
             } else if (interstitialAd == nil) {
                 NSString *errorMsg = @"interstitialAd is nil";
                 AdapterTraceP(@"error : %@", errorMsg);
-                [self setErrorWithMessage:errorMsg code:0];
-                [self setCallbackStatus:MovieRewardCallbackFetchFail];
+                [strongSelf setErrorWithMessage:errorMsg code:0];
+                [strongSelf setCallbackStatus:MovieRewardCallbackFetchFail];
                 return;
             }
             // Load Success
             AdapterTrace;
-            self.fullscreenVideoAd = interstitialAd;
-            self.fullscreenVideoAd.delegate = self;
-            [self setCallbackStatus:MovieRewardCallbackFetchComplete];
+            strongSelf.fullscreenVideoAd = interstitialAd;
+            strongSelf.fullscreenVideoAd.delegate = strongSelf;
+            [strongSelf setCallbackStatus:MovieRewardCallbackFetchComplete];
          }];
+
     } @catch (NSException *exception) {
         [self adnetworkExceptionHandling:exception];
     }
+    return true;
 }
 
+// 在庫取得有無を返す
+- (BOOL)isPrepared {
+    return self.isAdLoaded;
+}
+
+// 広告再生
 - (void)showAd {
-    [self showAdWithPresentingViewController:[self topMostViewController]];
+    UIViewController *topVC = [self topMostViewController];
+    if (topVC) {
+        [self showAdWithPresentingViewController:topVC];
+    } else {
+        [self setCallbackStatus:MovieRewardCallbackPlayFail];
+    }
 }
 
 - (void)showAdWithPresentingViewController:(UIViewController *)viewController {
     [super showAdWithPresentingViewController:viewController];
+    
+    if (!self.fullscreenVideoAd) {
+        [self setCallbackStatus:MovieRewardCallbackPlayFail];
+        return;
+    }
 
-    @try {
-        [self requireToAsyncPlay];
-        
-        [self.fullscreenVideoAd presentFromRootViewController:viewController];
-    } @catch (NSException *exception) {
-        [self adnetworkExceptionHandling:exception];
+    if ([self isPrepared]) {
+        @try {
+            [self requireToAsyncPlay];
+            [self.fullscreenVideoAd presentFromRootViewController:viewController];
+        } @catch (NSException *exception) {
+            [self adnetworkExceptionHandling:exception];
+            [self setCallbackStatus:MovieRewardCallbackPlayFail];
+        }
+    } else {
         [self setCallbackStatus:MovieRewardCallbackPlayFail];
     }
 }

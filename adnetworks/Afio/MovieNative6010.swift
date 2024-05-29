@@ -15,8 +15,7 @@ import ADFMovieReward
 class MovieNative6010: ADFmyMovieNativeInterface {
     private var sid: String?
     private var tag: String = ""
-
-    private var isPlayStart = false
+    private var sourceAppId: String?
 
     private var amoadView: UIView!
     private var adView: UIView!
@@ -33,7 +32,7 @@ class MovieNative6010: ADFmyMovieNativeInterface {
     }
 
     override class func getAdapterRevisionVersion() -> String {
-        return "4"
+        return "5"
     }
 
     override class func adnetworkClassName() -> String {
@@ -54,23 +53,33 @@ class MovieNative6010: ADFmyMovieNativeInterface {
         if let tag = data["tag"] as? String {
             self.tag = tag
         }
+        if let app_id = data["app_id"] as? String, app_id.count > 0 {
+            self.sourceAppId = app_id
+        }
+        self.adParam = ADFAdnetworkParam.init(param: [:])
     }
 
-    override func initAdnetworkIfNeeded() {
+    override func initAdnetworkIfNeeded() -> Bool {
         guard needsToInit() == true else {
-            return
+            return false
+        }
+        if ADFMovieOptions.getTestMode() {
+            AMoAdLogger.logLevel = .info
+        }
+        if let sourceAppId = sourceAppId {
+            print("MovieNative6010: set source app id: \(sourceAppId)")
+            AMoAdSKAdSetting.shared.setSourceAppId(sourceAppId: sourceAppId)
         }
         initCompleteAndRetryStartAdIfNeeded()
+        return true
     }
 
-    override func startAd() {
-        guard canStartAd() else {
-            return
+    override func startAd() -> Bool {
+        guard super.startAd() else {
+            return false
         }
-        super.startAd()
 
         if let sid = sid {
-            super.startAd()
             AMoAdNativeViewManager.shared.prepareAd(sid: sid, iconPreloading: true, imagePreloading: true)
 
             amoadView?.removeFromSuperview()
@@ -138,6 +147,7 @@ class MovieNative6010: ADFmyMovieNativeInterface {
 
             AMoAdNativeViewManager.shared.renderAd(sid: sid, tag: tag, view: amoadView, delegate: self)
         }
+        return true
     }
 
     override func isClassReference() -> Bool {
@@ -148,10 +158,7 @@ class MovieNative6010: ADFmyMovieNativeInterface {
 extension MovieNative6010: AMoAdNativeVideoAppDelegate {
     func amoadNativeVideoDidStart(view amoadNativeMainVideoView: UIView) {
         print("MovieNative6010: amoadNativeVideoDidStart")
-        if isPlayStart == false {
-            isPlayStart = true // Pause -> Resumeになる場合でもPlay Startが呼ばれるのでFlagでチェックする
-            setCallbackStatus(NativeAdCallbackPlayStart)
-        }
+        setCallbackStatus(NativeAdCallbackPlayStart)
     }
 
     func amoadNativeVideoDidComplete(view amoadNativeMainVideoView: UIView) {
@@ -175,12 +182,11 @@ extension MovieNative6010: AMoAdNativeAppDelegate {
                 self.adInfo = MovieNativeAdInfo6010(videoUrl: nil,
                                                     title: self.shortTitleLabel.text ?? "",
                                                     description: self.longTitleLabel.text ?? "",
-                                                    adnetworkKey: "6010")
+                                                    adnetworkKey: self.adnetworkKey)
                 self.adInfo.mediaType = .movie
                 self.adInfo.setupMediaView(self.adView)
                 self.adInfo.adapter = self
 
-                self.isPlayStart = false
                 self.setCallbackStatus(NativeAdCallbackLoadFinish)
             }
         }
@@ -204,4 +210,24 @@ class MovieNativeAdInfo6010: ADFNativeAdInfo {
     override func registerInteractionViews(_ views: [UIView]) {
         print("[ADF] [SEVERE] AfiOはregisterInteractionViewsをサポートしません。")
     }
+}
+
+@objc(MovieNative6180)
+class MovieNative6180: MovieNative6010 {
+}
+
+@objc(MovieNative6181)
+class MovieNative6181: MovieNative6010 {
+}
+
+@objc(MovieNative6182)
+class MovieNative6182: MovieNative6010 {
+}
+
+@objc(MovieNative6183)
+class MovieNative6183: MovieNative6010 {
+}
+
+@objc(MovieNative6184)
+class MovieNative6184: MovieNative6010 {
 }

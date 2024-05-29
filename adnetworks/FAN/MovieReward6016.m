@@ -56,7 +56,7 @@
     }
 }
 
-- (void)initAdnetworkIfNeeded {
+- (bool)initAdnetworkIfNeeded {
     static dispatch_once_t adfFANOnceToken;
     dispatch_once(&adfFANOnceToken, ^{
         @try {
@@ -70,11 +70,12 @@
             [self adnetworkExceptionHandling:exception];
         }
     });
+    return true;
 }
 
-- (void)startAd {
+- (bool)startAd {
     if (![self canStartAd]) {
-        return;
+        return true;
     }
 
     if (self.placementId) {
@@ -88,6 +89,7 @@
             [self adnetworkExceptionHandling:exception];
         }
     }
+    return true;
 }
 
 - (BOOL)isPrepared {

@@ -7,6 +7,7 @@
 //
 //
 #import "MovieReward6004.h"
+#import "Adnetworkconfigure6004.h"
 #import "AdnetworkParam6004.h"
 
 #import <Foundation/Foundation.h>
@@ -15,112 +16,128 @@
 @interface MovieReward6004()
 
 @property (nonatomic) MaioRewarded *maioInstance;
-@property (nonatomic) AdnetworkParam6004 *param;
-@property (nonatomic) BOOL isFireCloseCallback;
 
 @end
 
-
 @implementation MovieReward6004
 
-+ (NSString *)getSDKVersion {
-    return [MaioVersion.shared toString];
-}
-
+// adapterファイルのRevision番号を返す。実装が変わる度Incrementする
 + (NSString *)getAdapterRevisionVersion {
-    return @"12";
+    return @"13";
 }
 
+// Adnetwork実装時に使うClass名。SDKが導入されているかで使う
 + (NSString *)adnetworkClassName {
     return @"Maio.MaioRewarded";
 }
 
+// ADFで定義しているAdnetwork名。
 + (NSString *)adnetworkName {
-    return @"maio";
+    return [Adnetworkconfigure6004 adnetworkName];
 }
 
-- (id)init {
++ (NSString *)getSDKVersion {
+    return [Adnetworkconfigure6004 getSDKVersion];
+}
+
+// Instance Variableを初期化する。また、必要な場合Configureを生成する
+-(id)init {
     self = [super init];
-    
-    if ( self ) {
+    if (self) {
+        self.configure = [Adnetworkconfigure6004 sharedInstance];
     }
-    
     return self;
 }
 
+// Adnetwork Parameterを指定するAdnetworkParam Objectを生成する。
 - (void)setData:(NSDictionary *)data {
     [super setData:data];
     
-    self.param = [[AdnetworkParam6004 alloc] initWithParam:data];
+    self.adParam = [[AdnetworkParam6004 alloc] initWithParam:data];
+    self.configure.param = self.adParam; // Parameterを設定する
 }
 
-- (void)initAdnetworkIfNeeded {
+// Adnetwork SDKを初期化する
+- (bool)initAdnetworkIfNeeded {
     [self initCompleteAndRetryStartAdIfNeeded];
+    return true;
 }
 
-- (void)startAd {
-    if (![self canStartAd]) {
-        return;
+// 広告読み込みを開始する
+- (bool)startAd {
+    if (![super startAd]) { // 読み込みが可能な状態かをチェックする
+        return false;
     }
-
-    if (self.param == nil || [self.param isValid] == false) {
-        return;
-    }
-    
-    [super startAd];
     
     @try {
         [self requireToAsyncRequestAd];
-        
-        MaioRequest *request = [[MaioRequest alloc] initWithZoneId:self.param.maioZoneId testMode:ADFMovieOptions.getTestMode];
+        bool testMode = ADFMovieOptions.getTestMode;
+        if (testMode) {
+            AdapterLog(@"Test Mode ON!!!");
+        }
+        MaioRequest *request = [[MaioRequest alloc] initWithZoneId:((AdnetworkParam6004 *)self.adParam).maioZoneId
+                                                          testMode:testMode];
         self.maioInstance = [MaioRewarded loadAdWithRequest:request callback:self];
     } @catch (NSException *exception) {
         [self adnetworkExceptionHandling:exception];
     }
+    return true;
 }
 
+// 在庫取得有無を返す
+- (BOOL)isPrepared {
+    return self.isAdLoaded;
+}
+
+// 広告再生
 - (void)showAd {
     [self showAdWithPresentingViewController:[self topMostViewController]];
 }
 
 - (void)showAdWithPresentingViewController:(UIViewController *)viewController {
-    [super showAd];
+    [super showAdWithPresentingViewController:viewController];
+    
+    if (!self.maioInstance) {
+        [self setCallbackStatus:MovieRewardCallbackPlayFail];
+        return;
+    }
 
-    self.isFireCloseCallback = false;
-    if (self.maioInstance) {
+    if ([self isPrepared]) {
         @try {
             [self requireToAsyncPlay];
             [self.maioInstance showWithViewContext:viewController callback:self];
-        }
-        @catch (NSException *exception) {
+        } @catch (NSException *exception) {
             [self adnetworkExceptionHandling:exception];
             [self setCallbackStatus:MovieRewardCallbackPlayFail];
         }
     } else {
-        AdapterLog(@"play error because maio instance is nil");
         [self setCallbackStatus:MovieRewardCallbackPlayFail];
     }
 }
+
+#pragma mark MaioRewardedLoadCallback
 
 - (void)didLoad:(MaioRewarded * _Nonnull)ad {
     AdapterTrace;
     if (!self.isAdLoaded) {
-        self.isAdLoaded = true;
         [self setCallbackStatus:MovieRewardCallbackFetchComplete];
     }
 }
 
+// https://github.com/imobile/MaioSDK-v2-iOS/wiki/API-Rererences#errorcode
 - (void)didFail:(MaioRewarded * _Nonnull)ad errorCode:(NSInteger)errorCode {
     AdapterTraceP(@"zone id : %@, error code : %d", ad.request.zoneId, (int)errorCode);
     [self setErrorWithMessage:@"" code:errorCode];
 
-    if (self.isAdLoaded) { // load完了後のdidFailは再生エラー
-        [self setCallbackStatus:MovieRewardCallbackPlayFail];
-        self.isAdLoaded = false;
-    } else {
+    // 0を含めて、1xxxx Error Codeは読み込み時のエラー
+    if (errorCode <= 19999) {
         [self setCallbackStatus:MovieRewardCallbackFetchFail];
+    } else { // 20000以上のError Codeは再生時のエラー
+        [self setCallbackStatus:MovieRewardCallbackPlayFail];
     }
 }
+
+#pragma mark MaioRewardedShowCallback
 
 - (void)didOpen:(MaioRewarded * _Nonnull)ad {
     AdapterTrace;
@@ -129,11 +146,7 @@
 
 - (void)didClose:(MaioRewarded * _Nonnull)ad {
     AdapterTrace;
-    if (!self.isFireCloseCallback) {
-        [self setCallbackStatus:MovieRewardCallbackClose];
-        self.isAdLoaded = false;
-        self.isFireCloseCallback = true;
-    }
+    [self setCallbackStatus:MovieRewardCallbackClose];
 }
 
 - (void)didReward:(MaioRewarded * _Nonnull)ad reward:(RewardData * _Nonnull)reward {

@@ -21,3 +21,23 @@ class MovieInterstitial6010: MovieReward6010 {
         amoadInterstitialVideo?.isCancellable = true
     }
 }
+
+@objc(MovieInterstitial6180)
+class MovieInterstitial6180: MovieInterstitial6010 {
+}
+
+@objc(MovieInterstitial6181)
+class MovieInterstitial6181: MovieInterstitial6010 {
+}
+
+@objc(MovieInterstitial6182)
+class MovieInterstitial6182: MovieInterstitial6010 {
+}
+
+@objc(MovieInterstitial6183)
+class MovieInterstitial6183: MovieInterstitial6010 {
+}
+
+@objc(MovieInterstitial6184)
+class MovieInterstitial6184: MovieInterstitial6010 {
+}

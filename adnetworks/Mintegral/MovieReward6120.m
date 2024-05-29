@@ -7,92 +7,74 @@
 //
 
 #import "MovieReward6120.h"
+#import "AdnetworkConfigure6120.h"
 #import "AdnetworkParam6120.h"
-
-@interface MovieReward6120 ()
-
-@property (nonatomic) AdnetworkParam6120 *adParam;
-
-@end
 
 @implementation MovieReward6120
 
-// SDKからバージョンを取得して返す
-// APIがなければ削除
-+ (NSString *)getSDKVersion {
-    return MTGSDK.sdkVersion;
-}
-
-// Adapterのバージョン。最初は1にして、修正がある度＋1にする
+// adapterファイルのRevision番号を返す。実装が変わる度Incrementする
 + (NSString *)getAdapterRevisionVersion {
-    return @"5";
+    return @"7";
 }
 
+// Adnetwork実装時に使うClass名。SDKが導入されているかで使う
 + (NSString *)adnetworkClassName {
     return @"MTGRewardAdManager";
 }
 
+// ADFで定義しているAdnetwork名。
 + (NSString *)adnetworkName {
-    return @"Mintegral";
+    return [AdnetworkConfigure6120 adnetworkName];
 }
 
-// getinfoからのParameter設定
++ (NSString *)getSDKVersion {
+    return [AdnetworkConfigure6120 getSDKVersion];
+}
+
+// Instance Variableを初期化する。また、必要な場合Configureを生成する
+-(id)init {
+    self = [super init];
+    if (self) {
+        self.configure = [AdnetworkConfigure6120 sharedInstance];
+    }
+    return self;
+}
+
+// Adnetwork Parameterを指定するAdnetworkParam Objectを生成する。
 - (void)setData:(NSDictionary *)data {
     [super setData:data];
     
     self.adParam = [[AdnetworkParam6120 alloc] initWithParam:data];
+    self.configure.param = self.adParam; // Parameterを設定する
 }
 
-// 広告準備有無を返す
-- (BOOL)isPrepared {
-    // ロジックに合わせて修正する
-    AdapterLogP(@"isVideoReady %d", [MTGRewardAdManager.sharedInstance isVideoReadyToPlayWithPlacementId:self.adParam.placementId unitId:self.adParam.unitId]);
-    return  self.isAdLoaded && [MTGRewardAdManager.sharedInstance isVideoReadyToPlayWithPlacementId:self.adParam.placementId unitId:self.adParam.unitId];
+// Adnetwork SDKを初期化する
+- (bool)initAdnetworkIfNeeded {
+    if (![super initAdnetworkIfNeeded]) { // 初期化済みかParameterが設定されてないとそのままReturnする
+        return false;
+    }
+    
+    // SDK初期化はConfigureを使う
+    __weak typeof(self) weakSelf = self;
+    [self.configure initAdnetworkSDKWithCompletionHander:^(_Bool result) {
+        __strong typeof(self) strongSelf = weakSelf;
+        if (!strongSelf) return;
+        // 初期化完了後の実装が必要な場合こちらに追加する
+        [strongSelf initCompleteAndRetryStartAdIfNeeded];
+    }];
+    return true;
 }
 
-// Adnetwork SDKの初期化を行う
-- (void)initAdnetworkIfNeeded {
-    // 一回のみ初期化を行うようなチェックを行う
-    if (![self needsToInit]) {
-        return;
+// 広告読み込みを開始する
+- (bool)startAd {
+    if (![super startAd]) { // 読み込みが可能な状態かをチェックする
+        return false;
     }
     
-    if (!self.adParam || ![self.adParam isValid]) {
-        return;
-    }
-    
-    // Adnetwork SDKの関数を呼び出す際はTryーCatchでException Handlingを行う
     @try {
-        // 非同期で初期化が行われる場合にはFlag設定を行う
-        [self requireToAsyncInit]; // 要らない場合には消す
-        
-        [MTGSDK.sharedInstance setAppID:self.adParam.appId ApiKey:self.adParam.appKey];
-        // 初期化が完了するとこの関数を呼び出す
-        [self initCompleteAndRetryStartAdIfNeeded]; // 適切なタイミングに移動する
-    } @catch (NSException *exception) {
-        [self adnetworkExceptionHandling:exception];
-    }
-}
-
-// 広告呼び込みを行う
-- (void)startAd {
-    // 初期化が完了しているかをチェック
-    if (![self canStartAd]) {
-        return;
-    }
-    
-    if (!self.adParam || ![self.adParam isValid]) {
-        return;
-    }
-    
-    [super startAd];
-    
-    // Adnetwork SDKの関数を呼び出す際はTryーCatchでException Handlingを行う
-    @try {
-        // 非同期で行われる場合にはFlag設定を行う
         [self requireToAsyncRequestAd];
-        
         //音出力設定
+        AdapterLogP(@"soundState: %d", (int)[ADFMovieOptions getSoundState]);
         ADFMovieOptions_Sound soundState = [ADFMovieOptions getSoundState];
         if (ADFMovieOptions_Sound_On == soundState) {
             [MTGRewardAdManager.sharedInstance setPlayVideoMute:false];
@@ -100,16 +82,30 @@
             [MTGRewardAdManager.sharedInstance setPlayVideoMute:true];
         }
         
-        [MTGRewardAdManager.sharedInstance loadVideoWithPlacementId:self.adParam.placementId
-                                                             unitId:self.adParam.unitId
+        [MTGRewardAdManager.sharedInstance loadVideoWithPlacementId:((AdnetworkParam6120 *)self.adParam).placementId
+                                                             unitId:((AdnetworkParam6120 *)self.adParam).unitId
                                                            delegate:self];
+
     } @catch (NSException *exception) {
         [self adnetworkExceptionHandling:exception];
     }
+    return true;
 }
 
-// 広告再生関数
-// showAdWithPresentingViewController と両方を必ず実装する
+// 在庫取得有無を返す
+- (BOOL)isPrepared {
+    if (![self.adParam isValid]) {
+        return false;
+    }
+    NSString *placementId = ((AdnetworkParam6120 *)self.adParam).placementId;
+    NSString *unitId = ((AdnetworkParam6120 *)self.adParam).unitId;
+    bool result = [MTGRewardAdManager.sharedInstance isVideoReadyToPlayWithPlacementId:placementId
+                                                                                unitId:unitId];
+    AdapterLogP(@"isVideoReady %d", (int)result);
+    return self.isAdLoaded && result;
+}
+
+// 広告再生
 - (void)showAd {
     UIViewController *topVC = [self topMostViewController];
     if (topVC) {
@@ -120,38 +116,26 @@
 }
 
 - (void)showAdWithPresentingViewController:(UIViewController *)viewController {
-    if (!self.adParam || ![self.adParam isValid]) {
-        [self setCallbackStatus:MovieRewardCallbackPlayFail];
-        return;
-    }
-    
     [super showAdWithPresentingViewController:viewController];
-
-    @try {
-        [self requireToAsyncPlay];
-        
-        [MTGRewardAdManager.sharedInstance showVideoWithPlacementId:self.adParam.placementId
-                                                             unitId:self.adParam.unitId
-                                                             userId:nil
-                                                           delegate:self
-                                                     viewController:viewController];
-    } @catch (NSException *exception) {
-        [self adnetworkExceptionHandling:exception];
+    
+    if ([self isPrepared]) {
+        @try {
+            [self requireToAsyncPlay];
+            [MTGRewardAdManager.sharedInstance showVideoWithPlacementId:((AdnetworkParam6120 *)self.adParam).placementId
+                                                                 unitId:((AdnetworkParam6120 *)self.adParam).unitId
+                                                                 userId:nil
+                                                               delegate:self
+                                                         viewController:viewController];
+        } @catch (NSException *exception) {
+            [self adnetworkExceptionHandling:exception];
+            [self setCallbackStatus:MovieRewardCallbackPlayFail];
+        }
+    } else {
         [self setCallbackStatus:MovieRewardCallbackPlayFail];
     }
 }
 
--(void)setHasUserConsent:(BOOL)hasUserConsent {
-    [super setHasUserConsent:hasUserConsent];
-    [MTGSDK.sharedInstance setConsentStatus:hasUserConsent];
-    AdapterLogP(@"Adnetwork 6120, gdprConsent : %@, sdk setting value : %d", self.hasGdprConsent, (int)hasUserConsent);
-}
 
-- (void)isChildDirected:(BOOL)childDirected {
-    [super isChildDirected:childDirected];
-    [MTGSDK.sharedInstance setCoppa:childDirected ? MTGBoolYes : MTGBoolNo];
-    AdapterLogP(@"Adnetwork %@, childDirected : %@, input parameter : %d", self.adnetworkKey, self.childDirected, (int)childDirected);
-}
 
 /*
  * Adnetwork SDKからのCallbackに合わせてStatusを設定する
@@ -174,6 +158,7 @@ completely
 */
 - (void)onAdLoadSuccess:(nullable NSString *)placementId unitId:(nullable NSString *)unitId {
     AdapterTrace;
+    self.creativeId = [MTGRewardAdManager.sharedInstance getCreativeIdWithUnitId:unitId];
     [self setCallbackStatus:MovieRewardCallbackFetchComplete];
 }
 

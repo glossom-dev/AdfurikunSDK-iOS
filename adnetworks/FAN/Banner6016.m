@@ -16,7 +16,7 @@
 @implementation Banner6016
 
 + (NSString *)getAdapterRevisionVersion {
-    return @"5";
+    return @"6";
 }
 
 + (NSString *)adnetworkClassName {
@@ -43,9 +43,9 @@
 /**
  *  広告の読み込みを開始する
  */
--(void)startAd {
+-(bool)startAd {
     if (![self canStartAd]) {
-        return;
+        return true;
     }
 
     if (self.placement_id) {
@@ -62,6 +62,7 @@
             [self adnetworkExceptionHandling:exception];
         }
     }
+    return true;
 }
 
 #pragma mark - FBAdViewDelegate

@@ -7,7 +7,7 @@
 //
 
 #import "MovieNative6017.h"
-#import "MovieReward6017.h"
+#import "AdnetworkConfigure6017.h"
 #import "AdnetworkParam6017.h"
 
 #pragma mark MovieNative6017
@@ -17,118 +17,123 @@
 @property (nonatomic) PAGLNativeAd *nativeAd;
 @property (nonatomic) PAGLNativeAdRelatedView *relatedView;
 @property (nonatomic) UIImageView *imageView;
-@property (nonatomic) BOOL didSendPlayStartCallback;
-@property (nonatomic) BOOL didSendPlayFinishCallback;
-@property (nonatomic) AdnetworkParam6017 *adParam;
 
 @end
 
 @implementation MovieNative6017
 
-+ (NSString *)getSDKVersion {
-    return PAGSdk.SDKVersion;
-}
-
+// adapterファイルのRevision番号を返す。実装が変わる度Incrementする
 + (NSString *)getAdapterRevisionVersion {
-    return @"10";
+    return @"11";
 }
 
+// Adnetwork実装時に使うClass名。SDKが導入されているかで使う
 + (NSString *)adnetworkClassName {
     return @"PAGLNativeAd";
 }
 
+// ADFで定義しているAdnetwork名。
 + (NSString *)adnetworkName {
-    return @"Pangle";
+    return [AdnetworkConfigure6017 adnetworkName];
 }
 
-// getinfoから取得したデータを内部変数に保存する
++ (NSString *)getSDKVersion {
+    return [AdnetworkConfigure6017 getSDKVersion];
+}
+
+// Instance Variableを初期化する。また、必要な場合Configureを生成する
+-(id)init {
+    self = [super init];
+    if (self) {
+        self.configure = [AdnetworkConfigure6017 sharedInstance];
+    }
+    return self;
+}
+
+// Adnetwork Parameterを指定するAdnetworkParam Objectを生成する。
 - (void)setData:(NSDictionary *)data {
     [super setData:data];
     
     self.adParam = [[AdnetworkParam6017 alloc] initWithParam:data];
+    self.configure.param = self.adParam; // Parameterを設定する
 }
 
-// SDKの初期化ロジックを入れる。ただし、Instance化を毎回する必要がある場合にはこちらではなくてSstartAdで行うこと
--(void)initAdnetworkIfNeeded {
-    if (![self needsToInit]) {
-        return;
+// Adnetwork SDKを初期化する
+- (bool)initAdnetworkIfNeeded {
+    if (![super initAdnetworkIfNeeded]) { // 初期化済みかParameterが設定されてないとそのままReturnする
+        return false;
     }
-    if (!self.adParam || ![self.adParam isValid]) {
-        return;
-    }
-
-    AdapterLog(@"MovieNatve6017 initAdnetworkIfNeeded");
-    @try {
-        [self requireToAsyncInit];
-        
-        [MovieConfigure6017.sharedInstance configureWithAppId:self.adParam.appID
-                                                   gdprStatus:self.hasGdprConsent
-                                                childDirected:self.childDirected
-                                                 appLogoImage:nil
-                                                   completion:^{
-            [self initCompleteAndRetryStartAdIfNeeded];
-        }];
-    } @catch (NSException *exception) {
-        [self adnetworkExceptionHandling:exception];
-    }
+    
+    // SDK初期化はConfigureを使う
+    __weak typeof(self) weakSelf = self;
+    [self.configure initAdnetworkSDKWithCompletionHander:^(_Bool result) {
+        __strong typeof(self) strongSelf = weakSelf;
+        if (!strongSelf) return;
+        // 初期化完了後の実装が必要な場合こちらに追加する
+        [strongSelf initCompleteAndRetryStartAdIfNeeded];
+    }];
+    return true;
 }
 
-- (void)clearStatusIfNeeded {
-}
-
-- (BOOL)isPrepared {
-    return self.isAdLoaded;
-}
-
-// SDKのLoading関数を呼び出す
-- (void)startAd {
-    if (![self canStartAd]) {
-        return;
+// 広告読み込みを開始する
+- (bool)startAd {
+    if (![super startAd]) { // 読み込みが可能な状態かをチェックする
+        return false;
     }
-
-    if (!self.adParam || ![self.adParam isValid]) {
-        return;
-    }
-
-    AdapterTrace;
     
     if (self.nativeAd) {
         self.nativeAd = nil;
     }
-    
-    [super startAd];
-    
+
     @try {
         [self requireToAsyncRequestAd];
-        
         PAGNativeRequest *request = PAGNativeRequest.request;
-        [PAGLNativeAd loadAdWithSlotID:self.adParam.slotID
-                                   request:request
-                         completionHandler:^(PAGLNativeAd * _Nullable nativeAd, NSError * _Nullable error) {
+        __weak typeof(self) weakSelf = self;
+        [PAGLNativeAd loadAdWithSlotID:((AdnetworkParam6017 *)self.adParam).slotID
+                               request:request
+                     completionHandler:^(PAGLNativeAd * _Nullable nativeAd, NSError * _Nullable error) {
+            __strong typeof(self) strongSelf = weakSelf;
+            if (!strongSelf) return;
+
             // load fail
             if (error) {
-                [self setErrorWithMessage:error.localizedDescription code:error.code];
-                [self setCallbackStatus:NativeAdCallbackLoadError];
+                [strongSelf setErrorWithMessage:error.localizedDescription code:error.code];
+                [strongSelf setCallbackStatus:NativeAdCallbackLoadError];
                 return;
             } else if (nativeAd == nil) {
                 NSString *errorMsg = @"nativeAd is nil";
                 AdapterTraceP(@"error : %@", errorMsg);
-                [self setErrorWithMessage:errorMsg code:0];
-                [self setCallbackStatus:NativeAdCallbackLoadError];
+                [strongSelf setErrorWithMessage:errorMsg code:0];
+                [strongSelf setCallbackStatus:NativeAdCallbackLoadError];
                 return;
             }
 
             // load success
-            [self setupNativeAdData:nativeAd];
-            [self setCallbackStatus:NativeAdCallbackLoadFinish];
+            [strongSelf setupNativeAdData:nativeAd];
+            [strongSelf setCallbackStatus:NativeAdCallbackLoadFinish];
         }];
     } @catch (NSException *exception) {
         [self adnetworkExceptionHandling:exception];
     }
+    return true;
 }
 
-- (void)startAdWithOption:(NSDictionary *)option {
-    [self startAd];
+- (bool)startAdWithOption:(NSDictionary *)option {
+    return [self startAd];
+}
+
+// 在庫取得有無を返す
+- (BOOL)isPrepared {
+    return self.isAdLoaded;
+}
+
+// startAd前の後処理
+- (void)clearStatusIfNeeded {
+}
+
+// 後処理を実装
+- (void)dispose {
+    [super dispose];
 }
 
 - (void)setupNativeAdData:(PAGLNativeAd *)nativeAd {
@@ -140,7 +145,7 @@
     MovieNativeAdInfo6017 *info = [[MovieNativeAdInfo6017 alloc] initWithVideoUrl:nil
                                                                             title:adMeta.AdTitle
                                                                       description:adMeta.AdDescription
-                                                                     adnetworkKey:@"6017"];
+                                                                     adnetworkKey:self.adnetworkKey];
     info.mediaType = (adMeta.mediaType == PAGLNativeMediaTypeVideo) ? ADFNativeAdType_Movie : ADFNativeAdType_Image;
     if (self.relatedView) {
         self.relatedView = nil;
@@ -152,10 +157,6 @@
     [nativeAd registerContainer:info.mediaView withClickableViews:@[self.relatedView.mediaView]];
     info.adapter = self;
     info.isCustomComponentSupported = false;
-    
-    self.didSendPlayStartCallback = false;
-    self.didSendPlayFinishCallback = false;
-    
     self.adInfo = info;
 }
 

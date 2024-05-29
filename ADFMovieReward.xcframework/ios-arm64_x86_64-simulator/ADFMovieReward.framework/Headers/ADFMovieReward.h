@@ -18,6 +18,7 @@
 #import <ADFMovieReward/ADFMediaView.h>
 #import <ADFMovieReward/ADFMovieError.h>
 #import <ADFMovieReward/ADFmyMovieDelegateBase.h>
+#import <ADFMovieReward/ADFmyAdnetworkConfigure.h>
 #import <ADFMovieReward/ADFmyBaseAdapterInterface.h>
 #import <ADFMovieReward/ADFmyMovieNativeInterface.h>
 #import <ADFMovieReward/ADFmyMovieRewardInterface.h>

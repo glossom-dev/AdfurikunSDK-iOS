@@ -6,98 +6,103 @@
 //
 #import <AppLovinSDK/AppLovinSDK.h>
 #import "Banner6000.h"
+#import "AdnetworkConfigure6000.h"
+#import "AdnetworkParam6000.h"
+
 #import <ADFMovieReward/ADFMovieOptions.h>
 
 @interface Banner6000 () <ALAdLoadDelegate, ALAdDisplayDelegate>
 @property (nonatomic, strong)ALAdView *adView;
-@property (nonatomic, strong)NSString *zoneIdentifier;
-@property (nonatomic, strong)NSString* appLovinSdkKey;
 @end
 
 @implementation Banner6000
 
-+ (NSString *)getSDKVersion {
-    return ALSdk.version;
-}
-
+// adapterファイルのRevision番号を返す。実装が変わる度Incrementする
 + (NSString *)getAdapterRevisionVersion {
-    return @"8";
+    return @"10";
 }
 
+// Adnetwork実装時に使うClass名。SDKが導入されているかで使う
 + (NSString *)adnetworkClassName {
     return @"ALAdView";
 }
 
+// ADFで定義しているAdnetwork名。
 + (NSString *)adnetworkName {
-    return @"AppLovin";
+    return [AdnetworkConfigure6000 adnetworkName];
 }
 
++ (NSString *)getSDKVersion {
+    return [AdnetworkConfigure6000 getSDKVersion];
+}
+
+// Instance Variableを初期化する。また、必要な場合Configureを生成する
+-(id)init {
+    self = [super init];
+    if (self) {
+        self.configure = [AdnetworkConfigure6000 sharedInstance];
+    }
+    return self;
+}
+
+// Adnetwork Parameterを指定するAdnetworkParam Objectを生成する。
 - (void)setData:(NSDictionary *)data {
     [super setData:data];
     
-    NSString *data_sdkKey = [data objectForKey:@"sdk_key"];
-    if ([self isNotNull:data_sdkKey]) {
-        self.appLovinSdkKey = [NSString stringWithFormat:@"%@", data_sdkKey];
-    }
-    NSString *data_zoneID = [data objectForKey:@"zone_id"];
-    if ([self isNotNull:data_zoneID]) {
-        self.zoneIdentifier = [NSString stringWithFormat:@"%@", data_zoneID];
-    }
+    self.adParam = [[AdnetworkParam6000 alloc] initWithParam:data];
+    self.configure.param = self.adParam; // Parameterを設定する
 }
 
--(void)initAdnetworkIfNeeded {
-    if (!self.adView && self.appLovinSdkKey && self.zoneIdentifier) {
-        @try {
-            self.adView = [[ALAdView alloc] initWithSdk:[ALSdk shared]
-                                                   size:ALAdSize.banner
-                                         zoneIdentifier:self.zoneIdentifier];
-        } @catch (NSException *exception) {
-            [self adnetworkExceptionHandling:exception];
-        }
-        
-        self.adView.adLoadDelegate = self;
-        self.adView.adDisplayDelegate = self;
-        
-        //音出力設定
-        ADFMovieOptions_Sound soundState = [ADFMovieOptions getSoundState];
-        if (ADFMovieOptions_Sound_Default != soundState) {
-            [ALSdk shared].settings.muted = (ADFMovieOptions_Sound_Off == soundState);
-        }
-
-        // デバッグ機能設定（Trueにすると端末を裏表に振ると、画面にAppLovinアイコンが表示される）
-        [ALSdk shared].settings.creativeDebuggerEnabled = [ADFMovieOptions getTestMode];
-        
-        [self initCompleteAndRetryStartAdIfNeeded];
+// Adnetwork SDKを初期化する
+- (bool)initAdnetworkIfNeeded {
+    if (![super initAdnetworkIfNeeded]) { // 初期化済みかParameterが設定されてないとそのままReturnする
+        return false;
     }
-}
-
-- (void)startAd {
-    if (![self canStartAd]) {
-        return;
-    }
-
-    [super startAd];
     
-    if (self.adView) {
-        @try {
-            [self requireToAsyncRequestAd];
-            [self.adView loadNextAd];
-        } @catch (NSException *exception) {
-            [self adnetworkExceptionHandling:exception];
+    // SDK初期化はConfigureを使う
+    __weak typeof(self) weakSelf = self;
+    [self.configure initAdnetworkSDKWithCompletionHander:^(_Bool result) {
+        __strong typeof(self) strongSelf = weakSelf;
+        if (!strongSelf) return;
+        if (!strongSelf.adView) {
+            strongSelf.adView = [[ALAdView alloc] initWithSdk:[ALSdk shared]
+                                                         size:ALAdSize.banner
+                                               zoneIdentifier:((AdnetworkParam6000 *)strongSelf.adParam).zoneIdentifier];
+            strongSelf.adView.adLoadDelegate = strongSelf;
+            strongSelf.adView.adDisplayDelegate = strongSelf;
         }
+        [strongSelf initCompleteAndRetryStartAdIfNeeded];
+    }];
+    return true;
+}
+
+// 広告読み込みを開始する
+- (bool)startAd {
+    if (![super startAd]) { // 読み込みが可能な状態かをチェックする
+        return false;
     }
+    
+    @try {
+        [self requireToAsyncRequestAd];
+        [self.adView loadNextAd];
+    } @catch (NSException *exception) {
+        [self adnetworkExceptionHandling:exception];
+    }
+    return true;
 }
 
--(void)setHasUserConsent:(BOOL)hasUserConsent {
-    [super setHasUserConsent:hasUserConsent];
-    [ALPrivacySettings setHasUserConsent:hasUserConsent];
-    AdapterLogP(@"Adnetwork 6000, gdprConsent : %@, sdk setting value : %d", self.hasGdprConsent, (int)hasUserConsent);
+- (bool)startAdWithOption:(NSDictionary *)option {
+    return [self startAd];
 }
 
-- (void)isChildDirected:(BOOL)childDirected {
-    [super isChildDirected:childDirected];
-    [ALPrivacySettings setIsAgeRestrictedUser:childDirected];
-    AdapterLogP(@"Adnetwork %@, childDirected : %@, input parameter : %d", self.adnetworkKey, self.childDirected, (int)childDirected);
+// 在庫取得有無を返す
+- (BOOL)isPrepared {
+    return self.isAdLoaded;
+}
+
+// 後処理を実装
+- (void)dispose {
+    [super dispose];
 }
 
 #pragma mark - Ad Load Delegate
@@ -109,7 +114,7 @@
             NativeAdInfo6000 *info = [[NativeAdInfo6000 alloc] initWithVideoUrl:nil
                                                                           title:@""
                                                                     description:@""
-                                                                   adnetworkKey:@"6000"];
+                                                                   adnetworkKey:self.adnetworkKey];
             info.mediaType = ADFNativeAdType_Image;
             info.adapter = self;
             [info setupMediaView:self.adView];
@@ -148,6 +153,21 @@
     [self setCallbackStatus:NativeAdCallbackClick];
 }
 
+@end
+
+@implementation Banner6011
+@end
+
+@implementation Banner6012
+@end
+
+@implementation Banner6013
+@end
+
+@implementation Banner6014
+@end
+
+@implementation Banner6015
 @end
 
 @implementation NativeAdInfo6000

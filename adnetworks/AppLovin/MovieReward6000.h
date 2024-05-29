@@ -16,11 +16,6 @@ typedef void(^completionHandlerType)(void);
 
 @end
 
-@interface MovieConfigure6000 : NSObject
-+ (instancetype)sharedInstance;
-- (void)configure:(NSString *)sdkKey completion:(void (^)(void))completionHandler;
-@end
-
 // 同一広告枠に複数のAppLovin Zoneをサポートする
 @interface MovieReward6011 : MovieReward6000
 

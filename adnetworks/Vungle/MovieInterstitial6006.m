@@ -6,159 +6,133 @@
 //
 
 #import "MovieInterstitial6006.h"
+#import "AdnetworkConfigure6006.h"
 #import "AdnetworkParam6006.h"
-#import <ADFMovieReward/ADFMovieOptions.h>
 
 @interface MovieInterstitial6006()
 
 @property (nonatomic, strong) VungleInterstitial *interstitialAd;
-@property (nonatomic) AdnetworkParam6006 *param;
 
 @end
 
 @implementation MovieInterstitial6006
 
-+ (NSString *)getSDKVersion {
-    return [VungleAds sdkVersion];
-}
-
+// adapterファイルのRevision番号を返す。実装が変わる度Incrementする
 + (NSString *)getAdapterRevisionVersion {
-    return @"1";
+    return @"3";
 }
 
+// Adnetwork実装時に使うClass名。SDKが導入されているかで使う
 + (NSString *)adnetworkClassName {
     return @"VungleAdsSDK.VungleInterstitial";
 }
 
+// ADFで定義しているAdnetwork名。
 + (NSString *)adnetworkName {
-    return @"Vungle";
+    return [AdnetworkConfigure6006 adnetworkName];
 }
 
-- (id)init {
++ (NSString *)getSDKVersion {
+    return [AdnetworkConfigure6006 getSDKVersion];
+}
+
+// Instance Variableを初期化する。また、必要な場合Configureを生成する
+-(id)init {
     self = [super init];
     if (self) {
+        self.configure = [AdnetworkConfigure6006 sharedInstance];
     }
     return self;
 }
 
-- (id)copyWithZone:(NSZone *)zone {
-    MovieInterstitial6006 *newSelf = [super copyWithZone:zone];
-    if (newSelf) {
-        newSelf.param = self.param;
-    }
-    return newSelf;
-}
-
-/**
- *  データの設定
- */
+// Adnetwork Parameterを指定するAdnetworkParam Objectを生成する。
 - (void)setData:(NSDictionary *)data {
     [super setData:data];
     
-    self.param = [[AdnetworkParam6006 alloc] initWithParam:data];
+    self.adParam = [[AdnetworkParam6006 alloc] initWithParam:data];
+    self.configure.param = self.adParam; // Parameterを設定する
 }
 
-- (void)initAdnetworkIfNeeded {
-    if (![self.param isValid]) {
-        return;
+// Adnetwork SDKを初期化する
+- (bool)initAdnetworkIfNeeded {
+    if (![super initAdnetworkIfNeeded]) { // 初期化済みかParameterが設定されてないとそのままReturnする
+        return false;
     }
     
-    if ([VungleAds isInitialized]) {
-        [self initCompleteAndRetryStartAdIfNeeded];
-        return;
-    }
-    
-    [VungleAds setDebugLoggingEnabled:[ADFMovieOptions getTestMode]];
-    
-    @try {
-        [VungleAds initWithAppId:self.param.vungleAppID completion:^(NSError * _Nullable error){
-            if (!error) {
-                [self initCompleteAndRetryStartAdIfNeeded];
-            }
-        }];
-    } @catch (NSException *exception) {
-        [self adnetworkExceptionHandling:exception];
-    }
+    // SDK初期化はConfigureを使う
+    __weak typeof(self) weakSelf = self;
+    [self.configure initAdnetworkSDKWithCompletionHander:^(_Bool result) {
+        __strong typeof(self) strongSelf = weakSelf;
+        if (!strongSelf) return;
+        // 初期化完了後の実装が必要な場合こちらに追加する
+        [strongSelf initCompleteAndRetryStartAdIfNeeded];
+    }];
+    return true;
 }
 
-/**
- *  広告の読み込みを開始する
- */
-- (void)startAd {
-    if (![self canStartAd]) {
-        return;
+// 広告読み込みを開始する
+- (bool)startAd {
+    if (![super startAd]) { // 読み込みが可能な状態かをチェックする
+        return false;
     }
-    
-    if (![self.param isValid]) {
-        return;
-    }
-    
-    [super startAd];
     
     @try {
+        [self requireToAsyncRequestAd];
         if (self.interstitialAd) {
             self.interstitialAd = nil;
         }
         [self requireToAsyncRequestAd];
         
-        self.interstitialAd = [[VungleInterstitial alloc] initWithPlacementId:self.param.placementID];
+        self.interstitialAd = [[VungleInterstitial alloc] initWithPlacementId:((AdnetworkParam6006 *)self.adParam).placementID];
         self.interstitialAd.delegate = self;
         [self.interstitialAd load:nil];
     } @catch (NSException *exception) {
         [self adnetworkExceptionHandling:exception];
     }
+    return true;
 }
 
+// 在庫取得有無を返す
 - (BOOL)isPrepared {
-    if (!self.delegate || !self.interstitialAd) {
-        return NO;
-    }
     return self.isAdLoaded && [self.interstitialAd canPlayAd];
 }
 
-/**
- *  広告の表示を行う
- */
+// 広告再生
 - (void)showAd {
-    UIViewController *topMostViewController = [self topMostViewController];
-    [self showAdWithPresentingViewController:topMostViewController];
-}
-
-- (void)showAdWithPresentingViewController:(UIViewController *)viewController {
-    if (!self.interstitialAd || !self.param) {
-        return;
-    }
-    
-    [super showAdWithPresentingViewController:viewController];
-    
-    @try {
-        [self requireToAsyncPlay];
-        
-        [self.interstitialAd presentWith:viewController];
-    } @catch (NSException *exception) {
-        [self adnetworkExceptionHandling:exception];
+    UIViewController *topVC = [self topMostViewController];
+    if (topVC) {
+        [self showAdWithPresentingViewController:topVC];
+    } else {
         [self setCallbackStatus:MovieRewardCallbackPlayFail];
     }
 }
 
-- (void)setHasUserConsent:(BOOL)hasUserConsent {
-    [super setHasUserConsent:hasUserConsent];
+- (void)showAdWithPresentingViewController:(UIViewController *)viewController {
+    [super showAdWithPresentingViewController:viewController];
     
-    [VunglePrivacySettings setGDPRStatus:hasUserConsent];
-    AdapterLogP(@"Adnetwork 6006, gdprConsent : %@, sdk setting value : %d", self.hasGdprConsent, (int)(hasUserConsent));
-}
+    if (!self.interstitialAd) {
+        [self setCallbackStatus:MovieRewardCallbackPlayFail];
+        return;
+    }
 
-- (void)isChildDirected:(BOOL)childDirected {
-    [super isChildDirected:childDirected];
-    
-    [VunglePrivacySettings setCOPPAStatus:childDirected];
-    AdapterLogP(@"Adnetwork 6006, childDirected : %@, sdk setting value : %d", self.childDirected, (int)(childDirected));
+    if ([self isPrepared]) {
+        @try {
+            [self requireToAsyncPlay];
+            [self.interstitialAd presentWith:viewController];
+        } @catch (NSException *exception) {
+            [self adnetworkExceptionHandling:exception];
+            [self setCallbackStatus:MovieRewardCallbackPlayFail];
+        }
+    } else {
+        [self setCallbackStatus:MovieRewardCallbackPlayFail];
+    }
 }
 
 #pragma mark - VungleInterstitial Delegate Methods
 // Ad load events
 - (void)interstitialAdDidLoad:(VungleInterstitial *)interstitial {
     AdapterTrace;
+    self.creativeId = interstitial.creativeId;
     [self setCallbackStatus:MovieRewardCallbackFetchComplete];
 }
 

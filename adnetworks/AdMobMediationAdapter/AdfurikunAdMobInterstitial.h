@@ -10,7 +10,7 @@
 
 NS_ASSUME_NONNULL_BEGIN
 
-@interface AdfurikunAdMobInterstitial : NSObject <GADCustomEventInterstitial, ADFmyMovieRewardDelegate>
+@interface AdfurikunAdMobInterstitial : NSObject <GADMediationAdapter, GADMediationInterstitialAd, ADFmyMovieRewardDelegate>
 @property(nonatomic) ADFmyInterstitial *interstitialAd;
 @end
 

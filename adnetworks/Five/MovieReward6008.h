@@ -5,9 +5,10 @@
 //
 //
 #import <Foundation/Foundation.h>
-#import "AdnetworkBase6008.h"
+#import <ADFMovieReward/ADFmyMovieRewardInterface.h>
+#import <FiveAd/FiveAd.h>
 
-@interface MovieReward6008 : AdnetworkBase6008 <FADVideoRewardEventListener>
+@interface MovieReward6008 : ADFmyMovieRewardInterface <FADLoadDelegate, FADVideoRewardEventListener>
 
 @end
 

@@ -7,11 +7,10 @@
 //
 
 #import "Banner6006.h"
+#import "AdnetworkConfigure6006.h"
 #import "AdnetworkParam6006.h"
 
 @interface Banner6006()
-
-@property (nonatomic) AdnetworkParam6006 *param;
 
 @property (nonatomic, strong) VungleBanner *bannerAd;
 @property (nonatomic) UIView *adView;
@@ -20,88 +19,68 @@
 
 @implementation Banner6006
 
-+ (NSString *)getSDKVersion {
-    return [VungleAds sdkVersion];
-}
-
+// adapterファイルのRevision番号を返す。実装が変わる度Incrementする
 + (NSString *)getAdapterRevisionVersion {
-    return @"9";
+    return @"11";
 }
 
+// Adnetwork実装時に使うClass名。SDKが導入されているかで使う
 + (NSString *)adnetworkClassName {
     return @"VungleAdsSDK.VungleBanner";
 }
 
+// ADFで定義しているAdnetwork名。
 + (NSString *)adnetworkName {
-    return @"Vungle";
+    return [AdnetworkConfigure6006 adnetworkName];
 }
 
-- (void)setHasUserConsent:(BOOL)hasUserConsent {
-    [super setHasUserConsent:hasUserConsent];
-    
-    [VunglePrivacySettings setGDPRStatus:hasUserConsent];
-    AdapterLogP(@"Adnetwork 6006, gdprConsent : %@, sdk setting value : %d", self.hasGdprConsent, (int)(hasUserConsent));
++ (NSString *)getSDKVersion {
+    return [AdnetworkConfigure6006 getSDKVersion];
 }
 
-- (void)isChildDirected:(BOOL)childDirected {
-    [super isChildDirected:childDirected];
-    
-    [VunglePrivacySettings setCOPPAStatus:childDirected];
-    AdapterLogP(@"Adnetwork 6006, childDirected : %@, sdk setting value : %d", self.childDirected, (int)(childDirected));
+// Instance Variableを初期化する。また、必要な場合Configureを生成する
+-(id)init {
+    self = [super init];
+    if (self) {
+        self.configure = [AdnetworkConfigure6006 sharedInstance];
+        self.bannerSize = BannerSizeRegular;
+    }
+    return self;
 }
 
-// getinfoから取得したデータを内部変数に保存する
+// Adnetwork Parameterを指定するAdnetworkParam Objectを生成する。
 - (void)setData:(NSDictionary *)data {
     [super setData:data];
     
-    self.param = [[AdnetworkParam6006 alloc] initWithParam:data];
+    self.adParam = [[AdnetworkParam6006 alloc] initWithParam:data];
+    self.configure.param = self.adParam; // Parameterを設定する
 }
 
-- (void)initAdnetworkIfNeeded {
-    if (![self.param isValid]) {
-        return;
+// Adnetwork SDKを初期化する
+- (bool)initAdnetworkIfNeeded {
+    if (![super initAdnetworkIfNeeded]) { // 初期化済みかParameterが設定されてないとそのままReturnする
+        return false;
     }
     
-    if ([VungleAds isInitialized]) {
-        [self initCompleteAndRetryStartAdIfNeeded];
-        return;
+    // SDK初期化はConfigureを使う
+    __weak typeof(self) weakSelf = self;
+    [self.configure initAdnetworkSDKWithCompletionHander:^(_Bool result) {
+        __strong typeof(self) strongSelf = weakSelf;
+        if (!strongSelf) return;
+        // 初期化完了後の実装が必要な場合こちらに追加する
+        [strongSelf initCompleteAndRetryStartAdIfNeeded];
+    }];
+    return true;
+}
+
+// 広告読み込みを開始する
+- (bool)startAd {
+    if (![super startAd]) { // 読み込みが可能な状態かをチェックする
+        return false;
     }
-    
-    [VungleAds setDebugLoggingEnabled:[ADFMovieOptions getTestMode]];
-    
-    self.bannerSize = BannerSizeRegular;
     
     @try {
-        [VungleAds initWithAppId:self.param.vungleAppID completion:^(NSError * _Nullable error){
-            if (!error) {
-                [self initCompleteAndRetryStartAdIfNeeded];
-            }
-        }];
-    } @catch (NSException *exception) {
-        [self adnetworkExceptionHandling:exception];
-    }
-}
-
-- (BOOL)isPrepared {
-    if (!self.param || ![self.param isValid]) {
-        return NO;
-    }
-    return self.isAdLoaded;
-}
-
-// SDKのLoading関数を呼び出す
-- (void)startAd {
-    if (![self canStartAd]) {
-        return;
-    }
-    
-    if (![self.param isValid]) {
-        return;
-    }
-    
-    [super startAd];
-    
-    @try {
+        [self requireToAsyncRequestAd];
         if (self.bannerAd) {
             self.bannerAd.delegate = nil;
             self.bannerAd = nil;
@@ -109,16 +88,27 @@
         
         [self requireToAsyncRequestAd];
         
-        self.bannerAd = [[VungleBanner alloc] initWithPlacementId:self.param.placementID size:self.bannerSize];
+        self.bannerAd = [[VungleBanner alloc] initWithPlacementId:((AdnetworkParam6006 *)self.adParam).placementID
+                                                             size:self.bannerSize];
         self.bannerAd.delegate = self;
         [self.bannerAd load:nil];
     } @catch (NSException *exception) {
         [self adnetworkExceptionHandling:exception];
     }
+    return true;
 }
 
-- (void)startAdWithOption:(NSDictionary *)option {
-    [self startAd];
+- (bool)startAdWithOption:(NSDictionary *)option {
+    return [self startAd];
+}
+
+// 在庫取得有無を返す
+- (BOOL)isPrepared {
+    return self.isAdLoaded;
+}
+
+// startAd前の後処理
+- (void)clearStatusIfNeeded {
 }
 
 -(void)destroyAdViewIfNeeded {
@@ -148,6 +138,8 @@
 // Ad load Events
 - (void)bannerAdDidLoad:(VungleBanner *)banner {
     AdapterTrace;
+    self.creativeId = banner.creativeId;
+    
     CGRect viewSize = CGRectMake(0.0, 0.0, 300.0, 250.0);
     if (self.bannerSize == BannerSizeRegular) {
         viewSize = CGRectMake(0.0, 0.0, 320.0, 50.0);
@@ -161,7 +153,7 @@
     NativeAdInfo6006 *info = [[NativeAdInfo6006 alloc] initWithVideoUrl:nil
                                                                   title:@""
                                                             description:@""
-                                                           adnetworkKey:@"6006"];
+                                                           adnetworkKey:self.adnetworkKey];
     info.mediaType = ADFNativeAdType_Image;
     info.adapter = self;
     [info setupMediaView:self.adView];

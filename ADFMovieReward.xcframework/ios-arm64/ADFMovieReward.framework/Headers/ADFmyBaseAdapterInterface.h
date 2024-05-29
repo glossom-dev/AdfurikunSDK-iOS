@@ -25,6 +25,8 @@ typedef enum : NSInteger {
 
 @class UIViewController;
 @class UIWindow;
+@class ADFmyAdnetworkConfigure;
+
 @protocol ADFMovieRewardDelegate;
 
 @interface ADFmyAdapterLogger : NSObject
@@ -74,6 +76,11 @@ typedef enum : NSInteger {
 
 @property (nonatomic) PreloadingStatus preloadingStatus; // 優先読み込みのStatus
 
+@property (nonatomic) ADFmyAdnetworkConfigure *configure;
+@property (nonatomic) ADFAdnetworkParam *adParam;
+
+@property (nonatomic, nullable) NSString *creativeId;
+
 //ADNW SDKのバージョン情報をSDKから取得できるようにする
 + (NSString *)getSDKVersion;
 + (NSString *)getAdapterVersion;
@@ -92,19 +99,20 @@ typedef enum : NSInteger {
 -(void)setData:(NSDictionary *)data;
 
 /**< Adnetwork SDKを初期化する （Optional） */
--(void)initAdnetworkIfNeeded;
+-(bool)initAdnetworkIfNeeded;
 /**< 広告データの初期化 （Optional） */
 -(void)clearStatusIfNeeded;
 /**< 広告が準備できているか？ */
 -(BOOL)isPrepared;
 /**< 広告の読み込み開始 */
--(void)startAd;
--(void)startAdWithOption:(nullable NSDictionary *)option;
+-(bool)startAd;
+-(bool)startAdWithOption:(nullable NSDictionary *)option;
 
 /** Waterfallの順番でStartAdが呼ばれる前にAdnetworkへのRequestを発生させる。下位Adnetworkで先に読み込みだけ実施する場合使う */
 -(void)preloadForPriority;
 
 /** Errorを設定する */
+-(void)setError:(nullable NSError *)error;
 -(void)setErrorWithMessage:(nullable NSString *)description code:(NSInteger)code;
 /** 最後のエラーを返す */
 -(nullable NSError *)getLastError;

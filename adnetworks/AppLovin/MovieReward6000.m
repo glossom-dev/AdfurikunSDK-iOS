@@ -9,124 +9,125 @@
 #import <ADFMovieReward/ADFMovieOptions.h>
 #import "MovieReward6000.h"
 
+#import "AdnetworkConfigure6000.h"
+#import "AdnetworkParam6000.h"
 
 @interface MovieReward6000()<ALAdLoadDelegate, ALAdDisplayDelegate, ALAdVideoPlaybackDelegate>
-@property (nonatomic, strong)NSString* appLovinSdkKey;
-@property (nonatomic, strong)NSString* submittedPackageName;
-@property (nonatomic, strong)NSString* zoneIdentifier;
-@property (nonatomic, strong)ALIncentivizedInterstitialAd *incentivizedInterstitial;
+
+@property(nonatomic, strong) ALIncentivizedInterstitialAd *incentivizedInterstitial;
+
 @end
 
 
 @implementation MovieReward6000
 
-//課題：ANDW SDKのバージョン情報をSDKから取得できるようにする
-+ (NSString *)getSDKVersion {
-    return ALSdk.version;
-}
-
+// adapterファイルのRevision番号を返す。実装が変わる度Incrementする
 + (NSString *)getAdapterRevisionVersion {
-    return @"9";
+    return @"10";
 }
 
+// Adnetwork実装時に使うClass名。SDKが導入されているかで使う
 + (NSString *)adnetworkClassName {
-    return @"ALSdk";
+    return @"ALIncentivizedInterstitialAd";
 }
 
+// ADFで定義しているAdnetwork名。
 + (NSString *)adnetworkName {
-    return @"AppLovin";
+    return [AdnetworkConfigure6000 adnetworkName];
 }
 
-/**
- *  データの設定
- */
--(void)setData:(NSDictionary *)data
-{
++ (NSString *)getSDKVersion {
+    return [AdnetworkConfigure6000 getSDKVersion];
+}
+
+// Instance Variableを初期化する。また、必要な場合Configureを生成する
+-(id)init {
+    self = [super init];
+    if (self) {
+        self.configure = [AdnetworkConfigure6000 sharedInstance];
+    }
+    return self;
+}
+
+// Adnetwork Parameterを指定するAdnetworkParam Objectを生成する。
+- (void)setData:(NSDictionary *)data {
     [super setData:data];
     
-    NSString *appLovinSdkKey = [data objectForKey:@"sdk_key"];
-    if ([self isNotNull:appLovinSdkKey]) {
-        self.appLovinSdkKey = [NSString stringWithFormat:@"%@", appLovinSdkKey];
-    }
-    
-    //申請されたパッケージ名を受け取り
-    NSString *submittedPackageName = [data objectForKey:@"package_name"];
-    if ([self isNotNull:submittedPackageName]) {
-        self.submittedPackageName = [NSString stringWithFormat:@"%@", submittedPackageName];
-    }
-    
-    NSString *zoneIdentifier = [data objectForKey:@"zone_id"];
-    if ([self isNotNull:zoneIdentifier]) {
-        self.zoneIdentifier = [NSString stringWithFormat:@"%@", zoneIdentifier];
-    }
+    self.adParam = [[AdnetworkParam6000 alloc] initWithParam:data];
+    self.configure.param = self.adParam; // Parameterを設定する
 }
 
--(void)initAdnetworkIfNeeded {
-    if (![self needsToInit]) {
-        return;
+// Adnetwork SDKを初期化する
+- (bool)initAdnetworkIfNeeded {
+    if (![super initAdnetworkIfNeeded]) { // 初期化済みかParameterが設定されてないとそのままReturnする
+        return false;
     }
-
-    if (self.appLovinSdkKey) {
-        [self requireToAsyncInit];
-        [[MovieConfigure6000 sharedInstance] configure:self.appLovinSdkKey completion:^{
-            if (!self.incentivizedInterstitial) {
-                @try {
-                    if (self.zoneIdentifier && ![self.zoneIdentifier isEqual: [NSNull null]] && [self.zoneIdentifier length] != 0) {
-                        self.incentivizedInterstitial = [[ALIncentivizedInterstitialAd alloc] initWithZoneIdentifier:self.zoneIdentifier];
-                    } else {
-                        self.incentivizedInterstitial = [[ALIncentivizedInterstitialAd alloc] initWithSdk:[ALSdk shared]];
-                    }
-                } @catch (NSException *exception) {
-                    [self adnetworkExceptionHandling:exception];
+    
+    // SDK初期化はConfigureを使う
+    __weak typeof(self) weakSelf = self;
+    [self.configure initAdnetworkSDKWithCompletionHander:^(_Bool result) {
+        __strong typeof(self) strongSelf = weakSelf;
+        if (!strongSelf) return;
+        if (!strongSelf.incentivizedInterstitial) {
+            @try {
+                if ([strongSelf.adParam isValid]) {
+                    strongSelf.incentivizedInterstitial =
+                    [[ALIncentivizedInterstitialAd alloc] initWithZoneIdentifier:((AdnetworkParam6000 *)strongSelf.adParam).zoneIdentifier];
+                } else {
+                    strongSelf.incentivizedInterstitial = [[ALIncentivizedInterstitialAd alloc] initWithSdk:[ALSdk shared]];
                 }
-                self.incentivizedInterstitial.adDisplayDelegate = self;
-                self.incentivizedInterstitial.adVideoPlaybackDelegate = self;
+            } @catch (NSException *exception) {
+                [self adnetworkExceptionHandling:exception];
             }
-            [self initCompleteAndRetryStartAdIfNeeded];
-        }];
-    }
-}
-
-/**
- *  広告の読み込みを開始する
- */
--(void)startAd
-{
-    if (![self canStartAd]) {
-        return;
-    }
-
-    if (self.incentivizedInterstitial) {
-        [super startAd];
-        @try {
-            [self requireToAsyncRequestAd];
-            [self.incentivizedInterstitial preloadAndNotify: self];
-        } @catch (NSException *exception) {
-            [self adnetworkExceptionHandling:exception];
+            strongSelf.incentivizedInterstitial.adDisplayDelegate = strongSelf;
+            strongSelf.incentivizedInterstitial.adVideoPlaybackDelegate = strongSelf;
         }
-    }
+        [strongSelf initCompleteAndRetryStartAdIfNeeded];
+    }];
+    return true;
 }
 
--(BOOL)isPrepared{
-    //申請済のバンドルIDと異なる場合のメッセージ
-    //(バンドルIDが申請済のものと異なると、正常に広告が返却されない可能性があります)
-    if(self.submittedPackageName != nil
-       && ![
-            [self.submittedPackageName lowercaseString]
-            isEqualToString:[[[NSBundle mainBundle] bundleIdentifier] lowercaseString]
-            ])
-    {
+// 広告読み込みを開始する
+- (bool)startAd {
+    if (![super startAd]) { // 読み込みが可能な状態かをチェックする
+        return false;
+    }
+
+    if (!self.incentivizedInterstitial) {
+        [self setCallbackStatus:MovieRewardCallbackFetchFail];
+        return false;
+    }
+    
+    @try {
+        [self requireToAsyncRequestAd];
+        [self.incentivizedInterstitial preloadAndNotify:self];
+    } @catch (NSException *exception) {
+        [self adnetworkExceptionHandling:exception];
+    }
+    return true;
+}
+
+// 在庫取得有無を返す
+- (BOOL)isPrepared {
+    if([self.adParam isValid] &&
+       ![[((AdnetworkParam6000 *)self.adParam).submittedPackageName lowercaseString]
+         isEqualToString:[[[NSBundle mainBundle] bundleIdentifier] lowercaseString]]) {
         //表示を消したい場合は、こちらをコメントアウトして下さい。
-        AdapterLogP(@"[SEVERE] [Applovin]アプリのバンドルIDが、申請されたもの（%@）と異なります。", self.submittedPackageName);
+        AdapterLogP(@"[SEVERE] [Applovin]アプリのバンドルIDが、申請されたもの（%@）と異なります。", ((AdnetworkParam6000 *)self.adParam).submittedPackageName);
     }
     return self.isAdLoaded && self.incentivizedInterstitial && self.incentivizedInterstitial.isReadyForDisplay;
 }
 
--(void)showAd
-{
+// 広告再生
+- (void)showAd {
     [super showAd];
+    
+    if (!self.incentivizedInterstitial) {
+        [self setCallbackStatus:MovieRewardCallbackPlayFail];
+        return;
+    }
 
-    if (self.incentivizedInterstitial && self.incentivizedInterstitial.isReadyForDisplay) {
+    if ([self isPrepared]) {
         @try {
             [self requireToAsyncPlay];
             [self.incentivizedInterstitial show];
@@ -134,27 +135,13 @@
             [self adnetworkExceptionHandling:exception];
             [self setCallbackStatus:MovieRewardCallbackPlayFail];
         }
-    } else{
-        AdapterLog(@"could not load ad");
+    } else {
         [self setCallbackStatus:MovieRewardCallbackPlayFail];
     }
 }
 
--(void)showAdWithPresentingViewController:(UIViewController *)viewController
-{
+- (void)showAdWithPresentingViewController:(UIViewController *)viewController {
     [self showAd];
-}
-
--(void)setHasUserConsent:(BOOL)hasUserConsent {
-    [super setHasUserConsent:hasUserConsent];
-    [ALPrivacySettings setHasUserConsent:hasUserConsent];
-    AdapterLogP(@"Adnetwork 6000, gdprConsent : %@, sdk setting value : %d", self.hasGdprConsent, (int)hasUserConsent);
-}
-
-- (void)isChildDirected:(BOOL)childDirected {
-    [super isChildDirected:childDirected];
-    [ALPrivacySettings setIsAgeRestrictedUser:childDirected];
-    AdapterLogP(@"Adnetwork %@, childDirected : %@, input parameter : %d", self.adnetworkKey, self.childDirected, (int)childDirected);
 }
 
 // ------------------------------ -----------------
@@ -163,8 +150,7 @@
 /**
  *  広告の読み込み準備が終わった
  */
--(void) adService: (ALAdService *) adService didLoadAd: (ALAd *) ad
-{
+-(void) adService: (ALAdService *) adService didLoadAd: (ALAd *) ad {
     AdapterTrace;
     [self setCallbackStatus:MovieRewardCallbackFetchComplete];
 }
@@ -172,8 +158,7 @@
 /**
  *  広告の読み込みに失敗
  */
--(void) adService: (ALAdService *) adService didFailToLoadAdWithError: (int) code
-{
+-(void) adService: (ALAdService *) adService didFailToLoadAdWithError: (int) code {
     AdapterTraceP(@"code : %d", code);
     [self setErrorWithMessage:nil code:code];
     [self setCallbackStatus:MovieRewardCallbackFetchFail];
@@ -182,16 +167,14 @@
 /**
  *  広告の表示が開始された場合
  */
--(void) ad: (ALAd *) ad wasDisplayedIn: (UIView *) view
-{
+-(void) ad: (ALAd *) ad wasDisplayedIn: (UIView *) view {
     AdapterTrace;
 }
 
 /**
  *  アプリが落とされたりした場合などのバックグラウンドに回った場合の動作
  */
--(void) ad: (ALAd *) ad wasHiddenIn: (UIView *) view
-{
+-(void) ad: (ALAd *) ad wasHiddenIn: (UIView *) view {
     AdapterTrace;
     [self setCallbackStatus:MovieRewardCallbackClose];
 }
@@ -199,16 +182,14 @@
 /**
  *  広告をクリックされた場合の動作
  */
--(void) ad: (ALAd *) ad wasClickedIn: (UIView *) view
-{
+-(void) ad: (ALAd *) ad wasClickedIn: (UIView *) view {
     AdapterTrace;
 }
 
 /**
  *  広告（ビデオ)の表示を開始されたか
  */
--(void) videoPlaybackBeganInAd: (ALAd*) ad
-{
+-(void) videoPlaybackBeganInAd: (ALAd*) ad {
     AdapterTrace;
     // 広告の読み
     [self setCallbackStatus:MovieRewardCallbackPlayStart];
@@ -218,97 +199,13 @@
  *  広告の終了・停止時に呼ばれる
  *  パーセント、読み込み終わりの設定を表示
  */
--(void) videoPlaybackEndedInAd: (ALAd*) ad atPlaybackPercent: (NSNumber*) percentPlayed fullyWatched: (BOOL) wasFullyWatched
-{
+-(void) videoPlaybackEndedInAd: (ALAd*) ad atPlaybackPercent: (NSNumber*) percentPlayed fullyWatched: (BOOL) wasFullyWatched {
     AdapterTraceP(@"atPlaybackPercent : %@, fullyWatched : %d", percentPlayed, wasFullyWatched);
     if ( wasFullyWatched ) {
         [self setCallbackStatus:MovieRewardCallbackPlayComplete];
     }
 }
 
-@end
-
-typedef enum : NSUInteger {
-    initializeNotYet,
-    initializing,
-    initializeComplete,
-} ALSDKInitializeStatus;
-
-@interface MovieConfigure6000()
-
-@property (nonatomic) ALSDKInitializeStatus initStatus;
-@property (nonatomic) NSMutableArray <completionHandlerType> *handlers;
-
-@end
-
-@implementation MovieConfigure6000
-
-+ (instancetype)sharedInstance {
-    static MovieConfigure6000 *sharedInstance = nil;
-    static dispatch_once_t onceToken;
-    dispatch_once(&onceToken, ^{
-        sharedInstance = [self new];
-    });
-    return sharedInstance;
-}
-
-- (instancetype)init {
-    self = [super init];
-    if (self) {
-        self.initStatus = initializeNotYet;
-        self.handlers = [NSMutableArray new];
-    }
-    return self;
-}
-
-- (void)configure:(NSString *)sdkKey completion:(void (^)(void))completionHandler {
-    if (!completionHandler) {
-        return;
-    }
-    
-    if (self.initStatus == initializeComplete) {
-        completionHandler();
-        return;
-    }
-    
-    if (self.initStatus == initializing) {
-        [self.handlers addObject:completionHandler];
-        return;
-    }
-    
-    if (self.initStatus == initializeNotYet) {
-        self.initStatus = initializing;
-        [self.handlers addObject:completionHandler];
-        
-        dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(0.1 * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
-            @try {
-                //音出力設定
-                ADFMovieOptions_Sound soundState = [ADFMovieOptions getSoundState];
-                if (ADFMovieOptions_Sound_Default != soundState) {
-                    [ALSdk shared].settings.muted = (ADFMovieOptions_Sound_Off == soundState);
-                }
-                // デバッグ機能設定（Trueにすると端末を裏表に振ると、画面にAppLovinアイコンが表示される）
-                [ALSdk shared].settings.creativeDebuggerEnabled = [ADFMovieOptions getTestMode];
-                
-                ALSdkInitializationConfiguration *initConfig = [ALSdkInitializationConfiguration configurationWithSdkKey:sdkKey
-                                                                                                            builderBlock:^(ALSdkInitializationConfigurationBuilder *builder) {
-                    builder.mediationProvider = ALMediationProviderMAX;
-                }];
-                
-                [[ALSdk shared] initializeWithConfiguration:initConfig completionHandler:^(ALSdkConfiguration *sdkConfig) {
-                    self.initStatus = initializeComplete;
-                    
-                    for (completionHandlerType handler in self.handlers) {
-                        handler();
-                    }
-                }];
-            } @catch (NSException *exception) {
-                NSLog(@"[ADF] adnetwork exception : %@", exception);
-            }
-        });
-    }
-}
-    
 @end
 
 @implementation MovieReward6011

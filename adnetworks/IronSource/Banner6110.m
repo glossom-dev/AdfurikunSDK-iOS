@@ -8,130 +8,113 @@
 
 #import "Banner6110.h"
 #import "AdnetworkConfigure6110.h"
-
-@interface Banner6110 ()
-
-@property (nonatomic) NSString *appKey;
-@property (nonatomic) NSString *instanceId;
-
-@end
+#import "AdnetworkParam6110.h"
 
 @implementation Banner6110
 
-// SDKからバージョンを取得して返す
-// APIがなければ削除
-+ (NSString *)getSDKVersion {
-    return [IronSource sdkVersion];
-}
-
-// Adapterのバージョン。最初は1にして、修正がある度＋1にする
+// adapterファイルのRevision番号を返す。実装が変わる度Incrementする
 + (NSString *)getAdapterRevisionVersion {
-    return @"6";
+    return @"7";
 }
 
+// Adnetwork実装時に使うClass名。SDKが導入されているかで使う
 + (NSString *)adnetworkClassName {
     return @"IronSource";
 }
 
+// ADFで定義しているAdnetwork名。
 + (NSString *)adnetworkName {
-    return @"ironSource";
+    return [AdnetworkConfigure6110 adnetworkName];
 }
 
-// getinfoからのParameter設定
++ (NSString *)getSDKVersion {
+    return [AdnetworkConfigure6110 getSDKVersion];
+}
+
+// Instance Variableを初期化する。また、必要な場合Configureを生成する
+-(id)init {
+    self = [super init];
+    if (self) {
+        self.configure = [AdnetworkConfigure6110 sharedInstance];
+        self.bannerSize = ISBannerSize_BANNER;
+    }
+    return self;
+}
+
+// Adnetwork Parameterを指定するAdnetworkParam Objectを生成する。
 - (void)setData:(NSDictionary *)data {
     [super setData:data];
     
-    NSString *appKey = [data objectForKey:@"app_key"];
-    if ([self isString:appKey]) {
-        self.appKey = [NSString stringWithFormat:@"%@", appKey];
-    }
-
-    NSString *instanceId = [data objectForKey:@"instance_id"];
-    if ([self isString:instanceId]) {
-        self.instanceId = [NSString stringWithFormat:@"%@", instanceId];
-    }
+    self.adParam = [[AdnetworkParam6110 alloc] initWithParam:data];
+    self.configure.param = self.adParam; // Parameterを設定する
 }
 
-// 広告準備有無を返す
+// Adnetwork SDKを初期化する
+- (bool)initAdnetworkIfNeeded {
+    if (![super initAdnetworkIfNeeded]) { // 初期化済みかParameterが設定されてないとそのままReturnする
+        if ([self.adParam isValid]) {
+            [IronSource setISDemandOnlyBannerDelegate:self forInstanceId:((AdnetworkParam6110 *)self.adParam).instanceId];
+        }
+        return false;
+    }
+    
+    // SDK初期化はConfigureを使う
+    __weak typeof(self) weakSelf = self;
+    [self.configure initAdnetworkSDKWithCompletionHander:^(_Bool result) {
+        __strong typeof(self) strongSelf = weakSelf;
+        if (!strongSelf) return;
+        // 初期化完了後の実装が必要な場合こちらに追加する
+        [strongSelf initCompleteAndRetryStartAdIfNeeded];
+        [IronSource setISDemandOnlyBannerDelegate:strongSelf forInstanceId:((AdnetworkParam6110 *)strongSelf.adParam).instanceId];
+    }];
+    return true;
+}
+
+// 広告読み込みを開始する
+- (bool)startAd {
+    if (![super startAd]) { // 読み込みが可能な状態かをチェックする
+        return false;
+    }
+
+    UIViewController *topVC = [self topMostViewController];
+    if (!topVC) {
+        return false;
+    }
+
+    @try {
+        [self requireToAsyncRequestAd];
+
+        if (self.bannerView) {
+            self.bannerView = nil;
+        }
+        [IronSource loadISDemandOnlyBannerWithInstanceId:((AdnetworkParam6110 *)self.adParam).instanceId
+                                          viewController:topVC
+                                                    size:self.bannerSize];
+    } @catch (NSException *exception) {
+        [self adnetworkExceptionHandling:exception];
+    }
+    return true;
+}
+
+- (bool)startAdWithOption:(NSDictionary *)option {
+    return [self startAd];
+}
+
+// 在庫取得有無を返す
 - (BOOL)isPrepared {
-    // ロジックに合わせて修正する
     return self.isAdLoaded;
 }
 
 - (void)clearStatusIfNeeded {
 }
 
-// Adnetwork SDKの初期化を行う
-- (void)initAdnetworkIfNeeded {
-    // 一回のみ初期化を行うようなチェックを行う
-    if (![self needsToInit]) {
-        return;
-    }
-    
-    if (!self.appKey) {
-        return;
-    }
-    
-    self.bannerSize = ISBannerSize_BANNER;
-    [AdnetworkConfigure6110.sharedInstance initIronSource:self.appKey completion:^{
-        [self initCompleteAndRetryStartAdIfNeeded];
-        [IronSource setISDemandOnlyBannerDelegate:self forInstanceId:self.instanceId];
-    }];
-}
-
-// 広告呼び込みを行う
-- (void)startAd {
-    // 初期化が完了しているかをチェック
-    if (![self canStartAd]) {
-        return;
-    }
-    
-    UIViewController *topVC = [self topMostViewController];
-    if (!topVC) {
-        return;
-    }
-    
-    [super startAd];
-
-    if (self.bannerView) {
-        self.bannerView = nil;
-    }
-    
-    // Adnetwork SDKの関数を呼び出す際はTryーCatchでException Handlingを行う
-    @try {
-        // 非同期で行われる場合にはFlag設定を行う
-        [self requireToAsyncRequestAd];
-
-        [IronSource loadISDemandOnlyBannerWithInstanceId:self.instanceId
-                                          viewController:topVC
-                                                    size:self.bannerSize];
-    } @catch (NSException *exception) {
-        [self adnetworkExceptionHandling:exception];
-    }
-}
-
-- (void)startAdWithOption:(NSDictionary *)option {
-    [self startAd];
-}
-
+// 後処理を実装
 - (void)dispose {
-    AdapterTrace;
+    [super dispose];
     if (self.bannerView) {
         self.bannerView = nil;
     }
-    [IronSource destroyISDemandOnlyBannerWithInstanceId:self.instanceId];
-}
-
--(void)setHasUserConsent:(BOOL)hasUserConsent {
-    [super setHasUserConsent:hasUserConsent];
-    [IronSource setConsent:hasUserConsent];
-    AdapterLogP(@"Adnetwork 6110, gdprConsent : %@, sdk setting value : %d", self.hasGdprConsent, (int)hasUserConsent);
-}
-
-- (void)isChildDirected:(BOOL)childDirected {
-    [super isChildDirected:childDirected];
-    [IronSource setMetaDataWithKey:@"is_child_directed" value:childDirected ? @"YES": @"NO"];
-    AdapterLogP(@"Adnetwork %@, childDirected : %@, input parameter : %d", self.adnetworkKey, self.childDirected, (int)childDirected);
+    [IronSource destroyISDemandOnlyBannerWithInstanceId:((AdnetworkParam6110 *)self.adParam).instanceId];
 }
 
 /*

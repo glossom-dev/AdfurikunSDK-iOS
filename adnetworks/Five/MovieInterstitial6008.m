@@ -6,6 +6,9 @@
 //
 
 #import "MovieInterstitial6008.h"
+#import "AdnetworkConfigure6008.h"
+#import "AdnetworkParam6008.h"
+
 #import <ADFMovieReward/ADFMovieOptions.h>
 
 @interface MovieInterstitial6008()
@@ -16,52 +19,77 @@
 
 @implementation MovieInterstitial6008
 
+// adapterファイルのRevision番号を返す。実装が変わる度Incrementする
 + (NSString *)getAdapterRevisionVersion {
-    return @"16";
+    return @"17";
 }
 
+// Adnetwork実装時に使うClass名。SDKが導入されているかで使う
 + (NSString *)adnetworkClassName {
     return @"FADInterstitial";
 }
 
+// ADFで定義しているAdnetwork名。
 + (NSString *)adnetworkName {
-    return @"LINE Ads Platform";
+    return [AdnetworkConfigure6008 adnetworkName];
 }
 
--(BOOL)isPrepared {
-    //申請済のバンドルIDと異なる場合のメッセージ
-    //(バンドルIDが申請済のものと異なると、正常に広告が返却されない可能性があります)
-    if(![self.submittedPackageName isEqualToString:[[NSBundle mainBundle] bundleIdentifier]]) {
-        //表示を消したい場合は、こちらをコメントアウトして下さい。
-        AdapterLogP(@"[SEVERE] [Five]アプリのバンドルIDが、申請されたもの（%@）と異なります。", self.submittedPackageName);
-    }
-    
-    if (self.interstitial) {
-        return self.isAdLoaded && self.interstitial.state == kFADStateLoaded;
-    }
-    return NO;
++ (NSString *)getSDKVersion {
+    return [AdnetworkConfigure6008 getSDKVersion];
 }
 
-/**
- *  広告の読み込みを開始する
- */
--(void)startAd {
-    if (![self canStartAd]) {
-        return;
+// Instance Variableを初期化する。また、必要な場合Configureを生成する
+-(id)init {
+    self = [super init];
+    if (self) {
+        self.configure = [AdnetworkConfigure6008 sharedInstance];
     }
-    
-    if (self.interstitial) {
-        self.interstitial = nil;
-    }
-    
-    [super startAd];
+    return self;
+}
 
+// Adnetwork Parameterを指定するAdnetworkParam Objectを生成する。
+- (void)setData:(NSDictionary *)data {
+    [super setData:data];
+    
+    self.adParam = [[AdnetworkParam6008 alloc] initWithParam:data];
+    self.configure.param = self.adParam; // Parameterを設定する
+}
+
+// Adnetwork SDKを初期化する
+- (bool)initAdnetworkIfNeeded {
+    if (![super initAdnetworkIfNeeded]) { // 初期化済みかParameterが設定されてないとそのままReturnする
+        return false;
+    }
+    
+    // SDK初期化はConfigureを使う
+    __weak typeof(self) weakSelf = self;
+    [self.configure initAdnetworkSDKWithCompletionHander:^(_Bool result) {
+        __strong typeof(self) strongSelf = weakSelf;
+        if (!strongSelf) return;
+        // 初期化完了後の実装が必要な場合こちらに追加する
+        [strongSelf initCompleteAndRetryStartAdIfNeeded];
+    }];
+    return true;
+}
+
+// 広告読み込みを開始する
+- (bool)startAd {
+    if (![super startAd]) { // 読み込みが可能な状態かをチェックする
+        return false;
+    }
+    
     @try {
         [self requireToAsyncRequestAd];
-        self.interstitial = [[FADInterstitial alloc] initWithSlotId:self.fiveSlotId];
+        
+        if (self.interstitial) {
+            self.interstitial = nil;
+        }
+
+        self.interstitial = [[FADInterstitial alloc] initWithSlotId:((AdnetworkParam6008 *)self.adParam).fiveSlotId];
         [self.interstitial setLoadDelegate:self];
         [self.interstitial setEventListener:self];
         //音出力設定
+        AdapterLogP(@"soundState: %d", (int)[ADFMovieOptions getSoundState]);
         ADFMovieOptions_Sound soundState = [ADFMovieOptions getSoundState];
         if (ADFMovieOptions_Sound_On == soundState) {
             [self.interstitial enableSound:true];
@@ -73,13 +101,26 @@
     } @catch (NSException *exception) {
         [self adnetworkExceptionHandling:exception];
     }
+    return true;
 }
 
+// 在庫取得有無を返す
+- (BOOL)isPrepared {
+    //申請済のバンドルIDと異なる場合のメッセージ
+    //(バンドルIDが申請済のものと異なると、正常に広告が返却されない可能性があります)
+    if(![((AdnetworkParam6008 *)self.adParam).submittedPackageName isEqualToString:[[NSBundle mainBundle] bundleIdentifier]]) {
+        //表示を消したい場合は、こちらをコメントアウトして下さい。
+        AdapterLogP(@"[SEVERE] [Five]アプリのバンドルIDが、申請されたもの（%@）と異なります。", ((AdnetworkParam6008 *)self.adParam).submittedPackageName);
+    }
+    
+    if (self.interstitial) {
+        return self.isAdLoaded && self.interstitial.state == kFADStateLoaded;
+    }
+    return false;
+}
 
-/**
- *  広告の表示を行う
- */
--(void)showAd {
+// 広告再生
+- (void)showAd {
     UIViewController *vc = [self topMostViewController];
     if (vc) {
         [self showAdWithPresentingViewController:vc];
@@ -87,13 +128,17 @@
         AdapterLog(@"top most viewcontroller is nil");
         [self setCallbackStatus:MovieRewardCallbackPlayFail];
     }
-
 }
 
--(void)showAdWithPresentingViewController:(UIViewController *)viewController {
+- (void)showAdWithPresentingViewController:(UIViewController *)viewController {
     [super showAdWithPresentingViewController:viewController];
     
-    if (self.interstitial) {
+    if (!self.interstitial) {
+        [self setCallbackStatus:MovieRewardCallbackPlayFail];
+        return;
+    }
+
+    if ([self isPrepared]) {
         @try {
             [self requireToAsyncPlay];
             [self.interstitial showWithViewController:viewController];
@@ -104,14 +149,23 @@
     }
 }
 
--(void)dealloc {
+#pragma mark - FiveDelegate
+- (void)fiveAdDidLoad:(id<FADAdInterface>)ad {
+    AdapterTrace;
+    [self setCallbackStatus:MovieRewardCallbackFetchComplete];
+}
+
+- (void)fiveAd:(id<FADAdInterface>)ad didFailedToReceiveAdWithError:(FADErrorCode)errorCode {
+    AdapterLogP(@"errorCode: %ld, slotId: %@", (long)errorCode, ((AdnetworkParam6008 *)self.adParam).fiveSlotId);
+    [self setErrorWithMessage:nil code:errorCode];
+    [self setCallbackStatus:MovieRewardCallbackFetchFail];
 }
 
 #pragma mark FADInterstitialEventListener
 - (void)fiveInterstitialAd:(nonnull FADInterstitial*)ad didFailedToShowAdWithError:(FADErrorCode) errorCode {
     // エラー時の処理
     AdapterTrace;
-    AdapterLogP(@"errorCode: %ld, slotId: %@", (long)errorCode, self.fiveSlotId);
+    AdapterLogP(@"errorCode: %ld, slotId: %@", (long)errorCode, ((AdnetworkParam6008 *)self.adParam).fiveSlotId);
     [self setErrorWithMessage:nil code:errorCode];
     [self setCallbackStatus:MovieRewardCallbackPlayFail];
 }

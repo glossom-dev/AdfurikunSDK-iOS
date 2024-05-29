@@ -8,104 +8,90 @@
 
 #import "MovieReward6110.h"
 #import "AdnetworkConfigure6110.h"
-
-@interface MovieReward6110 ()
-
-@property (nonatomic) NSString *appKey;
-
-@end
+#import "AdnetworkParam6110.h"
 
 @implementation MovieReward6110
 
-// SDKからバージョンを取得して返す
-// APIがなければ削除
-+ (NSString *)getSDKVersion {
-    return [IronSource sdkVersion];
-}
-
-// Adapterのバージョン。最初は1にして、修正がある度＋1にする
+// adapterファイルのRevision番号を返す。実装が変わる度Incrementする
 + (NSString *)getAdapterRevisionVersion {
-    return @"7";
+    return @"8";
 }
 
+// Adnetwork実装時に使うClass名。SDKが導入されているかで使う
 + (NSString *)adnetworkClassName {
     return @"IronSource";
 }
 
+// ADFで定義しているAdnetwork名。
 + (NSString *)adnetworkName {
-    return @"ironSource";
+    return [AdnetworkConfigure6110 adnetworkName];
 }
 
-// getinfoからのParameter設定
++ (NSString *)getSDKVersion {
+    return [AdnetworkConfigure6110 getSDKVersion];
+}
+
+// Instance Variableを初期化する。また、必要な場合Configureを生成する
+-(id)init {
+    self = [super init];
+    if (self) {
+        self.configure = [AdnetworkConfigure6110 sharedInstance];
+    }
+    return self;
+}
+
+// Adnetwork Parameterを指定するAdnetworkParam Objectを生成する。
 - (void)setData:(NSDictionary *)data {
     [super setData:data];
     
-    NSString *appKey = [data objectForKey:@"app_key"];
-    if ([self isString:appKey]) {
-        self.appKey = [NSString stringWithFormat:@"%@", appKey];
-    }
-    
-    NSString *instanceId = [data objectForKey:@"instance_id"];
-    if ([self isString:instanceId]) {
-        self.instanceId = [NSString stringWithFormat:@"%@", instanceId];
-    }
+    self.adParam = [[AdnetworkParam6110 alloc] initWithParam:data];
+    self.configure.param = self.adParam; // Parameterを設定する
 }
 
-// 広告準備有無を返す
-- (BOOL)isPrepared {
-    AdapterTrace;
-    return self.isAdLoaded;
-}
-
-// Adnetwork SDKの初期化を行う
-- (void)initAdnetworkIfNeeded {
-    // 一回のみ初期化を行うようなチェックを行う
-    if (![self needsToInit]) {
-        return;
+// Adnetwork SDKを初期化する
+- (bool)initAdnetworkIfNeeded {
+    if (![super initAdnetworkIfNeeded]) { // 初期化済みかParameterが設定されてないとそのままReturnする
+        return false;
     }
     
-    if (!self.appKey) {
-        return;
-    }
-    
-    [AdnetworkConfigure6110.sharedInstance initIronSource:self.appKey completion:^{
-        [self initCompleteAndRetryStartAdIfNeeded];
+    // SDK初期化はConfigureを使う
+    __weak typeof(self) weakSelf = self;
+    [self.configure initAdnetworkSDKWithCompletionHander:^(_Bool result) {
+        __strong typeof(self) strongSelf = weakSelf;
+        if (!strongSelf) return;
+        // 初期化完了後の実装が必要な場合こちらに追加する
+        [strongSelf initCompleteAndRetryStartAdIfNeeded];
     }];
+    return true;
 }
 
-// 広告呼び込みを行う
-- (void)startAd {
-    AdapterTrace;
-    // 初期化が完了しているかをチェック
-    if (![self canStartAd]) {
-        return;
+// 広告読み込みを開始する
+- (bool)startAd {
+    if (![super startAd]) { // 読み込みが可能な状態かをチェックする
+        return false;
     }
     
-    if (!self.instanceId) {
-        return;
-    }
-    
-    [super startAd];
-    
-    // Adnetwork SDKの関数を呼び出す際はTryーCatchでException Handlingを行う
     @try {
-        // 非同期で行われる場合にはFlag設定を行う
         [self requireToAsyncRequestAd];
-        
-        [AdnetworkConfigure6110.sharedInstance setMovieRewardAdapter:self instanceId:self.instanceId];
-        [IronSource loadISDemandOnlyRewardedVideo:self.instanceId];
+        [AdnetworkConfigure6110.sharedInstance setMovieRewardAdapter:self instanceId:((AdnetworkParam6110 *)self.adParam).instanceId];
+        [IronSource loadISDemandOnlyRewardedVideo:((AdnetworkParam6110 *)self.adParam).instanceId];
         AdapterLog(@"load rewarded video");
     } @catch (NSException *exception) {
         [self adnetworkExceptionHandling:exception];
     }
+    return true;
 }
 
-// 広告再生関数
-// showAdWithPresentingViewController と両方を必ず実装する
+// 在庫取得有無を返す
+- (BOOL)isPrepared {
+    return self.isAdLoaded;
+}
+
+// 広告再生
 - (void)showAd {
-    UIViewController *topVC = [self topMostViewController];
-    if (topVC) {
-        [self showAdWithPresentingViewController:topVC];
+    UIViewController *vc = [self topMostViewController];
+    if (vc) {
+        [self showAdWithPresentingViewController:vc];
     } else {
         [self setCallbackStatus:MovieRewardCallbackPlayFail];
     }
@@ -114,26 +100,17 @@
 - (void)showAdWithPresentingViewController:(UIViewController *)viewController {
     [super showAdWithPresentingViewController:viewController];
     
-    @try {
-        [self requireToAsyncPlay];
-        
-        [IronSource showISDemandOnlyRewardedVideo:viewController instanceId:self.instanceId];
-    } @catch (NSException *exception) {
-        [self adnetworkExceptionHandling:exception];
+    if ([self isPrepared]) {
+        @try {
+            [self requireToAsyncPlay];
+            [IronSource showISDemandOnlyRewardedVideo:viewController instanceId:((AdnetworkParam6110 *)self.adParam).instanceId];
+        } @catch (NSException *exception) {
+            [self adnetworkExceptionHandling:exception];
+            [self setCallbackStatus:MovieRewardCallbackPlayFail];
+        }
+    } else {
         [self setCallbackStatus:MovieRewardCallbackPlayFail];
     }
-}
-
--(void)setHasUserConsent:(BOOL)hasUserConsent {
-    [super setHasUserConsent:hasUserConsent];
-    [IronSource setConsent:hasUserConsent];
-    AdapterLogP(@"Adnetwork 6110, gdprConsent : %@, sdk setting value : %d", self.hasGdprConsent, (int)hasUserConsent);
-}
-
-- (void)isChildDirected:(BOOL)childDirected {
-    [super isChildDirected:childDirected];
-    [IronSource setMetaDataWithKey:@"is_child_directed" value:childDirected ? @"YES": @"NO"];
-    AdapterLogP(@"Adnetwork %@, childDirected : %@, input parameter : %d", self.adnetworkKey, self.childDirected, (int)childDirected);
 }
 
 @end
