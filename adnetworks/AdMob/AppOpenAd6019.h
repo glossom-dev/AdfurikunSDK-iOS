@@ -15,19 +15,22 @@ NS_ASSUME_NONNULL_BEGIN
 
 @end
 
-@interface AppOpenAd6060 : AppOpenAd6019
+@interface AppOpenAd6160 : AppOpenAd6019
 @end
 
-@interface AppOpenAd6061 : AppOpenAd6019
+@interface AppOpenAd6161 : AppOpenAd6019
 @end
 
-@interface AppOpenAd6062 : AppOpenAd6019
+@interface AppOpenAd6162 : AppOpenAd6019
 @end
 
-@interface AppOpenAd6063 : AppOpenAd6019
+@interface AppOpenAd6163 : AppOpenAd6019
 @end
 
-@interface AppOpenAd6064 : AppOpenAd6019
+@interface AppOpenAd6164 : AppOpenAd6019
+@end
+
+@interface AppOpenAd6060 : AppOpenAd6019 // GAM
 @end
 
 NS_ASSUME_NONNULL_END

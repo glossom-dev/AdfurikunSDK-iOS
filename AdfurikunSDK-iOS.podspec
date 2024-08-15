@@ -1,6 +1,6 @@
 Pod::Spec.new do |s|
   s.name            = "AdfurikunSDK-iOS"
-  s.version         = "3.22.0"
+  s.version         = "0.3.23.0"
   s.summary         = "An iOS SDK for ADFURIKUN Movie Reward Ads"
   s.homepage        = "https://adfurikun.jp/adfurikun/"
   s.license         = { :type => 'Copyright', :text => 'Copyright Glossom Inc. All rights reserved.' }
@@ -29,14 +29,14 @@ Pod::Spec.new do |s|
 
   s.subspec 'Afio' do |afio|
     afio.dependency 'AdfurikunSDK-iOS/Core'
-    afio.dependency 'AMoAd', '<=6.1.21'
+    afio.dependency 'AMoAd', '<=6.1.22'
     afio.source_files = '**/adnetworks/Afio/*.swift'
     afio.resource = '**/adnetworks/Afio/*.txt'
   end
 
   s.subspec 'AppLovin' do |applovin|
     applovin.dependency 'AdfurikunSDK-iOS/Core'
-    applovin.dependency 'AppLovinSDK', '12.4.2'
+    applovin.dependency 'AppLovinSDK', '12.6.0'
     applovin.source_files = '**/adnetworks/AppLovin/*.{h,m}'
     applovin.resource = '**/adnetworks/AppLovin/*.txt'
   end
@@ -50,61 +50,61 @@ Pod::Spec.new do |s|
 
   s.subspec 'Five' do |five|
     five.dependency 'AdfurikunSDK-iOS/Core'
-    five.dependency 'FiveAd', '2.7.20240411'
+    five.dependency 'FiveAd', '2.8.20240612'
     five.source_files = '**/adnetworks/Five/*.{h,m}'
     five.resource = '**/adnetworks/Five/*.txt'
   end
 
   s.subspec 'Fyber' do |fyber|
     fyber.dependency 'AdfurikunSDK-iOS/Core'
-    fyber.dependency 'Fyber_Marketplace_SDK', '8.2.8'
+    fyber.dependency 'Fyber_Marketplace_SDK', '8.3.1'
     fyber.source_files = '**/adnetworks/Fyber/*.{h,m}'
     fyber.resource = '**/adnetworks/Fyber/*.txt'
   end
 
   s.subspec 'ironSource' do |ironSource|
     ironSource.dependency 'AdfurikunSDK-iOS/Core'
-    ironSource.dependency 'IronSourceSDK', '7.9.1'
+    ironSource.dependency 'IronSourceSDK', '8.2.0'
     ironSource.source_files = '**/adnetworks/IronSource/*.{h,m}'
     ironSource.resource = '**/adnetworks/IronSource/*.txt'
   end
 
   s.subspec 'Maio' do |maio|
     maio.dependency 'AdfurikunSDK-iOS/Core'
-    maio.dependency 'MaioSDK-v2', '2.1.4'
+    maio.dependency 'MaioSDK-v2', '2.1.5'
     maio.source_files = '**/adnetworks/Maio/*.{h,m}'
     maio.resource = '**/adnetworks/Maio/*.txt'
   end
 
   s.subspec 'Pangle' do |pangle|
     pangle.dependency 'AdfurikunSDK-iOS/Core'
-    pangle.dependency 'Ads-Global', '5.9.0.8'
+    pangle.dependency 'Ads-Global', '6.1.0.6'
     pangle.source_files = '**/adnetworks/Pangle/*.{h,m}'
     pangle.resource = '**/adnetworks/Pangle/*.txt'
   end
 
   s.subspec 'UnityAds' do |unityads|
     unityads.dependency 'AdfurikunSDK-iOS/Core'
-    unityads.dependency 'UnityAds', '4.10.0'
+    unityads.dependency 'UnityAds', '4.12.2'
     unityads.source_files = '**/adnetworks/UnityAds/*.{h,m}'
     unityads.resource = '**/adnetworks/UnityAds/*.txt'
   end
 
   s.subspec 'Vungle' do |vungle|
     vungle.dependency 'AdfurikunSDK-iOS/Core'
-    vungle.dependency 'VungleAds', '7.3.2'
+    vungle.dependency 'VungleAds', '7.4.0'
     vungle.source_files = '**/adnetworks/Vungle/*.{h,m}'
     vungle.resource = '**/adnetworks/Vungle/*.txt'
   end
 
   s.subspec 'Mintegral' do |mintegral|
     mintegral.dependency 'AdfurikunSDK-iOS/Core'
-    mintegral.dependency 'MintegralAdSDK/BidNativeAd', '7.6.1'
-    mintegral.dependency 'MintegralAdSDK/BidNativeAdvancedAd', '7.6.1'
-    mintegral.dependency 'MintegralAdSDK/BidRewardVideoAd', '7.6.1'
-    mintegral.dependency 'MintegralAdSDK/BidNewInterstitialAd', '7.6.1'
-    mintegral.dependency 'MintegralAdSDK/BidBannerAd', '7.6.1'
-    mintegral.dependency 'MintegralAdSDK/BidSplashAd', '7.6.1'
+    mintegral.dependency 'MintegralAdSDK/BidNativeAd', '7.6.9'
+    mintegral.dependency 'MintegralAdSDK/BidNativeAdvancedAd', '7.6.9'
+    mintegral.dependency 'MintegralAdSDK/BidRewardVideoAd', '7.6.9'
+    mintegral.dependency 'MintegralAdSDK/BidNewInterstitialAd', '7.6.9'
+    mintegral.dependency 'MintegralAdSDK/BidBannerAd', '7.6.9'
+    mintegral.dependency 'MintegralAdSDK/BidSplashAd', '7.6.9'
     mintegral.source_files = '**/adnetworks/Mintegral/*.{h,m}'
     mintegral.resource = '**/adnetworks/Mintegral/*.txt'
   end

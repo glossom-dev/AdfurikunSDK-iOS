@@ -22,7 +22,7 @@
 
 // adapterファイルのRevision番号を返す。実装が変わる度Incrementする
 + (NSString *)getAdapterRevisionVersion {
-    return @"7";
+    return @"8";
 }
 
 // Adnetwork実装時に使うClass名。SDKが導入されているかで使う
@@ -113,7 +113,7 @@
     }
     
     if (self.fullscreen) {
-        return self.isAdLoaded && self.fullscreen.state == kFADStateLoaded;
+        return self.isAdLoaded;
     }
     return false;
 }

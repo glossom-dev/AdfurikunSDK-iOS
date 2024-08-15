@@ -13,12 +13,12 @@
 
 // adapterファイルのRevision番号を返す。実装が変わる度Incrementする
 + (NSString *)getAdapterRevisionVersion {
-    return @"13";
+    return @"14";
 }
 
 // Adnetwork実装時に使うClass名。SDKが導入されているかで使う
 + (NSString *)adnetworkClassName {
-    return @"UnityAds";
+    return @"UnityAds.UnityAds";
 }
 
 // ADFで定義しているAdnetwork名。

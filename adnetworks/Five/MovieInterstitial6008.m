@@ -21,7 +21,7 @@
 
 // adapterファイルのRevision番号を返す。実装が変わる度Incrementする
 + (NSString *)getAdapterRevisionVersion {
-    return @"17";
+    return @"18";
 }
 
 // Adnetwork実装時に使うClass名。SDKが導入されているかで使う
@@ -114,7 +114,7 @@
     }
     
     if (self.interstitial) {
-        return self.isAdLoaded && self.interstitial.state == kFADStateLoaded;
+        return self.isAdLoaded;
     }
     return false;
 }
