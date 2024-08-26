@@ -1,6 +1,6 @@
 Pod::Spec.new do |s|
   s.name            = "AdfurikunSDK-iOS"
-  s.version         = "0.3.23.0"
+  s.version         = "0.3.23.0.1"
   s.summary         = "An iOS SDK for ADFURIKUN Movie Reward Ads"
   s.homepage        = "https://adfurikun.jp/adfurikun/"
   s.license         = { :type => 'Copyright', :text => 'Copyright Glossom Inc. All rights reserved.' }
@@ -64,7 +64,7 @@ Pod::Spec.new do |s|
 
   s.subspec 'ironSource' do |ironSource|
     ironSource.dependency 'AdfurikunSDK-iOS/Core'
-    ironSource.dependency 'IronSourceSDK', '8.2.0'
+    ironSource.dependency 'IronSourceSDK', '8.1.1'
     ironSource.source_files = '**/adnetworks/IronSource/*.{h,m}'
     ironSource.resource = '**/adnetworks/IronSource/*.txt'
   end
