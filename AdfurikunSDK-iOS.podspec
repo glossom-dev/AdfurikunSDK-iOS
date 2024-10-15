@@ -27,6 +27,12 @@ Pod::Spec.new do |s|
     admob.resource = '**/adnetworks/AdMob/*.{txt,xib}'
   end
 
+  s.subspec 'AdMobMediationAdapter' do |admobMediationAdapter|
+    admobMediationAdapter.dependency 'AdfurikunSDK-iOS/Core'
+    admobMediationAdapter.dependency 'Google-Mobile-Ads-SDK', '>=11.2.0'
+    admobMediationAdapter.source_files = '**/adnetworks/AdMobMediationAdapter/*.{h,m}'
+  end
+
   s.subspec 'Afio' do |afio|
     afio.dependency 'AdfurikunSDK-iOS/Core'
     afio.dependency 'AMoAd', '<=6.1.22'
