@@ -14,7 +14,7 @@
 
 // adapterファイルのRevision番号を返す。実装が変わる度Incrementする
 + (NSString *)getAdapterRevisionVersion {
-    return @"8";
+    return @"9";
 }
 
 // Adnetwork実装時に使うClass名。SDKが導入されているかで使う
@@ -74,7 +74,10 @@
     @try {
         [self requireToAsyncRequestAd];
         [AdnetworkConfigure6110.sharedInstance setMovieRewardAdapter:self instanceId:((AdnetworkParam6110 *)self.adParam).instanceId];
-        [IronSource loadISDemandOnlyRewardedVideo:((AdnetworkParam6110 *)self.adParam).instanceId];
+//        [IronSource loadISDemandOnlyRewardedVideo:((AdnetworkParam6110 *)self.adParam).instanceId];
+        
+        
+        [IronSource loadRewardedVideo];
         AdapterLog(@"load rewarded video");
     } @catch (NSException *exception) {
         [self adnetworkExceptionHandling:exception];
@@ -128,4 +131,16 @@
 @end
 
 @implementation MovieReward6115
+@end
+
+@implementation MovieReward6116
+@end
+
+@implementation MovieReward6117
+@end
+
+@implementation MovieReward6118
+@end
+
+@implementation MovieReward6119
 @end

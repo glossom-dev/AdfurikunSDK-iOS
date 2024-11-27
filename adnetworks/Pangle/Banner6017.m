@@ -20,7 +20,7 @@
 
 // adapterファイルのRevision番号を返す。実装が変わる度Incrementする
 + (NSString *)getAdapterRevisionVersion {
-    return @"11";
+    return @"12";
 }
 
 // Adnetwork実装時に使うClass名。SDKが導入されているかで使う
@@ -191,4 +191,16 @@
 @end
 
 @implementation Banner6094
+@end
+
+@implementation Banner6095
+@end
+
+@implementation Banner6096
+@end
+
+@implementation Banner6097
+@end
+
+@implementation Banner6098
 @end

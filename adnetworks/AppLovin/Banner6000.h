@@ -27,6 +27,18 @@ NS_ASSUME_NONNULL_BEGIN
 @interface Banner6015 : Banner6000
 @end
 
+@interface Banner6210 : Banner6000
+@end
+
+@interface Banner6211 : Banner6000
+@end
+
+@interface Banner6212 : Banner6000
+@end
+
+@interface Banner6213 : Banner6000
+@end
+
 @interface NativeAdInfo6000 : ADFNativeAdInfo
 
 @end

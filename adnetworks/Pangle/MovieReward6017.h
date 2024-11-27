@@ -33,6 +33,18 @@ typedef void(^completionHandlerType)(void);
 @interface MovieReward6094 : MovieReward6017
 @end
 
+@interface MovieReward6095 : MovieReward6017
+@end
+
+@interface MovieReward6096 : MovieReward6017
+@end
+
+@interface MovieReward6097 : MovieReward6017
+@end
+
+@interface MovieReward6098 : MovieReward6017
+@end
+
 @interface MovieConfigure6017 : NSObject
 
 + (instancetype)sharedInstance;

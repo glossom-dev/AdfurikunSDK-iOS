@@ -34,4 +34,16 @@ NS_ASSUME_NONNULL_BEGIN
 @interface MovieNative6094 : MovieNative6017
 @end
 
+@interface MovieNative6095 : MovieNative6017
+@end
+
+@interface MovieNative6096 : MovieNative6017
+@end
+
+@interface MovieNative6097 : MovieNative6017
+@end
+
+@interface MovieNative6098 : MovieNative6017
+@end
+
 NS_ASSUME_NONNULL_END

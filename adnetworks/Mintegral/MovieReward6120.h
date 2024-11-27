@@ -17,23 +17,30 @@ NS_ASSUME_NONNULL_BEGIN
 @end
 
 @interface MovieReward6121 : MovieReward6120
-
 @end
 
 @interface MovieReward6122 : MovieReward6120
-
 @end
 
 @interface MovieReward6123 : MovieReward6120
-
 @end
 
 @interface MovieReward6124 : MovieReward6120
-
 @end
 
 @interface MovieReward6125 : MovieReward6120
+@end
 
+@interface MovieReward6126 : MovieReward6120
+@end
+
+@interface MovieReward6127 : MovieReward6120
+@end
+
+@interface MovieReward6128 : MovieReward6120
+@end
+
+@interface MovieReward6129 : MovieReward6120
 @end
 
 NS_ASSUME_NONNULL_END

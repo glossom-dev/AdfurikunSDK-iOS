@@ -26,3 +26,15 @@
 
 @implementation MovieInterstitial6034
 @end
+
+@implementation MovieInterstitial6035
+@end
+
+@implementation MovieInterstitial6036
+@end
+
+@implementation MovieInterstitial6037
+@end
+
+@implementation MovieInterstitial6038
+@end

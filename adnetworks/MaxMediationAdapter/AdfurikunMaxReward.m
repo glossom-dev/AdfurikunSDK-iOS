@@ -77,12 +77,10 @@
 - (void)AdsDidShow:(NSString *)appID adnetworkKey:(NSString *)adnetworkKey {
     NSLog(@"%s", __FUNCTION__);
     [self.maxDelegate didDisplayRewardedAd];
-    [self.maxDelegate didStartRewardedAdVideo];
 }
 
 - (void)AdsDidCompleteShow:(NSString *)appID {
     NSLog(@"%s", __FUNCTION__);
-    [self.maxDelegate didCompleteRewardedAdVideo];
 }
 
 - (void)AdsDidHide:(NSString *)appID {

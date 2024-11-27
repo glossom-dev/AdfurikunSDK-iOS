@@ -31,4 +31,16 @@ NS_ASSUME_NONNULL_BEGIN
 @interface AppOpenAd6125 : AppOpenAd6120
 @end
 
+@interface AppOpenAd6126 : AppOpenAd6120
+@end
+
+@interface AppOpenAd6127 : AppOpenAd6120
+@end
+
+@interface AppOpenAd6128 : AppOpenAd6120
+@end
+
+@interface AppOpenAd6129 : AppOpenAd6120
+@end
+
 NS_ASSUME_NONNULL_END

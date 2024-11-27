@@ -22,7 +22,7 @@
 
 // adapterファイルのRevision番号を返す。実装が変わる度Incrementする
 + (NSString *)getAdapterRevisionVersion {
-    return @"17";
+    return @"18";
 }
 
 // Adnetwork実装時に使うClass名。SDKが導入されているかで使う
@@ -208,6 +208,18 @@
 @end
 
 @implementation MovieReward6094
+@end
+
+@implementation MovieReward6095
+@end
+
+@implementation MovieReward6096
+@end
+
+@implementation MovieReward6097
+@end
+
+@implementation MovieReward6098
 @end
 
 typedef enum : NSUInteger {

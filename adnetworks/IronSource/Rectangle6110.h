@@ -29,4 +29,16 @@ NS_ASSUME_NONNULL_BEGIN
 @interface Rectangle6115 : Rectangle6110
 @end
 
+@interface Rectangle6116 : Rectangle6110
+@end
+
+@interface Rectangle6117 : Rectangle6110
+@end
+
+@interface Rectangle6118 : Rectangle6110
+@end
+
+@interface Rectangle6119 : Rectangle6110
+@end
+
 NS_ASSUME_NONNULL_END

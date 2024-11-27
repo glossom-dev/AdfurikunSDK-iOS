@@ -1,6 +1,6 @@
 Pod::Spec.new do |s|
   s.name            = "AdfurikunSDK-iOS"
-  s.version         = "0.3.23.3"
+  s.version         = "0.3.24.0"
   s.summary         = "An iOS SDK for ADFURIKUN Movie Reward Ads"
   s.homepage        = "https://adfurikun.jp/adfurikun/"
   s.license         = { :type => 'Copyright', :text => 'Copyright Glossom Inc. All rights reserved.' }
@@ -42,7 +42,7 @@ Pod::Spec.new do |s|
 
   s.subspec 'AppLovin' do |applovin|
     applovin.dependency 'AdfurikunSDK-iOS/Core'
-    applovin.dependency 'AppLovinSDK', '12.6.0'
+    applovin.dependency 'AppLovinSDK', '13.0.1'
     applovin.source_files = '**/adnetworks/AppLovin/*.{h,m}'
     applovin.resource = '**/adnetworks/AppLovin/*.txt'
   end
@@ -56,16 +56,23 @@ Pod::Spec.new do |s|
 
   s.subspec 'Five' do |five|
     five.dependency 'AdfurikunSDK-iOS/Core'
-    five.dependency 'FiveAd', '2.8.20240612'
+    five.dependency 'FiveAd', '2.9.20241106'
     five.source_files = '**/adnetworks/Five/*.{h,m}'
     five.resource = '**/adnetworks/Five/*.txt'
   end
 
   s.subspec 'Fyber' do |fyber|
     fyber.dependency 'AdfurikunSDK-iOS/Core'
-    fyber.dependency 'Fyber_Marketplace_SDK', '8.3.1'
+    fyber.dependency 'Fyber_Marketplace_SDK', '8.3.2'
     fyber.source_files = '**/adnetworks/Fyber/*.{h,m}'
     fyber.resource = '**/adnetworks/Fyber/*.txt'
+  end
+
+  s.subspec 'InMobi' do |inMobi|
+    inMobi.dependency 'AdfurikunSDK-iOS/Core'
+    inMobi.dependency 'InMobiSDK', '10.7.8'
+    inMobi.source_files = '**/adnetworks/InMobi/*.{h,m}'
+    inMobi.resource = '**/adnetworks/InMobi/*.txt'
   end
 
   s.subspec 'ironSource' do |ironSource|
@@ -82,6 +89,18 @@ Pod::Spec.new do |s|
     maio.resource = '**/adnetworks/Maio/*.txt'
   end
 
+  s.subspec 'Mintegral' do |mintegral|
+    mintegral.dependency 'AdfurikunSDK-iOS/Core'
+    mintegral.dependency 'MintegralAdSDK/BidNativeAd', '7.7.3'
+    mintegral.dependency 'MintegralAdSDK/BidNativeAdvancedAd', '7.7.3'
+    mintegral.dependency 'MintegralAdSDK/BidRewardVideoAd', '7.7.3'
+    mintegral.dependency 'MintegralAdSDK/BidNewInterstitialAd', '7.7.3'
+    mintegral.dependency 'MintegralAdSDK/BidBannerAd', '7.7.3'
+    mintegral.dependency 'MintegralAdSDK/BidSplashAd', '7.7.3'
+    mintegral.source_files = '**/adnetworks/Mintegral/*.{h,m}'
+    mintegral.resource = '**/adnetworks/Mintegral/*.txt'
+  end
+
   s.subspec 'Pangle' do |pangle|
     pangle.dependency 'AdfurikunSDK-iOS/Core'
     pangle.dependency 'Ads-Global', '6.2.0.9'
@@ -91,28 +110,16 @@ Pod::Spec.new do |s|
 
   s.subspec 'UnityAds' do |unityads|
     unityads.dependency 'AdfurikunSDK-iOS/Core'
-    unityads.dependency 'UnityAds', '4.12.2'
+    unityads.dependency 'UnityAds', '4.12.5'
     unityads.source_files = '**/adnetworks/UnityAds/*.{h,m}'
     unityads.resource = '**/adnetworks/UnityAds/*.txt'
   end
 
   s.subspec 'Vungle' do |vungle|
     vungle.dependency 'AdfurikunSDK-iOS/Core'
-    vungle.dependency 'VungleAds', '7.4.0'
+    vungle.dependency 'VungleAds', '7.4.2'
     vungle.source_files = '**/adnetworks/Vungle/*.{h,m}'
     vungle.resource = '**/adnetworks/Vungle/*.txt'
-  end
-
-  s.subspec 'Mintegral' do |mintegral|
-    mintegral.dependency 'AdfurikunSDK-iOS/Core'
-    mintegral.dependency 'MintegralAdSDK/BidNativeAd', '7.6.9'
-    mintegral.dependency 'MintegralAdSDK/BidNativeAdvancedAd', '7.6.9'
-    mintegral.dependency 'MintegralAdSDK/BidRewardVideoAd', '7.6.9'
-    mintegral.dependency 'MintegralAdSDK/BidNewInterstitialAd', '7.6.9'
-    mintegral.dependency 'MintegralAdSDK/BidBannerAd', '7.6.9'
-    mintegral.dependency 'MintegralAdSDK/BidSplashAd', '7.6.9'
-    mintegral.source_files = '**/adnetworks/Mintegral/*.{h,m}'
-    mintegral.resource = '**/adnetworks/Mintegral/*.txt'
   end
 
   s.subspec 'All' do |all|
@@ -122,12 +129,13 @@ Pod::Spec.new do |s|
     all.dependency 'AdfurikunSDK-iOS/AppLovin'
     all.dependency 'AdfurikunSDK-iOS/Five'
     all.dependency 'AdfurikunSDK-iOS/Fyber'
+    all.dependency 'AdfurikunSDK-iOS/InMobi'
     all.dependency 'AdfurikunSDK-iOS/ironSource'
     all.dependency 'AdfurikunSDK-iOS/Maio'
+    all.dependency 'AdfurikunSDK-iOS/Mintegral'
     all.dependency 'AdfurikunSDK-iOS/Pangle'
     all.dependency 'AdfurikunSDK-iOS/UnityAds'
     all.dependency 'AdfurikunSDK-iOS/Vungle'
-    all.dependency 'AdfurikunSDK-iOS/Mintegral'
   end
 
 end

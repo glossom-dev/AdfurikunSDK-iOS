@@ -34,12 +34,6 @@
     [ALPrivacySettings setHasUserConsent:hasUserConsent];
 }
 
-// COPPA関連設定実装
-- (void)isChildDirected:(BOOL)childDirected {
-    AdapterTraceP(@"childDirected: %d", (int)childDirected);
-    [ALPrivacySettings setIsAgeRestrictedUser:childDirected];
-}
-
 // Adnetwork SDK初期化ロジック実装
 // 初期化成功：initSuccess()呼び出し
 // 初期化失敗：initFail()呼び出し
@@ -63,6 +57,9 @@
         
         // DebugLog出力設定
         [ALSdk shared].settings.verboseLoggingEnabled = [ADFMovieOptions getTestMode];
+        
+        // SafeAreaサイズ不具合対応
+        [[ALSdk shared].settings setExtraParameterForKey:@"pisw" value:@"true"];
         
         [strongSelf initSuccess];
     }];

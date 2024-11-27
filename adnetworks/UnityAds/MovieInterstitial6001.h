@@ -26,3 +26,15 @@
 
 @interface MovieInterstitial6034 : MovieInterstitial6001
 @end
+
+@interface MovieInterstitial6035 : MovieInterstitial6001
+@end
+
+@interface MovieInterstitial6036 : MovieInterstitial6001
+@end
+
+@interface MovieInterstitial6037 : MovieInterstitial6001
+@end
+
+@interface MovieInterstitial6038 : MovieInterstitial6001
+@end

@@ -15,21 +15,28 @@
 
 // 同一広告枠に複数のAppLovin Zoneをサポートする
 @interface MovieInterstitial6011 : MovieInterstitial6000
-
 @end
 
 @interface MovieInterstitial6012 : MovieInterstitial6000
-
 @end
 
 @interface MovieInterstitial6013 : MovieInterstitial6000
-
 @end
 
 @interface MovieInterstitial6014 : MovieInterstitial6000
-
 @end
 
 @interface MovieInterstitial6015 : MovieInterstitial6000
+@end
 
+@interface MovieInterstitial6210 : MovieInterstitial6000
+@end
+
+@interface MovieInterstitial6211 : MovieInterstitial6000
+@end
+
+@interface MovieInterstitial6212 : MovieInterstitial6000
+@end
+
+@interface MovieInterstitial6213 : MovieInterstitial6000
 @end

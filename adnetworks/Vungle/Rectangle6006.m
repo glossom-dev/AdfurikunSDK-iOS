@@ -13,9 +13,36 @@
 - (id)init {
     self = [super init];
     if (self) {
-        self.bannerSize = BannerSizeMrec;
+        self.bannerSize = VungleAdSize.VungleAdSizeMREC;;
     }
     return self;
 }
 
+@end
+
+@implementation Rectangle6200
+@end
+
+@implementation Rectangle6201
+@end
+
+@implementation Rectangle6202
+@end
+
+@implementation Rectangle6203
+@end
+
+@implementation Rectangle6204
+@end
+
+@implementation Rectangle6205
+@end
+
+@implementation Rectangle6206
+@end
+
+@implementation Rectangle6207
+@end
+
+@implementation Rectangle6208
 @end

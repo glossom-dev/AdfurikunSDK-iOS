@@ -26,3 +26,15 @@
 
 @implementation Rectangle6145
 @end
+
+@implementation Rectangle6146
+@end
+
+@implementation Rectangle6147
+@end
+
+@implementation Rectangle6148
+@end
+
+@implementation Rectangle6149
+@end

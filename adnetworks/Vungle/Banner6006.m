@@ -12,8 +12,7 @@
 
 @interface Banner6006()
 
-@property (nonatomic, strong) VungleBanner *bannerAd;
-@property (nonatomic) UIView *adView;
+@property (nonatomic, strong) VungleBannerView *bannerView;
 
 @end
 
@@ -21,12 +20,12 @@
 
 // adapterファイルのRevision番号を返す。実装が変わる度Incrementする
 + (NSString *)getAdapterRevisionVersion {
-    return @"11";
+    return @"12";
 }
 
 // Adnetwork実装時に使うClass名。SDKが導入されているかで使う
 + (NSString *)adnetworkClassName {
-    return @"VungleAdsSDK.VungleBanner";
+    return @"VungleAdsSDK.VungleBannerView";
 }
 
 // ADFで定義しているAdnetwork名。
@@ -43,7 +42,7 @@
     self = [super init];
     if (self) {
         self.configure = [AdnetworkConfigure6006 sharedInstance];
-        self.bannerSize = BannerSizeRegular;
+        self.bannerSize = VungleAdSize.VungleAdSizeBannerRegular;
     }
     return self;
 }
@@ -81,17 +80,17 @@
     
     @try {
         [self requireToAsyncRequestAd];
-        if (self.bannerAd) {
-            self.bannerAd.delegate = nil;
-            self.bannerAd = nil;
+        if (self.bannerView) {
+            self.bannerView.delegate = nil;
+            self.bannerView = nil;
         }
         
         [self requireToAsyncRequestAd];
         
-        self.bannerAd = [[VungleBanner alloc] initWithPlacementId:((AdnetworkParam6006 *)self.adParam).placementID
-                                                             size:self.bannerSize];
-        self.bannerAd.delegate = self;
-        [self.bannerAd load:nil];
+        self.bannerView = [[VungleBannerView alloc] initWithPlacementId:((AdnetworkParam6006 *)self.adParam).placementID
+                                                         vungleAdSize:self.bannerSize];
+        self.bannerView.delegate = self;
+        [self.bannerView load:nil];
     } @catch (NSException *exception) {
         [self adnetworkExceptionHandling:exception];
     }
@@ -111,101 +110,67 @@
 - (void)clearStatusIfNeeded {
 }
 
--(void)destroyAdViewIfNeeded {
-    AdapterTrace;
-    if (self.adView) {
-        for (id subview in self.adView.subviews) {
-          [subview removeFromSuperview];
-        }
-        [self.adView removeFromSuperview];
-        self.adView = nil;
-    }
-    
-}
-
 - (void)dispose {
     [super dispose];
     
-    [self destroyAdViewIfNeeded];
-    
-    if (self.bannerAd) {
-        self.bannerAd.delegate = nil;
-        self.bannerAd = nil;
+    if (self.bannerView) {
+        self.bannerView.delegate = nil;
+        self.bannerView = nil;
     }
 }
 
-#pragma mark - VungleBanner Delegate Methods
+#pragma mark - VungleBannerViewDelegate Delegate Methods
 // Ad load Events
-- (void)bannerAdDidLoad:(VungleBanner *)banner {
+- (void)bannerAdDidLoad:(VungleBannerView *)bannerView {
     AdapterTrace;
-    self.creativeId = banner.creativeId;
-    
-    CGRect viewSize = CGRectMake(0.0, 0.0, 300.0, 250.0);
-    if (self.bannerSize == BannerSizeRegular) {
-        viewSize = CGRectMake(0.0, 0.0, 320.0, 50.0);
-    }
-    
-    [self destroyAdViewIfNeeded];
-    
-    self.adView = [[UIView alloc] initWithFrame:viewSize];
-    [self.bannerAd presentOn:self.adView];
-    AdapterLog(@"vungle 6006 addAdViewToView complete");
+    self.creativeId = bannerView.creativeId;
     NativeAdInfo6006 *info = [[NativeAdInfo6006 alloc] initWithVideoUrl:nil
                                                                   title:@""
                                                             description:@""
                                                            adnetworkKey:self.adnetworkKey];
     info.mediaType = ADFNativeAdType_Image;
-    info.adapter = self;
-    [info setupMediaView:self.adView];
-    self.adInfo = info;
+    [info setupMediaView:bannerView];
+    [self setCustomMediaview:bannerView];
     
-    [self setCustomMediaview:self.adView];
+    info.adapter = self;
+    info.isCustomComponentSupported = false;
+    
+    self.adInfo = info;
     
     [self setCallbackStatus:NativeAdCallbackLoadFinish];
 }
 
-- (void)bannerAdDidFailToLoad:(VungleBanner *)banner
-                    withError:(NSError *)withError {
+- (void)bannerAdDidFail:(VungleBannerView *)bannerView withError:(NSError *)withError {
     AdapterTraceP(@"error : %@", withError);
-    [self setLastError:withError];
+    [self setErrorWithMessage:withError.localizedDescription code:withError.code];
     [self setCallbackStatus:NativeAdCallbackLoadError];
 }
 
 // Ad Lifecycle Events
-- (void)bannerAdWillPresent:(VungleBanner *)banner {
+
+- (void)bannerAdWillPresent:(VungleBannerView *)bannerView {
     AdapterTrace;
 }
 
-- (void)bannerAdDidPresent:(VungleBanner *)banner {
+- (void)bannerAdDidPresent:(VungleBannerView *)bannerView {
     AdapterTrace;
 }
 
-- (void)bannerAdDidFailToPresent:(VungleBanner *)banner
-                       withError:(NSError *)withError {
-    AdapterTraceP(@"error : %@", withError);
-    [self setLastError:withError];
-    [self setCallbackStatus:NativeAdCallbackPlayFail];
+- (void)bannerAdDidClose:(VungleBannerView *)bannerView {
+    AdapterTrace;
 }
 
-- (void)bannerAdDidTrackImpression:(VungleBanner *)banner {
+- (void)bannerAdDidTrackImpression:(VungleBannerView *)bannerView {
     AdapterTrace;
     [self setCallbackStatus:NativeAdCallbackPlayStart];
 }
 
-- (void)bannerAdDidClick:(VungleBanner *)banner {
+- (void)bannerAdDidClick:(VungleBannerView *)bannerView {
     AdapterTrace;
     [self setCallbackStatus:NativeAdCallbackClick];
 }
 
-- (void)bannerAdWillLeaveApplication:(VungleBanner *)banner {
-    AdapterTrace;
-}
-
-- (void)bannerAdWillClose:(VungleBanner *)banner {
-    AdapterTrace;
-}
-
-- (void)bannerAdDidClose:(VungleBanner *)banner {
+- (void)bannerAdWillLeaveApplication:(VungleBannerView *)bannerView {
     AdapterTrace;
 }
 
@@ -219,4 +184,31 @@
     }
 }
 
+@end
+
+@implementation Banner6200
+@end
+
+@implementation Banner6201
+@end
+
+@implementation Banner6202
+@end
+
+@implementation Banner6203
+@end
+
+@implementation Banner6204
+@end
+
+@implementation Banner6205
+@end
+
+@implementation Banner6206
+@end
+
+@implementation Banner6207
+@end
+
+@implementation Banner6208
 @end

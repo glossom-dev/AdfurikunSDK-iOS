@@ -14,7 +14,7 @@ NS_ASSUME_NONNULL_BEGIN
 
 typedef void(^completionHandlerType)(void);
 
-@interface AdnetworkConfigure6110 : ADFmyAdnetworkConfigure<ISDemandOnlyRewardedVideoDelegate, ISDemandOnlyInterstitialDelegate>
+@interface AdnetworkConfigure6110 : ADFmyAdnetworkConfigure<ISDemandOnlyRewardedVideoDelegate, ISDemandOnlyInterstitialDelegate, LevelPlayRewardedVideoManualDelegate>
 
 - (void)setMovieRewardAdapter:(ADFmyMovieRewardInterface *)adapter instanceId:(NSString *)instanceId;
 - (void)removeMovieRewardAdapterWithInstanceId:(NSString *)instanceId;
