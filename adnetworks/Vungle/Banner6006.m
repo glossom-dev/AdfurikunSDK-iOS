@@ -162,7 +162,8 @@
 
 - (void)bannerAdDidTrackImpression:(VungleBannerView *)bannerView {
     AdapterTrace;
-    [self setCallbackStatus:NativeAdCallbackPlayStart];
+    [self setCallbackStatus:NativeAdCallbackRendering];
+    [self startViewabilityCheck];
 }
 
 - (void)bannerAdDidClick:(VungleBannerView *)bannerView {
@@ -177,12 +178,6 @@
 @end
 
 @implementation NativeAdInfo6006
-
-- (void)playMediaView {
-    if (self.adapter) {
-        [self.adapter setCallbackStatus:NativeAdCallbackRendering];
-    }
-}
 
 @end
 

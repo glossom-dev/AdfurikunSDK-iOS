@@ -13,7 +13,7 @@
 
 #import <ADFMovieReward/ADFMovieOptions.h>
 
-@interface MovieInterstitial6000()<ALAdLoadDelegate, ALAdDisplayDelegate, ALAdVideoPlaybackDelegate>
+@interface MovieInterstitial6000()<ALAdLoadDelegate, ALAdDisplayDelegate>
 @property (nonatomic, strong) ALAd *ad;
 @property (nonatomic, strong) ALInterstitialAd *interstitialAd;
 @end
@@ -72,7 +72,6 @@
                 strongSelf.interstitialAd = [[ALInterstitialAd alloc] initWithSdk:[ALSdk shared]];
                 strongSelf.interstitialAd.adDisplayDelegate = strongSelf;
                 strongSelf.interstitialAd.adLoadDelegate = strongSelf;
-                strongSelf.interstitialAd.adVideoPlaybackDelegate = strongSelf;
             } @catch (NSException *exception) {
                 [strongSelf adnetworkExceptionHandling:exception];
             }
@@ -172,6 +171,7 @@
  */
 -(void) ad:(ALAd *) ad wasHiddenIn: (UIView *)view {
     AdapterTrace;
+    [self setCallbackStatus:MovieRewardCallbackPlayComplete];
     [self setCallbackStatus:MovieRewardCallbackClose];
 }
 
@@ -180,28 +180,6 @@
  */
 -(void) ad:(ALAd *) ad wasClickedIn: (UIView *)view {
     AdapterTrace;
-}
-
-/**
- *  広告（ビデオ)の表示を開始されたか
- */
--(void) videoPlaybackBeganInAd: (ALAd*) ad {
-    AdapterTrace;
-    // 広告の読み
-}
-
-/**
- *  広告の終了・停止時に呼ばれる
- * パーセント、読み込み終わりの設定を表示
- */
--(void) videoPlaybackEndedInAd: (ALAd*) ad atPlaybackPercent:(NSNumber*) percentPlayed fullyWatched: (BOOL) wasFullyWatched {
-    AdapterTraceP(@"atPlaybackPercent : %@, fullyWatched : %d", percentPlayed, wasFullyWatched);
-    
-    if (wasFullyWatched) {
-        [self setCallbackStatus:MovieRewardCallbackPlayComplete];
-    } else {
-        AdapterLogP(@"%s Delegate is not setting or wasFullyWatched(%@) is false", __FUNCTION__, (wasFullyWatched ? @"true" : @"false"));
-    }
 }
 
 @end

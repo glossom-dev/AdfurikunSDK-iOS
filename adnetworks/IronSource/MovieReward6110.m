@@ -74,10 +74,7 @@
     @try {
         [self requireToAsyncRequestAd];
         [AdnetworkConfigure6110.sharedInstance setMovieRewardAdapter:self instanceId:((AdnetworkParam6110 *)self.adParam).instanceId];
-//        [IronSource loadISDemandOnlyRewardedVideo:((AdnetworkParam6110 *)self.adParam).instanceId];
-        
-        
-        [IronSource loadRewardedVideo];
+        [IronSource loadISDemandOnlyRewardedVideo:((AdnetworkParam6110 *)self.adParam).instanceId];
         AdapterLog(@"load rewarded video");
     } @catch (NSException *exception) {
         [self adnetworkExceptionHandling:exception];

@@ -54,25 +54,15 @@
 // 初期化成功：initSuccess()呼び出し
 // 初期化失敗：initFail()呼び出し
 - (void)initAdnetworkSDK {
-//    [IronSource setISDemandOnlyRewardedVideoDelegate:self];
-//    [IronSource setISDemandOnlyInterstitialDelegate:self];
+    [IronSource setISDemandOnlyRewardedVideoDelegate:self];
+    [IronSource setISDemandOnlyInterstitialDelegate:self];
     
-    [IronSource setLevelPlayRewardedVideoManualDelegate:self];
-    
-    ISAInitRequestBuilder *builder = [[ISAInitRequestBuilder alloc] initWithAppKey:((AdnetworkParam6110 *)self.param).appKey];
-    ISAInitRequest *request = builder.build;
-    [IronSourceAds initWithRequest:request completion:^(BOOL success, NSError * _Nullable error) {
-        if (success) {
-            [self initSuccess];
-        }
-    }];
-    
-//    [IronSource initISDemandOnly:((AdnetworkParam6110 *)self.param).appKey adUnits:@[IS_REWARDED_VIDEO, IS_INTERSTITIAL, IS_BANNER]];
+    [IronSource initISDemandOnly:((AdnetworkParam6110 *)self.param).appKey adUnits:@[IS_REWARDED_VIDEO, IS_INTERSTITIAL, IS_BANNER]];
     
     NSString *mediationString = [NSString stringWithFormat:@"Adfurikun1SDK%@", [ADFMovieOptions version]];
     AdapterLogP(@"mediation string : %@", mediationString);
     [IronSource setMediationType:mediationString];
-//    [self initSuccess];
+    [self initSuccess];
 }
 
 - (instancetype)init {
@@ -236,43 +226,6 @@
  */
 - (void)didClickInterstitial:(NSString *)instanceId {
     AdapterTraceP(@"instance id : %@", instanceId);
-}
-
-
-
-
-
-
-- (void)didClick:(ISPlacementInfo *)placementInfo withAdInfo:(ISAdInfo *)adInfo { 
-    
-}
-
-- (void)didCloseWithAdInfo:(ISAdInfo *)adInfo { 
-    
-}
-
-- (void)didFailToShowWithError:(NSError *)error andAdInfo:(ISAdInfo *)adInfo { 
-    
-}
-
-- (void)didOpenWithAdInfo:(ISAdInfo *)adInfo { 
-    
-}
-
-- (void)didReceiveRewardForPlacement:(ISPlacementInfo *)placementInfo withAdInfo:(ISAdInfo *)adInfo { 
-    AdapterTraceP(@"instance id : %@", placementInfo.placementName);
-    ADFmyMovieRewardInterface *adapter = [self.movieRewardAdapters objectForKey:placementInfo.placementName];
-    if (adapter) {
-        [adapter setCallbackStatus:MovieRewardCallbackFetchComplete];
-    }
-}
-
-- (void)didFailToLoadWithError:(NSError *)error { 
-    
-}
-
-- (void)didLoadWithAdInfo:(ISAdInfo *)adInfo { 
-    
 }
 
 @end
