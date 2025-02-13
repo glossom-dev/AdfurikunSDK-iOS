@@ -14,15 +14,15 @@ import ADFMovieReward
 
 class MovieReward6010: ADFmyMovieRewardInterface {
     var amoadInterstitialVideo: AMoAdInterstitialVideo?
-    
-    private var sid: String?
-    private var tag: String = ""
-    private var sourceAppId: String?
-    
     private var didLoad = false
+    
+    override init() {
+        super.init()
+        configure = AdnetworkConfigure6010.sharedInstance()
+    }
 
     override class func getAdapterRevisionVersion() -> String {
-        return "5"
+        return "6"
     }
     
     override class func adnetworkClassName() -> String {
@@ -30,45 +30,38 @@ class MovieReward6010: ADFmyMovieRewardInterface {
     }
     
     override class func adnetworkName() -> String {
-        return "Afio"
+        return AdnetworkConfigure6010.adnetworkName()
     }
     
     override func setData(_ data: [AnyHashable : Any]) {
+        print("MovieReward6010: setData")
         super.setData(data)
-
-        if let sid = data["sid"] as? String {
-            self.sid = sid
-        }
-        if let tag = data["tag"] as? String {
-            self.tag = tag
-        }
-        if let app_id = data["app_id"] as? String, app_id.count > 0 {
-            self.sourceAppId = app_id
-        }
-        self.adParam = ADFAdnetworkParam.init(param: [:])
+        
+        adParam = AdnetworkParam6010.init(param: data)
+        configure.param = adParam
     }
 
     override func initAdnetworkIfNeeded() -> Bool {
-        guard amoadInterstitialVideo == nil, let sid = sid else {
+        guard super.initAdnetworkIfNeeded() == true else {
             return false
         }
-        guard needsToInit() == true else {
-            return false
+        
+        weak var weakSelf = self
+        configure.initAdnetworkSDK { result in
+            guard let strongSelf = weakSelf else {
+                return
+            }
+            guard strongSelf.amoadInterstitialVideo == nil, let param = strongSelf.adParam as? AdnetworkParam6010, let sid = param.sid else {
+                print("MovieReward6010: param error")
+                return
+            }
+            print("MovieReward6010: initAdnetworkSDK")
+            strongSelf.amoadInterstitialVideo = AMoAdInterstitialVideo.shared(sid: sid, tag: param.tag)
+            strongSelf.amoadInterstitialVideo?.delegate = self
+            strongSelf.setCancellable()
+            strongSelf.initCompleteAndRetryStartAdIfNeeded()
         }
-
-        if ADFMovieOptions.getTestMode() {
-            AMoAdLogger.logLevel = .info
-        }
-
-        if let sourceAppId = sourceAppId {
-            print("MovieReward6010: set source app id: \(sourceAppId)")
-            AMoAdSKAdSetting.shared.setSourceAppId(sourceAppId: sourceAppId)
-        }
-
-        amoadInterstitialVideo = AMoAdInterstitialVideo.shared(sid: sid, tag: tag)
-        amoadInterstitialVideo?.delegate = self
-        setCancellable()
-        initCompleteAndRetryStartAdIfNeeded()
+        
         return true
     }
 
@@ -76,6 +69,10 @@ class MovieReward6010: ADFmyMovieRewardInterface {
         guard super.startAd() else {
             return false
         }
+        
+        requireToAsyncRequestAd()
+
+        print("MovieReward6010: startAd")
         if amoadInterstitialVideo?.isLoaded == false {
             amoadInterstitialVideo?.load()
             didLoad = true

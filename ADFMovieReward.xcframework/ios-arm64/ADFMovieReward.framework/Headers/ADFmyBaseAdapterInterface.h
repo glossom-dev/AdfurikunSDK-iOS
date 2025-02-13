@@ -23,6 +23,12 @@ typedef enum : NSInteger {
     PreloadingStatusStartAd,                // 通常読み込み開始
 } PreloadingStatus;
 
+typedef enum : NSUInteger {
+    initAdnetworkNotYet,      // initAdnetworkIfNeeded呼び出し前
+    initAdnetworkProcessing,  // initAdnetworkIfNeeded実行中
+    initAdnetworkComplete,    // initAdnetworkIfNeeded実行完了
+} InitAdnetworkStatus;
+
 @class UIViewController;
 @class UIWindow;
 @class ADFmyAdnetworkConfigure;
@@ -52,8 +58,8 @@ typedef enum : NSInteger {
 
 @property (nonatomic, weak) NSObject *delegate;
 
+@property (nonatomic) InitAdnetworkStatus initAdnetworkStatus;
 @property (nonatomic) BOOL isAdLoaded;
-@property (nonatomic) BOOL isInitialized;
 @property (nonatomic) BOOL hasPendedStartAd;
 
 @property (nonatomic) int playErrorCheckInterval;

@@ -12,11 +12,6 @@ import ADFMovieReward
 @objc(MovieInterstitial6010)
 
 class MovieInterstitial6010: MovieReward6010 {
-    override init() {
-        super.init()
-        setCancellable()
-    }
-
     override func setCancellable() {
         amoadInterstitialVideo?.isCancellable = true
     }

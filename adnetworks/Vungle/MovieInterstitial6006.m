@@ -19,7 +19,7 @@
 
 // adapterファイルのRevision番号を返す。実装が変わる度Incrementする
 + (NSString *)getAdapterRevisionVersion {
-    return @"4";
+    return @"5";
 }
 
 // Adnetwork実装時に使うClass名。SDKが導入されているかで使う
@@ -81,7 +81,6 @@
         if (self.interstitialAd) {
             self.interstitialAd = nil;
         }
-        [self requireToAsyncRequestAd];
         
         self.interstitialAd = [[VungleInterstitial alloc] initWithPlacementId:((AdnetworkParam6006 *)self.adParam).placementID];
         self.interstitialAd.delegate = self;

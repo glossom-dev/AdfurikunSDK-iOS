@@ -22,7 +22,7 @@
 
 // adapterファイルのRevision番号を返す。実装が変わる度Incrementする
 + (NSString *)getAdapterRevisionVersion {
-    return @"18";
+    return @"19";
 }
 
 // Adnetwork実装時に使うClass名。SDKが導入されているかで使う
@@ -220,93 +220,4 @@
 @end
 
 @implementation MovieReward6098
-@end
-
-typedef enum : NSUInteger {
-    initializeNotYet,
-    initializing,
-    initializeComplete,
-} PangleInitializeStatus;
-
-@interface MovieConfigure6017()
-
-@property (nonatomic) PangleInitializeStatus initStatus;
-@property (nonatomic) NSMutableArray <completionHandlerType> *handlers;
-
-@end
-
-@implementation MovieConfigure6017
-+ (instancetype)sharedInstance {
-    static MovieConfigure6017 *sharedInstance = nil;
-    static dispatch_once_t onceToken;
-    dispatch_once(&onceToken, ^{
-        sharedInstance = [self new];
-    });
-    return sharedInstance;
-}
-
-- (instancetype)init {
-    self = [super init];
-    if (self) {
-        self.initStatus = initializeNotYet;
-        self.handlers = [NSMutableArray new];
-    }
-    return self;
-}
-
-- (void)configureWithAppId:(NSString *)appId
-                gdprStatus:(NSNumber *)gdprStatus
-             childDirected:(NSNumber * _Nullable)childDirected
-              appLogoImage:(UIImage * _Nullable)logoImage
-                completion:(completionHandlerType)completionHandler {
-    if (!appId || !completionHandler) {
-        return;
-    }
-    
-    if (self.initStatus == initializeComplete) {
-        completionHandler();
-        return;
-    }
-    
-    if (self.initStatus == initializing) {
-        [self.handlers addObject:completionHandler];
-        return;
-    }
-    
-    if (self.initStatus == initializeNotYet) {
-        self.initStatus = initializing;
-        [self.handlers addObject:completionHandler];
-        
-        dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(0.1 * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
-            @try {
-                PAGConfig *configuration = [PAGConfig shareConfig];
-                if (gdprStatus) {
-                    configuration.GDPRConsent = gdprStatus.boolValue ? PAGGDPRConsentTypeConsent : PAGGDPRConsentTypeNoConsent;
-                    NSLog(@"[ADF] Adnetwork 6017, gdprConsent : %@, sdk setting value : %d", gdprStatus, (int)configuration.GDPRConsent);
-                }
-                if (childDirected) {
-                    configuration.childDirected = childDirected.boolValue ? PAGChildDirectedTypeChild : PAGChildDirectedTypeNonChild;
-                    NSLog(@"[ADF] Adnetwork 6017, childDirected : %@, sdk setting value : %d", childDirected, (int)configuration.childDirected);
-                }
-                configuration.debugLog = false;
-                configuration.appID = appId;
-                if (logoImage) {
-                    configuration.appLogoImage = logoImage;
-                }
-                [PAGSdk startWithConfig:configuration completionHandler:^(BOOL success, NSError * _Nonnull error) {
-                    if (success) {
-                        self.initStatus = initializeComplete;
-
-                        for (completionHandlerType handler in self.handlers) {
-                            handler();
-                        }
-                    }
-                }];
-            } @catch (NSException *exception) {
-                NSLog(@"[ADF] adnetwork exception : %@", exception);
-            }
-        });
-    }
-}
-
 @end

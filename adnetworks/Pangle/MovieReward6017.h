@@ -12,8 +12,6 @@
 
 NS_ASSUME_NONNULL_BEGIN
 
-typedef void(^completionHandlerType)(void);
-
 @interface MovieReward6017 : ADFmyMovieRewardInterface
 
 @end
@@ -43,17 +41,6 @@ typedef void(^completionHandlerType)(void);
 @end
 
 @interface MovieReward6098 : MovieReward6017
-@end
-
-@interface MovieConfigure6017 : NSObject
-
-+ (instancetype)sharedInstance;
-- (void)configureWithAppId:(NSString *)appId
-                gdprStatus:(NSNumber * _Nullable)gdprStatus
-             childDirected:(NSNumber * _Nullable)childDirected
-              appLogoImage:(UIImage * _Nullable)logoImage
-                completion:(completionHandlerType)completionHandler;
-
 @end
 
 NS_ASSUME_NONNULL_END

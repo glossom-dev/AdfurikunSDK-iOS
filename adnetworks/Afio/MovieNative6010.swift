@@ -13,9 +13,6 @@ import ADFMovieReward
 @objc(MovieNative6010)
 
 class MovieNative6010: ADFmyMovieNativeInterface {
-    private var sid: String?
-    private var tag: String = ""
-    private var sourceAppId: String?
 
     private var amoadView: UIView!
     private var adView: UIView!
@@ -25,14 +22,19 @@ class MovieNative6010: ADFmyMovieNativeInterface {
 
     private let viewSize = CGRect(x: 0.0, y: 0.0, width: 160.0, height: 90.0)
 
+    override init() {
+        super.init()
+        configure = AdnetworkConfigure6010.sharedInstance()
+    }
+    
     deinit {
-        if let sid = sid {
+        if let param = adParam as? AdnetworkParam6010, let sid = param.sid {
             AMoAdNativeViewManager.shared.clearAd(sid: sid)
         }
     }
 
     override class func getAdapterRevisionVersion() -> String {
-        return "5"
+        return "6"
     }
 
     override class func adnetworkClassName() -> String {
@@ -40,37 +42,30 @@ class MovieNative6010: ADFmyMovieNativeInterface {
     }
     
     override class func adnetworkName() -> String {
-        return "Afio"
+        return AdnetworkConfigure6010.adnetworkName()
     }
     
     override func setData(_ data: [AnyHashable : Any]) {
         print("MovieNative6010: setData")
         super.setData(data)
 
-        if let sid = data["sid"] as? String {
-            self.sid = sid
-        }
-        if let tag = data["tag"] as? String {
-            self.tag = tag
-        }
-        if let app_id = data["app_id"] as? String, app_id.count > 0 {
-            self.sourceAppId = app_id
-        }
-        self.adParam = ADFAdnetworkParam.init(param: [:])
+        adParam = AdnetworkParam6010.init(param: data)
+        configure.param = adParam
     }
-
+    
     override func initAdnetworkIfNeeded() -> Bool {
-        guard needsToInit() == true else {
+        guard super.initAdnetworkIfNeeded() == true else {
             return false
         }
-        if ADFMovieOptions.getTestMode() {
-            AMoAdLogger.logLevel = .info
+        
+        weak var weakSelf = self
+        configure.initAdnetworkSDK { result in
+            guard let strongSelf = weakSelf else {
+                return
+            }
+            strongSelf.initCompleteAndRetryStartAdIfNeeded()
         }
-        if let sourceAppId = sourceAppId {
-            print("MovieNative6010: set source app id: \(sourceAppId)")
-            AMoAdSKAdSetting.shared.setSourceAppId(sourceAppId: sourceAppId)
-        }
-        initCompleteAndRetryStartAdIfNeeded()
+        
         return true
     }
 
@@ -79,74 +74,80 @@ class MovieNative6010: ADFmyMovieNativeInterface {
             return false
         }
 
-        if let sid = sid {
-            AMoAdNativeViewManager.shared.prepareAd(sid: sid, iconPreloading: true, imagePreloading: true)
-
-            amoadView?.removeFromSuperview()
-            adView?.removeFromSuperview()
-
-            amoadView = UIView(frame: viewSize)
-
-            adView = UIView(frame: viewSize)
-            adView.isUserInteractionEnabled = true
-            adView.tag = 6
-            amoadView.addSubview(adView)
-
-            videoView = AMoAdNativeMainVideoView(frame: viewSize)
-            videoView.tag = 7
-            videoView.delegate = self
-            adView.addSubview(videoView)
-
-            videoView.translatesAutoresizingMaskIntoConstraints = false
-            adView.addConstraints([
-                NSLayoutConstraint(
-                    item: videoView,
-                    attribute: .top,
-                    relatedBy: .equal,
-                    toItem: adView,
-                    attribute: .top,
-                    multiplier: 1.0,
-                    constant: 0.0
-                ),
-                NSLayoutConstraint(
-                    item: videoView,
-                    attribute: .bottom,
-                    relatedBy: .equal,
-                    toItem: adView,
-                    attribute: .bottom,
-                    multiplier: 1.0,
-                    constant: 0.0
-                ),
-                NSLayoutConstraint(
-                    item: videoView,
-                    attribute: .left,
-                    relatedBy: .equal,
-                    toItem: adView,
-                    attribute: .left,
-                    multiplier: 1.0,
-                    constant: 0.0
-                ),
-                NSLayoutConstraint(
-                    item: videoView,
-                    attribute: .right,
-                    relatedBy: .equal,
-                    toItem: adView,
-                    attribute: .right,
-                    multiplier: 1.0,
-                    constant: 0.0
-                )
-            ])
-
-            shortTitleLabel = UILabel(frame: viewSize)
-            shortTitleLabel.tag = 3
-            amoadView.addSubview(shortTitleLabel)
-
-            longTitleLabel = UILabel(frame: viewSize)
-            longTitleLabel.tag = 4
-            amoadView.addSubview(longTitleLabel)
-
-            AMoAdNativeViewManager.shared.renderAd(sid: sid, tag: tag, view: amoadView, delegate: self)
+        guard let param = adParam as? AdnetworkParam6010, let sid = param.sid else {
+            return false
         }
+        
+        requireToAsyncRequestAd()
+        
+        print("MovieNative6010: startAd")
+        AMoAdNativeViewManager.shared.prepareAd(sid: sid, iconPreloading: true, imagePreloading: true)
+
+        amoadView?.removeFromSuperview()
+        adView?.removeFromSuperview()
+
+        amoadView = UIView(frame: viewSize)
+
+        adView = UIView(frame: viewSize)
+        adView.isUserInteractionEnabled = true
+        adView.tag = 6
+        amoadView.addSubview(adView)
+
+        videoView = AMoAdNativeMainVideoView(frame: viewSize)
+        videoView.tag = 7
+        videoView.delegate = self
+        adView.addSubview(videoView)
+
+        videoView.translatesAutoresizingMaskIntoConstraints = false
+        adView.addConstraints([
+            NSLayoutConstraint(
+                item: videoView,
+                attribute: .top,
+                relatedBy: .equal,
+                toItem: adView,
+                attribute: .top,
+                multiplier: 1.0,
+                constant: 0.0
+            ),
+            NSLayoutConstraint(
+                item: videoView,
+                attribute: .bottom,
+                relatedBy: .equal,
+                toItem: adView,
+                attribute: .bottom,
+                multiplier: 1.0,
+                constant: 0.0
+            ),
+            NSLayoutConstraint(
+                item: videoView,
+                attribute: .left,
+                relatedBy: .equal,
+                toItem: adView,
+                attribute: .left,
+                multiplier: 1.0,
+                constant: 0.0
+            ),
+            NSLayoutConstraint(
+                item: videoView,
+                attribute: .right,
+                relatedBy: .equal,
+                toItem: adView,
+                attribute: .right,
+                multiplier: 1.0,
+                constant: 0.0
+            )
+        ])
+
+        shortTitleLabel = UILabel(frame: viewSize)
+        shortTitleLabel.tag = 3
+        amoadView.addSubview(shortTitleLabel)
+
+        longTitleLabel = UILabel(frame: viewSize)
+        longTitleLabel.tag = 4
+        amoadView.addSubview(longTitleLabel)
+
+        AMoAdNativeViewManager.shared.renderAd(sid: sid, tag: param.tag, view: amoadView, delegate: self)
+        
         return true
     }
 

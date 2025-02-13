@@ -19,7 +19,7 @@
 
 // adapterファイルのRevision番号を返す。実装が変わる度Incrementする
 + (NSString *)getAdapterRevisionVersion {
-    return @"12";
+    return @"13";
 }
 
 // Adnetwork実装時に使うClass名。SDKが導入されているかで使う
@@ -81,7 +81,6 @@
         if (self.rewardedAd) {
             self.rewardedAd = nil;
         }
-        [self requireToAsyncRequestAd];
         
         self.rewardedAd = [[VungleRewarded alloc] initWithPlacementId:((AdnetworkParam6006 *)self.adParam).placementID];
         self.rewardedAd.delegate = self;

@@ -20,7 +20,7 @@
 
 // adapterファイルのRevision番号を返す。実装が変わる度Incrementする
 + (NSString *)getAdapterRevisionVersion {
-    return @"12";
+    return @"13";
 }
 
 // Adnetwork実装時に使うClass名。SDKが導入されているかで使う
@@ -84,8 +84,6 @@
             self.bannerView.delegate = nil;
             self.bannerView = nil;
         }
-        
-        [self requireToAsyncRequestAd];
         
         self.bannerView = [[VungleBannerView alloc] initWithPlacementId:((AdnetworkParam6006 *)self.adParam).placementID
                                                          vungleAdSize:self.bannerSize];

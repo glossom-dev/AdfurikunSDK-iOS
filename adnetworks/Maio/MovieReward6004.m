@@ -59,6 +59,9 @@
 
 // Adnetwork SDKを初期化する
 - (bool)initAdnetworkIfNeeded {
+    if (![super initAdnetworkIfNeeded]) { // startAdが2重で実行されるケースを無くすため、１度のみ実行するように制限する
+        return false;
+    }
     [self initCompleteAndRetryStartAdIfNeeded];
     return true;
 }
