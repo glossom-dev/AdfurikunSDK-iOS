@@ -22,7 +22,7 @@
 
 // adapterファイルのRevision番号を返す。実装が変わる度Incrementする
 + (NSString *)getAdapterRevisionVersion {
-    return @"12";
+    return @"13";
 }
 
 // Adnetwork実装時に使うClass名。SDKが導入されているかで使う
@@ -37,6 +37,10 @@
 
 + (NSString *)getSDKVersion {
     return [AdnetworkConfigure6000 getSDKVersion];
+}
+
++ (bool)isSupportForChild {
+    return [AdnetworkConfigure6000 isSupportForChild];
 }
 
 // Instance Variableを初期化する。また、必要な場合Configureを生成する

@@ -19,6 +19,10 @@
     return @"AppLovin";
 }
 
++ (bool)isSupportForChild {
+    return false;
+}
+
 + (instancetype)sharedInstance {
     static AdnetworkConfigure6000 *sharedInstance = nil;
     static dispatch_once_t onceToken;
@@ -32,12 +36,6 @@
 - (void)setHasUserConsent:(BOOL)hasUserConsent {
     AdapterTraceP(@"hasUserConsent: %d", (int)hasUserConsent);
     [ALPrivacySettings setHasUserConsent:hasUserConsent];
-}
-
-// COPPA関連設定実装
-- (void)isChildDirected:(BOOL)childDirected {
-    AdapterTraceP(@"childDirected: %d", (int)childDirected);
-    [ALPrivacySettings setIsAgeRestrictedUser:childDirected];
 }
 
 // Adnetwork SDK初期化ロジック実装

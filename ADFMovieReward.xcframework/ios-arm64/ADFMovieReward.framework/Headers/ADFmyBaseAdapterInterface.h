@@ -98,6 +98,9 @@ typedef enum : NSUInteger {
 // Adnetwork名を返す
 + (NSString *)adnetworkName;
 
+/** Adnetworkが子供向けのアプリケーションをサポートするかをチェック */
++ (bool)isSupportForChild;
+
 /**< SDKが読み込まれているかどうか？ */
 -(BOOL)isClassReference;
 

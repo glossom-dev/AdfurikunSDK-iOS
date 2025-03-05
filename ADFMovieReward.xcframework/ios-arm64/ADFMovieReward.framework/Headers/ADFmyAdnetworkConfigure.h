@@ -25,6 +25,7 @@ typedef void(^completionHandler)(bool result);
 // Adnetwork SDKに合わせて実装が必要な関数
 + (NSString *)getSDKVersion;
 + (NSString *)adnetworkName;
++ (bool)isSupportForChild;
 
 - (void)setHasUserConsent:(BOOL)hasUserConsent;
 - (void)isChildDirected:(BOOL)childDirected;

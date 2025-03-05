@@ -31,4 +31,6 @@
 #import <ADFMovieReward/ADFmyCarousel.h>
 #import <ADFMovieReward/ADFmyAppOpenAd.h>
 
+#import <ADFMovieReward/AdfurikunSdk.h>
+
 #endif /* ADFMovieReward_h */
