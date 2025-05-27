@@ -22,7 +22,7 @@ class MovieReward6010: ADFmyMovieRewardInterface {
     }
 
     override class func getAdapterRevisionVersion() -> String {
-        return "6"
+        return "7"
     }
     
     override class func adnetworkClassName() -> String {
@@ -94,7 +94,7 @@ class MovieReward6010: ADFmyMovieRewardInterface {
             amoadInterstitialVideo?.show()
             didLoad = false
         } else {
-            setCallbackStatus(MovieRewardCallbackPlayFail)
+            setPlayFailCallbackIsPreparedFalse()
         }
     }
 
@@ -129,11 +129,13 @@ extension MovieReward6010: AMoAdInterstitialVideoDelegate {
 
     func amoadInterstitialVideoDidComplete(amoadInterstitialVideo: AMoAdInterstitialVideo) {
         print("MovieReward6010: amoadInterstitialVideoDidComplete")
+        isRewarded = true
         setCallbackStatus(MovieRewardCallbackPlayComplete)
     }
 
     func amoadInterstitialVideoDidFailToPlay(amoadInterstitialVideo: AMoAdInterstitialVideo) {
         print("MovieReward6010: amoadInterstitialVideoDidFailToPlay")
+        setErrorWithMessage("amoadInterstitialVideoDidFailToPlay", code: 0)
         setCallbackStatus(MovieRewardCallbackPlayFail)
     }
 

@@ -120,14 +120,14 @@
     if (topVC) {
         [self showAdWithPresentingViewController:topVC];
     } else {
-        [self setCallbackStatus:MovieRewardCallbackPlayFail];
+        [self setPlayFailCallbackTopVCGetFailed];
     }
 }
 
 - (void)showAdWithPresentingViewController:(UIViewController *)viewController {
     UIWindow *window = [self getKeyWindow];
     if (!window || !self.splashAd) {
-        [self setCallbackStatus:MovieRewardCallbackPlayFail];
+        [self setPlayFailCallbackAdInstanceNil];
         return;
     }
     AdapterLogP(@"window : %@, rootVC : %@, topMostVC : %@", window, window.rootViewController, [self topMostViewController]);
@@ -140,10 +140,10 @@
             [self.splashAd showInKeyWindow:window customView:self.logoView];
         } @catch (NSException *exception) {
             [self adnetworkExceptionHandling:exception];
-            [self setCallbackStatus:MovieRewardCallbackPlayFail];
+            [self setPlayFailCallbackException:exception];
         }
     } else {
-        [self setCallbackStatus:MovieRewardCallbackPlayFail];
+        [self setPlayFailCallbackIsPreparedFalse];
     }
 }
 
@@ -186,8 +186,8 @@
 
 - (void)splashADShowFail:(MTGSplashAD *)splashAD error:(NSError *)error {
     AdapterTraceP(@"errro : %@", error);
+    [self setErrorWithMessage:error.localizedDescription code:error.code];
     [self setCallbackStatus:MovieRewardCallbackPlayFail];
-    return;
 }
 
 - (void)splashADDidLeaveApplication:(MTGSplashAD *)splashAD {

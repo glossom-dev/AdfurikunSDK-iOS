@@ -59,7 +59,7 @@
     
     [IronSource initISDemandOnly:((AdnetworkParam6110 *)self.param).appKey adUnits:@[IS_REWARDED_VIDEO, IS_INTERSTITIAL, IS_BANNER]];
     
-    NSString *mediationString = [NSString stringWithFormat:@"Adfurikun1SDK%@", [ADFMovieOptions version]];
+    NSString *mediationString = [NSString stringWithFormat:@"Adfurikun1SDK%@", [AdfurikunSdk version]];
     AdapterLogP(@"mediation string : %@", mediationString);
     [IronSource setMediationType:mediationString];
     [self initSuccess];
@@ -136,6 +136,7 @@
     AdapterTraceP(@"instance id : %@", instanceId);
     ADFmyMovieRewardInterface *adapter = [self.movieRewardAdapters objectForKey:instanceId];
     if (adapter) {
+        adapter.isRewarded = true;
         [adapter setCallbackStatus:MovieRewardCallbackPlayComplete];
     }
 }

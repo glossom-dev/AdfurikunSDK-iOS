@@ -9,7 +9,7 @@
 #import "AdnetworkConfigure6001.h"
 #import "AdnetworkParameter6001.h"
 
-#import <ADFMovieReward/ADFMovieOptions.h>
+#import <ADFMovieReward/AdfurikunSdk.h>
 
 @implementation AdnetworkConfigure6001
 
@@ -55,7 +55,7 @@
     if (UnityAds.isInitialized) {
         [self initSuccess];
     }
-    bool testFlg = [ADFMovieOptions getTestMode];
+    bool testFlg = [AdfurikunSdk getTestMode];
     if (testFlg) {
         AdapterLog(@"Test Mode ON!!!");
     }

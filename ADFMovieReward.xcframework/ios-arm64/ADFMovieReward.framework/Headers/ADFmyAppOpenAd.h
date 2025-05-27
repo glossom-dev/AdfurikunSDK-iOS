@@ -73,15 +73,12 @@ NS_ASSUME_NONNULL_BEGIN
 /**< 広告の取得成功 */
 - (void)AdsFetchCompleted:(NSString *)appID;
 /**< 広告の取得失敗 */
-- (void)AdsFetchFailed:(NSString *)appID error:(NSError *)error __deprecated_msg("Please use 'AdsFetchFailed:error:adnetworkError:' instead");
 - (void)AdsFetchFailed:(NSString *)appID error:(NSError *)error adnetworkError:(NSArray<AdnetworkError *> *)adnetworkError;
 /**< 広告の表示開始 */
-- (void)AdsDidShow:(NSString *)appID adNetworkKey:(NSString *)adNetworkKey __deprecated_msg("Please use 'AdsDidShow:adnetworkKey:' instead");
 - (void)AdsDidShow:(NSString *)appID adnetworkKey:(NSString *)adnetworkKey;
 /**< 広告を閉じた */
 - (void)AdsDidHide:(NSString *)appID;
 /**< 広告の表示失敗 */
-- (void)AdsPlayFailed:(NSString *)appID __deprecated_msg("Please use 'AdsPlayFailed:adnetworkError:' instead");
 - (void)AdsPlayFailed:(NSString *)appID adnetworkError:(AdnetworkError *)adnetworkError;
 
 @end

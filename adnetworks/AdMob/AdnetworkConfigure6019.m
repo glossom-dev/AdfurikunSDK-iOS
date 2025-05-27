@@ -8,7 +8,7 @@
 
 #import "AdnetworkConfigure6019.h"
 
-#import <ADFMovieReward/ADFMovieOptions.h>
+#import <ADFMovieReward/AdfurikunSdk.h>
 
 #import <GoogleMobileAds/GoogleMobileAds.h>
 
@@ -42,7 +42,7 @@
 }
 
 - (void)initAdnetworkSDK {
-    if ([ADFMovieOptions getTestMode]) {
+    if ([AdfurikunSdk getTestMode]) {
         AdapterLog(@"Test Mode ON!!!");
         //GADMobileAds.sharedInstance.requestConfiguration.testDeviceIdentifiers = @[@"コンソールに出力されたデバイスIDを入力してください。"];
         //詳細　https://developers.google.com/admob/ios/test-ads?hl=ja
@@ -56,11 +56,11 @@
 }
 
 - (void)soundControl {
-    AdapterTraceP(@"soundState: %d", (int)[ADFMovieOptions getSoundState]);
-    ADFMovieOptions_Sound soundState = [ADFMovieOptions getSoundState];
-    if (ADFMovieOptions_Sound_On == soundState) {
+    AdapterTraceP(@"soundState: %d", (int)[AdfurikunSdk getSoundState]);
+    AdfurikunSdkSound soundState = [AdfurikunSdk getSoundState];
+    if (AdfurikunSdkSoundOn == soundState) {
         GADMobileAds.sharedInstance.applicationMuted = NO;
-    } else if (ADFMovieOptions_Sound_Off == soundState) {
+    } else if (AdfurikunSdkSoundOff == soundState) {
         GADMobileAds.sharedInstance.applicationMuted = YES;
     }
 }

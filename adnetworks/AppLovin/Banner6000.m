@@ -9,8 +9,6 @@
 #import "AdnetworkConfigure6000.h"
 #import "AdnetworkParam6000.h"
 
-#import <ADFMovieReward/ADFMovieOptions.h>
-
 @interface Banner6000 () <ALAdLoadDelegate, ALAdDisplayDelegate>
 @property (nonatomic, strong)ALAdView *adView;
 @end

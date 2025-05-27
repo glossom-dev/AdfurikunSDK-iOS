@@ -11,7 +11,7 @@
 #import "AdnetworkParam6004.h"
 
 #import <Foundation/Foundation.h>
-#import <ADFMovieReward/ADFMovieOptions.h>
+#import <ADFMovieReward/AdfurikunSdk.h>
 
 @interface MovieInterstitial6004()
 
@@ -23,7 +23,7 @@
 
 // adapterファイルのRevision番号を返す。実装が変わる度Incrementする
 + (NSString *)getAdapterRevisionVersion {
-    return @"2";
+    return @"3";
 }
 
 // Adnetwork実装時に使うClass名。SDKが導入されているかで使う
@@ -75,7 +75,7 @@
     @try {
         [self requireToAsyncRequestAd];
         MaioRequest *request = [[MaioRequest alloc] initWithZoneId:((AdnetworkParam6004 *)self.adParam).maioZoneId
-                                                          testMode:ADFMovieOptions.getTestMode];
+                                                          testMode:AdfurikunSdk.getTestMode];
         self.maioInstance = [MaioInterstitial loadAdWithRequest:request callback:self];
     } @catch (NSException *exception) {
         [self adnetworkExceptionHandling:exception];
@@ -97,7 +97,7 @@
     [super showAdWithPresentingViewController:viewController];
     
     if (!self.maioInstance) {
-        [self setCallbackStatus:MovieRewardCallbackPlayFail];
+        [self setPlayFailCallbackAdInstanceNil];
         return;
     }
 
@@ -107,10 +107,10 @@
             [self.maioInstance showWithViewContext:viewController callback:self];
         } @catch (NSException *exception) {
             [self adnetworkExceptionHandling:exception];
-            [self setCallbackStatus:MovieRewardCallbackPlayFail];
+            [self setPlayFailCallbackException:exception];
         }
     } else {
-        [self setCallbackStatus:MovieRewardCallbackPlayFail];
+        [self setPlayFailCallbackIsPreparedFalse];
     }
 }
 

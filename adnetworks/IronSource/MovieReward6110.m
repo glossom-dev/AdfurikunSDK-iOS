@@ -93,7 +93,7 @@
     if (vc) {
         [self showAdWithPresentingViewController:vc];
     } else {
-        [self setCallbackStatus:MovieRewardCallbackPlayFail];
+        [self setPlayFailCallbackTopVCGetFailed];
     }
 }
 
@@ -106,10 +106,10 @@
             [IronSource showISDemandOnlyRewardedVideo:viewController instanceId:((AdnetworkParam6110 *)self.adParam).instanceId];
         } @catch (NSException *exception) {
             [self adnetworkExceptionHandling:exception];
-            [self setCallbackStatus:MovieRewardCallbackPlayFail];
+            [self setPlayFailCallbackException:exception];
         }
     } else {
-        [self setCallbackStatus:MovieRewardCallbackPlayFail];
+        [self setPlayFailCallbackIsPreparedFalse];
     }
 }
 

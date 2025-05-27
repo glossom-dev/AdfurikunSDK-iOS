@@ -11,7 +11,7 @@
 #import "AdnetworkParam6004.h"
 
 #import <Foundation/Foundation.h>
-#import <ADFMovieReward/ADFMovieOptions.h>
+#import <ADFMovieReward/AdfurikunSdk.h>
 
 @interface MovieReward6004()
 
@@ -23,7 +23,7 @@
 
 // adapterファイルのRevision番号を返す。実装が変わる度Incrementする
 + (NSString *)getAdapterRevisionVersion {
-    return @"13";
+    return @"15";
 }
 
 // Adnetwork実装時に使うClass名。SDKが導入されているかで使う
@@ -74,7 +74,7 @@
     
     @try {
         [self requireToAsyncRequestAd];
-        bool testMode = ADFMovieOptions.getTestMode;
+        bool testMode = AdfurikunSdk.getTestMode;
         if (testMode) {
             AdapterLog(@"Test Mode ON!!!");
         }
@@ -101,7 +101,7 @@
     [super showAdWithPresentingViewController:viewController];
     
     if (!self.maioInstance) {
-        [self setCallbackStatus:MovieRewardCallbackPlayFail];
+        [self setPlayFailCallbackAdInstanceNil];
         return;
     }
 
@@ -111,10 +111,10 @@
             [self.maioInstance showWithViewContext:viewController callback:self];
         } @catch (NSException *exception) {
             [self adnetworkExceptionHandling:exception];
-            [self setCallbackStatus:MovieRewardCallbackPlayFail];
+            [self setPlayFailCallbackException:exception];
         }
     } else {
-        [self setCallbackStatus:MovieRewardCallbackPlayFail];
+        [self setPlayFailCallbackIsPreparedFalse];
     }
 }
 
@@ -154,6 +154,7 @@
 
 - (void)didReward:(MaioRewarded * _Nonnull)ad reward:(RewardData * _Nonnull)reward {
     AdapterTrace;
+    self.isRewarded = true;
     [self setCallbackStatus:MovieRewardCallbackPlayComplete];
 }
 

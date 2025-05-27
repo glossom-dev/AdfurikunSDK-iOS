@@ -6,7 +6,7 @@
 
 #import "AdfurikunAdMobNativeAd.h"
 #include <stdatomic.h>
-#import <ADFMovieReward/ADFMovieOptions.h>
+#import <ADFMovieReward/AdfurikunSdk.h>
 
 @interface AdfurikunAdMobNativeAd ()
 
@@ -19,7 +19,7 @@
 @implementation AdfurikunAdMobNativeAd
 
 + (GADVersionNumber)adSDKVersion {
-    NSString *versionString = ADFMovieOptions.version;
+    NSString *versionString = AdfurikunSdk.version;
     NSMutableArray *versionComponents = [[versionString componentsSeparatedByString:@"."] mutableCopy];
     GADVersionNumber version = {0};
     if (versionComponents.count == 3) {
@@ -37,7 +37,7 @@
 }
 
 + (GADVersionNumber)adapterVersion {
-    NSString *versionString = @"1.0.1";
+    NSString *versionString = @"1.0.2";
     NSArray *versionComponents = [versionString componentsSeparatedByString:@"."];
     GADVersionNumber version = {0};
     if (versionComponents.count == 3) {

@@ -35,7 +35,7 @@
 // 初期化失敗：initFail()呼び出し
 - (void)initAdnetworkSDK {
     FADConfig *config = [[FADConfig alloc] initWithAppId:((AdnetworkParam6008 *)self.param).fiveAppId];
-    if ([ADFMovieOptions getTestMode]) {
+    if ([AdfurikunSdk getTestMode]) {
         AdapterLog(@"Test Mode ON!!!");
         config.isTest =  YES;
     }

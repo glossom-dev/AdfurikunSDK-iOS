@@ -12,7 +12,6 @@
 
 #import <WebKit/WebKit.h>
 
-#import <ADFMovieReward/ADFMovieOptions.h>
 #import <GoogleMobileAds/GoogleMobileAds.h>
 
 @implementation Banner6019

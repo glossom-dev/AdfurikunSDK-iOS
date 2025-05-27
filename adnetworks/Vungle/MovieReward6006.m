@@ -19,7 +19,7 @@
 
 // adapterファイルのRevision番号を返す。実装が変わる度Incrementする
 + (NSString *)getAdapterRevisionVersion {
-    return @"13";
+    return @"14";
 }
 
 // Adnetwork実装時に使うClass名。SDKが導入されているかで使う
@@ -102,7 +102,7 @@
     if (topVC) {
         [self showAdWithPresentingViewController:topVC];
     } else {
-        [self setCallbackStatus:MovieRewardCallbackPlayFail];
+        [self setPlayFailCallbackTopVCGetFailed];
     }
 }
 
@@ -110,7 +110,7 @@
     [super showAdWithPresentingViewController:viewController];
     
     if (!self.rewardedAd) {
-        [self setCallbackStatus:MovieRewardCallbackPlayFail];
+        [self setPlayFailCallbackAdInstanceNil];
         return;
     }
 
@@ -120,10 +120,10 @@
             [self.rewardedAd presentWith:viewController];
         } @catch (NSException *exception) {
             [self adnetworkExceptionHandling:exception];
-            [self setCallbackStatus:MovieRewardCallbackPlayFail];
+            [self setPlayFailCallbackException:exception];
         }
     } else {
-        [self setCallbackStatus:MovieRewardCallbackPlayFail];
+        [self setPlayFailCallbackIsPreparedFalse];
     }
 }
 
@@ -170,6 +170,7 @@
 
 - (void)rewardedAdDidRewardUser:(VungleRewarded *)rewarded {
     AdapterTrace;
+    self.isRewarded = true;
 }
 
 - (void)rewardedAdWillClose:(VungleRewarded *)rewarded {
@@ -178,6 +179,7 @@
 
 - (void)rewardedAdDidClose:(VungleRewarded *)rewarded {
     AdapterTrace;
+    self.isRewarded = true; // 動画視聴完了でもRewardを付与する
     [self setCallbackStatus:MovieRewardCallbackPlayComplete];
     [self setCallbackStatus:MovieRewardCallbackClose];
 }

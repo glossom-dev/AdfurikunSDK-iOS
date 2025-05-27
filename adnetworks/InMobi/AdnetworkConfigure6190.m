@@ -53,7 +53,7 @@
 // 初期化失敗：initFail()呼び出し
 - (void)initAdnetworkSDK {
     // Test Mode ONの時Debug Logを出力する
-    if ([ADFMovieOptions getTestMode]) {
+    if ([AdfurikunSdk getTestMode]) {
         [IMSdk setLogLevel:IMSDKLogLevelDebug];
     }
     
@@ -96,9 +96,9 @@
 
 // サウンド制御実装
 - (void)soundControl {
-    AdapterTraceP(@"soundState: %d", (int)[ADFMovieOptions getSoundState]);
-    ADFMovieOptions_Sound soundState = [ADFMovieOptions getSoundState];
-    [IMSdk setMute:(ADFMovieOptions_Sound_Off == soundState)];
+    AdapterTraceP(@"soundState: %d", (int)[AdfurikunSdk getSoundState]);
+    AdfurikunSdkSound soundState = [AdfurikunSdk getSoundState];
+    [IMSdk setMute:(AdfurikunSdkSoundOff == soundState)];
 }
 
 @end

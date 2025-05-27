@@ -102,7 +102,7 @@
     if (topVC) {
         [self showAdWithPresentingViewController:topVC];
     } else {
-        [self setCallbackStatus:MovieRewardCallbackPlayFail];
+        [self setPlayFailCallbackTopVCGetFailed];
     }
 }
 
@@ -110,7 +110,7 @@
     [super showAdWithPresentingViewController:viewController];
     
     if (!self.interstitialAd) {
-        [self setCallbackStatus:MovieRewardCallbackPlayFail];
+        [self setPlayFailCallbackAdInstanceNil];
         return;
     }
 
@@ -120,10 +120,10 @@
             [self.interstitialAd presentWith:viewController];
         } @catch (NSException *exception) {
             [self adnetworkExceptionHandling:exception];
-            [self setCallbackStatus:MovieRewardCallbackPlayFail];
+            [self setPlayFailCallbackException:exception];
         }
     } else {
-        [self setCallbackStatus:MovieRewardCallbackPlayFail];
+        [self setPlayFailCallbackIsPreparedFalse];
     }
 }
 

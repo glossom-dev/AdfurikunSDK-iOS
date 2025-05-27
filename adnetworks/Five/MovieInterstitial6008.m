@@ -9,7 +9,7 @@
 #import "AdnetworkConfigure6008.h"
 #import "AdnetworkParam6008.h"
 
-#import <ADFMovieReward/ADFMovieOptions.h>
+#import <ADFMovieReward/AdfurikunSdk.h>
 
 @interface MovieInterstitial6008()
 
@@ -21,7 +21,7 @@
 
 // adapterファイルのRevision番号を返す。実装が変わる度Incrementする
 + (NSString *)getAdapterRevisionVersion {
-    return @"18";
+    return @"19";
 }
 
 // Adnetwork実装時に使うClass名。SDKが導入されているかで使う
@@ -89,11 +89,11 @@
         [self.interstitial setLoadDelegate:self];
         [self.interstitial setEventListener:self];
         //音出力設定
-        AdapterLogP(@"soundState: %d", (int)[ADFMovieOptions getSoundState]);
-        ADFMovieOptions_Sound soundState = [ADFMovieOptions getSoundState];
-        if (ADFMovieOptions_Sound_On == soundState) {
+        AdapterLogP(@"soundState: %d", (int)[AdfurikunSdk getSoundState]);
+        AdfurikunSdkSound soundState = [AdfurikunSdk getSoundState];
+        if (AdfurikunSdkSoundOn == soundState) {
             [self.interstitial enableSound:true];
-        } else if (ADFMovieOptions_Sound_Off == soundState) {
+        } else if (AdfurikunSdkSoundOff == soundState) {
             [self.interstitial enableSound:false];
         }
         
@@ -126,7 +126,7 @@
         [self showAdWithPresentingViewController:vc];
     } else {
         AdapterLog(@"top most viewcontroller is nil");
-        [self setCallbackStatus:MovieRewardCallbackPlayFail];
+        [self setPlayFailCallbackTopVCGetFailed];
     }
 }
 
@@ -134,7 +134,7 @@
     [super showAdWithPresentingViewController:viewController];
     
     if (!self.interstitial) {
-        [self setCallbackStatus:MovieRewardCallbackPlayFail];
+        [self setPlayFailCallbackAdInstanceNil];
         return;
     }
 
@@ -144,7 +144,7 @@
             [self.interstitial showWithViewController:viewController];
         } @catch (NSException *exception) {
             [self adnetworkExceptionHandling:exception];
-            [self setCallbackStatus:MovieRewardCallbackPlayFail];
+            [self setPlayFailCallbackException:exception];
         }
     }
 }

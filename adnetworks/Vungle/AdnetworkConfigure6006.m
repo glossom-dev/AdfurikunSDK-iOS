@@ -47,7 +47,7 @@
 // 初期化成功：initSuccess()呼び出し
 // 初期化失敗：initFail()呼び出し
 - (void)initAdnetworkSDK {
-    [VungleAds setDebugLoggingEnabled:[ADFMovieOptions getTestMode]];
+    [VungleAds setDebugLoggingEnabled:[AdfurikunSdk getTestMode]];
     
     __weak typeof(self) weakSelf = self;
     [VungleAds initWithAppId:((AdnetworkParam6006 *)self.param).vungleAppID completion:^(NSError * _Nullable error){

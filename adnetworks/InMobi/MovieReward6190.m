@@ -16,7 +16,7 @@
 
 // adapterファイルのRevision番号を返す。実装が変わる度Incrementする
 + (NSString *)getAdapterRevisionVersion {
-    return @"1";
+    return @"2";
 }
 
 // Adnetwork実装時に使うClass名。SDKが導入されているかで使う
@@ -100,7 +100,7 @@
     if (topVC) {
         [self showAdWithPresentingViewController:topVC];
     } else {
-        [self setCallbackStatus:MovieRewardCallbackPlayFail];
+        [self setPlayFailCallbackTopVCGetFailed];
     }
 }
 
@@ -108,7 +108,7 @@
     [super showAdWithPresentingViewController:viewController];
     
     if (!self.interstitial) {
-        [self setCallbackStatus:MovieRewardCallbackPlayFail];
+        [self setPlayFailCallbackAdInstanceNil];
         return;
     }
     
@@ -119,10 +119,10 @@
             [self.interstitial showFrom:viewController];
         } @catch (NSException *exception) {
             [self adnetworkExceptionHandling:exception];
-            [self setCallbackStatus:MovieRewardCallbackPlayFail];
+            [self setPlayFailCallbackException:exception];
         }
     } else {
-        [self setCallbackStatus:MovieRewardCallbackPlayFail];
+        [self setPlayFailCallbackIsPreparedFalse];
     }
 }
 
@@ -179,6 +179,7 @@
     AdapterTrace;
     // Interstitial広告ではこちらのCallbackが呼ばれないが念の為広告タイプをチェックして2重発生を防ぐ
     if (self.isRewardAd) {
+        self.isRewarded = true;
         [self setCallbackStatus:MovieRewardCallbackPlayComplete];
     }
 }

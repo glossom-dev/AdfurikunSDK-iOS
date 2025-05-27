@@ -6,7 +6,7 @@
 //  Copyright © 2018 A .D F. U. L. L. Y Co., Ltd. All rights reserved.
 //
 
-#import <ADFMovieReward/ADFMovieOptions.h>
+#import <ADFMovieReward/AdfurikunSdk.h>
 #import "MovieReward6016.h"
 
 @interface MovieReward6016()
@@ -21,7 +21,7 @@
 @implementation MovieReward6016
 
 + (NSString *)getAdapterRevisionVersion {
-    return @"8";
+    return @"10";
 }
 
 + (NSString *)adnetworkClassName {
@@ -46,7 +46,7 @@
         self.isAnimated = animatedValue == 1 ? YES : NO;
     }
     
-    if (ADFMovieOptions.getTestMode) {
+    if (AdfurikunSdk.getTestMode) {
         self.test_flg = YES;
     } else {
         NSNumber *testFlg = [data objectForKey:@"test_flg"];
@@ -137,6 +137,7 @@
 }
 
 - (void)rewardedVideoAdVideoComplete:(FBRewardedVideoAd *)rewardedVideoAd {
+    self.isRewarded = true;
     [self setCallbackStatus:MovieRewardCallbackPlayComplete];
 }
 

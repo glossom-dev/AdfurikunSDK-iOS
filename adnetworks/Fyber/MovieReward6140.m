@@ -22,7 +22,7 @@
 
 // adapterファイルのRevision番号を返す。実装が変わる度Incrementする
 + (NSString *)getAdapterRevisionVersion {
-    return @"7";
+    return @"8";
 }
 
 // Adnetwork実装時に使うClass名。SDKが導入されているかで使う
@@ -129,7 +129,7 @@
     [super showAd];
     
     if (!self.unitController) {
-        [self setCallbackStatus:MovieRewardCallbackPlayFail];
+        [self setPlayFailCallbackAdInstanceNil];
         return;
     }
 
@@ -139,10 +139,10 @@
             [self.unitController showAdAnimated:true completion:nil];
         } @catch (NSException *exception) {
             [self adnetworkExceptionHandling:exception];
-            [self setCallbackStatus:MovieRewardCallbackPlayFail];
+            [self setPlayFailCallbackException:exception];
         }
     } else {
-        [self setCallbackStatus:MovieRewardCallbackPlayFail];
+        [self setPlayFailCallbackIsPreparedFalse];
     }
 }
 
@@ -184,6 +184,7 @@
 
 - (void)IAAdDidReward:(IAUnitController * _Nullable)unitController {
     AdapterTrace;
+    self.isRewarded = true;
 }
 
 - (void)IAUnitControllerWillPresentFullscreen:(IAUnitController * _Nullable)unitController {
@@ -216,6 +217,7 @@
 
 - (void)IAVideoCompleted:(IAVideoContentController * _Nullable)contentController {
     AdapterTrace;
+    self.isRewarded = true; // 動画視聴完了でもRewardを付与する
     [self setCallbackStatus:MovieRewardCallbackPlayComplete];
 }
 

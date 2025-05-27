@@ -1,13 +1,13 @@
 Pod::Spec.new do |s|
   s.name            = "AdfurikunSDK-iOS"
-  s.version         = "3.24.1"
+  s.version         = "0.4.0.0"
   s.summary         = "An iOS SDK for ADFURIKUN Movie Reward Ads"
   s.homepage        = "https://adfurikun.jp/adfurikun/"
   s.license         = { :type => 'Copyright', :text => 'Copyright Glossom Inc. All rights reserved.' }
   s.author          = "Glossom Inc."
   s.platform        = :ios, "12.0"
   s.source          = { :git => "https://github.com/glossom-dev/AdfurikunSDK-iOS", :tag => "#{s.version}" }
-  s.resource_bundles = {'AdfurikunSDK-iOS_resources' => ['PrivacyInfo.xcprivacy']}  
+  s.resource_bundles = {'AdfurikunSDK-iOS_resources' => ['PrivacyInfo.xcprivacy']}
   s.default_subspec = 'All'
   s.static_framework = true
   s.swift_version = '5.0'
@@ -35,7 +35,7 @@ Pod::Spec.new do |s|
 
   s.subspec 'Afio' do |afio|
     afio.dependency 'AdfurikunSDK-iOS/Core'
-    afio.dependency 'AMoAd', '<=6.2.1'
+    afio.dependency 'AMoAd', '<=6.2.7'
     afio.source_files = '**/adnetworks/Afio/*.swift'
     afio.resource = '**/adnetworks/Afio/*.txt'
   end
@@ -70,7 +70,7 @@ Pod::Spec.new do |s|
 
   s.subspec 'InMobi' do |inMobi|
     inMobi.dependency 'AdfurikunSDK-iOS/Core'
-    inMobi.dependency 'InMobiSDK', '10.7.8'
+    inMobi.dependency 'InMobiSDK', '10.8.3'
     inMobi.source_files = '**/adnetworks/InMobi/*.{h,m}'
     inMobi.resource = '**/adnetworks/InMobi/*.txt'
   end
@@ -84,26 +84,26 @@ Pod::Spec.new do |s|
 
   s.subspec 'Maio' do |maio|
     maio.dependency 'AdfurikunSDK-iOS/Core'
-    maio.dependency 'MaioSDK-v2', '2.1.5'
+    maio.dependency 'MaioSDK-v2', '2.1.6'
     maio.source_files = '**/adnetworks/Maio/*.{h,m}'
     maio.resource = '**/adnetworks/Maio/*.txt'
   end
 
   s.subspec 'Mintegral' do |mintegral|
     mintegral.dependency 'AdfurikunSDK-iOS/Core'
-    mintegral.dependency 'MintegralAdSDK/BidNativeAd', '7.7.3'
-    mintegral.dependency 'MintegralAdSDK/BidNativeAdvancedAd', '7.7.3'
-    mintegral.dependency 'MintegralAdSDK/BidRewardVideoAd', '7.7.3'
-    mintegral.dependency 'MintegralAdSDK/BidNewInterstitialAd', '7.7.3'
-    mintegral.dependency 'MintegralAdSDK/BidBannerAd', '7.7.3'
-    mintegral.dependency 'MintegralAdSDK/BidSplashAd', '7.7.3'
+    mintegral.dependency 'MintegralAdSDK/BidNativeAd', '7.7.8'
+    mintegral.dependency 'MintegralAdSDK/BidNativeAdvancedAd', '7.7.8'
+    mintegral.dependency 'MintegralAdSDK/BidRewardVideoAd', '7.7.8'
+    mintegral.dependency 'MintegralAdSDK/BidNewInterstitialAd', '7.7.8'
+    mintegral.dependency 'MintegralAdSDK/BidBannerAd', '7.7.8'
+    mintegral.dependency 'MintegralAdSDK/BidSplashAd', '7.7.8'
     mintegral.source_files = '**/adnetworks/Mintegral/*.{h,m}'
     mintegral.resource = '**/adnetworks/Mintegral/*.txt'
   end
 
   s.subspec 'Pangle' do |pangle|
     pangle.dependency 'AdfurikunSDK-iOS/Core'
-    pangle.dependency 'Ads-Global', '6.2.0.9'
+    pangle.dependency 'Ads-Global', '7.1.1.1'
     pangle.source_files = '**/adnetworks/Pangle/*.{h,m}'
     pangle.resource = '**/adnetworks/Pangle/*.txt'
   end

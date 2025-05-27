@@ -14,7 +14,7 @@
 
 // adapterファイルのRevision番号を返す。実装が変わる度Incrementする
 + (NSString *)getAdapterRevisionVersion {
-    return @"8";
+    return @"10";
 }
 
 // Adnetwork実装時に使うClass名。SDKが導入されているかで使う
@@ -74,11 +74,11 @@
     @try {
         [self requireToAsyncRequestAd];
         //音出力設定
-        AdapterLogP(@"soundState: %d", (int)[ADFMovieOptions getSoundState]);
-        ADFMovieOptions_Sound soundState = [ADFMovieOptions getSoundState];
-        if (ADFMovieOptions_Sound_On == soundState) {
+        AdapterLogP(@"soundState: %d", (int)[AdfurikunSdk getSoundState]);
+        AdfurikunSdkSound soundState = [AdfurikunSdk getSoundState];
+        if (AdfurikunSdkSoundOn == soundState) {
             [MTGRewardAdManager.sharedInstance setPlayVideoMute:false];
-        } else if (ADFMovieOptions_Sound_Off == soundState) {
+        } else if (AdfurikunSdkSoundOff == soundState) {
             [MTGRewardAdManager.sharedInstance setPlayVideoMute:true];
         }
         
@@ -111,7 +111,7 @@
     if (topVC) {
         [self showAdWithPresentingViewController:topVC];
     } else {
-        [self setCallbackStatus:MovieRewardCallbackPlayFail];
+        [self setPlayFailCallbackTopVCGetFailed];
     }
 }
 
@@ -128,10 +128,10 @@
                                                          viewController:viewController];
         } @catch (NSException *exception) {
             [self adnetworkExceptionHandling:exception];
-            [self setCallbackStatus:MovieRewardCallbackPlayFail];
+            [self setPlayFailCallbackException:exception];
         }
     } else {
-        [self setCallbackStatus:MovieRewardCallbackPlayFail];
+        [self setPlayFailCallbackIsPreparedFalse];
     }
 }
 
@@ -219,6 +219,7 @@ completely
  */
 - (void) onVideoPlayCompleted:(nullable NSString *)placementId unitId:(nullable NSString *)unitId {
     AdapterTrace;
+    self.isRewarded = true; // 動画視聴完了でもRewardを付与する
     [self setCallbackStatus:MovieRewardCallbackPlayComplete];
 }
 
@@ -251,7 +252,8 @@ completely
  *  @param rewardInfo  - the rewardInfo object containing the info that should be given to your user.
  */
 - (void)onVideoAdDismissed:(nullable NSString *)placementId unitId:(nullable NSString *)unitId withConverted:(BOOL)converted withRewardInfo:(nullable MTGRewardAdInfo *)rewardInfo {
-    AdapterTrace;
+    AdapterTraceP(@"reward info : %@", rewardInfo);
+    self.isRewarded = (rewardInfo != nil);
 }
 
 /**

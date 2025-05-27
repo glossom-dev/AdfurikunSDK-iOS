@@ -11,8 +11,6 @@
 #import "AdnetworkConfigure6000.h"
 #import "AdnetworkParam6000.h"
 
-#import <ADFMovieReward/ADFMovieOptions.h>
-
 @interface MovieInterstitial6000()<ALAdLoadDelegate, ALAdDisplayDelegate>
 @property (nonatomic, strong) ALAd *ad;
 @property (nonatomic, strong) ALInterstitialAd *interstitialAd;
@@ -120,7 +118,7 @@
     [super showAd];
     
     if (!self.interstitialAd) {
-        [self setCallbackStatus:MovieRewardCallbackPlayFail];
+        [self setPlayFailCallbackAdInstanceNil];
         return;
     }
 
@@ -130,10 +128,10 @@
             [self.interstitialAd showAd:self.ad];
         } @catch (NSException *exception) {
             [self adnetworkExceptionHandling:exception];
-            [self setCallbackStatus:MovieRewardCallbackPlayFail];
+            [self setPlayFailCallbackException:exception];
         }
     } else {
-        [self setCallbackStatus:MovieRewardCallbackPlayFail];
+        [self setPlayFailCallbackIsPreparedFalse];
     }
 }
 

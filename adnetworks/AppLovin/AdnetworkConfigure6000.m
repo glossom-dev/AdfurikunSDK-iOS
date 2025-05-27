@@ -57,10 +57,10 @@
         [strongSelf soundControl];
         
         // デバッグ機能設定（Trueにすると端末を裏表に振ると、画面にAppLovinアイコンが表示される）
-        [ALSdk shared].settings.creativeDebuggerEnabled = [ADFMovieOptions getTestMode];
+        [ALSdk shared].settings.creativeDebuggerEnabled = [AdfurikunSdk getTestMode];
         
         // DebugLog出力設定
-        [ALSdk shared].settings.verboseLoggingEnabled = [ADFMovieOptions getTestMode];
+        [ALSdk shared].settings.verboseLoggingEnabled = [AdfurikunSdk getTestMode];
         
         // SafeAreaサイズ不具合対応
         [[ALSdk shared].settings setExtraParameterForKey:@"pisw" value:@"true"];
@@ -72,8 +72,8 @@
 
 // サウンド制御実装
 - (void)soundControl {
-    AdapterTraceP(@"soundState: %d", (int)[ADFMovieOptions getSoundState]);
-    [ALSdk shared].settings.muted = (ADFMovieOptions_Sound_Off == [ADFMovieOptions getSoundState]);
+    AdapterTraceP(@"soundState: %d", (int)[AdfurikunSdk getSoundState]);
+    [ALSdk shared].settings.muted = (AdfurikunSdkSoundOff == [AdfurikunSdk getSoundState]);
 }
 
 @end

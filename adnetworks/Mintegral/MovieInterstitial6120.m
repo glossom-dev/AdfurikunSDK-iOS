@@ -20,7 +20,7 @@
 
 // adapterファイルのRevision番号を返す。実装が変わる度Incrementする
 + (NSString *)getAdapterRevisionVersion {
-    return @"8";
+    return @"9";
 }
 
 // Adnetwork実装時に使うClass名。SDKが導入されているかで使う
@@ -85,11 +85,11 @@
                                                                              delegate:self];
         }
         //音出力設定
-        AdapterLogP(@"soundState: %d", (int)[ADFMovieOptions getSoundState]);
-        ADFMovieOptions_Sound soundState = [ADFMovieOptions getSoundState];
-        if (ADFMovieOptions_Sound_On == soundState) {
+        AdapterLogP(@"soundState: %d", (int)[AdfurikunSdk getSoundState]);
+        AdfurikunSdkSound soundState = [AdfurikunSdk getSoundState];
+        if (AdfurikunSdkSoundOn == soundState) {
             [self.adManager setPlayVideoMute:false];
-        } else if (ADFMovieOptions_Sound_Off == soundState) {
+        } else if (AdfurikunSdkSoundOff == soundState) {
             [self.adManager setPlayVideoMute:true];
         }
         
@@ -111,7 +111,7 @@
     if (topVC) {
         [self showAdWithPresentingViewController:topVC];
     } else {
-        [self setCallbackStatus:MovieRewardCallbackPlayFail];
+        [self setPlayFailCallbackTopVCGetFailed];
     }
 }
 
@@ -119,7 +119,7 @@
     [super showAdWithPresentingViewController:viewController];
     
     if (!self.adManager) {
-        [self setCallbackStatus:MovieRewardCallbackPlayFail];
+        [self setPlayFailCallbackAdInstanceNil];
         return;
     }
 
@@ -129,10 +129,10 @@
             [self.adManager showFromViewController:viewController];
         } @catch (NSException *exception) {
             [self adnetworkExceptionHandling:exception];
-            [self setCallbackStatus:MovieRewardCallbackPlayFail];
+            [self setPlayFailCallbackException:exception];
         }
     } else {
-        [self setCallbackStatus:MovieRewardCallbackPlayFail];
+        [self setPlayFailCallbackIsPreparedFalse];
     }
 }
 

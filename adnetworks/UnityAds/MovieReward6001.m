@@ -13,7 +13,7 @@
 
 // adapterファイルのRevision番号を返す。実装が変わる度Incrementする
 + (NSString *)getAdapterRevisionVersion {
-    return @"15";
+    return @"16";
 }
 
 // Adnetwork実装時に使うClass名。SDKが導入されているかで使う
@@ -90,7 +90,7 @@
     if (topVC) {
         [self showAdWithPresentingViewController:topVC];
     } else {
-        [self setCallbackStatus:MovieRewardCallbackPlayFail];
+        [self setPlayFailCallbackTopVCGetFailed];
     }
 }
 
@@ -104,12 +104,11 @@
             [UnityAds show:viewController placementId:((AdnetworkParameter6001 *)self.adParam).placementId showDelegate:self];
         } @catch (NSException *exception) {
             [self adnetworkExceptionHandling:exception];
-            [self setCallbackStatus:MovieRewardCallbackPlayFail];
+            [self setPlayFailCallbackException:exception];
         }
     } else {
         AdapterLog(@"Error encountered playing ad : could not fetch topmost viewcontroller");
-        [self setErrorWithMessage:@"Error encountered playing ad : could not fetch topmost viewcontroller" code:0];
-        [self setCallbackStatus:MovieRewardCallbackPlayFail];
+        [self setPlayFailCallbackTopVCGetFailed];
     }
 }
 
@@ -145,6 +144,7 @@
     switch (state) {
         case kUnityShowCompletionStateCompleted:
             AdapterLogP(@"kUnityShowCompletionStateCompleted %@", placementId);
+            self.isRewarded = true;
             [self setCallbackStatus:MovieRewardCallbackPlayComplete];
             break;
         case kUnityShowCompletionStateSkipped:

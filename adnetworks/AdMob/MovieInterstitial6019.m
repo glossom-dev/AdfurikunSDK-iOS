@@ -10,7 +10,6 @@
 #import "AdnetworkConfigure6019.h"
 #import "AdnetworkParam6019.h"
 
-#import <ADFMovieReward/ADFMovieOptions.h>
 #import <GoogleMobileAds/GoogleMobileAds.h>
 
 @interface MovieInterstitial6019 ()<GADFullScreenContentDelegate>
@@ -111,7 +110,7 @@
     [super showAdWithPresentingViewController:viewController];
 
     if (!self.interstitial) {
-        [self setCallbackStatus:MovieRewardCallbackPlayFail];
+        [self setPlayFailCallbackAdInstanceNil];
         return;
     }
 
@@ -121,10 +120,10 @@
             [self.interstitial presentFromRootViewController:viewController];
         } @catch (NSException *exception) {
             [self adnetworkExceptionHandling:exception];
-            [self setCallbackStatus:MovieRewardCallbackPlayFail];
+            [self setPlayFailCallbackException:exception];
         }
     } else {
-        [self setCallbackStatus:MovieRewardCallbackPlayFail];
+        [self setPlayFailCallbackIsPreparedFalse];
     }
 }
 

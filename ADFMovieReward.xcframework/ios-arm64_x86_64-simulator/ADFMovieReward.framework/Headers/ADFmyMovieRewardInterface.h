@@ -29,12 +29,18 @@ typedef enum : NSInteger {
 
 @property (nonatomic, strong) NSString *objectId;
 @property (nonatomic, weak) NSObject<ADFMovieRewardDelegate> *delegate;
+@property (nonatomic) bool isRewarded;
 
 /**< 広告の表示 */
 -(void)showAd;
 -(void)showAdWithPresentingViewController:(UIViewController *)viewController;
 
 - (void)setCallbackStatus:(MovieRewardCallbackStatus)status;
+
+- (void)setPlayFailCallbackIsPreparedFalse;
+- (void)setPlayFailCallbackTopVCGetFailed;
+- (void)setPlayFailCallbackAdInstanceNil;
+- (void)setPlayFailCallbackException:(NSException *)exception;
 
 -(void)invalidViewControllerTimer;
 

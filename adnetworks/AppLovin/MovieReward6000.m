@@ -6,7 +6,6 @@
 //
 
 #import <UIKit/UIKit.h>
-#import <ADFMovieReward/ADFMovieOptions.h>
 #import "MovieReward6000.h"
 
 #import "AdnetworkConfigure6000.h"
@@ -23,7 +22,7 @@
 
 // adapterファイルのRevision番号を返す。実装が変わる度Incrementする
 + (NSString *)getAdapterRevisionVersion {
-    return @"12";
+    return @"13";
 }
 
 // Adnetwork実装時に使うClass名。SDKが導入されているかで使う
@@ -127,7 +126,7 @@
     [super showAd];
     
     if (!self.incentivizedInterstitial) {
-        [self setCallbackStatus:MovieRewardCallbackPlayFail];
+        [self setPlayFailCallbackAdInstanceNil];
         return;
     }
 
@@ -137,10 +136,10 @@
             [self.incentivizedInterstitial show];
         } @catch (NSException *exception) {
             [self adnetworkExceptionHandling:exception];
-            [self setCallbackStatus:MovieRewardCallbackPlayFail];
+            [self setPlayFailCallbackException:exception];
         }
     } else {
-        [self setCallbackStatus:MovieRewardCallbackPlayFail];
+        [self setPlayFailCallbackIsPreparedFalse];
     }
 }
 
@@ -206,6 +205,7 @@
 -(void) videoPlaybackEndedInAd: (ALAd*) ad atPlaybackPercent: (NSNumber*) percentPlayed fullyWatched: (BOOL) wasFullyWatched {
     AdapterTraceP(@"atPlaybackPercent : %@, fullyWatched : %d", percentPlayed, wasFullyWatched);
     if ( wasFullyWatched ) {
+        self.isRewarded = true;
         [self setCallbackStatus:MovieRewardCallbackPlayComplete];
     }
 }

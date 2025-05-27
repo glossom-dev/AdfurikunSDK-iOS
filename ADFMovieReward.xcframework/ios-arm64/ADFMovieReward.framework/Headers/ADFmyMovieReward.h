@@ -2,7 +2,7 @@
 //  ADFmyMovieReward.h
 //  ADFMovieReword
 //
-//  (3.24.1)
+//  (4.0.0)
 //  Created by tsukui on 2016/05/28.
 //  (c) 2015 ADFULLY Inc.
 //  (ご利用になられる前に、必ずマニュアルにて実装方法をご参照ください。
@@ -127,31 +127,23 @@ NS_ASSUME_NONNULL_BEGIN
 @protocol ADFmyMovieRewardDelegate<NSObject>
 @optional
 /**< 広告の表示準備が終わった時のイベント */
-- (void)AdsFetchCompleted:(BOOL)isTestMode_inApp __deprecated_msg("Please use 'AdsFetchCompleted:isTestMode:' instead");
 - (void)AdsFetchCompleted:(NSString *)appID isTestMode:(BOOL)isTestMode_inApp;
 - (void)AdsFetchCompleted:(NSString *)appID isTestMode:(BOOL)isTestMode_inApp isManualMode:(BOOL)isManualMode;
 
 /**< 広告の表示準備が失敗した時のイベント */
-- (void)AdsFetchFailed:(NSString *)appID error:(NSError *)error __deprecated_msg("Please use 'AdsFetchFailed:error:adnetworkError:' instead");
 - (void)AdsFetchFailed:(NSString *)appID error:(NSError *)error adnetworkError:(NSArray<AdnetworkError *> *)adnetworkError;
 
 /**< 広告の表示が開始した時のイベント */
-- (void)AdsDidShow:(NSString *)adnetworkKey __deprecated_msg("Please use 'AdsDidShow:adnetworkKey:' instead");
-- (void)AdsDidShow:(NSString *)appID adNetworkKey:(NSString *)adNetworkKey __deprecated_msg("Please use 'AdsDidShow:adnetworkKey:' instead");
 - (void)AdsDidShow:(NSString *)appID adnetworkKey:(NSString *)adnetworkKey;
 
 /**< 広告の表示が最後まで終わった時のイベント */
-- (void)AdsDidCompleteShow __deprecated_msg("Please use 'AdsDidCompleteShow:' instead");
 - (void)AdsDidCompleteShow:(NSString *)appID;
 
 /**< 動画広告再生エラー時のイベント */
-- (void)AdsPlayFailed __deprecated_msg("Please use 'AdsPlayFailed:adnetworkError:' instead");
-- (void)AdsPlayFailed:(NSString *)appID __deprecated_msg("Please use 'AdsPlayFailed:adnetworkError:' instead");
 - (void)AdsPlayFailed:(NSString *)appID adnetworkError:(AdnetworkError *)adnetworkError;
 
 /**< 広告を閉じた時のイベント */
-- (void)AdsDidHide __deprecated_msg("Please use 'AdsDidHide:' instead");
-- (void)AdsDidHide:(NSString *)appID;
+- (void)AdsDidHide:(NSString *)appID isRewarded:(bool)rewarded;
 
 @end
 

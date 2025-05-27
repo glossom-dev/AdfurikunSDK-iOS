@@ -30,7 +30,7 @@ class AdnetworkConfigure6010: ADFmyAdnetworkConfigure {
     }
     
     override func initAdnetworkSDK() {
-        if ADFMovieOptions.getTestMode() {
+        if AdfurikunSdk.getTestMode() {
             AMoAdLogger.logLevel = .info
         }
         

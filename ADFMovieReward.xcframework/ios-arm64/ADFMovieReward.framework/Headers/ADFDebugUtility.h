@@ -34,6 +34,12 @@ NS_ASSUME_NONNULL_BEGIN
 + (void)forceStop;
 + (BOOL)didForceStop;
 
+/**
+ * アドフリくんSDKが生成したCacheファイルを全て削除する
+ * ※ アドフリくんの動作に影響が出るため、本番リリース時は削除して下さい。
+ * */
++ (void)removeAllCaches;
+
 @end
 
 NS_ASSUME_NONNULL_END

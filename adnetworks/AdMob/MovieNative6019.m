@@ -10,7 +10,6 @@
 #import "AdnetworkConfigure6019.h"
 #import "AdnetworkParam6019.h"
 
-#import <ADFMovieReward/ADFMovieOptions.h>
 #import <GoogleMobileAds/GoogleMobileAds.h>
 
 @interface MovieNative6019 ()<GADNativeAdLoaderDelegate, GADNativeAdDelegate, GADVideoControllerDelegate>

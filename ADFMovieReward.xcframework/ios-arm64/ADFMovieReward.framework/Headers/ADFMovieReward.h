@@ -11,7 +11,6 @@
 
 #import <ADFMovieReward/ADFmyMovieReward.h>
 #import <ADFMovieReward/ADFmyInterstitial.h>
-#import <ADFMovieReward/ADFMovieOptions.h>
 #import <ADFMovieReward/ADFEventSender.h>
 #import <ADFMovieReward/ADFDebugUtility.h>
 #import <ADFMovieReward/ADFLogger.h>

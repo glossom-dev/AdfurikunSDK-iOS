@@ -28,7 +28,7 @@
 }
 
 - (NSString *)SDKVersion {
-    return [ADFMovieOptions version];
+    return [AdfurikunSdk version];
 }
 
 - (NSString *)adapterVersion {

@@ -77,9 +77,9 @@
 
 // サウンド制御実装
 - (void)soundControl {
-    AdapterTraceP(@"soundState: %d", (int)[ADFMovieOptions getSoundState]);
-    ADFMovieOptions_Sound soundState = [ADFMovieOptions getSoundState];
-    IASDKCore.sharedInstance.muteAudio = (ADFMovieOptions_Sound_Off == soundState);
+    AdapterTraceP(@"soundState: %d", (int)[AdfurikunSdk getSoundState]);
+    AdfurikunSdkSound soundState = [AdfurikunSdk getSoundState];
+    IASDKCore.sharedInstance.muteAudio = (AdfurikunSdkSoundOff == soundState);
 }
 
 - (void)adDidShowWithImpressionData:(IAImpressionData * _Nonnull)impressionData withAdRequest:(IAAdRequest * _Nonnull)adRequest {

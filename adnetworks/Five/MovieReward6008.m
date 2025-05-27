@@ -9,7 +9,7 @@
 #import "AdnetworkConfigure6008.h"
 #import "AdnetworkParam6008.h"
 
-#import <ADFMovieReward/ADFMovieOptions.h>
+#import <ADFMovieReward/AdfurikunSdk.h>
 
 @interface MovieReward6008()
 
@@ -22,7 +22,7 @@
 
 // adapterファイルのRevision番号を返す。実装が変わる度Incrementする
 + (NSString *)getAdapterRevisionVersion {
-    return @"8";
+    return @"10";
 }
 
 // Adnetwork実装時に使うClass名。SDKが導入されているかで使う
@@ -91,11 +91,11 @@
         [self.fullscreen setEventListener:self];
         
         //音出力設定
-        AdapterLogP(@"soundState: %d", (int)[ADFMovieOptions getSoundState]);
-        ADFMovieOptions_Sound soundState = [ADFMovieOptions getSoundState];
-        if (ADFMovieOptions_Sound_On == soundState) {
+        AdapterLogP(@"soundState: %d", (int)[AdfurikunSdk getSoundState]);
+        AdfurikunSdkSound soundState = [AdfurikunSdk getSoundState];
+        if (AdfurikunSdkSoundOn == soundState) {
             [self.fullscreen enableSound:true];
-        } else if (ADFMovieOptions_Sound_Off == soundState) {
+        } else if (AdfurikunSdkSoundOff == soundState) {
             [self.fullscreen enableSound:false];
         }
         [self.fullscreen loadAdAsync];
@@ -125,7 +125,7 @@
         [self showAdWithPresentingViewController:vc];
     } else {
         AdapterLog(@"top most viewcontroller is nil");
-        [self setCallbackStatus:MovieRewardCallbackPlayFail];
+        [self setPlayFailCallbackTopVCGetFailed];
     }
 }
 
@@ -133,7 +133,7 @@
     [super showAdWithPresentingViewController:viewController];
     
     if (!self.fullscreen) {
-        [self setCallbackStatus:MovieRewardCallbackPlayFail];
+        [self setPlayFailCallbackAdInstanceNil];
         return;
     }
 
@@ -143,10 +143,10 @@
             [self.fullscreen showWithViewController:viewController];
         } @catch (NSException *exception) {
             [self adnetworkExceptionHandling:exception];
-            [self setCallbackStatus:MovieRewardCallbackPlayFail];
+            [self setPlayFailCallbackException:exception];
         }
     } else {
-        [self setCallbackStatus:MovieRewardCallbackPlayFail];
+        [self setPlayFailCallbackIsPreparedFalse];
     }
 }
 
@@ -174,6 +174,7 @@
     // 【新規】リワード付与の処理
     AdapterTrace;
     // 静止画の場合fiveVideoRewardAdDidViewThroughが発生しないため、Reward CallbackでFinishも発生させる
+    self.isRewarded = true;
     [self setCallbackStatus:MovieRewardCallbackPlayComplete];
     [self setCallbackStatus:MovieRewardCallbackClose];
 }
@@ -212,7 +213,7 @@
 - (void)fiveVideoRewardAdDidViewThrough:(nonnull FADVideoReward*)ad {
     // 再生完了時の処理（動画広告のみ）
     AdapterTrace;
-    
+    self.isRewarded = true;
     [self setCallbackStatus:MovieRewardCallbackPlayComplete];
 }
 

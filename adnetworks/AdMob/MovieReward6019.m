@@ -10,7 +10,6 @@
 #import "AdnetworkConfigure6019.h"
 #import "AdnetworkParam6019.h"
 
-#import <ADFMovieReward/ADFMovieOptions.h>
 #import <GoogleMobileAds/GoogleMobileAds.h>
 
 @interface MovieReward6019 ()<GADFullScreenContentDelegate>
@@ -22,7 +21,7 @@
 @implementation MovieReward6019
 
 + (NSString *)getAdapterRevisionVersion {
-    return @"16";
+    return @"17";
 }
 
 + (NSString *)adnetworkClassName {
@@ -105,7 +104,7 @@
     [super showAdWithPresentingViewController:viewController];
 
     if (!self.rewardedAd) {
-        [self setCallbackStatus:MovieRewardCallbackPlayFail];
+        [self setPlayFailCallbackAdInstanceNil];
         return;
     }
 
@@ -117,14 +116,15 @@
                                   userDidEarnRewardHandler:^{
                 __strong typeof(self) strongSelf = weakSelf;
                 if (!strongSelf) return;
+                strongSelf.isRewarded = true;
                 [strongSelf setCallbackStatus:MovieRewardCallbackPlayComplete];
             }];
         } @catch (NSException *exception) {
             [self adnetworkExceptionHandling:exception];
-            [self setCallbackStatus:MovieRewardCallbackPlayFail];
+            [self setPlayFailCallbackException:exception];
         }
     } else {
-        [self setCallbackStatus:MovieRewardCallbackPlayFail];
+        [self setPlayFailCallbackIsPreparedFalse];
     }
 }
 

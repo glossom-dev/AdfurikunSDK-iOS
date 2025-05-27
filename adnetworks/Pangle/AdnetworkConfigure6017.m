@@ -60,10 +60,12 @@
         AdapterLogP(@"gdprConsent : %@, sdk setting value : %d", self.gdprStatus, (int)configuration.GDPRConsent);
     }
     if (self.isChildDirected) {
-        configuration.childDirected = self.isChildDirected.boolValue ? PAGChildDirectedTypeChild : PAGChildDirectedTypeNonChild;
-        AdapterLogP(@"childDirected : %@, sdk setting value : %d", self.isChildDirected, (int)configuration.childDirected);
+        // Indicates whether the user agrees to serve personalized ads. If not passed, it is assumed to agree. If 0 is passed, it means that ads are not allowed to be served.
+        // 子供向けのアプリの場合には個人情報同意をしてないことにする
+        configuration.PAConsent = self.isChildDirected.boolValue ? PAGPAConsentTypeNoConsent : PAGPAConsentTypeConsent;
+        AdapterLogP(@"childDirected : %@, sdk setting value : %d", self.isChildDirected, (int)configuration.PAConsent);
     }
-    configuration.debugLog = [ADFMovieOptions getTestMode];
+    configuration.debugLog = [AdfurikunSdk getTestMode];
     configuration.appID = ((AdnetworkParam6017 *)self.param).appID;
     if (self.logoImage) {
         configuration.appLogoImage = self.logoImage;
