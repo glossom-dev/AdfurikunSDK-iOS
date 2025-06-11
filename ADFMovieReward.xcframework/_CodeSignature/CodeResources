@@ -6,7 +6,7 @@
 	<dict>
 		<key>ios-arm64/ADFMovieReward.framework/ADFMovieReward</key>
 		<data>
-		v9yE1GgIJ2m9qLv1FoQTBUDRVX8=
+		e7eh2itAxs417ePzpBPXHwLZV3Y=
 		</data>
 		<key>ios-arm64/ADFMovieReward.framework/Headers/ADFDebugUtility.h</key>
 		<data>
@@ -106,7 +106,7 @@
 		</data>
 		<key>ios-arm64_x86_64-simulator/ADFMovieReward.framework/ADFMovieReward</key>
 		<data>
-		nzVKoCCvh1LPexthxbj4xoXDnr4=
+		kFPH/Y4gifHClL+cc2KQzj+TDss=
 		</data>
 		<key>ios-arm64_x86_64-simulator/ADFMovieReward.framework/Headers/ADFDebugUtility.h</key>
 		<data>
@@ -211,11 +211,11 @@
 		<dict>
 			<key>hash</key>
 			<data>
-			v9yE1GgIJ2m9qLv1FoQTBUDRVX8=
+			e7eh2itAxs417ePzpBPXHwLZV3Y=
 			</data>
 			<key>hash2</key>
 			<data>
-			G6IA3dxmPMQwFoWhFpzOvtLOJER/dwA7+TsPwLW0Qks=
+			GR/8eeoPKzPKWvnHlc+ZeEMS4t3y9AJ6jzgMaa+fzzQ=
 			</data>
 		</dict>
 		<key>ios-arm64/ADFMovieReward.framework/Headers/ADFDebugUtility.h</key>
@@ -486,11 +486,11 @@
 		<dict>
 			<key>hash</key>
 			<data>
-			nzVKoCCvh1LPexthxbj4xoXDnr4=
+			kFPH/Y4gifHClL+cc2KQzj+TDss=
 			</data>
 			<key>hash2</key>
 			<data>
-			P1wXIR1dgcmo7lUJsi+NHjUet+7XZg5Gi0uVbI3d8JI=
+			rNb4aMdU4j+wZhPVyPnhHuNZ1e9Kqb/ZUcitAbChbGM=
 			</data>
 		</dict>
 		<key>ios-arm64_x86_64-simulator/ADFMovieReward.framework/Headers/ADFDebugUtility.h</key>
