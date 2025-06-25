@@ -1,10 +1,10 @@
 Pod::Spec.new do |s|
   s.name            = "AdfurikunSDK-iOS"
-  s.version         = "0.4.0.1"
+  s.version         = "4.0.1"
   s.summary         = "An iOS SDK for ADFURIKUN Movie Reward Ads"
   s.homepage        = "https://adfurikun.jp/adfurikun/"
-  s.license         = { :type => 'Copyright', :text => 'Copyright Glossom Inc. All rights reserved.' }
-  s.author          = "Glossom Inc."
+  s.license         = { :type => 'Copyright', :text => 'Copyright GREE X, Inc. All rights reserved.' }
+  s.author          = "GREE X, Inc."
   s.platform        = :ios, "12.0"
   s.source          = { :git => "https://github.com/glossom-dev/AdfurikunSDK-iOS", :tag => "#{s.version}" }
   s.resource_bundles = {'AdfurikunSDK-iOS_resources' => ['PrivacyInfo.xcprivacy']}
