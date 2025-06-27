@@ -34,7 +34,7 @@
 }
 
 + (GADVersionNumber)adapterVersion {
-    NSString *versionString = @"1.0.2";
+    NSString *versionString = @"1.0.3";
     NSArray *versionComponents = [versionString componentsSeparatedByString:@"."];
     GADVersionNumber version = {0};
     if (versionComponents.count == 3) {
@@ -138,7 +138,7 @@
     }
 }
 
-- (void)AdsDidHide:(NSString *)appID {
+- (void)AdsDidHide:(NSString *)appID isRewarded:(_Bool)rewarded {
     NSLog(@"%s", __FUNCTION__);
     if (self.adEventDelegate && [self.adEventDelegate respondsToSelector:@selector(willDismissFullScreenView)]) {
         [self.adEventDelegate willDismissFullScreenView];
