@@ -1,13 +1,13 @@
 Pod::Spec.new do |s|
   s.name            = "AdfurikunSDK-iOS"
-  s.version         = "4.0.2"
+  s.version         = "4.1.0"
   s.summary         = "An iOS SDK for ADFURIKUN Movie Reward Ads"
   s.homepage        = "https://adfurikun.jp/adfurikun/"
   s.license         = { :type => 'Copyright', :text => 'Copyright GREE X, Inc. All rights reserved.' }
   s.author          = "GREE X, Inc."
   s.platform        = :ios, "12.0"
   s.source          = { :git => "https://github.com/glossom-dev/AdfurikunSDK-iOS", :tag => "#{s.version}" }
-  s.resource_bundles = {'AdfurikunSDK-iOS_resources' => ['PrivacyInfo.xcprivacy']}
+  s.resource_bundles = {'AdfurikunSDK-iOS_resources' => ['PrivacyInfo.xcprivacy']}  
   s.default_subspec = 'All'
   s.static_framework = true
   s.swift_version = '5.0'
@@ -56,7 +56,7 @@ Pod::Spec.new do |s|
 
   s.subspec 'Five' do |five|
     five.dependency 'AdfurikunSDK-iOS/Core'
-    five.dependency 'FiveAd', '2.9.20241106'
+    five.dependency 'FiveAd', '2.9.20250512'
     five.source_files = '**/adnetworks/Five/*.{h,m}'
     five.resource = '**/adnetworks/Five/*.txt'
   end
@@ -77,7 +77,7 @@ Pod::Spec.new do |s|
 
   s.subspec 'ironSource' do |ironSource|
     ironSource.dependency 'AdfurikunSDK-iOS/Core'
-    ironSource.dependency 'IronSourceSDK', '8.1.1'
+    ironSource.dependency 'IronSourceSDK', '8.1.1.0'
     ironSource.source_files = '**/adnetworks/IronSource/*.{h,m}'
     ironSource.resource = '**/adnetworks/IronSource/*.txt'
   end
