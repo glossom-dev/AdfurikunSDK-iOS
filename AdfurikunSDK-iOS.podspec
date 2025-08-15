@@ -1,11 +1,11 @@
 Pod::Spec.new do |s|
   s.name            = "AdfurikunSDK-iOS"
-  s.version         = "4.1.0"
+  s.version         = "0.4.1.0"
   s.summary         = "An iOS SDK for ADFURIKUN Movie Reward Ads"
   s.homepage        = "https://adfurikun.jp/adfurikun/"
   s.license         = { :type => 'Copyright', :text => 'Copyright GREE X, Inc. All rights reserved.' }
   s.author          = "GREE X, Inc."
-  s.platform        = :ios, "12.0"
+  s.platform        = :ios, "13.0"
   s.source          = { :git => "https://github.com/glossom-dev/AdfurikunSDK-iOS", :tag => "#{s.version}" }
   s.resource_bundles = {'AdfurikunSDK-iOS_resources' => ['PrivacyInfo.xcprivacy']}  
   s.default_subspec = 'All'
@@ -91,12 +91,12 @@ Pod::Spec.new do |s|
 
   s.subspec 'Mintegral' do |mintegral|
     mintegral.dependency 'AdfurikunSDK-iOS/Core'
-    mintegral.dependency 'MintegralAdSDK/BidNativeAd', '7.7.8'
-    mintegral.dependency 'MintegralAdSDK/BidNativeAdvancedAd', '7.7.8'
-    mintegral.dependency 'MintegralAdSDK/BidRewardVideoAd', '7.7.8'
-    mintegral.dependency 'MintegralAdSDK/BidNewInterstitialAd', '7.7.8'
-    mintegral.dependency 'MintegralAdSDK/BidBannerAd', '7.7.8'
-    mintegral.dependency 'MintegralAdSDK/BidSplashAd', '7.7.8'
+    mintegral.dependency 'MintegralAdSDK/BidNativeAd', '7.7.9'
+    mintegral.dependency 'MintegralAdSDK/BidNativeAdvancedAd', '7.7.9'
+    mintegral.dependency 'MintegralAdSDK/BidRewardVideoAd', '7.7.9'
+    mintegral.dependency 'MintegralAdSDK/BidNewInterstitialAd', '7.7.9'
+    mintegral.dependency 'MintegralAdSDK/BidBannerAd', '7.7.9'
+    mintegral.dependency 'MintegralAdSDK/BidSplashAd', '7.7.9'
     mintegral.source_files = '**/adnetworks/Mintegral/*.{h,m}'
     mintegral.resource = '**/adnetworks/Mintegral/*.txt'
   end
