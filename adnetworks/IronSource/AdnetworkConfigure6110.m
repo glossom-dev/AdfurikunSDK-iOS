@@ -21,7 +21,7 @@
 
 // Adnetwork SDK Version
 + (NSString *)getSDKVersion {
-    return [IronSource sdkVersion];
+    return [IronSourceAds sdkVersion];
 }
 
 // Adnetwork名
@@ -41,13 +41,13 @@
 // GDPR関連設定実装
 - (void)setHasUserConsent:(BOOL)hasUserConsent {
     AdapterTraceP(@"hasUserConsent: %d", (int)hasUserConsent);
-    [IronSource setConsent:hasUserConsent];
+    [IronSourceAds setConsent:hasUserConsent];
 }
 
 // COPPA関連設定実装
 - (void)isChildDirected:(BOOL)childDirected {
     AdapterTraceP(@"childDirected: %d", (int)childDirected);
-    [IronSource setMetaDataWithKey:@"is_child_directed" value:childDirected ? @"YES": @"NO"];
+    [IronSourceAds setMetaDataWithKey:@"is_child_directed" value:childDirected ? @"YES": @"NO"];
 }
 
 // Adnetwork SDK初期化ロジック実装

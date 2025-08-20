@@ -77,7 +77,7 @@ Pod::Spec.new do |s|
 
   s.subspec 'ironSource' do |ironSource|
     ironSource.dependency 'AdfurikunSDK-iOS/Core'
-    ironSource.dependency 'IronSourceSDK', '8.1.1.0'
+    ironSource.dependency 'IronSourceSDK', '8.10.0.0'
     ironSource.source_files = '**/adnetworks/IronSource/*.{h,m}'
     ironSource.resource = '**/adnetworks/IronSource/*.txt'
   end
