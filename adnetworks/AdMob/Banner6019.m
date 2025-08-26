@@ -18,7 +18,7 @@
 
 // adapterファイルのRevision番号を返す。実装が変わる度Incrementする
 + (NSString *)getAdapterRevisionVersion {
-    return @"14";
+    return @"15";
 }
 
 // Adnetwork実装時に使うClass名。SDKが導入されているかで使う
@@ -188,25 +188,13 @@
 
 @end
 
-@implementation Banner6160
-@end
-
-@implementation Banner6161
-@end
-
-@implementation Banner6162
-@end
-
-@implementation Banner6163
-@end
-
-@implementation Banner6164
-@end
-
 @implementation Banner6060
 
 + (NSString *)adnetworkName {
     return @"Google Ad Manager";
 }
 
+@end
+
+@implementation Banner6220
 @end

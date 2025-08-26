@@ -22,7 +22,7 @@
 
 // adapterファイルのRevision番号を返す。実装が変わる度Incrementする
 + (NSString *)getAdapterRevisionVersion {
-    return @"16";
+    return @"17";
 }
 
 // Adnetwork実装時に使うClass名。SDKが導入されているかで使う
@@ -178,25 +178,13 @@
 
 @end
 
-@implementation MovieInterstitial6160
-@end
-
-@implementation MovieInterstitial6161
-@end
-
-@implementation MovieInterstitial6162
-@end
-
-@implementation MovieInterstitial6163
-@end
-
-@implementation MovieInterstitial6164
-@end
-
 @implementation MovieInterstitial6060
 
 + (NSString *)adnetworkName {
     return @"Google Ad Manager";
 }
 
+@end
+
+@implementation MovieInterstitial6220
 @end

@@ -21,7 +21,7 @@
 @implementation MovieReward6019
 
 + (NSString *)getAdapterRevisionVersion {
-    return @"17";
+    return @"18";
 }
 
 + (NSString *)adnetworkClassName {
@@ -178,25 +178,13 @@
 
 @end
 
-@implementation MovieReward6160
-@end
-
-@implementation MovieReward6161
-@end
-
-@implementation MovieReward6162
-@end
-
-@implementation MovieReward6163
-@end
-
-@implementation MovieReward6164
-@end
-
 @implementation MovieReward6060
 
 + (NSString *)adnetworkName {
     return @"Google Ad Manager";
 }
 
+@end
+
+@implementation MovieReward6220
 @end

@@ -14,23 +14,10 @@ NS_ASSUME_NONNULL_BEGIN
 
 @end
 
-@interface Rectangle6160 : Banner6019
-@end
-
-@interface Rectangle6161 : Banner6019
-@end
-
-@interface Rectangle6162 : Banner6019
-@end
-
-@interface Rectangle6163 : Banner6019
-@end
-
-@interface Rectangle6164 : Banner6019
-@end
-
 @interface Rectangle6060 : Rectangle6019 // GAM
+@end
 
+@interface Rectangle6220 : Banner6019
 @end
 
 NS_ASSUME_NONNULL_END
