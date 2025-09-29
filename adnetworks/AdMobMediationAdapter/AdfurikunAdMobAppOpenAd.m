@@ -1,22 +1,24 @@
 //
-//  AdfurikunAdMobReward.m
+//  AdfurikunAdMobAppOpenAd.m
+//  MovieRewardTestApp
 //
-//  Copyright © 2019 Glossom.Inc. All rights reserved.
+//  Created by Sungil Kim on 2025/09/25.
+//  Copyright © 2025 GREE X, Inc. All rights reserved.
 //
 
 #include <stdatomic.h>
-#import "AdfurikunAdMobReward.h"
+#import "AdfurikunAdMobAppOpenAd.h"
 #import "AdfurikunAdnetworkExtra.h"
 #import <ADFMovieReward/AdfurikunSdk.h>
 
-@interface AdfurikunAdMobReward ()
-@property(nonatomic, weak, nullable) id<GADMediationRewardedAdEventDelegate> adEventDelegate;
-@property(nonatomic) GADMediationRewardedLoadCompletionHandler loadCompletionHandler;
+@interface AdfurikunAdMobAppOpenAd ()
+@property(nonatomic, weak, nullable) id<GADMediationAppOpenAdEventDelegate> adEventDelegate;
+@property(nonatomic) GADMediationAppOpenLoadCompletionHandler loadCompletionHandler;
 
 @property (nonatomic) NSDictionary *customParameter;
 @end
 
-@implementation AdfurikunAdMobReward
+@implementation AdfurikunAdMobAppOpenAd
 
 + (GADVersionNumber)adSDKVersion {
     NSString *versionString = AdfurikunSdk.version;
@@ -48,16 +50,15 @@
     return version;
 }
 
-- (void)loadRewardedAdForAdConfiguration:(GADMediationRewardedAdConfiguration *)adConfiguration completionHandler:(GADMediationRewardedLoadCompletionHandler)completionHandler {
-    
+- (void)loadAppOpenAdForAdConfiguration:(GADMediationAppOpenAdConfiguration *)adConfiguration completionHandler:(GADMediationAppOpenLoadCompletionHandler)completionHandler {
     __block atomic_flag completionHandlerCalled = ATOMIC_FLAG_INIT;
-    __block GADMediationRewardedLoadCompletionHandler originalCompletionHandler = [completionHandler copy];
-    self.loadCompletionHandler = ^id<GADMediationRewardedAdEventDelegate>(_Nullable id<GADMediationRewardedAd> ad, NSError *_Nullable error) {
+    __block GADMediationAppOpenLoadCompletionHandler originalCompletionHandler = [completionHandler copy];
+    self.loadCompletionHandler = ^id<GADMediationAppOpenAdEventDelegate>(_Nullable id<GADMediationAppOpenAd> ad, NSError *_Nullable error) {
         // Only allow completion handler to be called once.
         if (atomic_flag_test_and_set(&completionHandlerCalled)) {
             return nil;
         }
-        id<GADMediationRewardedAdEventDelegate> delegate = nil;
+        id<GADMediationAppOpenAdEventDelegate> delegate = nil;
         if (originalCompletionHandler) {
             // Call original handler and hold on to its return value.
             delegate = originalCompletionHandler(ad, error);
@@ -81,11 +82,12 @@
         }
     }
     if (appId) {
-        self.movieReward = [ADFmyMovieReward getInstance:appId delegate:self];
+        [ADFmyAppOpenAd initializeWithAppID:appId];
+        self.appOpenAd = [ADFmyAppOpenAd getInstance:appId delegate:self];
         if (loadTimeout > 0.0) {
-            [self.movieReward loadWithTimeout:loadTimeout];
+            [self.appOpenAd loadWithTimeout:loadTimeout];
         } else {
-            [self.movieReward load];
+            [self.appOpenAd loadWithTimeout:3.0];
         }
     }
 }
@@ -95,8 +97,8 @@
 }
 
 - (void)presentFromViewController:(nonnull UIViewController *)viewController {
-    if ([self.movieReward isPrepared]) {
-        [self.movieReward playWithCustomParam:self.customParameter];
+    if ([self.appOpenAd isPrepared]) {
+        [self.appOpenAd playWithPresentingViewController:viewController window:nil];
     } else if (self.adEventDelegate && [self.adEventDelegate respondsToSelector:@selector(didFailToPresentWithError:)]) {
         NSString *message = @"ad was not loaded.";
         NSError *error = [NSError errorWithDomain:@"jp.glossom.adfurikun.error"
@@ -107,7 +109,7 @@
     }
 }
 
-- (void)AdsFetchCompleted:(NSString *)appID isTestMode:(BOOL)isTestMode_inApp {
+- (void)AdsFetchCompleted:(NSString *)appID {
     if (self.loadCompletionHandler) {
         self.adEventDelegate = self.loadCompletionHandler(self, nil);
     }
@@ -144,23 +146,9 @@
     if (self.adEventDelegate && [self.adEventDelegate respondsToSelector:@selector(reportImpression)]) {
         [self.adEventDelegate reportImpression];
     }
-    if (self.adEventDelegate && [self.adEventDelegate respondsToSelector:@selector(didStartVideo)]) {
-        [self.adEventDelegate didStartVideo];
-    }
 }
 
-- (void)AdsDidCompleteShow:(NSString *)appID {
-    if (self.adEventDelegate && [self.adEventDelegate respondsToSelector:@selector(didEndVideo)]) {
-        [self.adEventDelegate didEndVideo];
-    }
-}
-
-- (void)AdsDidHide:(NSString *)appID isRewarded:(_Bool)rewarded {
-    if (rewarded) {
-        if (self.adEventDelegate && [self.adEventDelegate respondsToSelector:@selector(didRewardUser)]) {
-            [self.adEventDelegate didRewardUser];
-        }
-    }
+- (void)AdsDidHide:(NSString *)appID {
     if (self.adEventDelegate && [self.adEventDelegate respondsToSelector:@selector(willDismissFullScreenView)]) {
         [self.adEventDelegate willDismissFullScreenView];
     }
