@@ -5,6 +5,7 @@
 //
 
 #import "AdfurikunAdMobNativeAd.h"
+#import "AdfurikunAdnetworkExtra.h"
 #include <stdatomic.h>
 #import <ADFMovieReward/AdfurikunSdk.h>
 
@@ -37,7 +38,7 @@
 }
 
 + (GADVersionNumber)adapterVersion {
-    NSString *versionString = @"1.0.2";
+    NSString *versionString = @"2.0.0";
     NSArray *versionComponents = [versionString componentsSeparatedByString:@"."];
     GADVersionNumber version = {0};
     if (versionComponents.count == 3) {
@@ -49,7 +50,7 @@
 }
 
 + (Class<GADAdNetworkExtras>)networkExtrasClass {
-    return nil;
+    return AdfurikunAdnetworkExtra.class;
 }
 
 - (void)loadNativeAdForAdConfiguration:(nonnull GADMediationNativeAdConfiguration *)adConfiguration
@@ -77,9 +78,26 @@
     };
     
     NSString *appId = adConfiguration.credentials.settings[@"parameter"];
+    float loadTimeout = 0.0;
+    NSDictionary *customParameter = nil;
+    
+    AdfurikunAdnetworkExtra *extra = (AdfurikunAdnetworkExtra *)adConfiguration.extras;
+    if (extra) {
+        loadTimeout = extra.loadTimeout;
+
+        [extra adfurikunSDKInitProcessWithTestMode:adConfiguration.isTestRequest];
+        
+        if (extra.customParameter) {
+            customParameter = [NSDictionary dictionaryWithDictionary:extra.customParameter];
+        }
+    }
+
     if (appId) {
         self.nativeAd = [ADFmyNativeAd getInstance:appId];
-        [self.nativeAd loadAndNotifyTo:self];
+        if (loadTimeout > 0.0) {
+            [self.nativeAd setLoadingTimeout:loadTimeout];
+        }
+        [self.nativeAd loadAndNotifyTo:self customParam:customParameter];
     }
 }
 
@@ -161,14 +179,12 @@
 # pragma ADFMediaViewDelegate
 
 - (void)onADFMediaViewPlayStart {
-    NSLog(@"%s", __FUNCTION__);
     if (self.adEventDelegate && [self.adEventDelegate respondsToSelector:@selector(reportImpression)]) {
         [self.adEventDelegate reportImpression];
     }
 }
 
 - (void)onADFMediaViewPlayFail {
-    NSLog(@"%s", __FUNCTION__);
     if (self.adEventDelegate && [self.adEventDelegate respondsToSelector:@selector(didFailToPresentWithError:)]) {
         NSError *error = [NSError errorWithDomain:@"jp.glossom.adfurikun.error"
                                              code:0
@@ -179,21 +195,17 @@
 }
 
 - (void)onADFMediaViewClick {
-    NSLog(@"%s", __FUNCTION__);
     if (self.adEventDelegate && [self.adEventDelegate respondsToSelector:@selector(reportClick)]) {
         [self.adEventDelegate reportClick];
     }
 }
 
 - (void)onADFMediaViewLoadFail {
-    NSLog(@"%s", __FUNCTION__);
 }
 
 - (void)onADFMediaViewRendering {
-    NSLog(@"%s", __FUNCTION__);
 }
 
 - (void)onADFMediaViewPlayFinish {
-    NSLog(@"%s", __FUNCTION__);
 }
 @end
