@@ -5,12 +5,14 @@
 //
 
 #import "AdfurikunAdMobInterstitial.h"
+#import "AdfurikunAdnetworkExtra.h"
 #include <stdatomic.h>
 #import <ADFMovieReward/AdfurikunSdk.h>
 
 @interface AdfurikunAdMobInterstitial ()
 @property(nonatomic, weak, nullable) id<GADMediationInterstitialAdEventDelegate> adEventDelegate;
 @property(nonatomic) GADMediationInterstitialLoadCompletionHandler loadCompletionHandler;
+@property (nonatomic) NSDictionary *customParameter;
 @end
 
 @implementation AdfurikunAdMobInterstitial
@@ -38,9 +40,27 @@
         return delegate;
     };
     NSString *appId = adConfiguration.credentials.settings[@"parameter"];
+    float loadTimeout = 0.0;
+    self.customParameter = nil;
+    
+    AdfurikunAdnetworkExtra *extra = (AdfurikunAdnetworkExtra *)adConfiguration.extras;
+    if (extra) {
+        loadTimeout = extra.loadTimeout;
+
+        [extra adfurikunSDKInitProcessWithTestMode:adConfiguration.isTestRequest];
+        
+        if (extra.customParameter) {
+            self.customParameter = [NSDictionary dictionaryWithDictionary:extra.customParameter];
+        }
+    }
+
     if (appId) {
         self.interstitialAd = [ADFmyInterstitial getInstance:appId delegate:self];
-        [self.interstitialAd load];
+        if (loadTimeout > 0.0) {
+            [self.interstitialAd loadWithTimeout:loadTimeout];
+        } else {
+            [self.interstitialAd load];
+        }
     }
 }
 
@@ -64,7 +84,7 @@
 
 
 + (GADVersionNumber)adapterVersion { 
-    NSString *versionString = @"1.0.3";
+    NSString *versionString = @"2.0.0";
     NSArray *versionComponents = [versionString componentsSeparatedByString:@"."];
     GADVersionNumber version = {0};
     if (versionComponents.count == 3) {
@@ -77,13 +97,13 @@
 
 
 + (nullable Class<GADAdNetworkExtras>)networkExtrasClass { 
-    return nil;
+    return AdfurikunAdnetworkExtra.class;
 }
 
 
 - (void)presentFromViewController:(UIViewController *)viewController {
     if ([self.interstitialAd isPrepared]) {
-        [self.interstitialAd play];
+        [self.interstitialAd playWithCustomParam:self.customParameter];
     } else if (self.adEventDelegate && [self.adEventDelegate respondsToSelector:@selector(didFailToPresentWithError:)]) {
         NSString *message = @"ad was not loaded.";
         NSError *error = [NSError errorWithDomain:@"jp.glossom.adfurikun.error"
@@ -95,14 +115,12 @@
 }
 
 - (void)AdsFetchCompleted:(NSString *)appID isTestMode:(BOOL)isTestMode_inApp {
-    NSLog(@"%s", __FUNCTION__);
     if (self.loadCompletionHandler) {
         self.adEventDelegate = self.loadCompletionHandler(self, nil);
     }
 }
 
 - (void)AdsFetchFailed:(NSString *)appID error:(NSError *)error adnetworkError:(NSArray<AdnetworkError *> *)adnetworkError {
-    NSLog(@"%s", __FUNCTION__);
     if (self.loadCompletionHandler) {
         self.adEventDelegate = self.loadCompletionHandler(nil, error);
     }
@@ -127,7 +145,6 @@
 }
 
 - (void)AdsDidShow:(NSString *)appID adnetworkKey:(NSString *)adnetworkKey {
-    NSLog(@"%s", __FUNCTION__);
     if (self.adEventDelegate && [self.adEventDelegate respondsToSelector:@selector(willPresentFullScreenView)]) {
         [self.adEventDelegate willPresentFullScreenView];
     }
@@ -137,11 +154,9 @@
 }
 
 - (void)AdsDidCompleteShow:(NSString *)appID {
-    NSLog(@"%s", __FUNCTION__);
 }
 
 - (void)AdsDidHide:(NSString *)appID isRewarded:(_Bool)rewarded {
-    NSLog(@"%s", __FUNCTION__);
     if (self.adEventDelegate && [self.adEventDelegate respondsToSelector:@selector(willDismissFullScreenView)]) {
         [self.adEventDelegate willDismissFullScreenView];
     }

@@ -1,6 +1,6 @@
 Pod::Spec.new do |s|
   s.name            = "AdfurikunSDK-iOS"
-  s.version         = "4.1.0"
+  s.version         = "4.2.0"
   s.summary         = "An iOS SDK for ADFURIKUN Movie Reward Ads"
   s.homepage        = "https://adfurikun.jp/adfurikun/"
   s.license         = { :type => 'Copyright', :text => 'Copyright GREE X, Inc. All rights reserved.' }
@@ -31,6 +31,12 @@ Pod::Spec.new do |s|
     admobMediationAdapter.dependency 'AdfurikunSDK-iOS/Core'
     admobMediationAdapter.dependency 'Google-Mobile-Ads-SDK', '>=11.2.0'
     admobMediationAdapter.source_files = '**/adnetworks/AdMobMediationAdapter/*.{h,m}'
+  end
+
+  s.subspec 'AdMobMediationAdapterUnity' do |admobMediationAdapterUnity|
+    admobMediationAdapterUnity.dependency 'AdfurikunSDK-iOS/Core'
+    admobMediationAdapterUnity.dependency 'AdfurikunSDK-iOS/AdMobMediationAdapter'
+    admobMediationAdapterUnity.source_files = '**/adnetworks/AdMobMediationAdapter/Unity/*.{h,m}'
   end
 
   s.subspec 'Afio' do |afio|
