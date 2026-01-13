@@ -13,7 +13,7 @@ NS_ASSUME_NONNULL_BEGIN
 @required
 - (void)onCarouselLoadFinish:(UIView *)carouselView;
 @optional
-- (void)onCarouselLoadError:(ADFMovieError *)error;
+- (void)onCarouselLoadError:(ADFError *)error;
 - (void)onCarouselViewImpressionAppID:(NSString *)appID index:(NSInteger)index;
 - (void)onCarouselViewClickAppID:(NSString *)appID index:(NSInteger)index;
 @end

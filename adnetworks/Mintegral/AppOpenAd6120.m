@@ -120,14 +120,14 @@
     if (topVC) {
         [self showAdWithPresentingViewController:topVC];
     } else {
-        [self setPlayFailCallbackTopVCGetFailed];
+        [self setPlayFailCallback:PlayFailCallbackReasonTopVCGetFailed exception:nil];
     }
 }
 
 - (void)showAdWithPresentingViewController:(UIViewController *)viewController {
     UIWindow *window = [self getKeyWindow];
     if (!window || !self.splashAd) {
-        [self setPlayFailCallbackAdInstanceNil];
+        [self setPlayFailCallback:PlayFailCallbackReasonAdInstanceNil exception:nil];
         return;
     }
     AdapterLogP(@"window : %@, rootVC : %@, topMostVC : %@", window, window.rootViewController, [self topMostViewController]);
@@ -140,10 +140,10 @@
             [self.splashAd showInKeyWindow:window customView:self.logoView];
         } @catch (NSException *exception) {
             [self adnetworkExceptionHandling:exception];
-            [self setPlayFailCallbackException:exception];
+            [self setPlayFailCallback:PlayFailCallbackReasonException exception:exception];
         }
     } else {
-        [self setPlayFailCallbackIsPreparedFalse];
+        [self setPlayFailCallback:PlayFailCallbackReasonIsPreparedFalse exception:nil];
     }
 }
 

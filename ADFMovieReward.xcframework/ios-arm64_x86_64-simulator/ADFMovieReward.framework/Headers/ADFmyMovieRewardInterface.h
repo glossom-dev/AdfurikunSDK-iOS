@@ -10,6 +10,8 @@
 
 #import "ADFmyBaseAdapterInterface.h"
 
+NS_ASSUME_NONNULL_BEGIN
+
 typedef enum : NSInteger {
     MovieRewardCallbackInit,
     MovieRewardCallbackFetchComplete,
@@ -21,13 +23,20 @@ typedef enum : NSInteger {
     MovieRewardCallbackClick, // 9998のみ対応
 } MovieRewardCallbackStatus;
 
+typedef enum : NSInteger {
+    PlayFailCallbackReasonIsPreparedFalse,
+    PlayFailCallbackReasonTopVCGetFailed,
+    PlayFailCallbackReasonAdInstanceNil,
+    PlayFailCallbackReasonException,
+} PlayFailCallbackReason;
+
 @class UIViewController;
 
 @protocol ADFMovieRewardDelegate;
 
 @interface ADFmyMovieRewardInterface : ADFmyBaseAdapterInterface
 
-@property (nonatomic, strong) NSString *objectId;
+@property (nonatomic) NSString *objectId;
 @property (nonatomic, weak) NSObject<ADFMovieRewardDelegate> *delegate;
 @property (nonatomic) bool isRewarded;
 
@@ -37,10 +46,7 @@ typedef enum : NSInteger {
 
 - (void)setCallbackStatus:(MovieRewardCallbackStatus)status;
 
-- (void)setPlayFailCallbackIsPreparedFalse;
-- (void)setPlayFailCallbackTopVCGetFailed;
-- (void)setPlayFailCallbackAdInstanceNil;
-- (void)setPlayFailCallbackException:(NSException *)exception;
+- (void)setPlayFailCallback:(PlayFailCallbackReason)reason exception:(nullable NSException *)exception;
 
 -(void)invalidViewControllerTimer;
 
@@ -69,3 +75,5 @@ typedef enum : NSInteger {
 - (void)AdsMaybeClosed:(ADFmyMovieRewardInterface*)movieReward;
 
 @end
+
+NS_ASSUME_NONNULL_END

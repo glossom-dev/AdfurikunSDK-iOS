@@ -97,7 +97,7 @@
     [super showAdWithPresentingViewController:viewController];
     
     if (!self.maioInstance) {
-        [self setPlayFailCallbackAdInstanceNil];
+        [self setPlayFailCallback:PlayFailCallbackReasonAdInstanceNil exception:nil];
         return;
     }
 
@@ -107,10 +107,10 @@
             [self.maioInstance showWithViewContext:viewController callback:self];
         } @catch (NSException *exception) {
             [self adnetworkExceptionHandling:exception];
-            [self setPlayFailCallbackException:exception];
+            [self setPlayFailCallback:PlayFailCallbackReasonException exception:exception];
         }
     } else {
-        [self setPlayFailCallbackIsPreparedFalse];
+        [self setPlayFailCallback:PlayFailCallbackReasonIsPreparedFalse exception:nil];
     }
 }
 

@@ -39,7 +39,7 @@
 }
 
 + (GADVersionNumber)adapterVersion {
-    NSString *versionString = @"2.0.0";
+    NSString *versionString = @"2.0.1";
     NSArray *versionComponents = [versionString componentsSeparatedByString:@"."];
     GADVersionNumber version = {0};
     if (versionComponents.count == 3) {
@@ -121,7 +121,7 @@
     }
 }
 
-- (void)AdsPlayFailed:(NSString *)appID adnetworkError:(AdnetworkError *)adnetworkError {
+- (void)AdsPlayFailed:(NSString *)appID adfError:(ADFError *)adfError adnetworkError:(AdnetworkError *)adnetworkError {
     if (self.adEventDelegate && [self.adEventDelegate respondsToSelector:@selector(didFailToPresentWithError:)]) {
         NSString *errorMessage = @"";
         NSInteger errorCode = 0;
@@ -130,6 +130,11 @@
                 errorMessage = adnetworkError.errorMessage;
             }
             errorCode = adnetworkError.errorCode;
+        } else if (adfError) {
+            if (adfError.errorMessage) {
+                errorMessage = adfError.errorMessage;
+            }
+            errorCode = adfError.errorCode;
         }
         NSError *error = [NSError errorWithDomain:@"jp.glossom.adfurikun.error"
                                              code:errorCode

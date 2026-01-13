@@ -15,7 +15,7 @@
 #import <ADFMovieReward/ADFDebugUtility.h>
 #import <ADFMovieReward/ADFLogger.h>
 #import <ADFMovieReward/ADFMediaView.h>
-#import <ADFMovieReward/ADFMovieError.h>
+#import <ADFMovieReward/ADFError.h>
 #import <ADFMovieReward/ADFmyMovieDelegateBase.h>
 #import <ADFMovieReward/ADFmyAdnetworkConfigure.h>
 #import <ADFMovieReward/ADFmyBaseAdapterInterface.h>

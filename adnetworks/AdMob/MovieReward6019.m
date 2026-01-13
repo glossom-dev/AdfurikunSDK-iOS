@@ -104,7 +104,7 @@
     [super showAdWithPresentingViewController:viewController];
 
     if (!self.rewardedAd) {
-        [self setPlayFailCallbackAdInstanceNil];
+        [self setPlayFailCallback:PlayFailCallbackReasonAdInstanceNil exception:nil];
         return;
     }
 
@@ -121,10 +121,10 @@
             }];
         } @catch (NSException *exception) {
             [self adnetworkExceptionHandling:exception];
-            [self setPlayFailCallbackException:exception];
+            [self setPlayFailCallback:PlayFailCallbackReasonException exception:exception];
         }
     } else {
-        [self setPlayFailCallbackIsPreparedFalse];
+        [self setPlayFailCallback:PlayFailCallbackReasonIsPreparedFalse exception:nil];
     }
 }
 

@@ -37,7 +37,7 @@
 }
 
 + (GADVersionNumber)adapterVersion {
-    NSString *versionString = @"2.0.0";
+    NSString *versionString = @"2.0.1";
     NSArray *versionComponents = [versionString componentsSeparatedByString:@"."];
     GADVersionNumber version = {0};
     if (versionComponents.count == 3) {
@@ -113,13 +113,18 @@
     }
 }
 
-- (void)AdsFetchFailed:(NSString *)appID error:(NSError *)error adnetworkError:(NSArray<AdnetworkError *> *)adnetworkError {
+- (void)AdsFetchFailed:(NSString *)appID adfError:(ADFError *)adfError adnetworkError:(NSArray<AdnetworkError *> *)adnetworkError {
+    NSLog(@"%s", __FUNCTION__);
     if (self.loadCompletionHandler) {
-        self.adEventDelegate = self.loadCompletionHandler(nil, error);
+        NSDictionary *userInfo = @{
+            NSLocalizedDescriptionKey: adfError.errorMessage
+        };
+        NSError *err = [[NSError alloc] initWithDomain:@"jp.glossom.adfurikun.error" code:adfError.errorCode userInfo:userInfo];
+        self.adEventDelegate = self.loadCompletionHandler(nil, err);
     }
 }
 
-- (void)AdsPlayFailed:(NSString *)appID adnetworkError:(AdnetworkError *)adnetworkError {
+- (void)AdsPlayFailed:(NSString *)appID adfError:(ADFError *)adfError adnetworkError:(AdnetworkError *)adnetworkError {
     if (self.adEventDelegate && [self.adEventDelegate respondsToSelector:@selector(didFailToPresentWithError:)]) {
         NSString *errorMessage = @"";
         NSInteger errorCode = 0;
@@ -128,6 +133,11 @@
                 errorMessage = adnetworkError.errorMessage;
             }
             errorCode = adnetworkError.errorCode;
+        } else if (adfError) {
+            if (adfError.errorMessage) {
+                errorMessage = adfError.errorMessage;
+            }
+            errorCode = adfError.errorCode;
         }
         NSError *error = [NSError errorWithDomain:@"jp.glossom.adfurikun.error"
                                              code:errorCode

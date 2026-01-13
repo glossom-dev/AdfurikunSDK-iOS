@@ -8,7 +8,7 @@
 
 #import <Foundation/Foundation.h>
 #import <UIKit/UIKit.h>
-#import "ADFMovieError.h"
+#import "ADFError.h"
 #import "ADFmyMovieRewardInterface.h"
 #import "ADFmyBaseAdapterInterface.h"
 #import "ADFNativeAdInfo.h"

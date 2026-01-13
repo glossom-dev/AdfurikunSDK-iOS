@@ -11,7 +11,7 @@
 #import <Foundation/Foundation.h>
 #import <UIKit/UIKit.h>
 #import "ADFmyMovieRewardInterface.h"
-#import "ADFMovieError.h"
+#import "ADFError.h"
 
 NS_ASSUME_NONNULL_BEGIN
 
@@ -24,11 +24,6 @@ NS_ASSUME_NONNULL_BEGIN
 /** デリゲート */
 @property (nonatomic, weak) NSObject<ADFmyMovieRewardDelegate> *delegate;
 
-/**
- サポートされているOSのバージョンか？
- @return BOOL サポートされているOSのバージョンか否か
- */
-+ (BOOL)isSupportedOSVersion;
 /**
  初期化関数。initWithAppIDからRenameされました。
 
@@ -118,12 +113,6 @@ NS_ASSUME_NONNULL_BEGIN
 
 @end
 
-#define ADF_FETCH_ERROR_CODE_OUTOFSTOCK 203
-#define ADF_FETCH_ERROR_CODE_NOADNETWORK 400
-#define ADF_FETCH_ERROR_CODE_API_REQUEST_FAILURE 500
-#define ADF_FETCH_ERROR_CODE_ALREADY_LOADING 999
-#define ADF_FETCH_ERROR_CODE_EXCEED_FREQUENCY 1000 // 以前のエラーコードはHTTP Return Codeとある程度一致したが、当てはまらないケースが出るのでこれからは1000番からナンバーリングをする
-
 @protocol ADFmyMovieRewardDelegate<NSObject>
 @optional
 /**< 広告の表示準備が終わった時のイベント */
@@ -131,7 +120,8 @@ NS_ASSUME_NONNULL_BEGIN
 - (void)AdsFetchCompleted:(NSString *)appID isTestMode:(BOOL)isTestMode_inApp isManualMode:(BOOL)isManualMode;
 
 /**< 広告の表示準備が失敗した時のイベント */
-- (void)AdsFetchFailed:(NSString *)appID error:(NSError *)error adnetworkError:(NSArray<AdnetworkError *> *)adnetworkError;
+- (void)AdsFetchFailed:(NSString *)appID adfError:(ADFError *)adfError adnetworkError:(NSArray<AdnetworkError *> *)adnetworkError;
+- (void)AdsFetchFailed:(NSString *)appID error:(NSError *)error adnetworkError:(NSArray<AdnetworkError *> *)adnetworkError; __deprecated_msg("Please use 'AdsFetchFailed:adfError:adnetworkError:' instead");
 
 /**< 広告の表示が開始した時のイベント */
 - (void)AdsDidShow:(NSString *)appID adnetworkKey:(NSString *)adnetworkKey;
@@ -140,7 +130,8 @@ NS_ASSUME_NONNULL_BEGIN
 - (void)AdsDidCompleteShow:(NSString *)appID;
 
 /**< 動画広告再生エラー時のイベント */
-- (void)AdsPlayFailed:(NSString *)appID adnetworkError:(AdnetworkError *)adnetworkError;
+- (void)AdsPlayFailed:(NSString *)appID adfError:(ADFError *)adfError adnetworkError:(AdnetworkError *)adnetworkError;
+- (void)AdsPlayFailed:(NSString *)appID adnetworkError:(AdnetworkError *)adnetworkError; __deprecated_msg("Please use 'AdsPlayFailed:adfError:adnetworkError:' instead");
 
 /**< 広告を閉じた時のイベント */
 - (void)AdsDidHide:(NSString *)appID isRewarded:(bool)rewarded;

@@ -129,7 +129,7 @@
     [super showAd];
     
     if (!self.unitController) {
-        [self setPlayFailCallbackAdInstanceNil];
+        [self setPlayFailCallback:PlayFailCallbackReasonAdInstanceNil exception:nil];
         return;
     }
 
@@ -139,10 +139,10 @@
             [self.unitController showAdAnimated:true completion:nil];
         } @catch (NSException *exception) {
             [self adnetworkExceptionHandling:exception];
-            [self setPlayFailCallbackException:exception];
+            [self setPlayFailCallback:PlayFailCallbackReasonException exception:exception];
         }
     } else {
-        [self setPlayFailCallbackIsPreparedFalse];
+        [self setPlayFailCallback:PlayFailCallbackReasonIsPreparedFalse exception:nil];
     }
 }
 

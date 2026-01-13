@@ -22,7 +22,7 @@ class MovieReward6010: ADFmyMovieRewardInterface {
     }
 
     override class func getAdapterRevisionVersion() -> String {
-        return "7"
+        return "8"
     }
     
     override class func adnetworkClassName() -> String {
@@ -94,7 +94,7 @@ class MovieReward6010: ADFmyMovieRewardInterface {
             amoadInterstitialVideo?.show()
             didLoad = false
         } else {
-            setPlayFailCallbackIsPreparedFalse()
+            setPlayFailCallback(PlayFailCallbackReasonIsPreparedFalse, exception: nil)
         }
     }
 
@@ -102,7 +102,7 @@ class MovieReward6010: ADFmyMovieRewardInterface {
         showAd()
     }
 
-    override func isClassReference() -> Bool {
+    override class func isClassReference() -> Bool {
         return true
     }
 

@@ -157,7 +157,7 @@
     if (topVC) {
         [self showAdWithPresentingViewController:topVC];
     } else {
-        [self setPlayFailCallbackTopVCGetFailed];
+        [self setPlayFailCallback:PlayFailCallbackReasonTopVCGetFailed exception:nil];
     }
 }
 
@@ -165,7 +165,7 @@
     [super showAdWithPresentingViewController:viewController];
     
     if (!self.openAd) {
-        [self setPlayFailCallbackAdInstanceNil];
+        [self setPlayFailCallback:PlayFailCallbackReasonAdInstanceNil exception:nil];
         return;
     }
 
@@ -175,10 +175,10 @@
             [self.openAd presentFromRootViewController:viewController];
         } @catch (NSException *exception) {
             [self adnetworkExceptionHandling:exception];
-            [self setPlayFailCallbackException:exception];
+            [self setPlayFailCallback:PlayFailCallbackReasonException exception:exception];
         }
     } else {
-        [self setPlayFailCallbackIsPreparedFalse];
+        [self setPlayFailCallback:PlayFailCallbackReasonIsPreparedFalse exception:nil];
     }
 }
 

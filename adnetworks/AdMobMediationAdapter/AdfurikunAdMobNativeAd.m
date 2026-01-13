@@ -38,7 +38,7 @@
 }
 
 + (GADVersionNumber)adapterVersion {
-    NSString *versionString = @"2.0.0";
+    NSString *versionString = @"2.0.1";
     NSArray *versionComponents = [versionString componentsSeparatedByString:@"."];
     GADVersionNumber version = {0};
     if (versionComponents.count == 3) {
@@ -118,12 +118,12 @@
     }
 }
 
-- (void)onNativeAdLoadError:(ADFMovieError *)error appID:(NSString *)appID adnetworkError:(NSArray<AdnetworkError *> *)adnetworkError {
+- (void)onNativeAdLoadError:(NSString *)appID adfError:(ADFError *)adfError adnetworkError:(NSArray<AdnetworkError *> *)adnetworkError {
     if (self.loadCompletionHandler) {
         NSDictionary *userInfo = @{
-            NSLocalizedDescriptionKey: error.errorMessage
+            NSLocalizedDescriptionKey: adfError.errorMessage
         };
-        NSError *err = [[NSError alloc] initWithDomain:@"jp.glossom.adfurikun.error" code:error.errorCode userInfo:userInfo];
+        NSError *err = [[NSError alloc] initWithDomain:@"jp.glossom.adfurikun.error" code:adfError.errorCode userInfo:userInfo];
         self.adEventDelegate = self.loadCompletionHandler(nil, err);
     }
 }

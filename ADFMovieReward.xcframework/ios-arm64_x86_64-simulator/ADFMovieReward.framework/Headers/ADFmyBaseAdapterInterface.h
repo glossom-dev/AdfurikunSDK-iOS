@@ -102,7 +102,7 @@ typedef enum : NSUInteger {
 + (bool)isSupportForChild;
 
 /**< SDKが読み込まれているかどうか？ */
--(BOOL)isClassReference;
++ (bool)isClassReference;
 
 /**< 設定データの送信 */
 -(void)setData:(NSDictionary *)data;

@@ -126,7 +126,7 @@
         [self showAdWithPresentingViewController:vc];
     } else {
         AdapterLog(@"top most viewcontroller is nil");
-        [self setPlayFailCallbackTopVCGetFailed];
+        [self setPlayFailCallback:PlayFailCallbackReasonTopVCGetFailed exception:nil];
     }
 }
 
@@ -134,7 +134,7 @@
     [super showAdWithPresentingViewController:viewController];
     
     if (!self.interstitial) {
-        [self setPlayFailCallbackAdInstanceNil];
+        [self setPlayFailCallback:PlayFailCallbackReasonAdInstanceNil exception:nil];
         return;
     }
 
@@ -144,7 +144,7 @@
             [self.interstitial showWithViewController:viewController];
         } @catch (NSException *exception) {
             [self adnetworkExceptionHandling:exception];
-            [self setPlayFailCallbackException:exception];
+            [self setPlayFailCallback:PlayFailCallbackReasonException exception:exception];
         }
     }
 }

@@ -9,7 +9,7 @@
 #import <Foundation/Foundation.h>
 
 #import "ADFNativeAdInfo.h"
-#import "ADFMovieError.h"
+#import "ADFError.h"
 
 NS_ASSUME_NONNULL_BEGIN
 
@@ -20,13 +20,6 @@ NS_ASSUME_NONNULL_BEGIN
 @interface ADFmyNativeAd : NSObject
 
 //- (instancetype)init;
-
-/**
- サポートされているOSのバージョンか確認
-
- @return サポートされているOSのバージョンか否か
- */
-+ (BOOL)isSupportedOSVersion;
 
 /**
  広告枠の情報をアドフリくんサーバから取得して動画ネイティブ広告の初期化
@@ -107,7 +100,8 @@ NS_ASSUME_NONNULL_BEGIN
  @param error エラーの情報を格納したオブジェクト
  @param appID 対象の広告枠ID
  */
-- (void)onNativeAdLoadError:(ADFMovieError *)error appID:(NSString *)appID adnetworkError:(NSArray<AdnetworkError *> *)adnetworkError;
+- (void)onNativeAdLoadError:(NSString *)appID adfError:(ADFError *)adfError adnetworkError:(NSArray<AdnetworkError *> *)adnetworkError;
+- (void)onNativeAdLoadError:(ADFMovieError *)error appID:(NSString *)appID adnetworkError:(NSArray<AdnetworkError *> *)adnetworkError; __deprecated_msg("Please use 'onNativeAdLoadError:adnetworkError:appID:' instead");
 @end
 
 NS_ASSUME_NONNULL_END

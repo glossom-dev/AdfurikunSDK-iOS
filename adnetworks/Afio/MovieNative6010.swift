@@ -34,7 +34,7 @@ class MovieNative6010: ADFmyMovieNativeInterface {
     }
 
     override class func getAdapterRevisionVersion() -> String {
-        return "6"
+        return "7"
     }
 
     override class func adnetworkClassName() -> String {
@@ -151,7 +151,7 @@ class MovieNative6010: ADFmyMovieNativeInterface {
         return true
     }
 
-    override func isClassReference() -> Bool {
+    override class func isClassReference() -> Bool {
         return true;
     }
 }

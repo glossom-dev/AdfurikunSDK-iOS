@@ -90,7 +90,7 @@
     if (topVC) {
         [self showAdWithPresentingViewController:topVC];
     } else {
-        [self setPlayFailCallbackTopVCGetFailed];
+        [self setPlayFailCallback:PlayFailCallbackReasonTopVCGetFailed exception:nil];
     }
 }
 
@@ -104,11 +104,11 @@
             [UnityAds show:viewController placementId:((AdnetworkParameter6001 *)self.adParam).placementId showDelegate:self];
         } @catch (NSException *exception) {
             [self adnetworkExceptionHandling:exception];
-            [self setPlayFailCallbackException:exception];
+            [self setPlayFailCallback:PlayFailCallbackReasonException exception:exception];
         }
     } else {
         AdapterLog(@"Error encountered playing ad : could not fetch topmost viewcontroller");
-        [self setPlayFailCallbackTopVCGetFailed];
+        [self setPlayFailCallback:PlayFailCallbackReasonTopVCGetFailed exception:nil];
     }
 }
 

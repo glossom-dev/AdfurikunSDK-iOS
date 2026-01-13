@@ -93,7 +93,7 @@
     if (vc) {
         [self showAdWithPresentingViewController:vc];
     } else {
-        [self setPlayFailCallbackTopVCGetFailed];
+        [self setPlayFailCallback:PlayFailCallbackReasonTopVCGetFailed exception:nil];
     }
 }
 
@@ -106,10 +106,10 @@
             [IronSource showISDemandOnlyRewardedVideo:viewController instanceId:((AdnetworkParam6110 *)self.adParam).instanceId];
         } @catch (NSException *exception) {
             [self adnetworkExceptionHandling:exception];
-            [self setPlayFailCallbackException:exception];
+            [self setPlayFailCallback:PlayFailCallbackReasonException exception:exception];
         }
     } else {
-        [self setPlayFailCallbackIsPreparedFalse];
+        [self setPlayFailCallback:PlayFailCallbackReasonIsPreparedFalse exception:nil];
     }
 }
 

@@ -7,19 +7,13 @@
 
 #import <Foundation/Foundation.h>
 #import <UIKit/UIKit.h>
-#import "ADFMovieError.h"
+#import "ADFError.h"
 
 NS_ASSUME_NONNULL_BEGIN
 
 @protocol ADFmyAppOpenAdDelegate;
 
 @interface ADFmyAppOpenAd : NSObject
-/**
- サポートされているOSのバージョンか確認
-
- @return サポートされているOSのバージョンか否か
- */
-+ (BOOL)isSupportedOSVersion;
 
 /**
  初期化関数
@@ -73,13 +67,15 @@ NS_ASSUME_NONNULL_BEGIN
 /**< 広告の取得成功 */
 - (void)AdsFetchCompleted:(NSString *)appID;
 /**< 広告の取得失敗 */
-- (void)AdsFetchFailed:(NSString *)appID error:(NSError *)error adnetworkError:(NSArray<AdnetworkError *> *)adnetworkError;
+- (void)AdsFetchFailed:(NSString *)appID adfError:(ADFError *)adfError adnetworkError:(NSArray<AdnetworkError *> *)adnetworkError;
+- (void)AdsFetchFailed:(NSString *)appID error:(NSError *)error adnetworkError:(NSArray<AdnetworkError *> *)adnetworkError; __deprecated_msg("Please use 'AdsFetchFailed:adfError:adnetworkError:' instead");
 /**< 広告の表示開始 */
 - (void)AdsDidShow:(NSString *)appID adnetworkKey:(NSString *)adnetworkKey;
 /**< 広告を閉じた */
 - (void)AdsDidHide:(NSString *)appID;
 /**< 広告の表示失敗 */
-- (void)AdsPlayFailed:(NSString *)appID adnetworkError:(AdnetworkError *)adnetworkError;
+- (void)AdsPlayFailed:(NSString *)appID adfError:(ADFError *)adfError adnetworkError:(AdnetworkError *)adnetworkError;
+- (void)AdsPlayFailed:(NSString *)appID adnetworkError:(AdnetworkError *)adnetworkError; __deprecated_msg("Please use 'AdsPlayFailed:adfError:adnetworkError:' instead");
 
 @end
 
