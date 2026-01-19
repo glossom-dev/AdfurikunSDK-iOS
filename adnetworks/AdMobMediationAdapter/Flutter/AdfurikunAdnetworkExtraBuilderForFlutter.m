@@ -36,9 +36,9 @@
             extra.childDirected = (value.boolValue) ? @1 : @0;
         }
 
-        value = self.extras[@"ADF_IS_APPLICATION_FOR_CHILD"];
+        value = self.extras[@"ADF_USER_IS_MINOR"];
         if (value) {
-            extra.applicationIsForChild = value.boolValue;
+            extra.setUserIsMinor = value.boolValue;
         }
 
         value = self.extras[@"ADF_CUSTOM_PARAMS"];
