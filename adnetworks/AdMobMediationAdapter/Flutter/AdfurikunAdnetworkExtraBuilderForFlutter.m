@@ -18,7 +18,7 @@
         
         value = self.extras[@"ADF_IS_DEBUG_MODE"];
         if (value) {
-            extra.enagleDebugLog = value.boolValue;
+            extra.enableDebugLog = value.boolValue;
         }
 
         value = self.extras[@"ADF_SOUND_STATE"];
