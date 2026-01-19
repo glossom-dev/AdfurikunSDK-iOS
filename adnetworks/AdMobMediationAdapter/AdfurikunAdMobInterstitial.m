@@ -17,6 +17,8 @@
 
 @implementation AdfurikunAdMobInterstitial
 
+#pragma mark GADMediationAdapter
+
 - (void)loadInterstitialForAdConfiguration:(GADMediationInterstitialAdConfiguration *)adConfiguration completionHandler:(GADMediationInterstitialLoadCompletionHandler)completionHandler {
     __block atomic_flag completionHandlerCalled = ATOMIC_FLAG_INIT;
     __block GADMediationInterstitialLoadCompletionHandler originalCompletionHandler = [completionHandler copy];
@@ -53,7 +55,7 @@
             self.customParameter = [NSDictionary dictionaryWithDictionary:extra.customParameter];
         }
     }
-
+    AdMobMediationTrace;
     if (appId) {
         self.interstitialAd = [ADFmyInterstitial getInstance:appId delegate:self];
         if (loadTimeout > 0.0) {
@@ -100,38 +102,71 @@
     return AdfurikunAdnetworkExtra.class;
 }
 
+#pragma mark GADMediationInterstitialAd
 
 - (void)presentFromViewController:(UIViewController *)viewController {
+    AdMobMediationTrace;
     if ([self.interstitialAd isPrepared]) {
         [self.interstitialAd playWithCustomParam:self.customParameter];
     } else if (self.adEventDelegate && [self.adEventDelegate respondsToSelector:@selector(didFailToPresentWithError:)]) {
         NSString *message = @"ad was not loaded.";
-        NSError *error = [NSError errorWithDomain:@"jp.glossom.adfurikun.error"
+        NSError *error = [NSError errorWithDomain:@"jp.greex.adfurikun.error"
                                              code:0
                                          userInfo:@{NSLocalizedDescriptionKey: message,
                                                     NSLocalizedRecoverySuggestionErrorKey: message}];
+        AdMobMediationLog(@"adEventDelegate didFailToPresentWithError called, errorCode: 0, errorMessage: %@", message);
         [self.adEventDelegate didFailToPresentWithError:error];
     }
 }
 
+#pragma mark ADFmyMovieRewardDelegate
+
 - (void)AdsFetchCompleted:(NSString *)appID isTestMode:(BOOL)isTestMode_inApp {
+    AdMobMediationTrace;
     if (self.loadCompletionHandler) {
         self.adEventDelegate = self.loadCompletionHandler(self, nil);
     }
 }
 
 - (void)AdsFetchFailed:(NSString *)appID adfError:(ADFError *)adfError adnetworkError:(NSArray<AdnetworkError *> *)adnetworkError {
-    NSLog(@"%s", __FUNCTION__);
+    AdMobMediationTrace;
+    if (adfError) {
+        AdMobMediationLog(@"ADFError code=%d, message=%@",
+                                  adfError.errorCode,
+                                  adfError.errorMessage);
+    }
+    if (adnetworkError) {
+        for (AdnetworkError *networkError in adnetworkError) {
+            AdMobMediationLog(@"AdnetworkError adnetworkKey=%@, code=%ld, message=%@",
+                              networkError.adnetworkKey,
+                              networkError.errorCode,
+                              networkError.errorMessage);
+        }
+    }
+    
     if (self.loadCompletionHandler) {
         NSDictionary *userInfo = @{
             NSLocalizedDescriptionKey: adfError.errorMessage
         };
-        NSError *err = [[NSError alloc] initWithDomain:@"jp.glossom.adfurikun.error" code:adfError.errorCode userInfo:userInfo];
+        NSError *err = [[NSError alloc] initWithDomain:@"jp.greex.adfurikun.error" code:adfError.errorCode userInfo:userInfo];
         self.adEventDelegate = self.loadCompletionHandler(nil, err);
     }
 }
 
 - (void)AdsPlayFailed:(NSString *)appID adfError:(ADFError *)adfError adnetworkError:(AdnetworkError *)adnetworkError {
+    AdMobMediationTrace;
+    if (adfError) {
+        AdMobMediationLog(@"ADFError code=%d, message=%@",
+                          adfError.errorCode,
+                          adfError.errorMessage);
+    }
+    if (adnetworkError) {
+        AdMobMediationLog(@"AdnetworkError adnetworkKey=%@, code=%ld, message=%@",
+                          adnetworkError.adnetworkKey,
+                          adnetworkError.errorCode,
+                          adnetworkError.errorMessage);
+    }
+    
     if (self.adEventDelegate && [self.adEventDelegate respondsToSelector:@selector(didFailToPresentWithError:)]) {
         NSString *errorMessage = @"";
         NSInteger errorCode = 0;
@@ -146,7 +181,7 @@
             }
             errorCode = adfError.errorCode;
         }
-        NSError *error = [NSError errorWithDomain:@"jp.glossom.adfurikun.error"
+        NSError *error = [NSError errorWithDomain:@"jp.greex.adfurikun.error"
                                              code:errorCode
                                          userInfo:@{NSLocalizedDescriptionKey: errorMessage,
                                                     NSLocalizedRecoverySuggestionErrorKey: errorMessage}];
@@ -155,22 +190,37 @@
 }
 
 - (void)AdsDidShow:(NSString *)appID adnetworkKey:(NSString *)adnetworkKey {
-    if (self.adEventDelegate && [self.adEventDelegate respondsToSelector:@selector(willPresentFullScreenView)]) {
+    AdMobMediationTrace;
+    if (!self.adEventDelegate) {
+        AdMobMediationLog(@"adEventDelegate is nil");
+        return;
+    }
+    if ([self.adEventDelegate respondsToSelector:@selector(willPresentFullScreenView)]) {
+        AdMobMediationLog(@"adEventDelegate willPresentFullScreenView called");
         [self.adEventDelegate willPresentFullScreenView];
     }
-    if (self.adEventDelegate && [self.adEventDelegate respondsToSelector:@selector(reportImpression)]) {
+    if ([self.adEventDelegate respondsToSelector:@selector(reportImpression)]) {
+        AdMobMediationLog(@"adEventDelegate reportImpression called");
         [self.adEventDelegate reportImpression];
     }
 }
 
 - (void)AdsDidCompleteShow:(NSString *)appID {
+    AdMobMediationTrace;
 }
 
 - (void)AdsDidHide:(NSString *)appID isRewarded:(_Bool)rewarded {
-    if (self.adEventDelegate && [self.adEventDelegate respondsToSelector:@selector(willDismissFullScreenView)]) {
+    AdMobMediationTrace;
+    if (!self.adEventDelegate) {
+        AdMobMediationLog(@"adEventDelegate is nil");
+        return;
+    }
+    if ([self.adEventDelegate respondsToSelector:@selector(willDismissFullScreenView)]) {
+        AdMobMediationLog(@"adEventDelegate willDismissFullScreenView called");
         [self.adEventDelegate willDismissFullScreenView];
     }
-    if (self.adEventDelegate && [self.adEventDelegate respondsToSelector:@selector(didDismissFullScreenView)]) {
+    if ([self.adEventDelegate respondsToSelector:@selector(didDismissFullScreenView)]) {
+        AdMobMediationLog(@"adEventDelegate didDismissFullScreenView called");
         [self.adEventDelegate didDismissFullScreenView];
     }
 }

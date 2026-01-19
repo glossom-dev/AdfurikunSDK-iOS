@@ -57,12 +57,28 @@
     [IronSource setISDemandOnlyRewardedVideoDelegate:self];
     [IronSource setISDemandOnlyInterstitialDelegate:self];
     
-    [IronSource initISDemandOnly:((AdnetworkParam6110 *)self.param).appKey adUnits:@[IS_REWARDED_VIDEO, IS_INTERSTITIAL, IS_BANNER]];
-    
     NSString *mediationString = [NSString stringWithFormat:@"Adfurikun1SDK%@", [AdfurikunSdk version]];
     AdapterLogP(@"mediation string : %@", mediationString);
     [IronSource setMediationType:mediationString];
-    [self initSuccess];
+    
+    ISAInitRequestBuilder *requestBuilder = [[ISAInitRequestBuilder alloc] initWithAppKey:((AdnetworkParam6110 *)self.param).appKey];
+    NSArray<ISAAdFormat *> *formats = @[
+        [[ISAAdFormat alloc] initWithAdFormatType:ISAAdFormatTypeRewarded],
+        [[ISAAdFormat alloc] initWithAdFormatType:ISAAdFormatTypeInterstitial],
+        [[ISAAdFormat alloc] initWithAdFormatType:ISAAdFormatTypeBanner]
+    ];
+    [requestBuilder withLegacyAdFormats:formats];
+    ISAInitRequest *initRequest = [requestBuilder build];
+    [IronSourceAds initWithRequest:initRequest completion:^(BOOL success, NSError * _Nullable error) {
+        if (error) {
+            AdapterLogP(@"error : %@", error);
+        }
+        if (success) {
+            [self initSuccess];
+        } else {
+            [self initFail];
+        }
+    }];
 }
 
 - (instancetype)init {

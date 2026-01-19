@@ -22,7 +22,7 @@
 
 // adapterファイルのRevision番号を返す。実装が変わる度Incrementする
 + (NSString *)getAdapterRevisionVersion {
-    return @"13";
+    return @"14";
 }
 
 // Adnetwork実装時に使うClass名。SDKが導入されているかで使う
@@ -37,10 +37,6 @@
 
 + (NSString *)getSDKVersion {
     return [AdnetworkConfigure6000 getSDKVersion];
-}
-
-+ (bool)isSupportForChild {
-    return [AdnetworkConfigure6000 isSupportForChild];
 }
 
 // Instance Variableを初期化する。また、必要な場合Configureを生成する
@@ -77,7 +73,7 @@
                     strongSelf.incentivizedInterstitial =
                     [[ALIncentivizedInterstitialAd alloc] initWithZoneIdentifier:((AdnetworkParam6000 *)strongSelf.adParam).zoneIdentifier];
                 } else {
-                    strongSelf.incentivizedInterstitial = [[ALIncentivizedInterstitialAd alloc] initWithSdk:[ALSdk shared]];
+                    strongSelf.incentivizedInterstitial = [[ALIncentivizedInterstitialAd alloc] init];
                 }
             } @catch (NSException *exception) {
                 [self adnetworkExceptionHandling:exception];
@@ -118,7 +114,7 @@
         //表示を消したい場合は、こちらをコメントアウトして下さい。
         AdapterLogP(@"[SEVERE] [Applovin]アプリのバンドルIDが、申請されたもの（%@）と異なります。", ((AdnetworkParam6000 *)self.adParam).submittedPackageName);
     }
-    return self.isAdLoaded && self.incentivizedInterstitial && self.incentivizedInterstitial.isReadyForDisplay;
+    return self.isAdLoaded;
 }
 
 // 広告再生

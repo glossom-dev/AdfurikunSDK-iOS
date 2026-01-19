@@ -23,7 +23,7 @@ NS_ASSUME_NONNULL_BEGIN
 /*
  Debug Log出力有無の設定値
  */
-@property (nonatomic) bool enagleDebugLog;
+@property (nonatomic) bool enableDebugLog;
 
 /*
  GDPR関連設定値。
@@ -42,10 +42,10 @@ NS_ASSUME_NONNULL_BEGIN
 @property (nonatomic, nullable) NSNumber *childDirected;
 
 /*
- 子供向けのアプリ設定
- true : アプリケーションが子供向けの場合、特定のAdnetworkが動作しないようにする
+ 未成年ユーザ設定
+ true : ユーザが未成年の場合、特定のAdnetworkが動作しないようにする
  */
-@property (nonatomic) bool applicationIsForChild;
+@property (nonatomic) bool setUserIsMinor;
 
 /*
  再生時に送信する分析用のデータを設定する
@@ -66,3 +66,35 @@ NS_ASSUME_NONNULL_BEGIN
 @end
 
 NS_ASSUME_NONNULL_END
+
+// 内部ログ出力用
+BOOL ADFIsMediationAdapterLogEnabled(void);
+
+#define AdMobMediationLog(fmt, ...) \
+    do { \
+        if (ADFIsMediationAdapterLogEnabled()) { \
+            @try { \
+                NSLog((@"[ADF] AdMobMediationAdapter Log [%s L:%d] " fmt), \
+                      __func__, __LINE__, ##__VA_ARGS__); \
+            } \
+            @catch (NSException *exception) { \
+                NSLog(@"[ADF] AdMobMediationAdapter LoggerException [%s L:%d] %@ %@", \
+                      __func__, __LINE__, \
+                      exception.name, exception.reason); \
+            } \
+        } \
+    } while (0)
+
+#define AdMobMediationTrace \
+    do { \
+        if (ADFIsMediationAdapterLogEnabled()) { \
+            @try { \
+                NSLog(@"[ADF] AdMobMediationAdapter Trace [%s L:%d]", \
+                      __func__, __LINE__); \
+            } \
+            @catch (NSException *exception) { \
+                NSLog(@"[ADF] AdMobMediationAdapter LoggerException [%s L:%d] %@ %@", \
+                      __func__, __LINE__, exception.name, exception.reason); \
+            } \
+        } \
+    } while (0)

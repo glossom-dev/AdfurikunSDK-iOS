@@ -17,7 +17,7 @@
 
 // adapterファイルのRevision番号を返す。実装が変わる度Incrementする
 + (NSString *)getAdapterRevisionVersion {
-    return @"12";
+    return @"13";
 }
 
 // Adnetwork実装時に使うClass名。SDKが導入されているかで使う
@@ -32,10 +32,6 @@
 
 + (NSString *)getSDKVersion {
     return [AdnetworkConfigure6000 getSDKVersion];
-}
-
-+ (bool)isSupportForChild {
-    return [AdnetworkConfigure6000 isSupportForChild];
 }
 
 // Instance Variableを初期化する。また、必要な場合Configureを生成する
@@ -67,9 +63,8 @@
         __strong typeof(self) strongSelf = weakSelf;
         if (!strongSelf) return;
         if (!strongSelf.adView) {
-            strongSelf.adView = [[ALAdView alloc] initWithSdk:[ALSdk shared]
-                                                         size:ALAdSize.banner
-                                               zoneIdentifier:((AdnetworkParam6000 *)strongSelf.adParam).zoneIdentifier];
+            strongSelf.adView = [[ALAdView alloc] initWithSize:ALAdSize.banner
+                                                zoneIdentifier:((AdnetworkParam6000 *)strongSelf.adParam).zoneIdentifier];
             strongSelf.adView.adLoadDelegate = strongSelf;
             strongSelf.adView.adDisplayDelegate = strongSelf;
         }

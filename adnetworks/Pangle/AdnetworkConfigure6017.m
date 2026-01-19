@@ -67,9 +67,6 @@
     }
     configuration.debugLog = [AdfurikunSdk getTestMode];
     configuration.appID = ((AdnetworkParam6017 *)self.param).appID;
-    if (self.logoImage) {
-        configuration.appLogoImage = self.logoImage;
-    }
     [PAGSdk startWithConfig:configuration completionHandler:^(BOOL success, NSError * _Nonnull error) {
         if (success) {
             [self initSuccess];
