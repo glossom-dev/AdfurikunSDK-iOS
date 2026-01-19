@@ -16,6 +16,7 @@ typedef NS_ENUM(NSInteger, ADFErrorType) {
     ADFErrorTypeApiRequestFailure = 104,
     ADFErrorTypeAlreadyLoading = 105,
     ADFErrorTypeExceedFrequency = 106,
+    ADFErrorTypeShortInterval = 107,
     ADFErrorTypeAdNotReady = 1000,
     ADFErrorTypeAlreadyPlaying = 1001,
     ADFErrorTypeInternalError = 1002
@@ -46,6 +47,9 @@ static inline NSString *ADFErrorMessage(ADFErrorType type) {
         case ADFErrorTypeExceedFrequency:
             return @"AppOpenAd frequency has been exceeded.\n\n"
                    "- Please try again after some time.";
+        case ADFErrorTypeShortInterval:
+            return @"AppOpenAd interval has not been reached.\n\n"
+                   "- Please try again after some time.";
         case ADFErrorTypeAdNotReady:
             return @"Ad is not ready.\n\n"
                    "- Please play it after it is ready.";
@@ -67,7 +71,7 @@ static inline NSString *ADFErrorMessage(ADFErrorType type) {
 @property (nonatomic, copy) NSString *errorMessage;
 @property (nonatomic, readonly, copy) NSString *appId;
 
-- (instancetype)initWithErrorType:(ADFErrorType)type appID:(NSString *)appID;
+- (instancetype)initWithErrorType:(ADFErrorType)type appID:(NSString *)appId;
 
 @end
 

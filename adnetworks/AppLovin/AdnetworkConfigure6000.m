@@ -19,10 +19,6 @@
     return @"AppLovin";
 }
 
-+ (bool)isSupportForChild {
-    return false;
-}
-
 + (instancetype)sharedInstance {
     static AdnetworkConfigure6000 *sharedInstance = nil;
     static dispatch_once_t onceToken;

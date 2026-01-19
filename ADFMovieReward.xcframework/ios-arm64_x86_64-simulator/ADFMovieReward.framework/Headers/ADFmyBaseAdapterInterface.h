@@ -87,6 +87,8 @@ typedef enum : NSUInteger {
 
 @property (nonatomic, nullable) NSString *creativeId;
 
+@property (nonatomic) bool isForceReloadAdnetwork; // Cacheがあっても必ずロードをする
+
 //ADNW SDKのバージョン情報をSDKから取得できるようにする
 + (NSString *)getSDKVersion;
 + (NSString *)getAdapterVersion;
@@ -97,9 +99,6 @@ typedef enum : NSUInteger {
 
 // Adnetwork名を返す
 + (NSString *)adnetworkName;
-
-/** Adnetworkが子供向けのアプリケーションをサポートするかをチェック */
-+ (bool)isSupportForChild;
 
 /**< SDKが読み込まれているかどうか？ */
 + (bool)isClassReference;

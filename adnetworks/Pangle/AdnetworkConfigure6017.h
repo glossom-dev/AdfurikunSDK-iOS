@@ -12,8 +12,6 @@ NS_ASSUME_NONNULL_BEGIN
 
 @interface AdnetworkConfigure6017 : ADFmyAdnetworkConfigure
 
-@property (nonatomic) UIImage *logoImage;
-
 @end
 
 NS_ASSUME_NONNULL_END

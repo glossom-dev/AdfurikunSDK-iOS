@@ -18,7 +18,7 @@
     
     value = extras[@"ADF_IS_DEBUG_MODE"];
     if (value) {
-        extra.enagleDebugLog = value.boolValue;
+        extra.enableDebugLog = value.boolValue;
     }
 
     value = extras[@"ADF_SOUND_STATE"];
@@ -36,9 +36,9 @@
         extra.childDirected = (value.boolValue) ? @1 : @0;
     }
 
-    value = extras[@"ADF_IS_APPLICATION_FOR_CHILD"];
+    value = extras[@"ADF_USER_IS_MINOR"];
     if (value) {
-        extra.applicationIsForChild = value.boolValue;
+        extra.setUserIsMinor = value.boolValue;
     }
 
     value = extras[@"ADF_CUSTOM_PARAMS"];

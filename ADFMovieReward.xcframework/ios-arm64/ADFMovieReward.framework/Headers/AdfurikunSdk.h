@@ -32,8 +32,8 @@ typedef NS_ENUM(NSInteger, AdfurikunSdkRegion) {
 
 @interface AdfurikunSdk : NSObject
 
-// アプリケーションが子供向けの場合、特定のAdnetworkが動作しないようにする
-+ (void)applicationIsForChild;
+// ユーザが未成年の場合、特定のAdnetworkが動作しないようにする
++ (void)setUserIsMinor;
 
 // アプリケーションの起動情報を集計する
 + (void)logApplicationLaunched:(NSArray <NSString *>*)appIdList userId:(nullable NSString *)userId;

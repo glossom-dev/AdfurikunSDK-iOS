@@ -23,8 +23,9 @@
 - (void)adfurikunSDKInitProcessWithTestMode:(bool)testMode {
     [AdfurikunSdk setTestMode:testMode];
     
-    if (self.enagleDebugLog) {
+    if (self.enableDebugLog) {
         [ADFLogger setLogLevel:ADFLogLevelVerbose];
+        enableMediationAdapterLog = true;
     }
     
     if (self.hasUserConsent) {
@@ -35,8 +36,8 @@
         [AdfurikunSdk isChildDirected:[self.childDirected boolValue]];
     }
 
-    if (self.applicationIsForChild) {
-        [AdfurikunSdk applicationIsForChild];
+    if (self.setUserIsMinor) {
+        [AdfurikunSdk setUserIsMinor];
     }
     
     if (self.soundState) {
@@ -44,4 +45,13 @@
         [AdfurikunSdk setSoundState:state];
     }
 }
+
+// 内部ログ出力用
+// MediationAdapterのログを出力する。extra.enableDebugLogをtrueに設定した場合もtrueが設定される。
+static BOOL enableMediationAdapterLog = false;
+
+BOOL ADFIsMediationAdapterLogEnabled(void) {
+    return enableMediationAdapterLog;
+}
+
 @end

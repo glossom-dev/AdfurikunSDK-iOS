@@ -14,7 +14,7 @@
 
 // adapterファイルのRevision番号を返す。実装が変わる度Incrementする
 + (NSString *)getAdapterRevisionVersion {
-    return @"6";
+    return @"7";
 }
 
 // Adnetwork実装時に使うClass名。SDKが導入されているかで使う
@@ -84,7 +84,7 @@
 
 // 在庫取得有無を返す
 - (BOOL)isPrepared {
-    return self.isAdLoaded;
+    return self.isAdLoaded & [IronSource hasISDemandOnlyInterstitial:((AdnetworkParam6110 *)self.adParam).instanceId];
 }
 
 // 広告再生

@@ -27,7 +27,7 @@
 
 // adapterファイルのRevision番号を返す。実装が変わる度Incrementする
 + (NSString *)getAdapterRevisionVersion {
-    return @"10";
+    return @"11";
 }
 
 // Adnetwork実装時に使うClass名。SDKが導入されているかで使う
@@ -59,7 +59,6 @@
     
     self.adParam = [[AdnetworkParam6017 alloc] initWithParam:data];
     self.configure.param = self.adParam; // Parameterを設定する
-    ((AdnetworkConfigure6017 *)self.configure).logoImage = self.logoImage;
 }
 
 // Adnetwork SDKを初期化する

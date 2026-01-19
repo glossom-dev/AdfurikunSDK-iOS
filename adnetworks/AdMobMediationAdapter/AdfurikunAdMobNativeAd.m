@@ -19,6 +19,8 @@
 
 @implementation AdfurikunAdMobNativeAd
 
+#pragma mark GADMediationAdapter
+
 + (GADVersionNumber)adSDKVersion {
     NSString *versionString = AdfurikunSdk.version;
     NSMutableArray *versionComponents = [[versionString componentsSeparatedByString:@"."] mutableCopy];
@@ -91,7 +93,7 @@
             customParameter = [NSDictionary dictionaryWithDictionary:extra.customParameter];
         }
     }
-
+    AdMobMediationTrace;
     if (appId) {
         self.nativeAd = [ADFmyNativeAd getInstance:appId];
         if (loadTimeout > 0.0) {
@@ -101,31 +103,14 @@
     }
 }
 
+#pragma mark GADMediationNativeAd
+
 - (BOOL)handlesUserClicks {
     return true;
 }
 
 - (BOOL)handlesUserImpressions {
     return true;
-}
-
-- (void)onNativeAdLoadFinish:(nonnull ADFNativeAdInfo *)info appID:(nonnull NSString *)appID {
-    if (self.loadCompletionHandler) {
-        self.adInfo = info;
-        self.adInfo.mediaView.mediaViewDelegate = self;
-        self.adEventDelegate = self.loadCompletionHandler(self, nil);
-        [self.adInfo playMediaView];
-    }
-}
-
-- (void)onNativeAdLoadError:(NSString *)appID adfError:(ADFError *)adfError adnetworkError:(NSArray<AdnetworkError *> *)adnetworkError {
-    if (self.loadCompletionHandler) {
-        NSDictionary *userInfo = @{
-            NSLocalizedDescriptionKey: adfError.errorMessage
-        };
-        NSError *err = [[NSError alloc] initWithDomain:@"jp.glossom.adfurikun.error" code:adfError.errorCode userInfo:userInfo];
-        self.adEventDelegate = self.loadCompletionHandler(nil, err);
-    }
 }
 
 - (BOOL)hasVideoContent {
@@ -176,26 +161,81 @@
     return nil;
 }
 
-# pragma ADFMediaViewDelegate
+#pragma mark ADFmyNativeAdDelegate
+
+- (void)onNativeAdLoadFinish:(nonnull ADFNativeAdInfo *)info appID:(nonnull NSString *)appID {
+    AdMobMediationTrace;
+    if (self.loadCompletionHandler) {
+        self.adInfo = info;
+        self.adInfo.mediaView.mediaViewDelegate = self;
+        self.adEventDelegate = self.loadCompletionHandler(self, nil);
+        [self.adInfo playMediaView];
+    }
+}
+
+- (void)onNativeAdLoadError:(NSString *)appID adfError:(ADFError *)adfError adnetworkError:(NSArray<AdnetworkError *> *)adnetworkError {
+    AdMobMediationTrace;
+    if (adfError) {
+        AdMobMediationLog(@"ADFError code=%d, message=%@",
+                          adfError.errorCode,
+                          adfError.errorMessage);
+    }
+    if (adnetworkError) {
+        for (AdnetworkError *networkError in adnetworkError) {
+            AdMobMediationLog(@"AdnetworkError adnetworkKey=%@, code=%ld, message=%@",
+                              networkError.adnetworkKey,
+                              networkError.errorCode,
+                              networkError.errorMessage);
+        }
+    }
+    
+    if (self.loadCompletionHandler) {
+        NSDictionary *userInfo = @{
+            NSLocalizedDescriptionKey: adfError.errorMessage
+        };
+        NSError *err = [[NSError alloc] initWithDomain:@"jp.greex.adfurikun.error" code:adfError.errorCode userInfo:userInfo];
+        self.adEventDelegate = self.loadCompletionHandler(nil, err);
+    }
+}
+
+#pragma mark ADFMediaViewDelegate
 
 - (void)onADFMediaViewPlayStart {
-    if (self.adEventDelegate && [self.adEventDelegate respondsToSelector:@selector(reportImpression)]) {
+    AdMobMediationTrace;
+    if (!self.adEventDelegate) {
+        AdMobMediationLog(@"adEventDelegate is nil");
+        return;
+    }
+    if ([self.adEventDelegate respondsToSelector:@selector(reportImpression)]) {
+        AdMobMediationLog(@"adEventDelegate reportImpression called");
         [self.adEventDelegate reportImpression];
     }
 }
 
 - (void)onADFMediaViewPlayFail {
-    if (self.adEventDelegate && [self.adEventDelegate respondsToSelector:@selector(didFailToPresentWithError:)]) {
-        NSError *error = [NSError errorWithDomain:@"jp.glossom.adfurikun.error"
+    AdMobMediationTrace;
+    if (!self.adEventDelegate) {
+        AdMobMediationLog(@"adEventDelegate is nil");
+        return;
+    }
+    if ([self.adEventDelegate respondsToSelector:@selector(didFailToPresentWithError:)]) {
+        NSError *error = [NSError errorWithDomain:@"jp.greex.adfurikun.error"
                                              code:0
                                          userInfo:@{NSLocalizedDescriptionKey: @"",
                                                     NSLocalizedRecoverySuggestionErrorKey: @""}];
+        AdMobMediationLog(@"adEventDelegate didFailToPresentWithError called");
         [self.adEventDelegate didFailToPresentWithError:error];
     }
 }
 
 - (void)onADFMediaViewClick {
-    if (self.adEventDelegate && [self.adEventDelegate respondsToSelector:@selector(reportClick)]) {
+    AdMobMediationTrace;
+    if (!self.adEventDelegate) {
+        AdMobMediationLog(@"adEventDelegate is nil");
+        return;
+    }
+    if ([self.adEventDelegate respondsToSelector:@selector(reportClick)]) {
+        AdMobMediationLog(@"adEventDelegate reportClick called");
         [self.adEventDelegate reportClick];
     }
 }
@@ -208,4 +248,5 @@
 
 - (void)onADFMediaViewPlayFinish {
 }
+
 @end
