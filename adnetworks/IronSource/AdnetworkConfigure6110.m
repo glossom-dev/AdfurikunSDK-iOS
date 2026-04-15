@@ -50,6 +50,12 @@
     [IronSourceAds setMetaDataWithKey:@"is_child_directed" value:childDirected ? @"YES": @"NO"];
 }
 
+// 未成年関連実装
+- (void)setUserIsMinor {
+    AdapterTrace;
+    [self isChildDirected:true];
+}
+
 // Adnetwork SDK初期化ロジック実装
 // 初期化成功：initSuccess()呼び出し
 // 初期化失敗：initFail()呼び出し

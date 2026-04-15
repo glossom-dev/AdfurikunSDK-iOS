@@ -13,21 +13,24 @@
 - (instancetype)initWithParam:(NSDictionary *)param {
     self = [super initWithParam:param];
     if (self) {
-        NSString *appId = [param objectForKey:@"appid"];
-        if ([self isString:appId]) {
-            self.appID = [NSString stringWithFormat:@"%@", appId];
-        }
-
-        NSString *slotId = [param objectForKey:@"ad_slot_id"];
-        if ([self isString:appId]) {
-            self.slotID = [NSString stringWithFormat:@"%@", slotId];
-        }
+        [self commonParamParse:param];
     }
     return self;
 }
 
 - (bool)isValid {
     return (self.appID && self.slotID);
+}
+
+- (void)commonParamParse:(NSDictionary *)param {
+    NSString *appId = [param objectForKey:@"appid"];
+    if ([self isString:appId]) {
+        self.appID = [NSString stringWithFormat:@"%@", appId];
+    }
+    NSString *slotId = [param objectForKey:@"ad_slot_id"];
+    if ([self isString:slotId]) {
+        self.slotID = [NSString stringWithFormat:@"%@", slotId];
+    }
 }
 
 @end

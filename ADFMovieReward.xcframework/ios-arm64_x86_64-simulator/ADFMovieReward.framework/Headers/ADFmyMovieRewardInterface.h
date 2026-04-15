@@ -39,7 +39,6 @@ typedef enum : NSInteger {
 @property (nonatomic) NSString *objectId;
 @property (nonatomic, weak) NSObject<ADFMovieRewardDelegate> *delegate;
 @property (nonatomic) bool isRewarded;
-
 /**< 広告の表示 */
 -(void)showAd;
 -(void)showAdWithPresentingViewController:(UIViewController *)viewController;
@@ -51,6 +50,9 @@ typedef enum : NSInteger {
 -(void)invalidViewControllerTimer;
 
 -(NSString *)debugDescriptionForCallback;
+
+- (void)checkExpiredAd;
+- (void)stopExpiredAdCheck;
 
 @end
 
@@ -73,6 +75,8 @@ typedef enum : NSInteger {
 - (void)AdsDidClick:(ADFmyMovieRewardInterface*)movieReward;
 /** VCをチェックして広告が閉じられたと判断 */
 - (void)AdsMaybeClosed:(ADFmyMovieRewardInterface*)movieReward;
+/** 案件が期限切れになった */
+- (void)AdsExpired:(ADFmyMovieRewardInterface*)movieReward;
 
 @end
 

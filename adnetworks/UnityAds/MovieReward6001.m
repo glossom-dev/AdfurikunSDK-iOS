@@ -7,13 +7,13 @@
 #import <UIKit/UIKit.h>
 #import "MovieReward6001.h"
 #import "AdnetworkConfigure6001.h"
-#import "AdnetworkParameter6001.h"
+#import "AdnetworkParam6001.h"
 
 @implementation MovieReward6001
 
 // adapterファイルのRevision番号を返す。実装が変わる度Incrementする
 + (NSString *)getAdapterRevisionVersion {
-    return @"16";
+    return @"17";
 }
 
 // Adnetwork実装時に使うClass名。SDKが導入されているかで使う
@@ -43,7 +43,7 @@
 - (void)setData:(NSDictionary *)data {
     [super setData:data];
     
-    self.adParam = [[AdnetworkParameter6001 alloc] initWithParam:data];
+    self.adParam = [[AdnetworkParam6001 alloc] initWithParam:data];
     self.configure.param = self.adParam; // Parameterを設定する
 }
 
@@ -72,7 +72,19 @@
     
     @try {
         [self requireToAsyncRequestAd];
-        [UnityAds load:((AdnetworkParameter6001 *)self.adParam).placementId loadDelegate:self];
+        
+        AdnetworkParam6001 *param = (AdnetworkParam6001 *)self.adParam;
+
+        if (param.adm && param.objectId) { // for Bidding
+            UADSLoadOptions *options = [UADSLoadOptions new];
+            [options setAdMarkup:param.adm];
+            [options setObjectId:param.objectId];
+            AdapterLogP(@"UnityAds load with adm : placementId=%@, objectId=%@", param.placementId, param.objectId);
+
+            [UnityAds load:param.placementId options:options loadDelegate:self];
+        } else { // for WF
+            [UnityAds load:param.placementId loadDelegate:self];
+        }
     } @catch (NSException *exception) {
         [self adnetworkExceptionHandling:exception];
     }
@@ -97,11 +109,26 @@
 - (void)showAdWithPresentingViewController:(UIViewController *)viewController {
     [super showAdWithPresentingViewController:viewController];
     
+    // RTB専用：案件が期限切れの場合は再生させない
+    if ([self isBiddingAdExpired]) {
+        [self setPlayFailCallback:PlayFailCallbackReasonIsPreparedFalse exception:nil];
+        return;
+    }
+    
     if (viewController != nil && self.isPrepared) {
         @try {
             [self requireToAsyncPlay];
             
-            [UnityAds show:viewController placementId:((AdnetworkParameter6001 *)self.adParam).placementId showDelegate:self];
+            AdnetworkParam6001 *param = (AdnetworkParam6001 *)self.adParam;
+            
+            if (param.adm && param.objectId) { // for Bidding
+                UADSShowOptions *options = [UADSShowOptions new];
+                [options setObjectId:param.objectId];
+                [UnityAds show:viewController placementId:param.placementId options:options showDelegate:self];
+            } else { // for WF
+                [UnityAds show:viewController placementId:param.placementId showDelegate:self];
+            }
+            
         } @catch (NSException *exception) {
             [self adnetworkExceptionHandling:exception];
             [self setPlayFailCallback:PlayFailCallbackReasonException exception:exception];
@@ -123,10 +150,10 @@
 #pragma mark: UnityAdsLoadDelegate
 - (void)unityAdsAdLoaded: (NSString *)placementId {
     AdapterTraceP(@"object : %@, placement Id : %@", self, placementId);
-    if ([((AdnetworkParameter6001 *)self.adParam).placementId isEqualToString:placementId]) {
+    if ([((AdnetworkParam6001 *)self.adParam).placementId isEqualToString:placementId]) {
         [self sendFetchComplete];
     } else {
-        AdapterLogP(@"unityAdsAdLoaded(%@), but placemendId(%@) is not equal to %@", self, placementId, ((AdnetworkParameter6001 *)self.adParam).placementId);
+        AdapterLogP(@"unityAdsAdLoaded(%@), but placemendId(%@) is not equal to %@", self, placementId, ((AdnetworkParam6001 *)self.adParam).placementId);
     }
 }
 

@@ -54,6 +54,10 @@
 // 初期化成功：initSuccess()呼び出し
 // 初期化失敗：initFail()呼び出し
 - (void)initAdnetworkSDK {
+    // すでに初期化済みの場合にはSuccess処理をする
+    if (PAGSdk.initializationState == PAGSDKInitializationStateReady) {
+        [self initSuccess];
+    }
     PAGConfig *configuration = [PAGConfig shareConfig];
     if (self.gdprStatus) {
         configuration.GDPRConsent = self.gdprStatus.boolValue ? PAGGDPRConsentTypeConsent : PAGGDPRConsentTypeNoConsent;
