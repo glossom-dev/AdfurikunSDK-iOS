@@ -22,6 +22,7 @@
 #import <ADFMovieReward/ADFmyMovieNativeInterface.h>
 #import <ADFMovieReward/ADFmyMovieRewardInterface.h>
 #import <ADFMovieReward/ADFmyAppOpenAdAdapterInterface.h>
+#import <ADFMovieReward/ADFmyBaseAdnetworkInitializer.h>
 
 #import <ADFMovieReward/ADFmyNativeAd.h>
 #import <ADFMovieReward/ADFNativeAdInfo.h>

@@ -87,6 +87,10 @@
         [self requireToAsyncRequestAd];
         dispatch_async(dispatch_get_main_queue(), ^{
             PAGRewardedRequest *request = [PAGRewardedRequest request];
+            NSString *adm = ((AdnetworkParam6017 *)self.adParam).adm;
+            if (adm && adm.length > 0) {
+                request.adString = adm;
+            }
             __weak typeof(self) weakSelf = self;
             [PAGRewardedAd loadAdWithSlotID:((AdnetworkParam6017 *)self.adParam).slotID
                                     request:request
@@ -138,6 +142,12 @@
 
 - (void)showAdWithPresentingViewController:(UIViewController *)viewController {
     [super showAdWithPresentingViewController:viewController];
+    
+    // RTB専用：案件が期限切れの場合は再生させない
+    if ([self isBiddingAdExpired]) {
+        [self setPlayFailCallback:PlayFailCallbackReasonIsPreparedFalse exception:nil];
+        return;
+    }
     
     if (!self.rewardedVideoAd) {
         [self setPlayFailCallback:PlayFailCallbackReasonAdInstanceNil exception:nil];

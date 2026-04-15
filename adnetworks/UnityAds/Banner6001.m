@@ -8,7 +8,7 @@
 #import <UnityAds/UnityAds.h>
 #import "Banner6001.h"
 #import "AdnetworkConfigure6001.h"
-#import "AdnetworkParameter6001.h"
+#import "AdnetworkParam6001.h"
 
 @interface Banner6001 () <UADSBannerViewDelegate>
 @property (nonatomic, strong) UADSBannerView *bannerView;
@@ -18,7 +18,7 @@
 
 // adapterファイルのRevision番号を返す。実装が変わる度Incrementする
 + (NSString *)getAdapterRevisionVersion {
-    return @"12";
+    return @"13";
 }
 
 // Adnetwork実装時に使うClass名。SDKが導入されているかで使う
@@ -48,7 +48,7 @@
 - (void)setData:(NSDictionary *)data {
     [super setData:data];
     
-    self.adParam = [[AdnetworkParameter6001 alloc] initWithParam:data];
+    self.adParam = [[AdnetworkParam6001 alloc] initWithParam:data];
     self.configure.param = self.adParam; // Parameterを設定する
 }
 
@@ -80,7 +80,7 @@
         if (self.bannerView) {
             self.bannerView = nil;
         }
-        self.bannerView = [[UADSBannerView alloc] initWithPlacementId:((AdnetworkParameter6001 *)self.adParam).placementId size:CGSizeMake(320.0, 50.0)];
+        self.bannerView = [[UADSBannerView alloc] initWithPlacementId:((AdnetworkParam6001 *)self.adParam).placementId size:CGSizeMake(320.0, 50.0)];
         self.bannerView.delegate = self;
         [self.bannerView load];
     } @catch (NSException *exception) {

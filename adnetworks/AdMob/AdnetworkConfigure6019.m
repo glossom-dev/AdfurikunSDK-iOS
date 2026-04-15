@@ -41,6 +41,11 @@
     GADMobileAds.sharedInstance.requestConfiguration.tagForChildDirectedTreatment = [NSNumber numberWithBool:childDirected];
 }
 
+- (void)setUserIsMinor {
+    AdapterTrace;
+    GADMobileAds.sharedInstance.requestConfiguration.tagForUnderAgeOfConsent = @(YES);
+}
+
 - (void)initAdnetworkSDK {
     if ([AdfurikunSdk getTestMode]) {
         AdapterLog(@"Test Mode ON!!!");

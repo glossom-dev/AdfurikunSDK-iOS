@@ -29,9 +29,12 @@ typedef enum : NSUInteger {
     initAdnetworkComplete,    // initAdnetworkIfNeeded実行完了
 } InitAdnetworkStatus;
 
+typedef void (^WinApiCompleteHandler)(NSError * _Nullable error);
+
 @class UIViewController;
 @class UIWindow;
 @class ADFmyAdnetworkConfigure;
+@class ADFBiddingAdInfo;
 
 @protocol ADFMovieRewardDelegate;
 
@@ -51,6 +54,20 @@ typedef enum : NSUInteger {
 -(bool)isNumber:(NSObject *)object;
 -(bool)isArray:(NSObject *)object;
 -(bool)isDictionary:(NSObject *)object;
+
+@end
+
+@interface ADFBiddingAdnetworkParam : ADFAdnetworkParam
+
+@property (nonatomic, nullable) ADFBiddingAdInfo *biddingAdInfo;
+@property (nonatomic, nullable) NSString *contentId;
+@property (nonatomic) int playedEventInterval;
+
+// RTB、WF共通のパラメータを受け取る
+- (void)commonParamParse:(NSDictionary *)param;
+
+// Pangleで必要なハードコーディング値を返す
+- (NSString *)pangleAdxId;
 
 @end
 
@@ -88,6 +105,9 @@ typedef enum : NSUInteger {
 @property (nonatomic, nullable) NSString *creativeId;
 
 @property (nonatomic) bool isForceReloadAdnetwork; // Cacheがあっても必ずロードをする
+
+// RTB用
+@property (nonatomic, nullable) NSString * lastLoadedBiddingContentId;// 同一contentIdで2重ロード防止
 
 //ADNW SDKのバージョン情報をSDKから取得できるようにする
 + (NSString *)getSDKVersion;
@@ -131,6 +151,9 @@ typedef enum : NSUInteger {
 /** COPPA関連の設定を行う。*/
 - (void)isChildDirected:(BOOL)childDirected;
 
+/** 未成年ユーザーの設定を行う。*/
+- (void)setUserIsMinor;
+
 -(nullable UIWindow *)getKeyWindow;
 -(UIViewController *)topMostViewController;
 -(BOOL)isNotNull:(id)obj;
@@ -162,6 +185,11 @@ typedef enum : NSUInteger {
 -(bool)isNumber:(NSObject *)object;
 -(bool)isArray:(NSObject *)object;
 -(bool)isDictionary:(NSObject *)object;
+
+// RTB用
+-(nullable ADFBiddingAdInfo *)getBiddingAdInfoIfNeeded;
+-(void)callWinApi:(WinApiCompleteHandler)handler;
+- (BOOL)isBiddingAdExpired;
 
 @end
 

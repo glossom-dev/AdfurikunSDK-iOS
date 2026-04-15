@@ -28,6 +28,7 @@ typedef void(^completionHandler)(bool result);
 
 - (void)setHasUserConsent:(BOOL)hasUserConsent;
 - (void)isChildDirected:(BOOL)childDirected;
+- (void)setUserIsMinor;
 - (void)soundControl;
 
 - (void)initAdnetworkSDK;

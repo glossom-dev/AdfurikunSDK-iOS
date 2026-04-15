@@ -7,7 +7,7 @@
 //
 
 #import "AdnetworkConfigure6001.h"
-#import "AdnetworkParameter6001.h"
+#import "AdnetworkParam6001.h"
 
 #import <ADFMovieReward/AdfurikunSdk.h>
 
@@ -48,6 +48,12 @@
     [gdprConsentMetaData commit];
 }
 
+// 未成年関連実装
+- (void)setUserIsMinor {
+    AdapterTrace;
+    [self isChildDirected:true];
+}
+
 // Adnetwork SDK初期化ロジック実装
 // 初期化成功：initSuccess()呼び出し
 // 初期化失敗：initFail()呼び出し
@@ -59,7 +65,7 @@
     if (testFlg) {
         AdapterLog(@"Test Mode ON!!!");
     }
-    [UnityAds initialize:((AdnetworkParameter6001 *)self.param).gameId testMode:testFlg initializationDelegate:self];
+    [UnityAds initialize:((AdnetworkParam6001 *)self.param).gameId testMode:testFlg initializationDelegate:self];
 }
 
 #pragma mark: UnityAdsInitializationDelegate
