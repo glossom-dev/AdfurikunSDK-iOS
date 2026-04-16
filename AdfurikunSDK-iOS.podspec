@@ -109,14 +109,14 @@ Pod::Spec.new do |s|
   s.subspec 'Pangle' do |pangle|
     pangle.dependency 'AdfurikunSDK-iOS/Core'
     pangle.dependency 'Ads-Global', '7.8.0.5'
-    pangle.source_files = '**/adnetworks/Pangle/*.{h,m}'
+    pangle.source_files = ['**/adnetworks/Pangle/*.{h,m}', '**/adnetworks/Pangle/Bidding/*.{h,m}']
     pangle.resource = '**/adnetworks/Pangle/*.txt'
   end
 
   s.subspec 'UnityAds' do |unityads|
     unityads.dependency 'AdfurikunSDK-iOS/Core'
     unityads.dependency 'UnityAds', '4.16.5'
-    unityads.source_files = '**/adnetworks/UnityAds/*.{h,m}'
+    unityads.source_files = ['**/adnetworks/UnityAds/*.{h,m}', '**/adnetworks/UnityAds/Bidding/*.{h,m}']
     unityads.resource = '**/adnetworks/UnityAds/*.txt'
   end
 
