@@ -6,7 +6,7 @@
 	<dict>
 		<key>ios-arm64/ADFMovieReward.framework/ADFMovieReward</key>
 		<data>
-		EML6ycuVv4Ly2LByh9DBDFpMEnA=
+		bck9nOBCPit04XP392AmX/CvmAU=
 		</data>
 		<key>ios-arm64/ADFMovieReward.framework/Headers/ADFBiddingTokenResult.h</key>
 		<data>
@@ -114,7 +114,7 @@
 		</data>
 		<key>ios-arm64_x86_64-simulator/ADFMovieReward.framework/ADFMovieReward</key>
 		<data>
-		sxevvS4MB6/5ZGINeJFESfBg1Ok=
+		+Kq+JXktws3RDSm4FuXo978W8Cg=
 		</data>
 		<key>ios-arm64_x86_64-simulator/ADFMovieReward.framework/Headers/ADFBiddingTokenResult.h</key>
 		<data>
@@ -227,11 +227,11 @@
 		<dict>
 			<key>hash</key>
 			<data>
-			EML6ycuVv4Ly2LByh9DBDFpMEnA=
+			bck9nOBCPit04XP392AmX/CvmAU=
 			</data>
 			<key>hash2</key>
 			<data>
-			5MrqFenSAxWrEyGWwSo7gxYZCRdjBBvJgzAg19wdXMI=
+			vfVgSCDk6GmhAZvraxpbtySViXlZ14RX6Avqa7kWDWc=
 			</data>
 		</dict>
 		<key>ios-arm64/ADFMovieReward.framework/Headers/ADFBiddingTokenResult.h</key>
@@ -524,11 +524,11 @@
 		<dict>
 			<key>hash</key>
 			<data>
-			sxevvS4MB6/5ZGINeJFESfBg1Ok=
+			+Kq+JXktws3RDSm4FuXo978W8Cg=
 			</data>
 			<key>hash2</key>
 			<data>
-			AWIaCXbqMKIj2Jgz9Z2PBOJe9E8f5wESD6Bl2QrazvE=
+			URGt2E+qn6zqTSc4lbN+9IkplxlH5S6tOYJJyQ3DIkI=
 			</data>
 		</dict>
 		<key>ios-arm64_x86_64-simulator/ADFMovieReward.framework/Headers/ADFBiddingTokenResult.h</key>
