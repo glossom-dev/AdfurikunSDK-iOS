@@ -103,6 +103,13 @@
     }
 }
 
+- (void)dealloc {
+    self.adInfo.mediaView.mediaViewDelegate = nil;
+    [self.adInfo.mediaView removeFromSuperview];
+    self.adInfo.mediaView = nil;
+    self.adInfo = nil;
+}
+
 #pragma mark GADMediationNativeAd
 
 - (BOOL)handlesUserClicks {

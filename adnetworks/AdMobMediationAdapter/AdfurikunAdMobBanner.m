@@ -113,6 +113,13 @@
     return true;
 }
 
+- (void)dealloc {
+    self.adInfo.mediaView.mediaViewDelegate = nil;
+    [self.adInfo.mediaView removeFromSuperview];
+    self.adInfo.mediaView = nil;
+    self.adInfo = nil;
+}
+
 #pragma mark ADFmyNativeAdDelegate
 
 - (void)onNativeAdLoadFinish:(nonnull ADFNativeAdInfo *)info appID:(nonnull NSString *)appID {
@@ -121,7 +128,6 @@
         self.adInfo = info;
         self.adInfo.mediaView.frame = self.bannerSize;
         self.adInfo.mediaView.mediaViewDelegate = self;
-        [self.adInfo playMediaView];
         self.adEventDelegate = self.loadCompletionHandler(self, nil);
         [self.adInfo playMediaView];
     }
