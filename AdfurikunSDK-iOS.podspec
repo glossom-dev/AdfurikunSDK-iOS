@@ -1,6 +1,6 @@
 Pod::Spec.new do |s|
   s.name            = "AdfurikunSDK-iOS"
-  s.version         = "0.4.4.0"
+  s.version         = "4.4.0"
   s.summary         = "An iOS SDK for ADFURIKUN Movie Reward Ads"
   s.homepage        = "https://adfurikun.jp/adfurikun/"
   s.license         = { :type => 'Copyright', :text => 'Copyright GREE X, Inc. All rights reserved.' }
@@ -80,13 +80,6 @@ Pod::Spec.new do |s|
     inMobi.resource = '**/adnetworks/InMobi/*.txt'
   end
 
-  s.subspec 'ironSource' do |ironSource|
-    ironSource.dependency 'AdfurikunSDK-iOS/Core'
-    ironSource.dependency 'IronSourceSDK', '9.2.0.0'
-    ironSource.source_files = '**/adnetworks/IronSource/*.{h,m}'
-    ironSource.resource = '**/adnetworks/IronSource/*.txt'
-  end
-
   s.subspec 'Maio' do |maio|
     maio.dependency 'AdfurikunSDK-iOS/Core'
     maio.dependency 'MaioSDK-v2', '2.2.0'
@@ -135,7 +128,6 @@ Pod::Spec.new do |s|
     all.dependency 'AdfurikunSDK-iOS/Five'
     all.dependency 'AdfurikunSDK-iOS/Fyber'
     all.dependency 'AdfurikunSDK-iOS/InMobi'
-    all.dependency 'AdfurikunSDK-iOS/ironSource'
     all.dependency 'AdfurikunSDK-iOS/Maio'
     all.dependency 'AdfurikunSDK-iOS/Mintegral'
     all.dependency 'AdfurikunSDK-iOS/Pangle'
