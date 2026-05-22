@@ -7,7 +7,7 @@
 //
 
 #import "AdfurikunAdnetworkExtraBuilder.h"
-#import "AdfurikunAdnetworkExtra.h"
+#import <ADFMovieReward/AdfurikunAdnetworkExtra.h>
 
 @implementation AdfurikunAdnetworkExtraBuilder
 

@@ -7,7 +7,7 @@
 //
 
 #import "AdfurikunAdnetworkExtraBuilderForFlutter.h"
-#import "AdfurikunAdnetworkExtra.h"
+#import <ADFMovieReward/AdfurikunAdnetworkExtra.h>
 
 @implementation AdfurikunAdnetworkExtraBuilderForFlutter
 

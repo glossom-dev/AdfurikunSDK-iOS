@@ -6,9 +6,9 @@
 
 #include <stdatomic.h>
 #import "AdfurikunAdMobReward.h"
-#import "AdfurikunAdnetworkExtra.h"
 #import <ADFMovieReward/AdfurikunSdk.h>
 #import <ADFMovieReward/ADFDebugUtility.h>
+#import <ADFMovieReward/AdfurikunAdnetworkExtra.h>
 
 @interface AdfurikunAdMobReward ()
 @property(nonatomic, weak, nullable) id<GADMediationRewardedAdEventDelegate> adEventDelegate;

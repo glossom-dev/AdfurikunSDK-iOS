@@ -8,7 +8,7 @@
 
 #import <Foundation/Foundation.h>
 
-#import "AdfurikunAdnetworkExtra.h"
+#import <ADFMovieReward/AdfurikunAdnetworkExtra.h>
 
 NS_ASSUME_NONNULL_BEGIN
 

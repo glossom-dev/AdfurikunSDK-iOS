@@ -5,9 +5,9 @@
 //
 
 #import "AdfurikunAdMobBanner.h"
-#import "AdfurikunAdnetworkExtra.h"
 #include <stdatomic.h>
 #import <ADFMovieReward/AdfurikunSdk.h>
+#import <ADFMovieReward/AdfurikunAdnetworkExtra.h>
 
 @interface AdfurikunAdMobBanner ()
 @property(nonatomic, weak, nullable) id<GADMediationBannerAdEventDelegate> adEventDelegate;

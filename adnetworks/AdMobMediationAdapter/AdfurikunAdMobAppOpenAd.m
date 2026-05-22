@@ -8,8 +8,8 @@
 
 #include <stdatomic.h>
 #import "AdfurikunAdMobAppOpenAd.h"
-#import "AdfurikunAdnetworkExtra.h"
 #import <ADFMovieReward/AdfurikunSdk.h>
+#import <ADFMovieReward/AdfurikunAdnetworkExtra.h>
 
 @interface AdfurikunAdMobAppOpenAd ()
 @property(nonatomic, weak, nullable) id<GADMediationAppOpenAdEventDelegate> adEventDelegate;

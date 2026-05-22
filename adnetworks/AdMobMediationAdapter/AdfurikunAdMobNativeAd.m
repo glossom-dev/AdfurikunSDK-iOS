@@ -5,9 +5,9 @@
 //
 
 #import "AdfurikunAdMobNativeAd.h"
-#import "AdfurikunAdnetworkExtra.h"
 #include <stdatomic.h>
 #import <ADFMovieReward/AdfurikunSdk.h>
+#import <ADFMovieReward/AdfurikunAdnetworkExtra.h>
 
 @interface AdfurikunAdMobNativeAd ()
 
