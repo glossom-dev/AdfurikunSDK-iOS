@@ -9,11 +9,17 @@
 #import "AdnetworkConfigure6001.h"
 #import "AdnetworkParam6001.h"
 
+@interface MovieReward6001 ()
+
+@property (nonatomic, strong) UADSRewardedAd *rewardedAd;
+
+@end
+
 @implementation MovieReward6001
 
 // adapterファイルのRevision番号を返す。実装が変わる度Incrementする
 + (NSString *)getAdapterRevisionVersion {
-    return @"17";
+    return @"18";
 }
 
 // Adnetwork実装時に使うClass名。SDKが導入されているかで使う
@@ -74,17 +80,36 @@
         [self requireToAsyncRequestAd];
         
         AdnetworkParam6001 *param = (AdnetworkParam6001 *)self.adParam;
-
-        if (param.adm && param.objectId) { // for Bidding
-            UADSLoadOptions *options = [UADSLoadOptions new];
-            [options setAdMarkup:param.adm];
-            [options setObjectId:param.objectId];
-            AdapterLogP(@"UnityAds load with adm : placementId=%@, objectId=%@", param.placementId, param.objectId);
-
-            [UnityAds load:param.placementId options:options loadDelegate:self];
-        } else { // for WF
-            [UnityAds load:param.placementId loadDelegate:self];
+        if (self.rewardedAd) {
+            self.rewardedAd = nil;
         }
+
+        UADSLoadConfigurationBuilder *builder = [[UADSLoadConfigurationBuilder alloc] initWithPlacementId:param.placementId];
+        if (param.adm) { // for Bidding
+            builder = [builder withAdMarkup:param.adm];
+            AdapterLogP(@"UnityAds load with adm : placementId=%@", param.placementId);
+        }
+
+        __weak typeof(self) weakSelf = self;
+        [UADSRewardedAd load:[builder build]
+                  completion:^(UADSRewardedAd * _Nullable ad, id<UnityAdsError> _Nullable error) {
+            __strong typeof(self) strongSelf = weakSelf;
+            if (!strongSelf) return;
+
+            if (error || !ad) {
+                // adが取得できずerrorもnilで返るケースがあるため、その場合はデフォルトのメッセージを使う
+                NSInteger errorCode = error ? error.code : 0;
+                NSString *errorMessage = error ? error.message : @"[ADF] UnityAds load returned nil ad without error";
+                AdapterLogP(@"load failed : placementId=%@, code=%ld, message=%@", param.placementId, (long)errorCode, errorMessage);
+                [strongSelf setErrorWithMessage:errorMessage code:errorCode];
+                [strongSelf sendFetchFail];
+                return;
+            }
+
+            AdapterTraceP(@"object : %@, placement Id : %@", strongSelf, param.placementId);
+            strongSelf.rewardedAd = ad;
+            [strongSelf sendFetchComplete];
+        }];
     } @catch (NSException *exception) {
         [self adnetworkExceptionHandling:exception];
     }
@@ -115,19 +140,18 @@
         return;
     }
     
+    if (!self.rewardedAd) {
+        [self setPlayFailCallback:PlayFailCallbackReasonAdInstanceNil exception:nil];
+        return;
+    }
+
     if (viewController != nil && self.isPrepared) {
         @try {
             [self requireToAsyncPlay];
             
-            AdnetworkParam6001 *param = (AdnetworkParam6001 *)self.adParam;
-            
-            if (param.adm && param.objectId) { // for Bidding
-                UADSShowOptions *options = [UADSShowOptions new];
-                [options setObjectId:param.objectId];
-                [UnityAds show:viewController placementId:param.placementId options:options showDelegate:self];
-            } else { // for WF
-                [UnityAds show:viewController placementId:param.placementId showDelegate:self];
-            }
+            UADSShowConfiguration *configuration = [[[UADSShowConfigurationBuilder alloc] init]
+                                                    withViewController:viewController].build;
+            [self.rewardedAd show:configuration delegate:self];
             
         } @catch (NSException *exception) {
             [self adnetworkExceptionHandling:exception];
@@ -147,39 +171,35 @@
     [self setCallbackStatus:MovieRewardCallbackFetchFail];
 }
 
-#pragma mark: UnityAdsLoadDelegate
-- (void)unityAdsAdLoaded: (NSString *)placementId {
-    AdapterTraceP(@"object : %@, placement Id : %@", self, placementId);
-    if ([((AdnetworkParam6001 *)self.adParam).placementId isEqualToString:placementId]) {
-        [self sendFetchComplete];
-    } else {
-        AdapterLogP(@"unityAdsAdLoaded(%@), but placemendId(%@) is not equal to %@", self, placementId, ((AdnetworkParam6001 *)self.adParam).placementId);
-    }
+#pragma mark: UADSRewardedShowDelegate
+- (void)showDidStart:(UADSRewardedAd *)unityAd {
+    AdapterTrace;
+    [self setCallbackStatus:MovieRewardCallbackPlayStart];
 }
 
-- (void)unityAdsAdFailedToLoad: (NSString *)placementId
-                     withError: (UnityAdsLoadError)error
-                   withMessage: (NSString *)message {
-    AdapterTraceP(@"unityAdsAdFailedToLoad : %@, placement Id : %@, message : %@", self, placementId, message);
-    [self setErrorWithMessage:message code:0];
-    [self sendFetchFail];
+- (void)showDidClick:(UADSRewardedAd *)unityAd {
+    AdapterTrace;
 }
 
-#pragma mark: UnityAdsShowDelegate
-- (void)unityAdsShowComplete:(NSString *)placementId withFinishState:(UnityAdsShowCompletionState)state {
-    AdapterTraceP(@"unityAdsShowComplete : UnityAdsShowDelegate unityAdsShowComplete %@ %ld", placementId, state);
-    switch (state) {
-        case kUnityShowCompletionStateCompleted:
-            AdapterLogP(@"kUnityShowCompletionStateCompleted %@", placementId);
+- (void)showDidReceiveReward:(UADSRewardedAd *)unityAd {
+    AdapterTrace;
+    self.isRewarded = true;
+}
+
+- (void)showDidComplete:(UADSRewardedAd *)unityAd with:(enum UADSShowFinishState)finishState {
+    AdapterTraceP(@"finishState : %ld", (long)finishState);
+    switch (finishState) {
+        case UADSShowFinishStateCompleted:
+            AdapterTrace;
             self.isRewarded = true;
             [self setCallbackStatus:MovieRewardCallbackPlayComplete];
             break;
-        case kUnityShowCompletionStateSkipped:
-            AdapterLogP(@"kUnityShowCompletionStateSkipped %@", placementId);
+        case UADSShowFinishStateSkipped:
+            AdapterTrace;
             break;
         default:
-            AdapterLogP(@"other %@", placementId);
-            [self setErrorWithMessage:@"unityAdsShowComplete with UnityAdsShowCompletionStateError" code:0];
+            AdapterLogP(@"other finishState : %ld", (long)finishState);
+            [self setErrorWithMessage:@"showDidComplete with unknown UADSShowFinishState" code:0];
             [self setCallbackStatus:MovieRewardCallbackPlayFail];
             break;
     }
@@ -187,49 +207,10 @@
     [self setCallbackStatus:MovieRewardCallbackClose];
 }
 
-- (void)unityAdsShowFailed:(NSString *)placementId withError:(UnityAdsShowError)error withMessage:(NSString *)message {
-    AdapterTraceP(@"%@ %ld", message, error);
-    NSString *reason;
-    switch (error) {
-        case kUnityShowErrorNotInitialized:
-            reason = @"NotInitialized";
-            break;
-        case kUnityShowErrorNotReady:
-            reason = @"NotReady";
-            break;
-        case kUnityShowErrorVideoPlayerError:
-            reason = @"VideoPlayerError";
-            break;
-        case kUnityShowErrorInvalidArgument:
-            reason = @"InvalidArgument";
-            break;
-        case kUnityShowErrorNoConnection:
-            reason = @"NoConnection";
-            break;
-        case kUnityShowErrorAlreadyShowing:
-            reason = @"AlreadyShowing";
-            break;
-        case kUnityShowErrorInternalError:
-            reason = @"InternalError";
-            break;
-        case kUnityShowErrorTimeout:
-            reason = @"TimeoutError";
-            break;
-        default:
-            reason = @"Unknown";
-    }
-    [self setErrorWithMessage:reason code:(int)error];
+- (void)showDidFail:(UADSRewardedAd *)unityAd error:(id<UnityAdsError>)error {
+    AdapterTraceP(@"code : %ld, message : %@", (long)error.code, error.message);
+    [self setErrorWithMessage:error.message code:error.code];
     [self setCallbackStatus:MovieRewardCallbackPlayFail];
-
-}
- 
-- (void)unityAdsShowStart:(NSString *)placementId {
-    AdapterTraceP(@"%@", placementId);
-    [self setCallbackStatus:MovieRewardCallbackPlayStart];
-}
- 
-- (void)unityAdsShowClick:(NSString *)placementId {
-    AdapterTraceP(@"%@", placementId);
 }
 
 @end

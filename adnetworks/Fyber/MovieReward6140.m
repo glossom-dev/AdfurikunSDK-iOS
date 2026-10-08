@@ -86,7 +86,9 @@
         
         if (self.adSpot == nil) {
             IAAdRequest *request = [IAAdRequest build:^(id<IAAdRequestBuilder>  _Nonnull builder) {
-                builder.spotID = ((AdnetworkParam6140 *)self.adParam).placementId;
+                if (((AdnetworkParam6140 *)self.adParam).adm == nil) {
+                    builder.spotID = ((AdnetworkParam6140 *)self.adParam).placementId;
+                }
             }];
             self.videoContentController = [IAVideoContentController build:^(id<IAVideoContentControllerBuilder>  _Nonnull builder) {
                 builder.videoContentDelegate = self;
@@ -100,9 +102,9 @@
                 [builder addSupportedUnitController:self.unitController];
             }];
         }
-        
+                
         __weak typeof(self) weakSelf = self;
-        [self.adSpot fetchAdWithCompletion:^(IAAdSpot * _Nullable adSpot, IAAdModel * _Nullable adModel, NSError * _Nullable error) {
+        IAAdSpotAdResponseBlock completionHandler = ^(IAAdSpot * _Nullable adSpot, IAAdModel * _Nullable adModel, NSError * _Nullable error) {
             AdapterLogP(@"error : %@", error);
             __strong typeof(self) strongSelf = weakSelf;
             if (!strongSelf) return;
@@ -112,7 +114,12 @@
                 return;
             }
             [strongSelf setCallbackStatus:MovieRewardCallbackFetchComplete];
-        }];
+        };
+        if (((AdnetworkParam6140 *)self.adParam).adm) { // Bidding
+            [self.adSpot loadAdWithMarkup:((AdnetworkParam6140 *)self.adParam).adm withCompletion:completionHandler];
+        } else { // WF
+            [self.adSpot fetchAdWithCompletion:completionHandler];
+        }
     } @catch (NSException *exception) {
         [self adnetworkExceptionHandling:exception];
     }

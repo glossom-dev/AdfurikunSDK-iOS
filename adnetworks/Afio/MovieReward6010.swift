@@ -22,7 +22,7 @@ class MovieReward6010: ADFmyMovieRewardInterface {
     }
 
     override class func getAdapterRevisionVersion() -> String {
-        return "8"
+        return "9"
     }
     
     override class func adnetworkClassName() -> String {
@@ -98,7 +98,7 @@ class MovieReward6010: ADFmyMovieRewardInterface {
         }
     }
 
-    override func showAd(withPresenting viewController: UIViewController!) {
+    override func showAd(withPresenting viewController: UIViewController) {
         showAd()
     }
 

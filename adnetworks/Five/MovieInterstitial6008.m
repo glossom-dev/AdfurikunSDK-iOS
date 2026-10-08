@@ -21,7 +21,7 @@
 
 // adapterファイルのRevision番号を返す。実装が変わる度Incrementする
 + (NSString *)getAdapterRevisionVersion {
-    return @"19";
+    return @"21";
 }
 
 // Adnetwork実装時に使うClass名。SDKが導入されているかで使う
@@ -80,24 +80,44 @@
     
     @try {
         [self requireToAsyncRequestAd];
-        
+
         if (self.interstitial) {
             self.interstitial = nil;
         }
 
-        self.interstitial = [[FADInterstitial alloc] initWithSlotId:((AdnetworkParam6008 *)self.adParam).fiveSlotId];
-        [self.interstitial setLoadDelegate:self];
-        [self.interstitial setEventListener:self];
-        //音出力設定
-        AdapterLogP(@"soundState: %d", (int)[AdfurikunSdk getSoundState]);
-        AdfurikunSdkSound soundState = [AdfurikunSdk getSoundState];
-        if (AdfurikunSdkSoundOn == soundState) {
-            [self.interstitial enableSound:true];
-        } else if (AdfurikunSdkSoundOff == soundState) {
-            [self.interstitial enableSound:false];
+        AdnetworkConfigure6008 *configure = (AdnetworkConfigure6008 *)self.configure;
+        FADAdSlotConfig *slotConfig = [FADAdSlotConfig configWithSlotId:((AdnetworkParam6008 *)self.adParam).fiveSlotId];
+        if ([AdfurikunSdk getTestMode]) {
+            AdapterLog(@"Test Mode ON!!!");
+            [slotConfig setAdTestModeEnabled:YES];
         }
-        
-        [self.interstitial loadAdAsync];
+
+        __weak typeof(self) weakSelf = self;
+        [configure.adLoader loadInterstitialAdWithConfig:slotConfig withLoadCallback:^(FADInterstitial * _Nullable ad, NSError * _Nullable error) {
+            __strong typeof(self) strongSelf = weakSelf;
+            if (!strongSelf) return;
+            
+            if (error) {
+                AdapterLogP(@"errorCode: %ld, slotId: %@", (long)error.code, ((AdnetworkParam6008 *)strongSelf.adParam).fiveSlotId);
+                [strongSelf setErrorWithMessage:error.localizedDescription code:error.code];
+                [strongSelf setCallbackStatus:MovieRewardCallbackFetchFail];
+                return;
+            }
+
+            strongSelf.interstitial = ad;
+            [strongSelf.interstitial setEventListener:strongSelf];
+
+            //音出力設定
+            AdapterLogP(@"soundState: %d", (int)[AdfurikunSdk getSoundState]);
+            AdfurikunSdkSound soundState = [AdfurikunSdk getSoundState];
+            if (AdfurikunSdkSoundOn == soundState) {
+                [strongSelf.interstitial enableSound:true];
+            } else if (AdfurikunSdkSoundOff == soundState) {
+                [strongSelf.interstitial enableSound:false];
+            }
+
+            [strongSelf setCallbackStatus:MovieRewardCallbackFetchComplete];
+        }];
     } @catch (NSException *exception) {
         [self adnetworkExceptionHandling:exception];
     }
@@ -147,18 +167,6 @@
             [self setPlayFailCallback:PlayFailCallbackReasonException exception:exception];
         }
     }
-}
-
-#pragma mark - FiveDelegate
-- (void)fiveAdDidLoad:(id<FADAdInterface>)ad {
-    AdapterTrace;
-    [self setCallbackStatus:MovieRewardCallbackFetchComplete];
-}
-
-- (void)fiveAd:(id<FADAdInterface>)ad didFailedToReceiveAdWithError:(FADErrorCode)errorCode {
-    AdapterLogP(@"errorCode: %ld, slotId: %@", (long)errorCode, ((AdnetworkParam6008 *)self.adParam).fiveSlotId);
-    [self setErrorWithMessage:nil code:errorCode];
-    [self setCallbackStatus:MovieRewardCallbackFetchFail];
 }
 
 #pragma mark FADInterstitialEventListener

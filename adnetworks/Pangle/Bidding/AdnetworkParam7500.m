@@ -14,24 +14,13 @@
     self = [super initWithParam:param];
     if (self) {
         self.adxID = [self pangleAdxId];
-
-        NSDictionary *content = [param objectForKey:@"content"];
-        if (content && [content isKindOfClass:[NSDictionary class]]) {
-            NSDictionary *adValues = [content objectForKey:@"ad_values"];
-            if (adValues && [adValues isKindOfClass:[NSDictionary class]]) {
-                NSString *adm = [adValues objectForKey:@"adm"];
-                if ([self isString:adm]) {
-                    self.adm = [NSString stringWithFormat:@"%@", adm];
-                }
-                [self commonParamParse:adValues];
-            }
-        }
+        [self parseBiddingAdValues:param];
     }
     return self;
 }
 
 - (bool)isValid {
-    return (self.appID && self.slotID && self.adm);
+    return ([super isValid] && self.adm);
 }
 
 @end

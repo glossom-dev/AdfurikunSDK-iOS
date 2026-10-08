@@ -32,5 +32,6 @@
 #import <ADFMovieReward/ADFmyAppOpenAd.h>
 
 #import <ADFMovieReward/AdfurikunSdk.h>
+#import <ADFMovieReward/AdfurikunAdnetworkExtra.h>
 
 #endif /* ADFMovieReward_h */

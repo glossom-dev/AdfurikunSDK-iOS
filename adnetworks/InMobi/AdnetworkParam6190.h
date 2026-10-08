@@ -10,7 +10,7 @@
 
 NS_ASSUME_NONNULL_BEGIN
 
-@interface AdnetworkParam6190 : ADFAdnetworkParam
+@interface AdnetworkParam6190 : ADFBiddingAdnetworkParam
 
 @property (nonatomic) NSString *accountId;
 @property (nonatomic) NSString *placementId;

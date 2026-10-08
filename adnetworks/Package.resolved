@@ -1,0 +1,122 @@
+{
+  "pins" : [
+    {
+      "identity" : "adsglobalpackage",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/bytedance/AdsGlobalPackage.git",
+      "state" : {
+        "revision" : "0e50b9691497b74f3e8dc24e691324c74ec7aeb9",
+        "version" : "8.2.1-release.2"
+      }
+    },
+    {
+      "identity" : "amoad-ios-sdk",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/amoad/amoad-ios-sdk",
+      "state" : {
+        "revision" : "e90304c8d86e4a5e2c3a5bf9d7a393c94fcc13a7",
+        "version" : "6.3.0"
+      }
+    },
+    {
+      "identity" : "applovin-max-swift-package",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/AppLovin/AppLovin-MAX-Swift-Package.git",
+      "state" : {
+        "revision" : "02544c3400d228cce5718e22f71f8d02787ba91e",
+        "version" : "13.6.4"
+      }
+    },
+    {
+      "identity" : "dtexchangesdk-ios-spm",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/inner-active/DTExchangeSDK-iOS-SPM.git",
+      "state" : {
+        "revision" : "14a6792285a47ebbe236c75418fa4782307da470",
+        "version" : "8.4.10"
+      }
+    },
+    {
+      "identity" : "inmobisdk-swift-package",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/InMobi/InMobiSDK-Swift-Package.git",
+      "state" : {
+        "revision" : "ba46fc5d865080b352d0002533e14a9298fcddbe",
+        "version" : "11.4.1"
+      }
+    },
+    {
+      "identity" : "maiosdk-v2-ios",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/imobile/MaioSDK-v2-iOS",
+      "state" : {
+        "revision" : "2410815602a8c55fcf0dd6b23c434d5388987cf9",
+        "version" : "2.2.2"
+      }
+    },
+    {
+      "identity" : "mintegraladsdk-swift-package",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/Mintegral-official/MintegralAdSDK-Swift-Package.git",
+      "state" : {
+        "revision" : "71e78da3d6070792c2216fef333daa652411f3a7",
+        "version" : "8.1.7"
+      }
+    },
+    {
+      "identity" : "swift-package-manager-fivead",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/ly-ads-network/swift-package-manager-fivead",
+      "state" : {
+        "revision" : "8b03d98842197affbf9a43e169773eeaf3356625",
+        "version" : "3.1.1"
+      }
+    },
+    {
+      "identity" : "swift-package-manager-google-mobile-ads",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/googleads/swift-package-manager-google-mobile-ads.git",
+      "state" : {
+        "revision" : "868149fc50d1452078e83540e636cf519bac3e6a",
+        "version" : "13.7.0"
+      }
+    },
+    {
+      "identity" : "swift-package-manager-google-user-messaging-platform",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/googleads/swift-package-manager-google-user-messaging-platform.git",
+      "state" : {
+        "revision" : "74f2ec169551c3b924947b473716142a0b983e10",
+        "version" : "2.6.0"
+      }
+    },
+    {
+      "identity" : "unity-ad-quality-swift-package",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/ironsource-mobile/Unity-Ad-Quality-Swift-Package",
+      "state" : {
+        "revision" : "a81df68cf80e989d1d9a2c15a75070488ce123b3",
+        "version" : "9.10.0"
+      }
+    },
+    {
+      "identity" : "unity-ads-swift-package",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/Unity-Technologies/Unity-Ads-Swift-Package.git",
+      "state" : {
+        "revision" : "589ebfb7a28cc9171856ced7a9429d9770ec31a5",
+        "version" : "4.20.0"
+      }
+    },
+    {
+      "identity" : "vungleadssdk-swiftpackagemanager",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/Vungle/VungleAdsSDK-SwiftPackageManager.git",
+      "state" : {
+        "revision" : "fad76e1308414d59a13015e2c12f551860c4509a",
+        "version" : "7.7.7"
+      }
+    }
+  ],
+  "version" : 2
+}

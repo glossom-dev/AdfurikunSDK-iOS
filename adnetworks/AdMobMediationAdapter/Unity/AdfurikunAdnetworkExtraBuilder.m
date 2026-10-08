@@ -7,7 +7,7 @@
 //
 
 #import "AdfurikunAdnetworkExtraBuilder.h"
-#import "AdfurikunAdnetworkExtra.h"
+#import <ADFMovieReward/AdfurikunAdnetworkExtra.h>
 
 @implementation AdfurikunAdnetworkExtraBuilder
 
@@ -43,16 +43,8 @@
 
     value = extras[@"ADF_CUSTOM_PARAMS"];
     if (value) {
-        // NSString → NSData
-        NSData *jsonData = [value dataUsingEncoding:NSUTF8StringEncoding];
-
-        // NSData → NSDictionary
-        NSError *error;
-        NSDictionary *customParam = [NSJSONSerialization JSONObjectWithData:jsonData
-                                                                    options:0
-                                                                      error:&error];
-
-        if (!error) {
+        NSDictionary *customParam = [self convertStringToDictionary:value];
+        if (customParam) {
             extra.customParameter = [NSDictionary dictionaryWithDictionary:customParam];
         }
     }
@@ -61,8 +53,34 @@
     if (value) {
         extra.loadTimeout = value.floatValue;
     }
-
+    
+    value = extras[@"ADF_ADNETWORK_INFORMATION"];
+    if (value) {
+        NSDictionary *adnetworkInformation = [self convertStringToDictionary:value];
+        if (adnetworkInformation) {
+            extra.adnetworkInformation = [NSDictionary dictionaryWithDictionary:adnetworkInformation];
+        }
+    }
+    
     return extra;
+}
+
+- (NSDictionary *)convertStringToDictionary:(NSString *)value {
+    if (!value) {
+        return nil;
+    }
+    // NSString → NSData
+    NSData *jsonData = [value dataUsingEncoding:NSUTF8StringEncoding];
+    if (!jsonData) {
+        return nil;
+    }
+    // NSData → NSDictionary
+    NSError *error;
+    id obj = [NSJSONSerialization JSONObjectWithData:jsonData options:0 error:&error];
+    if (error || ![obj isKindOfClass:[NSDictionary class]]) {
+        return nil;
+    }
+    return (NSDictionary *)obj;
 }
 
 @end

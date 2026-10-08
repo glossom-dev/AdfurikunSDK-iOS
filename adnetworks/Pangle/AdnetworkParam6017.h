@@ -14,7 +14,6 @@ NS_ASSUME_NONNULL_BEGIN
 
 @property (nonatomic, strong) NSString *appID;
 @property (nonatomic, strong) NSString *slotID;
-@property (nonatomic, strong) NSString *adm;
 
 @end
 

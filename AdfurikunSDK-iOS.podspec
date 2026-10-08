@@ -1,6 +1,6 @@
 Pod::Spec.new do |s|
   s.name            = "AdfurikunSDK-iOS"
-  s.version         = "4.4.0"
+  s.version         = "0.4.5.0"
   s.summary         = "An iOS SDK for ADFURIKUN Movie Reward Ads"
   s.homepage        = "https://adfurikun.jp/adfurikun/"
   s.license         = { :type => 'Copyright', :text => 'Copyright GREE X, Inc. All rights reserved.' }
@@ -22,7 +22,7 @@ Pod::Spec.new do |s|
 
   s.subspec 'AdMob' do |admob|
     admob.dependency 'AdfurikunSDK-iOS/Core'
-    admob.dependency 'Google-Mobile-Ads-SDK', '>=11.2.0', '<13.0'
+    admob.dependency 'Google-Mobile-Ads-SDK', '>=11.2.0'
     admob.source_files = '**/adnetworks/AdMob/*.{h,m}'
     admob.resource = '**/adnetworks/AdMob/*.{txt,xib}'
   end
@@ -47,75 +47,75 @@ Pod::Spec.new do |s|
 
   s.subspec 'Afio' do |afio|
     afio.dependency 'AdfurikunSDK-iOS/Core'
-    afio.dependency 'AMoAd', '<=6.2.7'
+    afio.dependency 'AMoAd', '<=6.3.0'
     afio.source_files = '**/adnetworks/Afio/*.swift'
     afio.resource = '**/adnetworks/Afio/*.txt'
   end
 
   s.subspec 'AppLovin' do |applovin|
     applovin.dependency 'AdfurikunSDK-iOS/Core'
-    applovin.dependency 'AppLovinSDK', '13.5.1'
+    applovin.dependency 'AppLovinSDK', '13.6.4'
     applovin.source_files = '**/adnetworks/AppLovin/*.{h,m}'
     applovin.resource = '**/adnetworks/AppLovin/*.txt'
   end
 
   s.subspec 'Five' do |five|
     five.dependency 'AdfurikunSDK-iOS/Core'
-    five.dependency 'FiveAd', '2.9.20251119'
+    five.dependency 'FiveAd', '3.1.1'
     five.source_files = '**/adnetworks/Five/*.{h,m}'
     five.resource = '**/adnetworks/Five/*.txt'
   end
 
   s.subspec 'Fyber' do |fyber|
     fyber.dependency 'AdfurikunSDK-iOS/Core'
-    fyber.dependency 'Fyber_Marketplace_SDK', '8.4.3'
-    fyber.source_files = '**/adnetworks/Fyber/*.{h,m}'
+    fyber.dependency 'Fyber_Marketplace_SDK', '8.4.10'
+    fyber.source_files = ['**/adnetworks/Fyber/*.{h,m}', '**/adnetworks/Fyber/Bidding/*.{h,m}']
     fyber.resource = '**/adnetworks/Fyber/*.txt'
   end
 
   s.subspec 'InMobi' do |inMobi|
     inMobi.dependency 'AdfurikunSDK-iOS/Core'
-    inMobi.dependency 'InMobiSDK', '11.1.0'
-    inMobi.source_files = '**/adnetworks/InMobi/*.{h,m}'
+    inMobi.dependency 'InMobiSDK', '11.4.1'
+    inMobi.source_files = ['**/adnetworks/InMobi/*.{h,m}', '**/adnetworks/InMobi/Bidding/*.{h,m}']
     inMobi.resource = '**/adnetworks/InMobi/*.txt'
   end
 
   s.subspec 'Maio' do |maio|
     maio.dependency 'AdfurikunSDK-iOS/Core'
-    maio.dependency 'MaioSDK-v2', '2.2.0'
+    maio.dependency 'MaioSDK-v2', '2.2.2'
     maio.source_files = '**/adnetworks/Maio/*.{h,m}'
     maio.resource = '**/adnetworks/Maio/*.txt'
   end
 
   s.subspec 'Mintegral' do |mintegral|
     mintegral.dependency 'AdfurikunSDK-iOS/Core'
-    mintegral.dependency 'MintegralAdSDK/BidNativeAd', '8.0.5'
-    mintegral.dependency 'MintegralAdSDK/BidNativeAdvancedAd', '8.0.5'
-    mintegral.dependency 'MintegralAdSDK/BidRewardVideoAd', '8.0.5'
-    mintegral.dependency 'MintegralAdSDK/BidNewInterstitialAd', '8.0.5'
-    mintegral.dependency 'MintegralAdSDK/BidBannerAd', '8.0.5'
-    mintegral.dependency 'MintegralAdSDK/BidSplashAd', '8.0.5'
+    mintegral.dependency 'MintegralAdSDK/BidNativeAd', '8.1.7'
+    mintegral.dependency 'MintegralAdSDK/BidNativeAdvancedAd', '8.1.7'
+    mintegral.dependency 'MintegralAdSDK/BidRewardVideoAd', '8.1.7'
+    mintegral.dependency 'MintegralAdSDK/BidNewInterstitialAd', '8.1.7'
+    mintegral.dependency 'MintegralAdSDK/BidBannerAd', '8.1.7'
+    mintegral.dependency 'MintegralAdSDK/BidSplashAd', '8.1.7'
     mintegral.source_files = '**/adnetworks/Mintegral/*.{h,m}'
     mintegral.resource = '**/adnetworks/Mintegral/*.txt'
   end
 
   s.subspec 'Pangle' do |pangle|
     pangle.dependency 'AdfurikunSDK-iOS/Core'
-    pangle.dependency 'Ads-Global', '7.8.0.5'
+    pangle.dependency 'Ads-Global', '8.2.1.2'
     pangle.source_files = ['**/adnetworks/Pangle/*.{h,m}', '**/adnetworks/Pangle/Bidding/*.{h,m}']
     pangle.resource = '**/adnetworks/Pangle/*.txt'
   end
 
   s.subspec 'UnityAds' do |unityads|
     unityads.dependency 'AdfurikunSDK-iOS/Core'
-    unityads.dependency 'UnityAds', '4.16.5'
+    unityads.dependency 'UnityAds', '4.20.0'
     unityads.source_files = ['**/adnetworks/UnityAds/*.{h,m}', '**/adnetworks/UnityAds/Bidding/*.{h,m}']
     unityads.resource = '**/adnetworks/UnityAds/*.txt'
   end
 
   s.subspec 'Vungle' do |vungle|
     vungle.dependency 'AdfurikunSDK-iOS/Core'
-    vungle.dependency 'VungleAds', '7.4.2'
+    vungle.dependency 'VungleAds', '7.7.7'
     vungle.source_files = '**/adnetworks/Vungle/*.{h,m}'
     vungle.resource = '**/adnetworks/Vungle/*.txt'
   end

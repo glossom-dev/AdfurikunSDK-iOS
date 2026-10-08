@@ -6,9 +6,13 @@
 //  Copyright © 2018 A .D F. U. L. L. Y Co., Ltd. All rights reserved.
 //
 
-#import "MovieReward6001.h"
+#import <Foundation/Foundation.h>
+#import <ADFMovieReward/ADFmyMovieRewardInterface.h>
+#import <ADFMovieReward/ADFmyMovieDelegateBase.h>
 
-@interface MovieInterstitial6001 : MovieReward6001
+#import <UnityAds/UnityAds.h>
+
+@interface MovieInterstitial6001 : ADFmyMovieRewardInterface<UADSInterstitialShowDelegate>
 
 @end
 

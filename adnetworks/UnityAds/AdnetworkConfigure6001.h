@@ -11,7 +11,7 @@
 
 NS_ASSUME_NONNULL_BEGIN
 
-@interface AdnetworkConfigure6001 : ADFmyAdnetworkConfigure <UnityAdsInitializationDelegate>
+@interface AdnetworkConfigure6001 : ADFmyAdnetworkConfigure
 
 @end
 

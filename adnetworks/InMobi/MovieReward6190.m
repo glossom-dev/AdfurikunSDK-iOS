@@ -81,7 +81,20 @@
             self.interstitial = [[IMInterstitial alloc] initWithPlacementId:((AdnetworkParam6190 *)self.adParam).placementId.integerValue
                                                                    delegate:self];
         }
-        [self.interstitial load];
+        
+        // Bidding 부분에서 사용 예시
+        if (((AdnetworkParam6190 *)self.adParam).adm) { // Bidding
+            NSString *admString = ((AdnetworkParam6190 *)self.adParam).adm;
+            NSData *admData = [admString dataUsingEncoding:NSUTF8StringEncoding];
+            
+            if (admData) {
+                [self.interstitial load:admData];
+            } else {
+                [self setCallbackStatus:MovieRewardCallbackFetchFail];
+            }
+        } else { // WF
+            [self.interstitial load];
+        }
         
     } @catch (NSException *exception) {
         [self adnetworkExceptionHandling:exception];

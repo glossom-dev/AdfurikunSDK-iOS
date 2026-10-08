@@ -40,6 +40,11 @@ NS_ASSUME_NONNULL_BEGIN
  * */
 + (void)removeAllCaches;
 
+/**
+  * Debug Codeを設定する
+ */
++ (void)setDebugCode:(NSString *)debugCode;
+
 @end
 
 NS_ASSUME_NONNULL_END

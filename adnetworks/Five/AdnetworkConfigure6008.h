@@ -13,6 +13,8 @@ NS_ASSUME_NONNULL_BEGIN
 
 @interface AdnetworkConfigure6008 : ADFmyAdnetworkConfigure
 
+@property (nonatomic, nullable, readonly) FADAdLoader *adLoader;
+
 @end
 
 NS_ASSUME_NONNULL_END

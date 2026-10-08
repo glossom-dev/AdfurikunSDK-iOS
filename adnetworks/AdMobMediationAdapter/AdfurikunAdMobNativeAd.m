@@ -5,9 +5,10 @@
 //
 
 #import "AdfurikunAdMobNativeAd.h"
-#import "AdfurikunAdnetworkExtra.h"
 #include <stdatomic.h>
 #import <ADFMovieReward/AdfurikunSdk.h>
+#import <ADFMovieReward/ADFDebugUtility.h>
+#import <ADFMovieReward/AdfurikunAdnetworkExtra.h>
 
 @interface AdfurikunAdMobNativeAd ()
 
@@ -91,6 +92,11 @@
         
         if (extra.customParameter) {
             customParameter = [NSDictionary dictionaryWithDictionary:extra.customParameter];
+        }
+        
+        // テストモード時のみ、デバッグ用機能の設定
+        if (adConfiguration.isTestRequest && appId && extra.adnetworkInformation && extra.adnetworkInformation.count > 0) {
+            [ADFDebugUtility setAdnetworkInformation:appId info:extra.adnetworkInformation];
         }
     }
     AdMobMediationTrace;

@@ -102,7 +102,7 @@
         }
         
         __weak typeof(self) weakSelf = self;
-        [self.adSpot fetchAdWithCompletion:^(IAAdSpot * _Nullable adSpot, IAAdModel * _Nullable adModel, NSError * _Nullable error) {
+        IAAdSpotAdResponseBlock completionHandler = ^(IAAdSpot * _Nullable adSpot, IAAdModel * _Nullable adModel, NSError * _Nullable error) {
             AdapterLogP(@"error : %@", error);
             __strong typeof(self) strongSelf = weakSelf;
             if (!strongSelf) return;
@@ -110,7 +110,7 @@
                 NativeAdInfo6140 *info = [[NativeAdInfo6140 alloc] initWithVideoUrl:nil
                                                                               title:@""
                                                                         description:@""
-                                                                       adnetworkKey:self.adnetworkKey];
+                                                                        adnetworkKey:self.adnetworkKey];
                 info.mediaType = ADFNativeAdType_Image;
                 [info setupMediaView:strongSelf.viewUnitController.adView];
                 [strongSelf setCustomMediaview:strongSelf.viewUnitController.adView];
@@ -127,7 +127,8 @@
                 [weakSelf setErrorWithMessage:error.localizedDescription code:error.code];
             }
             [weakSelf setCallbackStatus:NativeAdCallbackLoadError];
-        }];
+        };
+        [self.adSpot fetchAdWithCompletion:completionHandler];
     } @catch (NSException *exception) {
         [self adnetworkExceptionHandling:exception];
     }

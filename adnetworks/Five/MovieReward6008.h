@@ -8,7 +8,7 @@
 #import <ADFMovieReward/ADFmyMovieRewardInterface.h>
 #import <FiveAd/FiveAd.h>
 
-@interface MovieReward6008 : ADFmyMovieRewardInterface <FADLoadDelegate, FADVideoRewardEventListener>
+@interface MovieReward6008 : ADFmyMovieRewardInterface <FADVideoRewardEventListener>
 
 @end
 

@@ -22,7 +22,7 @@
 
 // adapterファイルのRevision番号を返す。実装が変わる度Incrementする
 + (NSString *)getAdapterRevisionVersion {
-    return @"10";
+    return @"12";
 }
 
 // Adnetwork実装時に使うClass名。SDKが導入されているかで使う
@@ -86,19 +86,39 @@
             self.fullscreen = nil;
         }
 
-        self.fullscreen = [[FADVideoReward alloc] initWithSlotId:((AdnetworkParam6008 *)self.adParam).fiveSlotId];
-        [self.fullscreen setLoadDelegate:self];
-        [self.fullscreen setEventListener:self];
-        
-        //音出力設定
-        AdapterLogP(@"soundState: %d", (int)[AdfurikunSdk getSoundState]);
-        AdfurikunSdkSound soundState = [AdfurikunSdk getSoundState];
-        if (AdfurikunSdkSoundOn == soundState) {
-            [self.fullscreen enableSound:true];
-        } else if (AdfurikunSdkSoundOff == soundState) {
-            [self.fullscreen enableSound:false];
+        AdnetworkConfigure6008 *configure = (AdnetworkConfigure6008 *)self.configure;
+        FADAdSlotConfig *slotConfig = [FADAdSlotConfig configWithSlotId:((AdnetworkParam6008 *)self.adParam).fiveSlotId];
+        if ([AdfurikunSdk getTestMode]) {
+            AdapterLog(@"Test Mode ON!!!");
+            [slotConfig setAdTestModeEnabled:YES];
         }
-        [self.fullscreen loadAdAsync];
+
+        __weak typeof(self) weakSelf = self;
+        [configure.adLoader loadRewardAdWithConfig:slotConfig withLoadCallback:^(FADVideoReward * _Nullable ad, NSError * _Nullable error) {
+            __strong typeof(self) strongSelf = weakSelf;
+            if (!strongSelf) return;
+            
+            if (error) {
+                AdapterLogP(@"errorCode: %ld, slotId: %@", (long)error.code, ((AdnetworkParam6008 *)strongSelf.adParam).fiveSlotId);
+                [strongSelf setErrorWithMessage:error.localizedDescription code:error.code];
+                [strongSelf setCallbackStatus:MovieRewardCallbackFetchFail];
+                return;
+            }
+
+            strongSelf.fullscreen = ad;
+            [strongSelf.fullscreen setEventListener:strongSelf];
+
+            //音出力設定
+            AdapterLogP(@"soundState: %d", (int)[AdfurikunSdk getSoundState]);
+            AdfurikunSdkSound soundState = [AdfurikunSdk getSoundState];
+            if (AdfurikunSdkSoundOn == soundState) {
+                [strongSelf.fullscreen enableSound:true];
+            } else if (AdfurikunSdkSoundOff == soundState) {
+                [strongSelf.fullscreen enableSound:false];
+            }
+
+            [strongSelf setCallbackStatus:MovieRewardCallbackFetchComplete];
+        }];
     } @catch (NSException *exception) {
         [self adnetworkExceptionHandling:exception];
     }
@@ -148,18 +168,6 @@
     } else {
         [self setPlayFailCallback:PlayFailCallbackReasonIsPreparedFalse exception:nil];
     }
-}
-
-#pragma mark - FiveDelegate
-- (void)fiveAdDidLoad:(id<FADAdInterface>)ad {
-    AdapterTrace;
-    [self setCallbackStatus:MovieRewardCallbackFetchComplete];
-}
-
-- (void)fiveAd:(id<FADAdInterface>)ad didFailedToReceiveAdWithError:(FADErrorCode)errorCode {
-    AdapterLogP(@"errorCode: %ld, slotId: %@", (long)errorCode, ((AdnetworkParam6008 *)self.adParam).fiveSlotId);
-    [self setErrorWithMessage:nil code:errorCode];
-    [self setCallbackStatus:MovieRewardCallbackFetchFail];
 }
 
 #pragma mark FADVideoRewardEventListener

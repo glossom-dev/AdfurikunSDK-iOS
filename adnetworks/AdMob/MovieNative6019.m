@@ -12,6 +12,34 @@
 
 #import <GoogleMobileAds/GoogleMobileAds.h>
 
+// Google Mobile Ads SDK v12.13.0で非推奨、v13.0.0でヘッダーから削除された
+// -registerAdView:clickableAssetViews:nonclickableAssetViews: を
+// v13未満のSDKでも呼び出せるようにするための補助プロトコル。
+// v13以降のSDKヘッダーにはこのメソッドの宣言が存在しないため、
+// このプロトコルでメソッドシグネチャをコンパイラに伝え、
+// 実際の呼び出しはrespondsToSelector:による実行時判定で行うことで、
+// v13以上/v13未満のどちらのSDKでもビルドが通るようにする。
+@protocol ADFGADNativeAdLegacyRegistering <NSObject>
+- (void)registerAdView:(UIView *)adView
+   clickableAssetViews:(NSDictionary<GADNativeAssetIdentifier, UIView *> *)clickableAssetViews
+nonclickableAssetViews:(NSDictionary<GADNativeAssetIdentifier, UIView *> *)nonclickableAssetViews;
+@end
+
+// Google Mobile Ads SDK v13未満の場合のみ、明示的にregisterAdView:clickableAssetViews:nonclickableAssetViews:を
+// 呼び出してアセットビューを登録する。v13以降は当該APIが存在しないため何もしない
+// （アセットビュー設定後にnativeAdを代入することでSDKが自動的に登録を行う）。
+static void ADFRegisterLegacyNativeAdViewIfNeeded(GADNativeAd *nativeAd,
+                                                   UIView *adView,
+                                                   NSDictionary<GADNativeAssetIdentifier, UIView *> *clickableAssetViews) {
+    if (![nativeAd respondsToSelector:@selector(registerAdView:clickableAssetViews:nonclickableAssetViews:)]) {
+        return;
+    }
+    id<ADFGADNativeAdLegacyRegistering> legacyNativeAd = (id<ADFGADNativeAdLegacyRegistering>)nativeAd;
+    [legacyNativeAd registerAdView:adView
+               clickableAssetViews:clickableAssetViews
+            nonclickableAssetViews:@{}];
+}
+
 @interface MovieNative6019 ()<GADNativeAdLoaderDelegate, GADNativeAdDelegate, GADVideoControllerDelegate>
 
 @property (nonatomic) GADAdLoader *adLoader;
@@ -22,7 +50,7 @@
 
 // adapterファイルのRevision番号を返す。実装が変わる度Incrementする
 + (NSString *)getAdapterRevisionVersion {
-    return @"13";
+    return @"14";
 }
 
 // Adnetwork実装時に使うClass名。SDKが導入されているかで使う
@@ -278,8 +306,6 @@
 }
 
 - (void)setupAdView:(GADNativeAd *)nativeAd {
-    self.nativeAd = nativeAd;
-
     GADMediaView *tempMediaView = [[GADMediaView alloc] initWithFrame:self.adMediaView.bounds];
     tempMediaView.mediaContent = nativeAd.mediaContent;
     tempMediaView.contentMode = UIViewContentModeScaleAspectFit;
@@ -323,20 +349,24 @@
 
     self.callToActionLabel.text = nativeAd.callToAction;
     self.callToActionView = self.callToActionLabel;
+    // SDKがクリックイベントを正しく処理できるよう、ユーザー操作を無効にする
+    self.callToActionLabel.userInteractionEnabled = NO;
 
     if (nativeAd.icon.image) {
         self.iconImageView.image = nativeAd.icon.image;
         self.iconView = self.iconImageView;
     }
     self.advertisedLabel.text = nativeAd.advertiser;
-    
-    [self.nativeAd registerAdView:self
-              clickableAssetViews:@{
-                  GADNativeHeadlineAsset: self.headlineLabel,
-                  GADNativeCallToActionAsset: self.callToActionLabel,
-                  GADNativeIconAsset: self.iconImageView}
-           nonclickableAssetViews:@{}
-     ];
+    self.advertiserView = self.advertisedLabel;
+
+    ADFRegisterLegacyNativeAdViewIfNeeded(nativeAd, self, @{
+        GADNativeHeadlineAsset: self.headlineLabel,
+        GADNativeCallToActionAsset: self.callToActionLabel,
+        GADNativeIconAsset: self.iconImageView});
+    // Google Mobile Ads SDK v13以降: アセットビューを設定した後にnativeAdを代入することで、
+    // クリック/インプレッションの記録およびAdChoicesの表示がSDKにより自動的に行われる。
+    // (v13未満でこの代入自体は無害なため、分岐せず共通の処理として最後に実行する)
+    self.nativeAd = nativeAd;
 }
 
 - (BOOL)isVideoContents {
@@ -400,19 +430,22 @@
 
 - (GADNativeAdView *)createViewForCarousel:(NSDictionary *)parts {
     GADNativeAdView *view = [GADNativeAdView new];
-    view.nativeAd = self.nativeAdView.nativeAd;
+    GADNativeAd *nativeAd = self.nativeAdView.nativeAd;
     view.bodyView = parts[@"body"];
     view.advertiserView = parts[@"advertiser"];
     view.callToActionView = parts[@"callToAction"];
     view.mediaView = parts[@"media"];
-    [view.nativeAd registerAdView:view
-              clickableAssetViews:@{
-                  GADNativeCallToActionAsset: view.callToActionView,
-                          GADNativeBodyAsset: view.bodyView,
-                     GADNativeMediaViewAsset: view.mediaView,
-                    GADNativeAdvertiserAsset: view.advertiserView
-              }
-           nonclickableAssetViews:@{}];
+    view.callToActionView.userInteractionEnabled = NO;
+
+    ADFRegisterLegacyNativeAdViewIfNeeded(nativeAd, view, @{
+        GADNativeCallToActionAsset: view.callToActionView,
+                GADNativeBodyAsset: view.bodyView,
+           GADNativeMediaViewAsset: view.mediaView,
+          GADNativeAdvertiserAsset: view.advertiserView});
+    // Google Mobile Ads SDK v13以降: アセットビューを設定した後にnativeAdを代入することで、
+    // クリック/インプレッションの記録がSDKにより自動的に行われる。
+    // (v13未満でこの代入自体は無害なため、分岐せず共通の処理として最後に実行する)
+    view.nativeAd = nativeAd;
     return view;
 }
 

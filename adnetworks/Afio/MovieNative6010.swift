@@ -34,7 +34,7 @@ class MovieNative6010: ADFmyMovieNativeInterface {
     }
 
     override class func getAdapterRevisionVersion() -> String {
-        return "7"
+        return "8"
     }
 
     override class func adnetworkClassName() -> String {
@@ -93,10 +93,11 @@ class MovieNative6010: ADFmyMovieNativeInterface {
         adView.tag = 6
         amoadView.addSubview(adView)
 
-        videoView = AMoAdNativeMainVideoView(frame: viewSize)
+        let videoView = AMoAdNativeMainVideoView(frame: viewSize)
         videoView.tag = 7
         videoView.delegate = self
         adView.addSubview(videoView)
+        self.videoView = videoView
 
         videoView.translatesAutoresizingMaskIntoConstraints = false
         adView.addConstraints([
