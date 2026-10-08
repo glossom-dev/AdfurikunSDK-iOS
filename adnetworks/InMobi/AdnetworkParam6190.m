@@ -13,17 +13,21 @@
 - (instancetype)initWithParam:(NSDictionary *)param {
     self = [super initWithParam:param];
     if (self) {
-        NSString *accountId = [param objectForKey:@"account_id"];
-        if ([self isString:accountId]) {
-            self.accountId = [NSString stringWithFormat:@"%@", accountId];
-        }
-
-        NSString *placementId = [param objectForKey:@"placement_id"];
-        if ([self isString:placementId]) {
-            self.placementId = [NSString stringWithFormat:@"%@", placementId];
-        }
+        [self commonParamParse:param];
     }
     return self;
+}
+
+- (void)commonParamParse:(NSDictionary *)param {
+    NSString *accountId = [param objectForKey:@"account_id"];
+    if ([self isString:accountId]) {
+        self.accountId = [NSString stringWithFormat:@"%@", accountId];
+    }
+    
+    NSString *placementId = [param objectForKey:@"placement_id"];
+    if ([self isString:placementId]) {
+        self.placementId = [NSString stringWithFormat:@"%@", placementId];
+    }
 }
 
 - (bool)isValid {

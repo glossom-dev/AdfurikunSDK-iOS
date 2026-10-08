@@ -35,17 +35,13 @@
 // GDPR関連設定実装
 - (void)setHasUserConsent:(BOOL)hasUserConsent {
     AdapterTraceP(@"hasUserConsent: %d", (int)hasUserConsent);
-    UADSMetaData *gdprConsentMetaData = [[UADSMetaData alloc] init];
-    [gdprConsentMetaData set:@"gdpr.consent" value:hasUserConsent ? @YES : @NO];
-    [gdprConsentMetaData commit];
+    [UnityAds setUserConsent:hasUserConsent];
 }
 
 // COPPA関連設定実装
 - (void)isChildDirected:(BOOL)childDirected {
     AdapterTraceP(@"childDirected: %d", (int)childDirected);
-    UADSMetaData *gdprConsentMetaData = [[UADSMetaData alloc] init];
-    [gdprConsentMetaData set:@"user.nonbehavioral" value:childDirected ? @YES : @NO];
-    [gdprConsentMetaData commit];
+    [UnityAds setNonBehavioral:childDirected];
 }
 
 // 未成年関連実装
@@ -65,18 +61,23 @@
     if (testFlg) {
         AdapterLog(@"Test Mode ON!!!");
     }
-    [UnityAds initialize:((AdnetworkParam6001 *)self.param).gameId testMode:testFlg initializationDelegate:self];
-}
 
-#pragma mark: UnityAdsInitializationDelegate
-- (void)initializationComplete {
-    AdapterTrace;
-    [self initSuccess];
-}
+    UADSInitializationConfiguration *configuration =
+        [[[[UADSInitializationConfigurationBuilder alloc] initWithGameId:((AdnetworkParam6001 *)self.param).gameId]
+          withTestMode:testFlg] build];
 
-- (void)initializationFailed: (UnityAdsInitializationError)error withMessage: (NSString *)message {
-    AdapterTraceP(@"error message : %@", message);
-    [self initFail];
+    __weak typeof(self) weakSelf = self;
+    [UnityAds initialize:configuration completion:^(id<UnityAdsError> _Nullable error) {
+        __strong typeof(self) strongSelf = weakSelf;
+        if (!strongSelf) return;
+        if (error) {
+            AdapterLogP(@"initialize failed. code : %ld, message : %@", (long)error.code, error.message);
+            [strongSelf initFail];
+        } else {
+            AdapterTrace;
+            [strongSelf initSuccess];
+        }
+    }];
 }
 
 @end

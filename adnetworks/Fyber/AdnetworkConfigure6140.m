@@ -12,7 +12,7 @@
 
 @interface AdnetworkConfigure6140 ()
 
-@property(nonatomic) bool childDirected;
+@property(nonatomic) NSNumber *childDirected;
 
 @end
 
@@ -46,7 +46,17 @@
 // COPPA関連設定実装
 - (void)isChildDirected:(BOOL)childDirected {
     AdapterTraceP(@"childDirected: %d", (int)childDirected);
-    self.childDirected = childDirected;
+    self.childDirected = [NSNumber numberWithBool:childDirected];
+}
+
+// COPPA関連設定はSDK初期化後にやるようにマニュアルに書いてる。
+// isChildDirected:が呼ばれていない場合はcoppaAppliesに何も設定しない(SDK既定のUnknownのまま)。
+- (void)applyCoppaSettingIfNeeded {
+    if (!self.childDirected) {
+        return;
+    }
+    IASDKCore.sharedInstance.coppaApplies = self.childDirected.boolValue ? IACoppaAppliesTypeTrue : IACoppaAppliesTypeFalse;
+    AdapterLogP(@"childDirected : %@, sdk setting value : %d", self.childDirected, (int)IASDKCore.sharedInstance.coppaApplies);
 }
 
 // 未成年関連実装
@@ -60,6 +70,7 @@
 // 初期化失敗：initFail()呼び出し
 - (void)initAdnetworkSDK {
     if (IASDKCore.sharedInstance.isInitialised) {
+        [self applyCoppaSettingIfNeeded];
         [self initSuccess];
         return;
     }
@@ -70,10 +81,7 @@
                             completionBlock:^(BOOL success, NSError * _Nullable error) {
             if (success) {
                 [self initSuccess];
-                // COPPA関連設定はSDK初期化後にやるようにマニュアルに書いてる。
-                if (self.childDirected) {
-                    IASDKCore.sharedInstance.coppaApplies = self.childDirected ? IACoppaAppliesTypeDenied : IACoppaAppliesTypeGiven;
-                }
+                [self applyCoppaSettingIfNeeded];
             } else {
                 [self initFail];
                 AdapterLogP(@"init error (%@)", error);

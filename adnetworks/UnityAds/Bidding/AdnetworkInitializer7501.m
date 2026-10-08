@@ -28,7 +28,25 @@
         if (testFlg) {
             AdapterLog(@"Test Mode ON!!!");
         }
-        [UnityAds initialize:((AdnetworkParam6001 *)self.param).gameId testMode:testFlg initializationDelegate:self];
+
+        UADSInitializationConfiguration *configuration =
+            [[[[UADSInitializationConfigurationBuilder alloc] initWithGameId:((AdnetworkParam6001 *)self.param).gameId]
+              withTestMode:testFlg] build];
+
+        __weak typeof(self) weakSelf = self;
+        [UnityAds initialize:configuration completion:^(id<UnityAdsError> _Nullable error) {
+            __strong typeof(self) strongSelf = weakSelf;
+            if (!strongSelf) return;
+            if (error) {
+                AdapterLogP(@"initialize failed. code : %ld, message : %@", (long)error.code, error.message);
+                if (strongSelf.handler) {
+                    strongSelf.handler([ADFBiddingTokenResult failureWithErrorCode:@(error.code) errorMessage:error.message]);
+                }
+                return;
+            }
+            AdapterTrace;
+            [strongSelf getBiddingToken];
+        }];
     } else {
         [self getBiddingToken];
     }
@@ -37,24 +55,27 @@
 - (void)getBiddingToken {
     AdapterTrace;
     
-    NSString *token = [UnityAds getToken];
-    AdapterLogP(@"Bidding Token: %@", token);
-    if (self.handler) {
-        self.handler([ADFBiddingTokenResult successWithToken:token]);
+    // 7501はRewarded枠のため、Rewardedフォーマット指定でTokenを取得する
+    UADSTokenConfigurationBuilder *builder = [[UADSTokenConfigurationBuilder alloc] initWithAdFormat:UADSAdFormatRewarded];
+    NSString *placementId = ((AdnetworkParam6001 *)self.param).placementId;
+    if (placementId) {
+        builder = [builder withPlacementId:placementId];
     }
-}
 
-#pragma mark: UnityAdsInitializationDelegate
-- (void)initializationComplete {
-    AdapterTrace;
-    [self getBiddingToken];
-}
+    __weak typeof(self) weakSelf = self;
+    [UnityAds getToken:[builder build] completion:^(NSString * _Nullable token) {
+        __strong typeof(self) strongSelf = weakSelf;
+        if (!strongSelf) return;
 
-- (void)initializationFailed: (UnityAdsInitializationError)error withMessage: (NSString *)message {
-    AdapterTraceP(@"error message : %@", message);
-    if (self.handler) {
-        self.handler([ADFBiddingTokenResult failureWithErrorCode:@(error) errorMessage:message]);
-    }
+        AdapterLogP(@"Bidding Token: %@", token);
+        if (!strongSelf.handler) return;
+
+        if (token) {
+            strongSelf.handler([ADFBiddingTokenResult successWithToken:token]);
+        } else {
+            strongSelf.handler([ADFBiddingTokenResult failureWithErrorCode:nil errorMessage:@"UnityAds getToken returned nil"]);
+        }
+    }];
 }
 
 @end

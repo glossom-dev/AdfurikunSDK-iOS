@@ -51,8 +51,12 @@ typedef enum : NSInteger {
 
 -(NSString *)debugDescriptionForCallback;
 
-- (void)checkExpiredAd;
-- (void)stopExpiredAdCheck;
+// RTB Ph2をサポートするAdapterのための関数
+- (bool)initAdnetworkForBidding;    // Adnetwork SDKの初期化処理のロジック
+- (bool)startAdForBidding;          // 広告の読み込み開始ロジック。WIN API処理などを行う
+- (void)checkExpiredAd;             // 案件切れを確認するTimer設定
+- (void)stopExpiredAdCheck;         // 案件切れTimerの解除
+- (void)loadAdAfterWinApi;          // Win API成功後のSDKロード処理。WF SDKのロードが必要なアダプターはoverrideする
 
 @end
 

@@ -10,20 +10,20 @@
 #import "AdnetworkConfigure6001.h"
 #import "AdnetworkParam6001.h"
 
-@interface Banner6001 () <UADSBannerViewDelegate>
-@property (nonatomic, strong) UADSBannerView *bannerView;
+@interface Banner6001 () <UADSBannerAdDelegate>
+@property (nonatomic, strong) UADSBannerAd *bannerAd;
 @end
 
 @implementation Banner6001
 
 // adapterファイルのRevision番号を返す。実装が変わる度Incrementする
 + (NSString *)getAdapterRevisionVersion {
-    return @"13";
+    return @"14";
 }
 
 // Adnetwork実装時に使うClass名。SDKが導入されているかで使う
 + (NSString *)adnetworkClassName {
-    return @"UADSBannerView";
+    return @"UnityAds.UADSBannerAd";
 }
 
 // ADFで定義しているAdnetwork名。
@@ -77,12 +77,35 @@
     
     @try {
         [self requireToAsyncRequestAd];
-        if (self.bannerView) {
-            self.bannerView = nil;
+        if (self.bannerAd) {
+            self.bannerAd = nil;
         }
-        self.bannerView = [[UADSBannerView alloc] initWithPlacementId:((AdnetworkParam6001 *)self.adParam).placementId size:CGSizeMake(320.0, 50.0)];
-        self.bannerView.delegate = self;
-        [self.bannerView load];
+
+        AdnetworkParam6001 *param = (AdnetworkParam6001 *)self.adParam;
+        UADSBannerLoadConfiguration *configuration =
+            [[[UADSBannerLoadConfigurationBuilder alloc] initWithPlacementId:param.placementId
+                                                                  bannerSize:CGSizeMake(320.0, 50.0)
+                                                                    delegate:self] build];
+
+        __weak typeof(self) weakSelf = self;
+        [UADSBannerAd load:configuration
+                completion:^(UADSBannerAd * _Nullable banner, id<UnityAdsError> _Nullable error) {
+            __strong typeof(self) strongSelf = weakSelf;
+            if (!strongSelf) return;
+
+            if (error || !banner) {
+                // bannerが取得できずerrorもnilで返るケースがあるため、その場合はデフォルトのメッセージを使う
+                NSInteger errorCode = error ? error.code : 0;
+                NSString *errorMessage = error ? error.message : @"[ADF] UnityAds load returned nil banner without error";
+                AdapterLogP(@"UnityAds Banner load error : code=%ld, message=%@", (long)errorCode, errorMessage);
+                [strongSelf setErrorWithMessage:errorMessage code:errorCode];
+                [strongSelf setCallbackStatus:NativeAdCallbackLoadError];
+                return;
+            }
+
+            strongSelf.bannerAd = banner;
+            [strongSelf bannerDidLoad:banner];
+        }];
     } @catch (NSException *exception) {
         [self adnetworkExceptionHandling:exception];
     }
@@ -108,13 +131,15 @@
 }
 
 -(void)dealloc {
-    _bannerView = nil;
+    _bannerAd = nil;
 }
 
-#pragma mark - UADSBannerViewDelegate
+#pragma mark - UADSBannerAdDelegate
 
--(void)bannerViewDidLoad:(UADSBannerView *)bannerView {
+// 旧 bannerViewDidLoad 相当。新APIではロード完了はload:completion:で受け取る
+-(void)bannerDidLoad:(UADSBannerAd *)banner {
     AdapterTrace;
+    UIView *mediaView = banner.view;
     NativeAdInfo6001 *info = [[NativeAdInfo6001 alloc] initWithVideoUrl:nil
                                                                   title:@""
                                                             description:@""
@@ -122,34 +147,28 @@
     info.mediaType = ADFNativeAdType_Image;
 
     info.adapter = self;
-    [info setupMediaView:bannerView];
+    [info setupMediaView:mediaView];
     self.adInfo = info;
 
-    [self setCustomMediaview:bannerView];
+    [self setCustomMediaview:mediaView];
     [self startViewabilityCheck];
     [self setCallbackStatus:NativeAdCallbackLoadFinish];
 }
 
--(void)bannerViewDidShow:(UADSBannerView *)bannerView {
+-(void)bannerImpression:(UADSBannerAd *)banner {
     AdapterTrace;
     [self setCallbackStatus:NativeAdCallbackRendering];
     [self startViewabilityCheck];
 }
 
--(void)bannerViewDidClick:(UADSBannerView *)bannerView {
+-(void)bannerDidClick:(UADSBannerAd *)banner {
     AdapterTrace;
     [self setCallbackStatus:NativeAdCallbackClick];
 }
 
--(void)bannerViewDidLeaveApplication:(UADSBannerView *)bannerView {
-    AdapterTrace;
-}
-
--(void)bannerViewDidError:(UADSBannerView *)bannerView error:(UADSBannerError *)error {
-    AdapterTraceP(@"UnityAds Banner load error :%d", (int)error.code);
-    if (error) {
-        [self setErrorWithMessage:@"" code:error.code];
-    }
+-(void)bannerDidFailShow:(UADSBannerAd *)banner error:(id<UnityAdsError>)error {
+    AdapterTraceP(@"UnityAds Banner show error : code=%ld, message=%@", (long)error.code, error.message);
+    [self setErrorWithMessage:error.message code:error.code];
     [self setCallbackStatus:NativeAdCallbackLoadError];
 }
 

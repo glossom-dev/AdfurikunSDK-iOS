@@ -13,7 +13,7 @@
 
 NS_ASSUME_NONNULL_BEGIN
 
-@interface AdnetworkInitializer7501 : ADFmyBaseAdnetworkInitializer <UnityAdsInitializationDelegate>
+@interface AdnetworkInitializer7501 : ADFmyBaseAdnetworkInitializer
 
 @property (nonatomic) AdnetworkParam6001 *param;
 @property (nonatomic) ADFInitAdnetworkForBiddingCompleteHandler handler;

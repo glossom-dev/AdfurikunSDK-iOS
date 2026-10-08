@@ -1,16 +1,25 @@
 //
 //  AdfurikunAdnetworkExtra.h
-//  MovieRewardTestApp
+//  ADFMovieReward
 //
 //  Created by Sungil Kim on 2025/08/12.
 //  Copyright © 2025 GREE X, Inc. All rights reserved.
 //
 
-#import <UIKit/UIKit.h>
-
-#import <GoogleMobileAds/GoogleMobileAds.h>
+#import <Foundation/Foundation.h>
 
 NS_ASSUME_NONNULL_BEGIN
+
+// AdMob SDKが導入されているかどうかで分岐
+#if __has_include(<GoogleMobileAds/GoogleMobileAds.h>)
+// AdMob SDKが導入されている場合は、GADAdNetworkExtrasプロトコルを採用する
+@protocol GADAdNetworkExtras;
+#else
+// AdMob SDKが導入されていない場合は、GADAdNetworkExtrasプロトコルを定義して採用する
+@protocol GADAdNetworkExtras <NSObject>
+@end
+
+#endif
 
 @interface AdfurikunAdnetworkExtra : NSObject <GADAdNetworkExtras>
 
@@ -59,6 +68,15 @@ NS_ASSUME_NONNULL_BEGIN
  端末の設定に合わせる場合には何も設定しないでください。
  */
 @property (nonatomic, nullable) NSNumber *soundState;
+
+/*
+ AdMobのテストモードが有効時のみ
+ アドネットワークの配信比率を管理画面の設定によらず上書きします。指定したアドネットワークは配信比率が上書きされ、他のアドネットワークの配信比率は0になります。
+* ※ 本番リリース時は削除して下さい。
+* 例 : AppLovin(6000)の配信比率を10、UnityAds(6001)の配信比率を20に設置する場合
+* extra.adnetworkInformation = @{@"6000": @10, @"6001": @20};
+*/
+@property (nonatomic, nullable) NSDictionary<NSString *, NSNumber *> *adnetworkInformation;
 
 // 内部関数
 - (void)adfurikunSDKInitProcessWithTestMode:(bool)testMode;

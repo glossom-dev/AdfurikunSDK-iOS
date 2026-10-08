@@ -14,8 +14,6 @@ NS_ASSUME_NONNULL_BEGIN
 
 @property (nonatomic, strong) NSString *gameId;
 @property (nonatomic, strong) NSString *placementId;
-@property (nonatomic, strong) NSString *adm;
-@property (nonatomic, strong) NSString *objectId;
 
 @end
 

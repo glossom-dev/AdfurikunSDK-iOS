@@ -52,9 +52,24 @@
 // 初期化成功：initSuccess()呼び出し
 // 初期化失敗：initFail()呼び出し
 - (void)initAdnetworkSDK {
-    [MTGSDK.sharedInstance setAppID:((AdnetworkParam6120 *)self.param).appId 
-                             ApiKey:((AdnetworkParam6120 *)self.param).appKey];
-    [self initSuccess];
+    __weak typeof(self) weakSelf = self;
+    [MTGSDK.sharedInstance initializeWithAppID:((AdnetworkParam6120 *)self.param).appId
+                                        ApiKey:((AdnetworkParam6120 *)self.param).appKey
+                             completionHandler:^(BOOL success, NSError * _Nullable error) {
+        __strong typeof(self) strongSelf = weakSelf;
+        if (!strongSelf) return;
+        
+        if (success) {
+            AdapterTrace;
+            [strongSelf initSuccess];
+        } else {
+            // 初期化失敗時にerrorがnilで返るケースがあるため、その場合はデフォルトのメッセージを使う
+            NSInteger errorCode = error ? error.code : 0;
+            NSString *errorMessage = error ? error.localizedDescription : @"[ADF] MTGSDK initialize failed without error";
+            AdapterLogP(@"initialize failed. code : %ld, message : %@", (long)errorCode, errorMessage);
+            [strongSelf initFail];
+        }
+    }];
 }
 
 @end

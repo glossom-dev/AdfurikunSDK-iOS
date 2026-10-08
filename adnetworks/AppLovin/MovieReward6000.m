@@ -13,6 +13,7 @@
 
 @interface MovieReward6000()<ALAdLoadDelegate, ALAdDisplayDelegate, ALAdVideoPlaybackDelegate>
 
+@property(nonatomic, strong) ALAd *ad;
 @property(nonatomic, strong) ALIncentivizedInterstitialAd *incentivizedInterstitial;
 
 @end
@@ -22,7 +23,7 @@
 
 // adapterファイルのRevision番号を返す。実装が変わる度Incrementする
 + (NSString *)getAdapterRevisionVersion {
-    return @"14";
+    return @"15";
 }
 
 // Adnetwork実装時に使うClass名。SDKが導入されているかで使う
@@ -96,10 +97,18 @@
         [self setCallbackStatus:MovieRewardCallbackFetchFail];
         return false;
     }
-    
+
+    // ALAdServiceにはゾーン指定なしでリワード広告を読み込むAPIがないため、zone_idが必須になる
+    NSString *zoneIdentifier = ((AdnetworkParam6000 *)self.adParam).zoneIdentifier;
+    if (!zoneIdentifier.length) {
+        AdapterLog(@"[SEVERE] [Applovin]zone_idが設定されていないため、広告を読み込めません。");
+        [self setCallbackStatus:MovieRewardCallbackFetchFail];
+        return false;
+    }
+
     @try {
         [self requireToAsyncRequestAd];
-        [self.incentivizedInterstitial preloadAndNotify:self];
+        [[ALSdk shared].adService loadNextAdForZoneIdentifier:zoneIdentifier andNotify:self];
     } @catch (NSException *exception) {
         [self adnetworkExceptionHandling:exception];
     }
@@ -114,7 +123,7 @@
         //表示を消したい場合は、こちらをコメントアウトして下さい。
         AdapterLogP(@"[SEVERE] [Applovin]アプリのバンドルIDが、申請されたもの（%@）と異なります。", ((AdnetworkParam6000 *)self.adParam).submittedPackageName);
     }
-    return self.isAdLoaded;
+    return self.isAdLoaded && self.ad && self.incentivizedInterstitial;
 }
 
 // 広告再生
@@ -129,7 +138,10 @@
     if ([self isPrepared]) {
         @try {
             [self requireToAsyncPlay];
-            [self.incentivizedInterstitial show];
+            // andNotifyのALAdRewardDelegateは、AppLovinサーバでのリワード検証結果と
+            // S2Sコールバックの到達可否を受け取るためのもので、ADFでは使用しないためnilを渡す。
+            // リワード付与の判定は従来通りvideoPlaybackEndedInAd:の完視聴で行う。
+            [self.incentivizedInterstitial showAd:self.ad andNotify:nil];
         } @catch (NSException *exception) {
             [self adnetworkExceptionHandling:exception];
             [self setPlayFailCallback:PlayFailCallbackReasonException exception:exception];
@@ -153,6 +165,7 @@
  */
 -(void) adService: (ALAdService *) adService didLoadAd: (ALAd *) ad {
     AdapterTrace;
+    self.ad = ad;
     [self setCallbackStatus:MovieRewardCallbackFetchComplete];
 }
 

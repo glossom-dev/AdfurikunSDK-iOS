@@ -9,11 +9,17 @@
 #import "AdnetworkConfigure6008.h"
 #import "AdnetworkParam6008.h"
 
+@interface AdnetworkConfigure6008 ()
+
+@property (nonatomic, nullable, readwrite) FADAdLoader *adLoader;
+
+@end
+
 @implementation AdnetworkConfigure6008
 
 // Adnetwork SDK Version
 + (NSString *)getSDKVersion {
-    return FADSettings.semanticVersion;
+    return FADAdLoader.semanticVersion;
 }
 
 // Adnetwork名
@@ -34,14 +40,18 @@
 // 初期化成功：initSuccess()呼び出し
 // 初期化失敗：initFail()呼び出し
 - (void)initAdnetworkSDK {
+    // テストモードはSDK 3.1.0でFADConfig.isTestが非推奨になったため、
+    // 各広告取得時にFADAdSlotConfig.setAdTestModeEnabled:で設定する
     FADConfig *config = [[FADConfig alloc] initWithAppId:((AdnetworkParam6008 *)self.param).fiveAppId];
-    if ([AdfurikunSdk getTestMode]) {
-        AdapterLog(@"Test Mode ON!!!");
-        config.isTest =  YES;
+
+    NSError *error = nil;
+    self.adLoader = [FADAdLoader adLoaderForConfig:config outError:&error];
+    if (error) {
+        AdapterLogP(@"[Five] FADAdLoader init failed: %@", error);
+        [self initFail];
+    } else {
+        [self initSuccess];
     }
-    
-    [FADSettings registerConfig:config];
-    [self initSuccess];
 }
 
 @end

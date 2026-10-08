@@ -34,7 +34,7 @@
     AdapterTrace;
     PAGConfig *configuration = [PAGConfig shareConfig];
     if (self.gdprStatus) {
-        configuration.GDPRConsent = self.gdprStatus.boolValue ? PAGGDPRConsentTypeConsent : PAGGDPRConsentTypeNoConsent;
+        configuration.PAConsent = self.gdprStatus.boolValue ? PAGPAConsentTypeConsent : PAGPAConsentTypeNoConsent;
     }
     if (self.isChildDirected) {
         // Indicates whether the user agrees to serve personalized ads. If not passed, it is assumed to agree. If 0 is passed, it means that ads are not allowed to be served.

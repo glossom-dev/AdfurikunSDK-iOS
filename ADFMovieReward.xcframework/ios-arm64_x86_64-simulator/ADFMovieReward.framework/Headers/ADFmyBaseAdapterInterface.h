@@ -62,9 +62,14 @@ typedef void (^WinApiCompleteHandler)(NSError * _Nullable error);
 @property (nonatomic, nullable) ADFBiddingAdInfo *biddingAdInfo;
 @property (nonatomic, nullable) NSString *contentId;
 @property (nonatomic) int playedEventInterval;
+// RTBのadmを保持する（WFでは未使用）
+@property (nonatomic, strong, nullable) NSString *adm;
 
 // RTB、WF共通のパラメータを受け取る
 - (void)commonParamParse:(NSDictionary *)param;
+
+// RTBのcontent.ad_valuesを取り出し、admを格納しcommonParamParse:を呼ぶ
+- (void)parseBiddingAdValues:(NSDictionary *)param;
 
 // Pangleで必要なハードコーディング値を返す
 - (NSString *)pangleAdxId;

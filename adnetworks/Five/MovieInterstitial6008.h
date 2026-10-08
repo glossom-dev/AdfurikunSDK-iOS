@@ -11,7 +11,7 @@
 
 NS_ASSUME_NONNULL_BEGIN
 
-@interface MovieInterstitial6008 : ADFmyMovieRewardInterface <FADLoadDelegate, FADInterstitialEventListener>
+@interface MovieInterstitial6008 : ADFmyMovieRewardInterface <FADInterstitialEventListener>
 
 @end
 
