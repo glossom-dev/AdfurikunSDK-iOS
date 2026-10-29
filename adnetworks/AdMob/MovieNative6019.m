@@ -6,6 +6,7 @@
 //  Copyright © 2020 Glossom, Inc. All rights reserved.
 //
 
+
 #import "MovieNative6019.h"
 #import "AdnetworkConfigure6019.h"
 #import "AdnetworkParam6019.h"
@@ -50,7 +51,7 @@ static void ADFRegisterLegacyNativeAdViewIfNeeded(GADNativeAd *nativeAd,
 
 // adapterファイルのRevision番号を返す。実装が変わる度Incrementする
 + (NSString *)getAdapterRevisionVersion {
-    return @"14";
+    return @"15";
 }
 
 // Adnetwork実装時に使うClass名。SDKが導入されているかで使う
@@ -179,26 +180,32 @@ static void ADFRegisterLegacyNativeAdViewIfNeeded(GADNativeAd *nativeAd,
 - (void)adLoader:(GADAdLoader *)adLoader didReceiveNativeAd:(GADNativeAd *)nativeAd {
     AdapterTrace;
 
-    MovieNativeAdView6019 *nativeAdView = [[MovieNativeAdView6019 alloc] initWithFrame:CGRectZero];
-    nativeAd.mediaContent.videoController.delegate = self;
-    nativeAd.delegate = self;
-    [nativeAdView setupAdView:nativeAd];
+    @try {
+	    MovieNativeAdView6019 *nativeAdView = [[MovieNativeAdView6019 alloc] initWithFrame:CGRectZero];
+	    nativeAd.mediaContent.videoController.delegate = self;
+	    nativeAd.delegate = self;
+	    [nativeAdView setupAdView:nativeAd];
+	
+	    MovieNativeAdInfo6019 *info = [[MovieNativeAdInfo6019 alloc] initWithVideoUrl:nil
+	                                                                            title:@""
+	                                                                      description:@""
+	                                                                     adnetworkKey:self.adnetworkKey];
+	
+	    info.mediaType = [nativeAdView isVideoContents] ? ADFNativeAdType_Movie : ADFNativeAdType_Image;
+	    info.isCustomComponentSupported = true;
+	    info.adapter = self;
+	    info.nativeAdView = nativeAdView;
+	    [info setupMediaView:nativeAdView];
+	    self.adInfo = info;
+	
+	    [self setCustomMediaview:nativeAdView];
+	
+	    [self setCallbackStatus:NativeAdCallbackLoadFinish];
+    } @catch (NSException *exception) {
+    	[self setErrorWithMessage:exception.reason code:0];
+        [self setCallbackStatus:NativeAdCallbackLoadError];
+    }
 
-    MovieNativeAdInfo6019 *info = [[MovieNativeAdInfo6019 alloc] initWithVideoUrl:nil
-                                                                            title:@""
-                                                                      description:@""
-                                                                     adnetworkKey:self.adnetworkKey];
-
-    info.mediaType = [nativeAdView isVideoContents] ? ADFNativeAdType_Movie : ADFNativeAdType_Image;
-    info.isCustomComponentSupported = true;
-    info.adapter = self;
-    info.nativeAdView = nativeAdView;
-    [info setupMediaView:nativeAdView];
-    self.adInfo = info;
-
-    [self setCustomMediaview:nativeAdView];
-
-    [self setCallbackStatus:NativeAdCallbackLoadFinish];
 }
 
 - (void)adLoader:(GADAdLoader *)adLoader didFailToReceiveAdWithError:(NSError *)error {
@@ -294,7 +301,12 @@ static void ADFRegisterLegacyNativeAdViewIfNeeded(GADNativeAd *nativeAd,
 }
 
 - (void)makeSubviews {
-    NSArray <UIView *>*result = [[UINib nibWithNibName:@"MovieNativeAdView6019" bundle:nil] instantiateWithOwner:self options:nil];
+#if SWIFT_PACKAGE
+    NSBundle *bundle = SWIFTPM_MODULE_BUNDLE;
+#else
+    NSBundle *bundle = [NSBundle bundleForClass:[MovieNativeAdView6019 class]];
+#endif
+    NSArray <UIView *>*result = [[UINib nibWithNibName:@"MovieNativeAdView6019" bundle:bundle] instantiateWithOwner:self options:nil];
     UIView *_view = result.firstObject;
     [self viewSetted:_view];
 }

@@ -5,7 +5,7 @@ Pod::Spec.new do |s|
   s.homepage        = "https://adfurikun.jp/adfurikun/"
   s.license         = { :type => 'Copyright', :text => 'Copyright GREE X, Inc. All rights reserved.' }
   s.author          = "GREE X, Inc."
-  s.platform        = :ios, "13.0"
+  s.platform        = :ios, "15.0"
   s.source          = { :git => "https://github.com/glossom-dev/AdfurikunSDK-iOS", :tag => "#{s.version}" }
   s.resource_bundles = {'AdfurikunSDK-iOS_resources' => ['PrivacyInfo.xcprivacy']}  
   s.default_subspec = 'All'
