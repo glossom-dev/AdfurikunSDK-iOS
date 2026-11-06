@@ -95,8 +95,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/ironsource-mobile/Unity-Ad-Quality-Swift-Package",
       "state" : {
-        "revision" : "a81df68cf80e989d1d9a2c15a75070488ce123b3",
-        "version" : "9.10.0"
+        "revision" : "bda5a2a96bf7f5fc267e2588fa29119b988beddf",
+        "version" : "9.11.0"
       }
     },
     {
